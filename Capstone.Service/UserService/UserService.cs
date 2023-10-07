@@ -25,7 +25,7 @@ namespace Capstone.Service.UserService
             _userRepository = userRepository;
         }
 
-        public async Task<CreateUserResponse> CreateAsync(CreateUserRequest createUserRequest)
+       /* public async Task<CreateUserResponse> CreateAsync(CreateUserRequest createUserRequest)
         {
             using var transaction = _userRepository.DatabaseTransaction();
             try
@@ -66,6 +66,54 @@ namespace Capstone.Service.UserService
             {
                 transaction.RollBack();
 
+                return new CreateUserResponse
+                {
+                    IsSucced = false,
+                };
+            }
+        }*/
+        public async Task<CreateUserResponse> CreateAsync(CreateUserRequest createUserRequest)
+        {
+            try
+            {
+               
+                var existingUser = await _userRepository.GetAsync(user => user.Email == createUserRequest.Email, null);
+
+                if (existingUser != null)
+                {
+                    
+                    return new CreateUserResponse
+                    {
+                        IsSucced = false,
+                    };
+                }
+
+                CreatePasswordHash(createUserRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                var newUserRequest = new User
+                {
+                    UserId = Guid.NewGuid(),
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    IsAdmin = false,
+                    JoinedDate = DateTime.UtcNow,
+                    IsFirstTime = true,
+                    Email = createUserRequest.Email,
+                    Status = Common.Enums.StatusEnum.Inactive,
+                };
+
+                var newUser = await _userRepository.CreateAsync(newUserRequest);
+                _userRepository.SaveChanges();
+
+                
+                return new CreateUserResponse
+                {
+                    IsSucced = true,
+                };
+            }
+            catch (Exception)
+            {
+               
                 return new CreateUserResponse
                 {
                     IsSucced = false,
