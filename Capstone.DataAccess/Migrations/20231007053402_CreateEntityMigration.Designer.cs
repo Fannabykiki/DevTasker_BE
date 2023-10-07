@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    [Migration("20231005100727_AddRefreshTokenMigration")]
-    partial class AddRefreshTokenMigration
+    [Migration("20231007053402_CreateEntityMigration")]
+    partial class CreateEntityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -450,7 +450,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Gender")
+                    b.Property<int?>("Gender")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAdmin")
@@ -461,6 +461,9 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Property<DateTime>("JoinedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PassResetToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("PasswordHash")
                         .HasColumnType("varbinary(max)");
@@ -474,11 +477,11 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ResetTokenExpires")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("TokenCreated")
                         .HasColumnType("datetime2");
@@ -488,6 +491,12 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId");
 

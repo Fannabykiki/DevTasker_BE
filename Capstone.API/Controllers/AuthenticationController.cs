@@ -36,7 +36,7 @@ namespace Capstone.API.Controllers
 		[HttpPost("token")]
 		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
 		{
-			var user = await _usersService.LoginUser(request.UserName, request.Password);
+			var user = await _usersService.LoginUser(request.Email, request.Password);
 			if (user == null)
 			{
 				return NotFound();

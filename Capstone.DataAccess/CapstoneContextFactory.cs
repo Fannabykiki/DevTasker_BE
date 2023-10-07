@@ -8,7 +8,7 @@ namespace Capstone.DataAccess
         public CapstoneContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<CapstoneContext>();
-            optionsBuilder.UseSqlServer("Server=staid-strider-6632.8nk.cockroachlabs.cloud;uid=devtasker;Password=oGbVtXnx1XpjBikXQul6Zg;Database=Capstone;Trusted_Connection=False;Encrypt=True");
+            optionsBuilder.UseSqlServer("Server=DESKTOP-OF0V18H\\FANNABY;uid=sa;Password=12345;Database=Capstone;TrustServerCertificate=True;Encrypt=True");
             return new CapstoneContext(optionsBuilder.Options);
         }
     }

@@ -161,9 +161,9 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-        public async Task<User> LoginUser(string username, string password)
+        public async Task<User> LoginUser(string email, string password)
         {
-            var user = await _userRepository.GetAsync(x => x.UserName == username, null);
+            var user = await _userRepository.GetAsync(x => x.Email == email, null);
             if (user != null)
             {
                 if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
@@ -197,7 +197,6 @@ namespace Capstone.Service.UserService
 				new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
 				new Claim("IsAdmin",user.IsAdmin.ToString()),
 				new Claim("UserId",user.UserId.ToString()),
-				new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
 		   };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
