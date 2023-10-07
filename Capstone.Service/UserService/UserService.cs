@@ -30,7 +30,7 @@ namespace Capstone.Service.UserService
             using var transaction = _userRepository.DatabaseTransaction();
             try
             {
-                var user = await _userRepository.GetAsync(user => user.UserName == createUserRequest.Email, null);
+                var user = await _userRepository.GetAsync(user => user.Email == createUserRequest.Email, null);
                 if (user == null)
                 {
                     CreatePasswordHash(createUserRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -120,46 +120,46 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, Guid id)
+        public async Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email)
         {
-			using (var transaction = _userRepository.DatabaseTransaction())
-			{
-				try
-				{
-					var updateRequest = await _userRepository.GetAsync(s => s.UserId == id, null);
-					if (updateRequest == null)
-					{
-						return new CreateUserResponse
-						{
-							IsSucced = false,
-						};
-					}
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
+                    if (updateRequest == null)
+                    {
+                        return new CreateUserResponse
+                        {
+                            IsSucced = false,
+                        };
+                    }
 
-					updateRequest.TokenCreated = updateUserRequest.Created;
-					updateRequest.TokenExpires = updateUserRequest.Expires;
-					updateRequest.RefreshToken = updateUserRequest.Token;
+                    updateRequest.TokenCreated = updateUserRequest.Created;
+                    updateRequest.TokenExpires = updateUserRequest.Expires;
+                    updateRequest.RefreshToken = updateUserRequest.Token;
 
-					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
 
-					transaction.Commit();
+                    transaction.Commit();
 
-					return new CreateUserResponse
-					{
-						IsSucced = true,
-					};
-				}
-				catch (Exception)
-				{
-					transaction.RollBack();
+                    return new CreateUserResponse
+                    {
+                        IsSucced = true,
+                    };
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
 
-					return new CreateUserResponse
-					{
-						IsSucced = false,
-					};
-				}
-			}
-		}
+                    return new CreateUserResponse
+                    {
+                        IsSucced = false,
+                    };
+                }
+            }
+        }
 
         public async Task<User> LoginUser(string username, string password)
         {
@@ -170,9 +170,9 @@ namespace Capstone.Service.UserService
                 {
                     return null;
                 }
-                else 
-                { 
-                    return user; 
+                else
+                {
+                    return user;
                 }
             }
             return null;
@@ -189,40 +189,79 @@ namespace Capstone.Service.UserService
             return refreshToken;
         }
 
-		public async Task<string> CreateToken(User user)
-		{
-			var claims = new Claim[]
-		   {
-				new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-				new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-				new Claim("IsAdmin",user.IsAdmin.ToString()),
-				new Claim("UserId",user.UserId.ToString()),
-				new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
-		   };
+        public async Task<string> CreateToken(User user)
+        {
+            var claims = new Claim[]
+           {
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
+                new Claim("IsAdmin",user.IsAdmin.ToString()),
+                new Claim("UserId",user.UserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
+           };
 
-			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
-			var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-			var expired = DateTime.UtcNow.AddMinutes(JwtConstant.ExpiredTime);
+            var expired = DateTime.UtcNow.AddMinutes(JwtConstant.ExpiredTime);
 
-			var token = new JwtSecurityToken(JwtConstant.Issuer,
-				JwtConstant.Audience, claims,
-				expires: expired, signingCredentials: signIn);
+            var token = new JwtSecurityToken(JwtConstant.Issuer,
+                JwtConstant.Audience, claims,
+                expires: expired, signingCredentials: signIn);
 
-			var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             return tokenString;
-		}
+        }
 
-		public Task<CreateUserResponse> UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id)
-		{
-			throw new NotImplementedException();
-		}
-
-        public Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email)
+        Task<CreateUserResponse> IUserService.UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var user = await _userRepository.GetAsync(x => x.UserId == id, null);
+
+                    if (user == null)
+                        return new UpdateProfileResponse
+                        {
+                            IsSucced = false,
+                        };
+
+                    // Update user properties from request
+
+                    user.UserName = updateProfileRequest.UserName;
+                    user.Address = updateProfileRequest.Address;
+                    user.Gender = updateProfileRequest.Gender;
+                    user.Avatar = updateProfileRequest.Avatar;
+
+                    // Save changes
+
+                    var result = await _userRepository.UpdateAsync(user);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+                    return new UpdateProfileResponse
+                    {
+                        IsSucced = true,
+                    };
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return new UpdateProfileResponse
+                    {
+                        IsSucced = false,
+                    };
+                }
+            }
         }
     }
 }

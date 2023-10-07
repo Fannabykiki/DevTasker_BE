@@ -12,6 +12,7 @@ namespace Capstone.Service.UserService
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email);
         Task<CreateUserResponse> UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id);
+        Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
         Task<CreateUserResponse> CreateAsync(CreateUserRequest createUserRequest);
         Task<RefreshToken> GenerateRefreshToken();
 		Task<string> CreateToken(User user);
