@@ -30,7 +30,7 @@ namespace Capstone.Service.UserService
             using var transaction = _userRepository.DatabaseTransaction();
             try
             {
-                var user = await _userRepository.GetAsync(user => user.UserName == createUserRequest.UserName, null);
+                var user = await _userRepository.GetAsync(user => user.Email == createUserRequest.Email, null);
                 if (user == null)
                 {
                     CreatePasswordHash(createUserRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -120,13 +120,13 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, Guid id)
+        public async Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email)
         {
 			using (var transaction = _userRepository.DatabaseTransaction())
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.UserId == id, null);
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
 					if (updateRequest == null)
 					{
 						return new CreateUserResponse
