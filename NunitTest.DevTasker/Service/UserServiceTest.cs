@@ -21,9 +21,10 @@ namespace DevTasker.UnitTest.Service
 
     public class UserServiceTest
     {
-        private readonly CapstoneContext _context;
+
         private Mock<IUserRepository> _userRepositoryMock;
         private UserService _userService;
+
 
 
         [SetUp]
@@ -31,6 +32,8 @@ namespace DevTasker.UnitTest.Service
         {
             _userRepositoryMock = new Mock<IUserRepository>();
             _userService = new UserService(null, _userRepositoryMock.Object);
+
+
         }
 
         [Test]
@@ -148,38 +151,165 @@ namespace DevTasker.UnitTest.Service
             }
             Assert.Null(result);
         }
+        [Test]
+        public async Task TestLoginUserAsync_NullUsername()
+        {
+            // Arrange
+            string username = null;
+            string password = "testpassword";
+
+            // Act
+            var result = await _userService.LoginUser(username, password);
+
+            // Assert
+            Assert.Null(result);
+        }
 
         [Test]
-        public async Task TestCreateAsync_Success()
+        public async Task TestLoginUserAsync_NullPassword()
+        {
+            // Arrange
+            string username = "testuser";
+            string password = null;
+
+            // Act
+            var result = await _userService.LoginUser(username, password);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_EmptyUsername()
+        {
+            // Arrange
+            string username = "";
+            string password = "testpassword";
+
+            // Act
+            var result = await _userService.LoginUser(username, password);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_EmptyPassword()
+        {
+            // Arrange
+            string username = "testuser";
+            string password = "";
+
+            // Act
+            var result = await _userService.LoginUser(username, password);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Test]
+        public async Task CreateAsync_Success()
         {
             // Arrange
             var createUserRequest = new CreateUserRequest
             {
-                Email = "newuser@example.com",
-                Password = "password",
-                // Các thông tin khác của người dùng.
+                Email = "test@example.com",
+                Password = "password123"
             };
 
-            // Mock để trả về null, tức là người dùng không tồn tại.
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null);
-
-            // Mock cho phương thức CreateAsync trả về một người dùng mới.
-            _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<User>()))
-                .ReturnsAsync(new User
-                {
-                    UserId = Guid.NewGuid(),
-                    // Các thông tin khác của người dùng.
-                });
+            _userRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<User>()))
+                .ReturnsAsync(new User { UserId = Guid.NewGuid() });
 
             // Act
             var result = await _userService.CreateAsync(createUserRequest);
 
             // Assert
+            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Once);
+            if (result != null)
+            {
+                Console.WriteLine("CreateAsync_Success: User creation was successful.");
+            }
+            else
+            {
+                Console.WriteLine("CreateAsync_Success: User creation was unsuccessful.");
+            }
+
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.IsSucced); // Đăng ký thành công.
-            //Assert.IsNotNull(result.CreateUserResponse); // Kiểm tra rằng CreatedUser không null.
+            Assert.IsTrue(result.IsSucced);
         }
 
+        [Test]
+        public async Task CreateAsync_EmailExists()
+        {
+            // Arrange
+            var createUserRequest = new CreateUserRequest
+            {
+                Email = "test@example.com",
+                Password = "password123"
+            };
+
+            // Giả lập email đã tồn tại trong cơ sở dữ liệu
+            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync(new User { Email = "test@example.com" });
+
+            // Act
+            var result = await _userService.CreateAsync(createUserRequest);
+
+            // Assert
+            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
+
+            if (result != null)
+            {
+                Console.WriteLine("CreateAsync_EmailExists: User creation was successful.");
+            }
+            else
+            {
+                Console.WriteLine("CreateAsync_EmailExists: User creation was unsuccessful.");
+            }
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.IsSucced);
+           
+        }
+
+        [Test]
+        public async Task CreateAsync_Failure()
+        {
+            // Arrange
+            var createUserRequest = new CreateUserRequest
+            {
+                Email = "test@example.com",
+                Password = "password123"
+            };
+
+            // Giả lập CreateUserAsync ném một ngoại lệ (simulating failure)
+            _userRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<User>()))
+                .ThrowsAsync(new Exception("Simulated exception"));
+
+            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null); // Giả lập email chưa tồn tại
+
+            // Act
+            var result = await _userService.CreateAsync(createUserRequest);
+
+            // Assert
+            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
+
+            if (result != null)
+            {
+                Console.WriteLine("CreateAsync_Failure: User creation was successful.");
+            }
+            else
+            {
+                Console.WriteLine("CreateAsync_Failure: User creation was unsuccessful.");
+            }
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.IsSucced);
+          
+        }
     }
 }
+
