@@ -25,10 +25,5 @@ namespace Capstone.DataAccess.Repository.Implements
         {
             _transaction.Rollback();
         }
-
-        public void Rollback()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

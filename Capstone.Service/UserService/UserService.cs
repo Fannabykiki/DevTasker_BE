@@ -245,6 +245,7 @@ namespace Capstone.Service.UserService
 				new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
 				new Claim("IsAdmin",user.IsAdmin.ToString()),
 				new Claim("UserId",user.UserId.ToString()),
+				new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
 		   };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
@@ -262,9 +263,53 @@ namespace Capstone.Service.UserService
             return tokenString;
 		}
 
-		public Task<CreateUserResponse> UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id)
-		{
-			throw new NotImplementedException();
-		}
-	}
+        Task<CreateUserResponse> IUserService.UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var user = await _userRepository.GetAsync(x => x.UserId == id, null);
+
+                    if (user == null)
+                        return new UpdateProfileResponse
+                        {
+                            IsSucced = false,
+                        };
+
+                    // Update user properties from request
+
+                    user.UserName = updateProfileRequest.UserName;
+                    user.Address = updateProfileRequest.Address;
+                    user.Gender = updateProfileRequest.Gender;
+                    user.Avatar = updateProfileRequest.Avatar;
+
+                    // Save changes
+
+                    var result = await _userRepository.UpdateAsync(user);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+                    return new UpdateProfileResponse
+                    {
+                        IsSucced = true,
+                    };
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return new UpdateProfileResponse
+                    {
+                        IsSucced = false,
+                    };
+                }
+            }
+        }
+    }
 }
