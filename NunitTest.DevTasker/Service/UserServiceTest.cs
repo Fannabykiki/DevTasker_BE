@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Capstone.DataAccess;
-using Capstone.DataAccess.Repository.Implements;
-using Capstone.DataAccess.Repository.Interfaces;
-using Moq;
-using Capstone.Service.UserService;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+﻿using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Interfaces;
+using Capstone.Service.UserService;
+using Moq;
+using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
-using Capstone.Common.DTOs.User;
-using Capstone.Common.Enums;
+using System.Text;
 
 namespace DevTasker.UnitTest.Service
 {
@@ -228,11 +220,11 @@ namespace DevTasker.UnitTest.Service
             _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Once);
             if (result != null)
             {
-                Console.WriteLine("CreateAsync_Success: User creation was successful.");
+                Console.WriteLine(" User creation was successful.");
             }
             else
             {
-                Console.WriteLine("CreateAsync_Success: User creation was unsuccessful.");
+                Console.WriteLine(" User creation was unsuccessful.");
             }
 
             Assert.IsNotNull(result);
@@ -245,13 +237,13 @@ namespace DevTasker.UnitTest.Service
             // Arrange
             var createUserRequest = new CreateUserRequest
             {
-                Email = "test@example.com",
-                Password = "password123"
+                Email = "cuongbui011@gmail.com",
+                Password = "123"
             };
 
             // Giả lập email đã tồn tại trong cơ sở dữ liệu
             _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync(new User { Email = "test@example.com" });
+                .ReturnsAsync(new User { Email = "cuongbui0110.com" }); // Trả về một người dùng có cùng email
 
             // Act
             var result = await _userService.CreateAsync(createUserRequest);
@@ -262,54 +254,77 @@ namespace DevTasker.UnitTest.Service
 
             if (result != null)
             {
-                Console.WriteLine("CreateAsync_EmailExists: User creation was successful.");
+                Console.WriteLine(" User creation was successful.");
             }
             else
             {
-                Console.WriteLine("CreateAsync_EmailExists: User creation was unsuccessful.");
+                Console.WriteLine(" User creation was unsuccessful - Email Exist");
             }
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSucced);
-           
+
         }
 
         [Test]
-        public async Task CreateAsync_Failure()
+        public async Task CreateAsync_MissingPassword()
         {
             // Arrange
             var createUserRequest = new CreateUserRequest
             {
                 Email = "test@example.com",
-                Password = "password123"
+                Password = null // Không nhập mật khẩu
             };
-
-            // Giả lập CreateUserAsync ném một ngoại lệ (simulating failure)
-            _userRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<User>()))
-                .ThrowsAsync(new Exception("Simulated exception"));
-
-            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null); // Giả lập email chưa tồn tại
 
             // Act
             var result = await _userService.CreateAsync(createUserRequest);
 
             // Assert
-            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Never);
             _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
 
             if (result != null)
             {
-                Console.WriteLine("CreateAsync_Failure: User creation was successful.");
+                Console.WriteLine("User registration was successful.");
             }
             else
             {
-                Console.WriteLine("CreateAsync_Failure: User creation was unsuccessful.");
+                Console.WriteLine("User registration was unsuccessful. - Password is empty");
             }
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSucced);
-          
         }
+        [Test]
+        public async Task CreateAsync_MissingEmail()
+        {
+            // Arrange
+            var createUserRequest = new CreateUserRequest
+            {
+                Email = null, // Không nhập email
+                Password = "password123"
+            };
+
+            // Act
+            var result = await _userService.CreateAsync(createUserRequest);
+
+            // Assert
+            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
+
+            if (result != null)
+            {
+                Console.WriteLine("User registration was successful.");
+            }
+            else
+            {
+                Console.WriteLine(" User registration was unsuccessful. - Email is empty");
+            }
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.IsSucced);
+        }
+
+       
     }
 }
 
