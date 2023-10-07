@@ -13,12 +13,15 @@ using NUnit.Framework;
 using Capstone.DataAccess.Entities;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
+using Capstone.Common.DTOs.User;
+using Capstone.Common.Enums;
 
 namespace DevTasker.UnitTest.Service
 {
 
     public class UserServiceTest
     {
+        private readonly CapstoneContext _context;
         private Mock<IUserRepository> _userRepositoryMock;
         private UserService _userService;
 
@@ -145,5 +148,38 @@ namespace DevTasker.UnitTest.Service
             }
             Assert.Null(result);
         }
+
+        [Test]
+        public async Task TestCreateAsync_Success()
+        {
+            // Arrange
+            var createUserRequest = new CreateUserRequest
+            {
+                Email = "newuser@example.com",
+                Password = "password",
+                // Các thông tin khác của người dùng.
+            };
+
+            // Mock để trả về null, tức là người dùng không tồn tại.
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null);
+
+            // Mock cho phương thức CreateAsync trả về một người dùng mới.
+            _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<User>()))
+                .ReturnsAsync(new User
+                {
+                    UserId = Guid.NewGuid(),
+                    // Các thông tin khác của người dùng.
+                });
+
+            // Act
+            var result = await _userService.CreateAsync(createUserRequest);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.IsSucced); // Đăng ký thành công.
+            //Assert.IsNotNull(result.CreateUserResponse); // Kiểm tra rằng CreatedUser không null.
+        }
+
     }
 }
