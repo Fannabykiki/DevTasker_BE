@@ -115,6 +115,61 @@ namespace Capstone.Service.UserService
 			};
 		}
 
+		public async Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id)
+		{
+			using (var transaction = _userRepository.DatabaseTransaction())
+			{
+				try
+				{
+					var user = await _userRepository.GetAsync(x => x.UserId == id, null);
+
+					if (user == null)
+						return new UpdateProfileResponse
+						{
+							IsSucced = false,
+						};
+
+					// Update user properties from request
+
+					user.UserName = updateProfileRequest.UserName == null ? user.UserName : updateProfileRequest.UserName;
+					user.PhoneNumber = updateProfileRequest.PhoneNumber == null ? user.PhoneNumber : updateProfileRequest.PhoneNumber;
+					user.Address = updateProfileRequest.Address == null ? user.Address : updateProfileRequest.Address;
+					user.Gender = updateProfileRequest.Gender == null ? user.Gender : updateProfileRequest.Gender;
+					user.Status = updateProfileRequest.Status == null ? user.Status : updateProfileRequest.Status;
+
+					// Save changes
+
+					var result = await _userRepository.UpdateAsync(user);
+					_userRepository.SaveChanges();
+
+					transaction.Commit();
+					return new UpdateProfileResponse
+					{
+						IsSucced = true,
+					};
+				}
+				catch (Exception)
+				{
+					transaction.RollBack();
+
+					return new UpdateProfileResponse
+					{
+						IsSucced = false,
+					};
+				}
+			}
+		}
+
+		public async Task<User> GetUserByIdAsync(Guid id)
+		{
+			var user = await _userRepository.GetAsync(x => x.UserId == id, null);
+			if (user != null)
+			{
+				return user;
+			}
+			return null;
+		}
+
 		private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
 		{
 			using (var hmac = new HMACSHA512())

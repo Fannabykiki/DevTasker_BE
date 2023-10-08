@@ -20,5 +20,8 @@ namespace Capstone.Service.UserService
         Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
 		Task<bool> ResetPassWord(ResetPasswordRequest resetPasswordRequest);
 		Task<bool> ForgotPassword(string email);
+		Task<User> GetUserByIdAsync(Guid id);
+		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
+
 	}
 }
