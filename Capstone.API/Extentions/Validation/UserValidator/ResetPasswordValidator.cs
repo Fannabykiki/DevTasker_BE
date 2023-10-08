@@ -3,11 +3,10 @@ using FluentValidation;
 
 namespace Capstone.API.Extentions.Validation.UserValidator
 {
-	public class CreateUserValidator : AbstractValidator<CreateUserRequest>
+	public class ResetPasswordValidator : AbstractValidator<ResetPasswordRequest>
 	{
-		public CreateUserValidator()
+		public ResetPasswordValidator() 
 		{
-
 			RuleFor(x => x.Email).NotEmpty().WithMessage("Email is required")
 				.Matches(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$")
 				.WithMessage("Email format not match");
