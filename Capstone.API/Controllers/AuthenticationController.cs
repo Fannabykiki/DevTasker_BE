@@ -1,6 +1,6 @@
-﻿using Capstone.Common.DTOs.User;
+﻿using Capstone.Common.DTOs.Email;
+using Capstone.Common.DTOs.User;
 using Capstone.Common.Token;
-using Capstone.DataAccess.Entities;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
@@ -37,9 +37,13 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
 		{
 			var user = await _usersService.LoginUser(request.Email, request.Password);
-			if (user == null)
+			if (user == null )
 			{
-				return NotFound();
+				return NotFound("User not exist");
+			}
+			if(user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
 			}
 
 			var token = await _usersService.CreateToken(user);
@@ -52,13 +56,65 @@ namespace Capstone.API.Controllers
 			{
 				IsAdmin = user.IsAdmin,
 				UserId = user.UserId,
-				UserName = user.UserName,
 				Email = user.Email,
 				Token = token,
-				IsFirstTime = user.IsFirstTime
+				IsFirstTime = user.IsFirstTime,
+				IsVerify = user.VerifiedAt,
+				VerifyToken = user.VerificationToken
 			};
 		}
 
+		[HttpPost("verify-token")]
+		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+			if(user.VerificationToken != verifyToken)
+			{
+				return BadRequest("Invalid token");
+			}
+
+			await _usersService.VerifyUser(email);
+
+			return Ok("User verified!");
+		}
+
+		[HttpPost("forgot-password")]
+		public async Task<IActionResult> ForgotPassword(string email)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+
+			if (user == null)
+			{
+				return NotFound("User not exist");
+			}
+
+			await _usersService.ForgotPassword(email);
+
+			return Ok("A verification email send to user");
+		}
+
+		[HttpPost("reset-password")]
+		public async Task<IActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(resetPasswordRequest.Email);
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+			{
+				return NotFound("Invalid token");
+			}
+
+			await _usersService.ResetPassWord(resetPasswordRequest);
+
+			return Ok("A verification email send to user");
+		}
+
+
+		[HttpPost("verify-email")]
+		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
+		{
+			await _usersService.SendVerifyEmail(emailRequest);
+
+			return Ok();
+		}
 		private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
 		{
 			var cookieOptions = new CookieOptions
