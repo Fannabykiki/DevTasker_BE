@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Capstone.Common", "Capstone
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Capstone.Service", "Capstone.Service\Capstone.Service.csproj", "{65B1AA71-068F-4989-AB01-113DAEC55C42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NunitTest.DevTasker", "NunitTest.DevTasker\NunitTest.DevTasker.csproj", "{DEF5E0D7-6C11-4892-846B-8593E9D27AD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest.DevTasker", "NUnitTest.DevTasker\NUnitTest.DevTasker.csproj", "{FA15CDB4-83D6-4E9B-BFC0-57CED214FDA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{65B1AA71-068F-4989-AB01-113DAEC55C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65B1AA71-068F-4989-AB01-113DAEC55C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65B1AA71-068F-4989-AB01-113DAEC55C42}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DEF5E0D7-6C11-4892-846B-8593E9D27AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEF5E0D7-6C11-4892-846B-8593E9D27AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEF5E0D7-6C11-4892-846B-8593E9D27AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEF5E0D7-6C11-4892-846B-8593E9D27AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA15CDB4-83D6-4E9B-BFC0-57CED214FDA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA15CDB4-83D6-4E9B-BFC0-57CED214FDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA15CDB4-83D6-4E9B-BFC0-57CED214FDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA15CDB4-83D6-4E9B-BFC0-57CED214FDA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

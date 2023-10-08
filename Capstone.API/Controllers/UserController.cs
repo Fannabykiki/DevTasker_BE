@@ -20,15 +20,16 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPost("users")]
-        public async Task<IActionResult> Create([FromBody] CreateUserRequest createUserRequest)
+        public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
         { 
             var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
+
             if(user != null)
             {
                 return BadRequest("Email already exist.");
             }
 
-            var result = await _usersService.CreateAsync(createUserRequest);
+            var result = await _usersService.Register(createUserRequest);
 
             if (result == null) return StatusCode(500);
 

@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.User;
+﻿using Capstone.Common.DTOs.Email;
+using Capstone.Common.DTOs.User;
 using Capstone.Common.Token;
 using Capstone.DataAccess.Entities;
 
@@ -11,9 +12,16 @@ namespace Capstone.Service.UserService
         Task<IEnumerable<User>> GetAllUserAsync();
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email);
-        Task<CreateUserResponse> UpdateUserAsync(UpdateUserRequest updateUserRequest, Guid id);
-        Task<CreateUserResponse> CreateAsync(CreateUserRequest createUserRequest);
+        Task<CreateUserResponse> VerifyUser(string email);
+        Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
         Task<RefreshToken> GenerateRefreshToken();
 		Task<string> CreateToken(User user);
+        Task SendVerifyEmail(EmailRequest emailRequest);
+        Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
+		Task<bool> ResetPassWord(ResetPasswordRequest resetPasswordRequest);
+		Task<bool> ForgotPassword(string email);
+		Task<User> GetUserByIdAsync(Guid id);
+		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
+
 	}
 }
