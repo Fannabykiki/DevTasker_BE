@@ -270,7 +270,7 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task SendEmail(EmailRequest emailRequest)
+		public async Task SendVerifyEmail(EmailRequest emailRequest)
 		{
 			string verificationLink = "https://localhost:7266/api/authentication/verify-token?email=" +emailRequest.To+"&verifyToken="+emailRequest.VerifyToken;
 			var email = new MimeMessage();
