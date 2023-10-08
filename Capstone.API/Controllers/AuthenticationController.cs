@@ -41,6 +41,10 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
+			if(user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
 			if(user.VerifiedAt == null)
 			{
 				return BadRequest("User not verified!");
