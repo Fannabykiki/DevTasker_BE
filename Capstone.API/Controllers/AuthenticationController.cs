@@ -14,17 +14,15 @@ namespace Capstone.API.Controllers
 	[ApiController]
 	public class AuthenticationController : ControllerBase
 	{
-        private readonly IConfiguration _config;
-        private readonly ILoggerManager _logger;
+		private readonly ILoggerManager _logger;
 		private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
-		
+		private readonly IConfiguration _config;
 
 		public AuthenticationController(IUserService usersService, ILoggerManager logger, IHttpContextAccessor httpContextAccessor, IConfiguration config)
 		{
-            _config = config;
-            _usersService = usersService;
+			_usersService = usersService;
 			_logger = logger;
 			_httpContextAccessor = httpContextAccessor;
 			var identity = httpContextAccessor.HttpContext?.User?.Identity;
@@ -39,6 +37,19 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
+		[HttpGet("external-login")]
+		public IActionResult Login()
+		{
+
+			var clientId = _config["Authentication:Google:ClientId"];
+
+			var redirectUrl = _config["Authentication:Google:CallBackUrl"];
+
+			var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
+
+			return Redirect(authUrl);
+
+		}
 
 		[HttpGet("/users/profile/{id}")]
 		public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
@@ -60,6 +71,22 @@ namespace Capstone.API.Controllers
 				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
+
+		}
+
+		[HttpPut("/users/{id}")]
+		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+		{
+			// Validate model
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var result = await _usersService.UpdateProfileAsync(request, id);
+
+			if (result == null)
+				return BadRequest(result);
+
+			return Ok(result);
 
 		}
 
@@ -89,20 +116,28 @@ namespace Capstone.API.Controllers
 			}
 			var token = await _usersService.CreateToken(user);
 
-            var refreshToken = await _usersService.GenerateRefreshToken();
+			var refreshToken = await _usersService.GenerateRefreshToken();
 
-            SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
 
-            return new LoginResponse
-            {
-                IsAdmin = user.IsAdmin,
-                UserId = user.UserId,
-                UserName = user.UserName,
-                Email = user.Email,
-                Token = token,
-                IsFirstTime = user.IsFirstTime
-            };
-        }
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+
+			return new LoginResponse
+			{
+				IsAdmin = user.IsAdmin,
+				UserId = user.UserId,
+				UserName = user.UserName,
+				Email = user.Email,
+				Token = token,
+				IsFirstTime = user.IsFirstTime
+			};
+		}
 
 
 		[HttpPost("token")]
@@ -113,11 +148,11 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
-			if(user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
 			{
 				return BadRequest("User is inactive");
 			}
-			if(user.VerifiedAt == null)
+			if (user.VerifiedAt == null)
 			{
 				return BadRequest("User not verified!");
 			}
@@ -126,7 +161,15 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
 			return new LoginResponse
 			{
@@ -136,11 +179,10 @@ namespace Capstone.API.Controllers
 				Token = token,
 				IsFirstTime = user.IsFirstTime,
 				IsVerify = user.VerifiedAt,
-				VerifyToken = user.VerificationToken
 			};
 		}
 
-		[HttpPost("verify-token")]
+		[HttpPost("verify-user")]
 		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
 		{
 			var user = await _usersService.GetUserByEmailAsync(email);
@@ -183,29 +225,12 @@ namespace Capstone.API.Controllers
 			return Ok("A verification email send to user");
 		}
 
-
-		[HttpPost("verify-email")]
+		[HttpPost("send-email")]
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
 		{
 			await _usersService.SendVerifyEmail(emailRequest);
 
 			return Ok();
-		}
-		private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
-		{
-			var cookieOptions = new CookieOptions
-			{
-				HttpOnly = true,
-				Expires = refreshToken.Expires,
-			};
-
-			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-
-			var result = await _usersService.UpdateUserTokenAsync(refreshToken, email);
-
-			if (result == null) return StatusCode(500);
-
-			return Ok(result);
 		}
 
 		[HttpPost("refresh-token")]
@@ -231,7 +256,15 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			SetRefreshToken(email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
 			return Ok(token);
 		}
