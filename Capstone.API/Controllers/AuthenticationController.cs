@@ -19,7 +19,7 @@ namespace Capstone.API.Controllers
 		private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
-		private readonly IConfiguration _config;
+		
 
 		public AuthenticationController(IUserService usersService, ILoggerManager logger, IHttpContextAccessor httpContextAccessor, IConfiguration config)
 		{
@@ -39,19 +39,6 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
-		[HttpGet("external-login")]
-		public IActionResult Login()
-		{
-
-			var clientId = _config["Authentication:Google:ClientId"];
-
-			var redirectUrl = _config["Authentication:Google:CallBackUrl"];
-
-			var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
-
-			return Redirect(authUrl);
-
-		}
 
 		[HttpGet("/users/profile/{id}")]
 		public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
@@ -73,22 +60,6 @@ namespace Capstone.API.Controllers
 				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
-
-		}
-
-		[HttpPut("/users/{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
-		{
-			// Validate model
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-
-			var result = await _usersService.UpdateProfileAsync(request, id);
-
-			if (result == null)
-				return BadRequest(result);
-
-			return Ok(result);
 
 		}
 
