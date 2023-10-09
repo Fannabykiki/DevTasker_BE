@@ -1,6 +1,6 @@
-﻿using Capstone.Common.DTOs.User;
+﻿using Capstone.Common.DTOs.Email;
+using Capstone.Common.DTOs.User;
 using Capstone.Common.Token;
-using Capstone.DataAccess.Entities;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using GoogleAuthentication.Services;
@@ -19,6 +19,7 @@ namespace Capstone.API.Controllers
 		private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IConfiguration _config;
 
 		public AuthenticationController(IUserService usersService, ILoggerManager logger, IHttpContextAccessor httpContextAccessor, IConfiguration config)
 		{
@@ -35,73 +36,87 @@ namespace Capstone.API.Controllers
 			{
 				_identity = identity as ClaimsIdentity;
 			}
+			_config = config;
 		}
 
-		[HttpPost("token")]
-		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
+		[HttpGet("external-login")]
+		public IActionResult Login()
 		{
-			var user = await _usersService.LoginUser(request.Email, request.Password);
+
+			var clientId = _config["Authentication:Google:ClientId"];
+
+			var redirectUrl = _config["Authentication:Google:CallBackUrl"];
+
+			var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
+
+			return Redirect(authUrl);
+
+		}
+
+		[HttpGet("/users/profile/{id}")]
+		public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
+		{
+			var user = await _usersService.GetUserByIdAsync(id);
 			if (user == null)
 			{
 				return NotFound();
 			}
 
-			var token = await _usersService.CreateToken(user);
-
-			var refreshToken = await _usersService.GenerateRefreshToken();
-
-			SetRefreshToken(user.Email, refreshToken);
-
-			return new LoginResponse
+			return new GetUserProfileResponse
 			{
-				IsAdmin = user.IsAdmin,
-				UserId = user.UserId,
 				UserName = user.UserName,
 				Email = user.Email,
-				Token = token,
-				IsFirstTime = user.IsFirstTime
+				PhoneNumber = user.PhoneNumber,
+				Address = user.Address,
+				Avatar = user.Avatar,
+				Gender = user.Gender,
+				Status = user.Status,
+				IsAdmin = user.IsAdmin,
 			};
+
 		}
 
-        [HttpGet("external-login")]
-        public IActionResult Login()
-        {
+		[HttpPut("/users/{id}")]
+		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+		{
+			// Validate model
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
 
-            var clientId = _config["Authentication:Google:ClientId"];
+			var result = await _usersService.UpdateProfileAsync(request, id);
 
-            var redirectUrl = _config["Authentication:Google:CallBackUrl"];
+			if (result == null)
+				return BadRequest(result);
 
-            var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
+			return Ok(result);
 
-            return Redirect(authUrl);
+		}
 
-        }
+		[HttpGet("external-login/token")]
+		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
+		{
+			GoogleProfile googleUser = new GoogleProfile();
+			try
+			{
+				var ClientSecret = _config["Authentication:Google:ClientSecret"];
+				var ClientID = _config["Authentication:Google:ClientId"];
+				var url = _config["Authentication:Google:CallBackUrl"];
+				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
+				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
+				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
 
-        [HttpGet("external-login/token")]
-        public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
-        {
-            GoogleProfile googleUser = new GoogleProfile();
-            try
-            {
-                var ClientSecret = _config["Authentication:Google:ClientSecret"];
-                var ClientID = _config["Authentication:Google:ClientId"];
-                var url = _config["Authentication:Google:CallBackUrl"];
-                var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
-                var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
-                googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
+			}
+			catch (Exception ex)
+			{
 
-            }
-            catch (Exception ex)
-            {
+			}
 
-            }
-
-            var user = await _usersService.GetUserByEmailAsync(googleUser.Email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            var token = await _usersService.CreateToken(user);
+			var user = await _usersService.GetUserByEmailAsync(googleUser.Email);
+			if (user == null)
+			{
+				return NotFound();
+			}
+			var token = await _usersService.CreateToken(user);
 
             var refreshToken = await _usersService.GenerateRefreshToken();
 
@@ -118,7 +133,94 @@ namespace Capstone.API.Controllers
             };
         }
 
-        private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
+
+		[HttpPost("token")]
+		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
+		{
+			var user = await _usersService.LoginUser(request.Email, request.Password);
+			if (user == null )
+			{
+				return NotFound("User not exist");
+			}
+			if(user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if(user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
+
+			var token = await _usersService.CreateToken(user);
+
+			var refreshToken = await _usersService.GenerateRefreshToken();
+
+			SetRefreshToken(user.Email, refreshToken);
+
+			return new LoginResponse
+			{
+				IsAdmin = user.IsAdmin,
+				UserId = user.UserId,
+				Email = user.Email,
+				Token = token,
+				IsFirstTime = user.IsFirstTime,
+				IsVerify = user.VerifiedAt,
+				VerifyToken = user.VerificationToken
+			};
+		}
+
+		[HttpPost("verify-token")]
+		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+			if(user.VerificationToken != verifyToken)
+			{
+				return BadRequest("Invalid token");
+			}
+
+			await _usersService.VerifyUser(email);
+
+			return Ok("User verified!");
+		}
+
+		[HttpPost("forgot-password")]
+		public async Task<IActionResult> ForgotPassword(string email)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+
+			if (user == null)
+			{
+				return NotFound("User not exist");
+			}
+
+			await _usersService.ForgotPassword(email);
+
+			return Ok("A verification email send to user");
+		}
+
+		[HttpPost("reset-password")]
+		public async Task<IActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(resetPasswordRequest.Email);
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+			{
+				return NotFound("Invalid token");
+			}
+
+			await _usersService.ResetPassWord(resetPasswordRequest);
+
+			return Ok("A verification email send to user");
+		}
+
+
+		[HttpPost("verify-email")]
+		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
+		{
+			await _usersService.SendVerifyEmail(emailRequest);
+
+			return Ok();
+		}
+		private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
 		{
 			var cookieOptions = new CookieOptions
 			{

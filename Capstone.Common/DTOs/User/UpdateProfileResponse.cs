@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.User
 {
-    public class UpdateProfileResponse : BaseResponse
-    {
-    }
+	public class UpdateProfileResponse : BaseResponse
+	{
+	}
 }
