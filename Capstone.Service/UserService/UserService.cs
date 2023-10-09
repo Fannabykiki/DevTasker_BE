@@ -52,10 +52,10 @@ namespace Capstone.Service.UserService
 					var newUser = await _userRepository.CreateAsync(newUserRequest);
 					_userRepository.SaveChanges();
 
-
 					return new CreateUserResponse
 					{
 						IsSucced = true,
+						VerifyToken = newUser.VerificationToken
 					};
 				}
 				else
@@ -184,47 +184,6 @@ namespace Capstone.Service.UserService
 			{
 				var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 				return computedHash.SequenceEqual(passwordHash);
-			}
-		}
-
-		public async Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email)
-		{
-			using (var transaction = _userRepository.DatabaseTransaction())
-			{
-				try
-				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
-					if (updateRequest == null)
-					{
-						return new CreateUserResponse
-						{
-							IsSucced = false,
-						};
-					}
-
-					updateRequest.TokenCreated = updateUserRequest.Created;
-					updateRequest.TokenExpires = updateUserRequest.Expires;
-					updateRequest.RefreshToken = updateUserRequest.Token;
-
-					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
-
-					transaction.Commit();
-
-					return new CreateUserResponse
-					{
-						IsSucced = true,
-					};
-				}
-				catch (Exception)
-				{
-					transaction.RollBack();
-
-					return new CreateUserResponse
-					{
-						IsSucced = false,
-					};
-				}
 			}
 		}
 
@@ -392,6 +351,38 @@ namespace Capstone.Service.UserService
 					updateRequest.PasswordSalt = passwordSalt;
 					updateRequest.PassResetToken = null;
 					updateRequest.ResetTokenExpires = null;
+
+					await _userRepository.UpdateAsync(updateRequest);
+					_userRepository.SaveChanges();
+
+					transaction.Commit();
+
+					return true;
+				}
+				catch (Exception)
+				{
+					transaction.RollBack();
+
+					return false;
+				}
+			}
+		}
+
+		public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken)
+		{
+			using (var transaction = _userRepository.DatabaseTransaction())
+			{
+				try
+				{
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
+					if (updateRequest == null)
+					{
+						return false;
+					}
+
+					updateRequest.TokenCreated = refreshToken.Created;
+					updateRequest.TokenExpires = refreshToken.Expires;
+					updateRequest.RefreshToken = refreshToken.Token;
 
 					await _userRepository.UpdateAsync(updateRequest);
 					_userRepository.SaveChanges();

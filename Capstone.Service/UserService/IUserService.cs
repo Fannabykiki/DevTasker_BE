@@ -11,7 +11,6 @@ namespace Capstone.Service.UserService
         Task<User> GetUserByEmailAsync(string email);
         Task<IEnumerable<User>> GetAllUserAsync();
         Task<bool> DeleteAsync(Guid id);
-        Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
         Task<RefreshToken> GenerateRefreshToken();
@@ -22,6 +21,6 @@ namespace Capstone.Service.UserService
 		Task<bool> ForgotPassword(string email);
 		Task<User> GetUserByIdAsync(Guid id);
 		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
-
+		Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken);
 	}
 }

@@ -118,7 +118,15 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
 			return new LoginResponse
 			{
@@ -140,11 +148,11 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
-			if(user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
 			{
 				return BadRequest("User is inactive");
 			}
-			if(user.VerifiedAt == null)
+			if (user.VerifiedAt == null)
 			{
 				return BadRequest("User not verified!");
 			}
@@ -153,7 +161,15 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
 			return new LoginResponse
 			{
@@ -163,11 +179,10 @@ namespace Capstone.API.Controllers
 				Token = token,
 				IsFirstTime = user.IsFirstTime,
 				IsVerify = user.VerifiedAt,
-				VerifyToken = user.VerificationToken
 			};
 		}
 
-		[HttpPost("verify-token")]
+		[HttpPost("verify-user")]
 		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
 		{
 			var user = await _usersService.GetUserByEmailAsync(email);
@@ -210,29 +225,12 @@ namespace Capstone.API.Controllers
 			return Ok("A verification email send to user");
 		}
 
-
-		[HttpPost("verify-email")]
+		[HttpPost("send-email")]
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
 		{
 			await _usersService.SendVerifyEmail(emailRequest);
 
 			return Ok();
-		}
-		private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
-		{
-			var cookieOptions = new CookieOptions
-			{
-				HttpOnly = true,
-				Expires = refreshToken.Expires,
-			};
-
-			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-
-			var result = await _usersService.UpdateUserTokenAsync(refreshToken, email);
-
-			if (result == null) return StatusCode(500);
-
-			return Ok(result);
 		}
 
 		[HttpPost("refresh-token")]
@@ -258,7 +256,15 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			SetRefreshToken(email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken);
+
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
 			return Ok(token);
 		}
