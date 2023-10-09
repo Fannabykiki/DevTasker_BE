@@ -148,14 +148,14 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
-			//if(user.Status == Common.Enums.StatusEnum.Inactive)
-			//{
-			//	return BadRequest("User is inactive");
-			//}
-			//if(user.VerifiedAt == null)
-			//{
-			//	return BadRequest("User not verified!");
-			//}
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
 
 			var token = await _usersService.CreateToken(user);
 
@@ -179,11 +179,10 @@ namespace Capstone.API.Controllers
 				Token = token,
 				IsFirstTime = user.IsFirstTime,
 				IsVerify = user.VerifiedAt,
-				VerifyToken = user.VerificationToken
 			};
 		}
 
-		[HttpPost("verify-token")]
+		[HttpPost("verify-user")]
 		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
 		{
 			var user = await _usersService.GetUserByEmailAsync(email);
@@ -226,8 +225,7 @@ namespace Capstone.API.Controllers
 			return Ok("A verification email send to user");
 		}
 
-
-		[HttpPost("verify-email")]
+		[HttpPost("send-email")]
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
 		{
 			await _usersService.SendVerifyEmail(emailRequest);

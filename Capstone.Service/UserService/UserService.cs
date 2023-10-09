@@ -52,10 +52,10 @@ namespace Capstone.Service.UserService
 					var newUser = await _userRepository.CreateAsync(newUserRequest);
 					_userRepository.SaveChanges();
 
-
 					return new CreateUserResponse
 					{
 						IsSucced = true,
+						VerifyToken = newUser.VerificationToken
 					};
 				}
 				else
