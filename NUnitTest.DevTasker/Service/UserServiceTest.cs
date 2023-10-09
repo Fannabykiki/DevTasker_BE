@@ -1,149 +1,240 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Capstone.DataAccess;
-using Capstone.DataAccess.Repository.Implements;
-using Capstone.DataAccess.Repository.Interfaces;
-using Moq;
+using Capstone.Common.DTOs.Email;
+using Capstone.Common.DTOs.User;
+using Capstone.Common.Token;
+using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-using Capstone.DataAccess.Entities;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
+using GoogleAuthentication.Services;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Security.Claims;
 
-namespace DevTasker.UnitTest.Service
+namespace Capstone.API.Controllers
 {
+	[Route("api/authentication")]
+	[ApiController]
+	public class AuthenticationController : ControllerBase
+	{
+        private readonly IConfiguration _config;
+        private readonly ILoggerManager _logger;
+		private readonly IUserService _usersService;
+		private readonly ClaimsIdentity? _identity;
+		private readonly IHttpContextAccessor _httpContextAccessor;
+		
 
-    public class UserServiceTest
-    {
-        private Mock<IUserRepository> _userRepositoryMock;
-        private UserService _userService;
+		public AuthenticationController(IUserService usersService, ILoggerManager logger, IHttpContextAccessor httpContextAccessor, IConfiguration config)
+		{
+            _config = config;
+            _usersService = usersService;
+			_logger = logger;
+			_httpContextAccessor = httpContextAccessor;
+			var identity = httpContextAccessor.HttpContext?.User?.Identity;
+			if (identity == null)
+			{
+				_identity = null;
+			}
+			else
+			{
+				_identity = identity as ClaimsIdentity;
+			}
+			_config = config;
+		}
 
 
-        [SetUp]
-        public void SetUp()
-        {
-            _userRepositoryMock = new Mock<IUserRepository>();
-            _userService = new UserService(null, _userRepositoryMock.Object);
-        }
+		[HttpGet("/users/profile/{id}")]
+		public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
+		{
+			var user = await _usersService.GetUserByIdAsync(id);
+			if (user == null)
+			{
+				return NotFound();
+			}
 
-        [Test]
-        public async Task TestLoginUserAsync()
-        {
-            // Arrange
-            var username = "testuser";
-            var password = "testpassword";
+			return new GetUserProfileResponse
+			{
+				UserName = user.UserName,
+				Email = user.Email,
+				PhoneNumber = user.PhoneNumber,
+				Address = user.Address,
+				Avatar = user.Avatar,
+				Gender = user.Gender,
+				Status = user.Status,
+				IsAdmin = user.IsAdmin,
+			};
 
-            byte[] passwordSalt = new byte[16];
-            using (var rng = new RNGCryptoServiceProvider())
+		}
+
+		[HttpGet("external-login/token")]
+		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
+		{
+			GoogleProfile googleUser = new GoogleProfile();
+			try
+			{
+				var ClientSecret = _config["Authentication:Google:ClientSecret"];
+				var ClientID = _config["Authentication:Google:ClientId"];
+				var url = _config["Authentication:Google:CallBackUrl"];
+				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
+				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
+				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
+
+			}
+			catch (Exception ex)
+			{
+
+			}
+
+			var user = await _usersService.GetUserByEmailAsync(googleUser.Email);
+			if (user == null)
+			{
+				return NotFound();
+			}
+			var token = await _usersService.CreateToken(user);
+
+            var refreshToken = await _usersService.GenerateRefreshToken();
+
+            SetRefreshToken(user.Email, refreshToken);
+
+            return new LoginResponse
             {
-                rng.GetBytes(passwordSalt);
-            }
-
-            byte[] passwordHash;
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
-
-            var user = new User
-            {
-                UserId = Guid.NewGuid(),
-                UserName = username,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
+                IsAdmin = user.IsAdmin,
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email,
+                Token = token,
+                IsFirstTime = user.IsFirstTime
             };
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-         .ReturnsAsync(user);
-
-            // Act
-            var result = await _userService.LoginUser(username, password);
-
-            // Assert
-            if (result != null)
-            {
-                Console.WriteLine("Success: Login was successful.");
-            }
-            else
-            {
-                Console.WriteLine("Wrong: Login was unsuccessful.");
-            }
-            Assert.NotNull(result);
-            Assert.AreEqual(username, result.UserName);
-        }
-        [Test]
-        public async Task TestLoginUserAsync_InvalidCredentials()
-        {
-            // Arrange
-            var username = "testuser";
-            var correctPassword = "testpassword";
-            var incorrectPassword = "wrongpassword";
-
-            byte[] passwordSalt = new byte[16];
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(passwordSalt);
-            }
-
-            byte[] passwordHash;
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(correctPassword));
-            }
-
-            var user = new User
-            {
-                UserId = Guid.NewGuid(),
-                UserName = username,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
-            };
-
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync(user);
-
-            // Act
-            var result = await _userService.LoginUser(username, incorrectPassword);
-
-            // Assert
-            if (result != null)
-            {
-                Console.WriteLine("Success: Login was successful.");
-            }
-            else
-            {
-                Console.WriteLine("Wrong: Login was unsuccessful.");
-            }
-            Assert.Null(result);
         }
 
-        [Test]
-        public async Task TestLoginUserAsync_UsernameNotFound()
-        {
-            // Arrange
-            var username = "nonexistentuser";
-            var password = "testpassword";
 
-            // Giả lập không có người dùng cùng tên tồn tại
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null);
+		[HttpPost("token")]
+		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
+		{
+			var user = await _usersService.LoginUser(request.Email, request.Password);
+			if (user == null )
+			{
+				return NotFound("User not exist");
+			}
+			if(user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if(user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
 
-            // Act
-            var result = await _userService.LoginUser(username, password);
+			var token = await _usersService.CreateToken(user);
 
-            // Assert
-            if (result != null)
-            {
-                Console.WriteLine("Success: Login was successful.");
-            }
-            else
-            {
-                Console.WriteLine("Wrong: Username not found.");
-            }
-            Assert.Null(result);
-        }
-    }
+			var refreshToken = await _usersService.GenerateRefreshToken();
+
+			SetRefreshToken(user.Email, refreshToken);
+
+			return new LoginResponse
+			{
+				IsAdmin = user.IsAdmin,
+				UserId = user.UserId,
+				Email = user.Email,
+				Token = token,
+				IsFirstTime = user.IsFirstTime,
+				IsVerify = user.VerifiedAt,
+				VerifyToken = user.VerificationToken
+			};
+		}
+
+		[HttpPost("verify-token")]
+		public async Task<IActionResult> VerifyEmail(string email,string verifyToken)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+			if(user.VerificationToken != verifyToken)
+			{
+				return BadRequest("Invalid token");
+			}
+
+			await _usersService.VerifyUser(email);
+
+			return Ok("User verified!");
+		}
+
+		[HttpPost("forgot-password")]
+		public async Task<IActionResult> ForgotPassword(string email)
+		{
+			var user = await _usersService.GetUserByEmailAsync(email);
+
+			if (user == null)
+			{
+				return NotFound("User not exist");
+			}
+
+			await _usersService.ForgotPassword(email);
+
+			return Ok("A verification email send to user");
+		}
+
+		[HttpPost("reset-password")]
+		public async Task<IActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(resetPasswordRequest.Email);
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+			{
+				return NotFound("Invalid token");
+			}
+
+			await _usersService.ResetPassWord(resetPasswordRequest);
+
+			return Ok("A verification email send to user");
+		}
+
+
+		[HttpPost("verify-email")]
+		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
+		{
+			await _usersService.SendVerifyEmail(emailRequest);
+
+			return Ok();
+		}
+		private async Task<IActionResult> SetRefreshToken(string email, RefreshToken refreshToken)
+		{
+			var cookieOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Expires = refreshToken.Expires,
+			};
+
+			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+
+			var result = await _usersService.UpdateUserTokenAsync(refreshToken, email);
+
+			if (result == null) return StatusCode(500);
+
+			return Ok(result);
+		}
+
+		[HttpPost("refresh-token")]
+		public async Task<ActionResult<string>> RefreshToken(string email)
+		{
+			var getRefreshToken = Request.Cookies["refreshToken"];
+
+			var user = await _usersService.GetUserByEmailAsync(email);
+
+			if(user==null) return NotFound();
+
+			if (!user.RefreshToken.Equals(getRefreshToken))
+			{
+				return Unauthorized("Invalid Refresh Token.");
+			}
+
+			else if (user.TokenExpires < DateTime.Now)
+			{
+				return Unauthorized("Token expired.");
+			}
+
+			var token = await _usersService.CreateToken(user);
+
+			var refreshToken = await _usersService.GenerateRefreshToken();
+
+			SetRefreshToken(email, refreshToken);
+
+			return Ok(token);
+		}
+
+	}
 }
