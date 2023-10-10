@@ -159,6 +159,7 @@ namespace Capstone.API.Controllers
 				Token = token,
 				IsFirstTime = user.IsFirstTime,
 				IsVerify = user.VerifiedAt,
+				VerifyToken = user.VerificationToken
 			};
 		}
 
