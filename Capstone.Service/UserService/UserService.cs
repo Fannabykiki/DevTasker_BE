@@ -13,6 +13,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Capstone.Service.UserService
 {
@@ -20,11 +22,25 @@ namespace Capstone.Service.UserService
 	{
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
+		private readonly ClaimsIdentity? _identity;
+		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IConfiguration _config;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository)
+		public UserService(CapstoneContext context, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor, IConfiguration config)
 		{
 			_context = context;
 			_userRepository = userRepository;
+			_httpContextAccessor = httpContextAccessor;
+			var identity = httpContextAccessor.HttpContext?.User?.Identity;
+			if (identity == null)
+			{
+				_identity = null;
+			}
+			else
+			{
+				_identity = identity as ClaimsIdentity;
+			}
+			_config = config;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
@@ -217,14 +233,14 @@ namespace Capstone.Service.UserService
 
 		public async Task<string> CreateToken(User user)
 		{
-			var claims = new Claim[]
-		   {
-				new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-				new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-				new Claim("IsAdmin",user.IsAdmin.ToString()),
-				new Claim("UserId",user.UserId.ToString()),
-				new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
-		   };
+			//var claims = new Claim[]
+		 //  {
+			//	new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+			//	new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
+			//	new Claim("IsAdmin",user.IsAdmin.ToString()),
+			//	new Claim("UserId",user.UserId.ToString()),
+			//	new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
+		 //  };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
@@ -233,7 +249,7 @@ namespace Capstone.Service.UserService
 			var expired = DateTime.UtcNow.AddMinutes(JwtConstant.ExpiredTime);
 
 			var token = new JwtSecurityToken(JwtConstant.Issuer,
-				JwtConstant.Audience, claims,
+				JwtConstant.Audience,
 				expires: expired, signingCredentials: signIn);
 
 			var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
