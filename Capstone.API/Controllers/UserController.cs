@@ -35,5 +35,21 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPut("/users/{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+        {
+            // Validate model
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _usersService.UpdateProfileAsync(request, id);
+
+            if (result == null)
+            return BadRequest(result);
+
+            return Ok(result);
+
+        }
     }
 }

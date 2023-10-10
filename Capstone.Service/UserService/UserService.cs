@@ -223,6 +223,7 @@ namespace Capstone.Service.UserService
 				new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
 				new Claim("IsAdmin",user.IsAdmin.ToString()),
 				new Claim("UserId",user.UserId.ToString()),
+				new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
 		   };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
