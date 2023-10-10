@@ -1,8 +1,13 @@
-﻿using Capstone.Common.DTOs.User;
+﻿using Capstone.Common.DTOs.Paging;
+using Capstone.Common.DTOs.User;
+using Capstone.Common.Enums;
+using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.API.Controllers
 {
@@ -17,6 +22,14 @@ namespace Capstone.API.Controllers
         {
             _logger = logger;
             _usersService = usersService;
+        }
+
+        [HttpPost("users-paged")]
+        public async Task<ActionResult<PagedResponse<ViewPagedUsersResponse>>> GetUsers(PagedRequest pagedRequest)
+        {
+            var response = await _usersService.GetUsersAsync(pagedRequest.pageSize, pagedRequest.pageNumber, pagedRequest.status, pagedRequest.search);
+            return Ok(response);
+
         }
 
         [HttpPost("users")]
