@@ -289,7 +289,7 @@ namespace Capstone.Service.UserService
 		{
 			string verificationLink = "https://localhost:7266/api/authentication/verify-token?email=" +emailRequest.To+"&verifyToken="+emailRequest.VerifyToken;
 			var email = new MimeMessage();
-			email.From.Add(MailboxAddress.Parse("namhocgioi2k1@gmail.com"));
+			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 			email.To.Add(MailboxAddress.Parse("" + emailRequest.To));
 			email.Subject = "DevTakser verification step";
 			email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Please verify your email address</h1><p>Click the link below to verify your email:</p><a href=\"{verificationLink}\">Verify Email</a>" };
@@ -297,7 +297,7 @@ namespace Capstone.Service.UserService
 			using (var client = new MailKit.Net.Smtp.SmtpClient())
 			{
 				client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-				client.Authenticate("namhocgioi2k1@gmail.com", "yectcfhxybsdezee");
+				client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
 				client.Send(email);
 				client.Disconnect(true);
 			}
