@@ -22,25 +22,11 @@ namespace Capstone.Service.UserService
 	{
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
-		private readonly ClaimsIdentity? _identity;
-		private readonly IHttpContextAccessor _httpContextAccessor;
-		private readonly IConfiguration _config;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor, IConfiguration config)
+		public UserService(CapstoneContext context, IUserRepository userRepository)
 		{
 			_context = context;
 			_userRepository = userRepository;
-			_httpContextAccessor = httpContextAccessor;
-			var identity = httpContextAccessor.HttpContext?.User?.Identity;
-			if (identity == null)
-			{
-				_identity = null;
-			}
-			else
-			{
-				_identity = identity as ClaimsIdentity;
-			}
-			_config = config;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
