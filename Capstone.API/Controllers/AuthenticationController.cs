@@ -37,24 +37,20 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
-		[HttpGet("external-login")]
-		public IActionResult Login()
-		{
-
-			var clientId = _config["Authentication:Google:ClientId"];
-
-			var redirectUrl = _config["Authentication:Google:CallBackUrl"];
-
-			var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
-
-			return Redirect(authUrl);
-
-		}
 
 		[HttpGet("/users/profile/{id}")]
 		public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
 		{
 			var user = await _usersService.GetUserByIdAsync(id);
+
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
 			if (user == null)
 			{
 				return NotFound();
@@ -71,22 +67,6 @@ namespace Capstone.API.Controllers
 				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
-
-		}
-
-		[HttpPut("/users/{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
-		{
-			// Validate model
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-
-			var result = await _usersService.UpdateProfileAsync(request, id);
-
-			if (result == null)
-				return BadRequest(result);
-
-			return Ok(result);
 
 		}
 
@@ -179,6 +159,7 @@ namespace Capstone.API.Controllers
 				Token = token,
 				IsFirstTime = user.IsFirstTime,
 				IsVerify = user.VerifiedAt,
+				VerifyToken = user.VerificationToken
 			};
 		}
 
@@ -205,6 +186,14 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
 
 			await _usersService.ForgotPassword(email);
 
@@ -219,7 +208,14 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Invalid token");
 			}
-
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
 			await _usersService.ResetPassWord(resetPasswordRequest);
 
 			return Ok("A verification email send to user");
@@ -240,7 +236,16 @@ namespace Capstone.API.Controllers
 
 			var user = await _usersService.GetUserByEmailAsync(email);
 
-			if(user==null) return NotFound();
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
+
+			if (user==null) return NotFound();
 
 			if (!user.RefreshToken.Equals(getRefreshToken))
 			{

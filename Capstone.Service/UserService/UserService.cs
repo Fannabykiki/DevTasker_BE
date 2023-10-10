@@ -13,6 +13,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -218,15 +220,16 @@ namespace Capstone.Service.UserService
             return refreshToken;
         }
 
-        public async Task<string> CreateToken(User user)
-        {
-            var claims = new Claim[]
-           {
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-                new Claim("IsAdmin",user.IsAdmin.ToString()),
-                new Claim("UserId",user.UserId.ToString()),
-           };
+		public async Task<string> CreateToken(User user)
+		{
+			//var claims = new Claim[]
+		 //  {
+			//	new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+			//	new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
+			//	new Claim("IsAdmin",user.IsAdmin.ToString()),
+			//	new Claim("UserId",user.UserId.ToString()),
+			//	new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
+		 //  };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
@@ -234,9 +237,9 @@ namespace Capstone.Service.UserService
 
             var expired = DateTime.UtcNow.AddMinutes(JwtConstant.ExpiredTime);
 
-            var token = new JwtSecurityToken(JwtConstant.Issuer,
-                JwtConstant.Audience, claims,
-                expires: expired, signingCredentials: signIn);
+			var token = new JwtSecurityToken(JwtConstant.Issuer,
+				JwtConstant.Audience,
+				expires: expired, signingCredentials: signIn);
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
@@ -287,23 +290,23 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task SendVerifyEmail(EmailRequest emailRequest)
-        {
-            string verificationLink = "https://localhost:7266/api/authentication/verify-token?email=" + emailRequest.To + "&verifyToken=" + emailRequest.VerifyToken;
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse("namhocgioi2k1@gmail.com"));
-            email.To.Add(MailboxAddress.Parse("" + emailRequest.To));
-            email.Subject = "DevTakser verification step";
-            email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Please verify your email address</h1><p>Click the link below to verify your email:</p><a href=\"{verificationLink}\">Verify Email</a>" };
+		public async Task SendVerifyEmail(EmailRequest emailRequest)
+		{
+			string verificationLink = "https://localhost:7266/api/authentication/verify-token?email=" +emailRequest.To+"&verifyToken="+emailRequest.VerifyToken;
+			var email = new MimeMessage();
+			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
+			email.To.Add(MailboxAddress.Parse("" + emailRequest.To));
+			email.Subject = "DevTakser verification step";
+			email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Please verify your email address</h1><p>Click the link below to verify your email:</p><a href=\"{verificationLink}\">Verify Email</a>" };
 
-            using (var client = new MailKit.Net.Smtp.SmtpClient())
-            {
-                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                client.Authenticate("namhocgioi2k1@gmail.com", "yectcfhxybsdezee");
-                client.Send(email);
-                client.Disconnect(true);
-            }
-        }
+			using (var client = new MailKit.Net.Smtp.SmtpClient())
+			{
+				client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+				client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
+				client.Send(email);
+				client.Disconnect(true);
+			}
+		}
 
         public async Task<bool> ForgotPassword(string email)
         {
