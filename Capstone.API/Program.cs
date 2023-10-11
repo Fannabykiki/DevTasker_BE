@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using Capstone.Service.Project;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -32,7 +33,8 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 builder.Services.AddControllers()
