@@ -1,18 +1,22 @@
+using AutoMapper;
 using Capstone.API.Extentions;
 using Capstone.Common.Jwt;
 using Capstone.DataAccess;
+using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
-using System.Text.Json.Serialization;
-using Capstone.Service.Project;
+using static System.Reflection.Metadata.BlobBuilder;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -22,7 +26,27 @@ static async Task InitializeDatabase(IApplicationBuilder app)
         await scope.ServiceProvider.GetRequiredService<CapstoneContext>().Database.MigrateAsync();
     }
 }
+static IEdmModel GetEdmModel()
+{
+	ODataConventionModelBuilder builder = new();
+	builder.EntitySet<Attachment>("Attachments");
+	builder.EntitySet<Board>("Boards");
+	builder.EntitySet<Notification>("Notifications");
+	builder.EntitySet<User>("Users");
+	builder.EntitySet<PermissionSchema>("PermissionSchemas");
+	builder.EntitySet<Permission>("Permissions");
+	builder.EntitySet<Project>("Projects");
+	builder.EntitySet<Role>("Roles");
+	builder.EntitySet<Ticket>("Tickets");
+	builder.EntitySet<TicketComment>("TicketComments");
+	builder.EntitySet<TicketHistory>("TicketHistorys");
+	builder.EntitySet<TicketType>("TicketTypes");
+	builder.EntitySet<TicketStatus>("TicketStatuss");
+	builder.EntitySet<PriorityLevel>("PriorityLevels");
+	builder.EntitySet<ProjectMember>("ProjectMembers");
 
+	return builder.GetEdmModel();
+}
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<CapstoneContext>(opt =>
@@ -36,6 +60,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
 
 builder.Services.AddControllers()
                 .AddFluentValidation(options =>
