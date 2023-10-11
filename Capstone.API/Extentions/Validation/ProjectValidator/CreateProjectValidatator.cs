@@ -11,7 +11,6 @@ public class CreateProjectValidatator : AbstractValidator<CreateProjectRequest>
         RuleFor(request => request.StartDate).NotEmpty().WithMessage("Start date cannot be blank");
         RuleFor(request => request.EndDate).NotEmpty().WithMessage("End date cannot be blank");
         RuleFor(request => request.CreateBy).NotEmpty().WithMessage("Creator cannot be left blank");
-        RuleFor(request => request.BoardId).NotEmpty().WithMessage("Table id cannot be empty");
         RuleFor(request => request.CreateAt).NotEmpty().WithMessage("Creation date cannot be blank");
         RuleFor(request => request.EndDate)
             .Must((request, endDate) => endDate < request.StartDate)

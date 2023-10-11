@@ -26,10 +26,8 @@ public class ProjectService : IProjectService
         {
             var newProjectRequest = new DataAccess.Entities.Project
             {
-                Token = Guid.NewGuid().ToString(),
                 ProjectId = Guid.NewGuid(),
                 ProjectName = createProjectRequest.ProjectName,
-                BoardId = createProjectRequest.BoardId,
                 CreateAt = createProjectRequest.CreateAt,
                 EndDate = createProjectRequest.EndDate,
                 StartDate = createProjectRequest.StartDate,

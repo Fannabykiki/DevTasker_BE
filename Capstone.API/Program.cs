@@ -16,6 +16,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
+using Capstone.Service.Project;
 using static System.Reflection.Metadata.BlobBuilder;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
