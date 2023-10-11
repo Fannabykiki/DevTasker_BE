@@ -94,6 +94,7 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound();
 			}
+
 			var token = await _usersService.CreateToken(user);
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
