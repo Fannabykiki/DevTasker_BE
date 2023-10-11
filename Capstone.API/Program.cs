@@ -16,6 +16,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
+using Capstone.Service.Project;
 using static System.Reflection.Metadata.BlobBuilder;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
@@ -57,7 +58,8 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
 
