@@ -10,3 +10,46 @@ add-migration UpdateAllowNullField -context CapstoneContext -o Migrations
 4. Update migration:
 update-database
 
+
+Lọc sinh viên theo tuổi
+Copy
+/odata/Students?$filter=Age eq 20
+Lọc sinh viên theo ngành học
+Copy
+/odata/Students?$filter=Major eq 'Computer Science'
+Sắp xếp sinh viên theo tên
+Copy
+/odata/Students?$orderby=Name
+Phân trang sinh viên (lấy 10 sinh viên đầu tiên)
+Copy
+/odata/Students?$top=10
+Tìm kiếm sinh viên theo tên
+Copy
+/odata/Students?$search=John
+Lấy số lượng sinh viên
+Copy
+/odata/Students/$count=true
+Lấy danh sách sinh viên theo ngành học và tuổi
+Copy
+/odata/Students?$filter=Major eq 'Computer Science' and Age eq 20
+Lấy danh sách sinh viên với tên bắt đầu bằng "John"
+Copy
+/odata/Students?$filter=startswith(Name, 'John')
+Lấy danh sách sinh viên theo ngành học và sắp xếp theo tuổi giảm dần
+Copy
+/odata/Students?$filter=Major eq 'Computer Science'&$orderby=Age desc
+Lấy danh sách sinh viên theo ngành học và phân trang (lấy 10 sinh viên đầu tiên)
+Copy
+/odata/Students?$filter=Major eq 'Computer Science'&$top=10
+Lấy danh sách sinh viên theo ngành học và bỏ qua 5 sinh viên đầu tiên
+Copy
+/odata/Students?$filter=Major eq 'Computer Science'&$skip=5
+Lấy danh sách sinh viên theo ngành học và lấy 5 sinh viên kế tiếp (phân trang)
+Copy
+/odata/Students?$filter=Major eq 'Computer Science'&$skip=10&$top=5
+Lấy danh sách sinh viên với tên chứa từ khóa "Smith" và sắp xếp theo tuổi tăng dần
+Copy
+/odata/Students?$filter=contains(Name, 'Smith')&$orderby=Age
+Lấy danh sách sinh viên theo ngành học và lọc tuổi từ 18 đến 25
+Copy
+/odata/Students?$filter=Major eq 'Computer Science' and Age ge 18 and Age le 25
