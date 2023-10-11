@@ -16,6 +16,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
+using Capstone.Service.Mapping;
 using Capstone.Service.Project;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -49,6 +50,12 @@ static IEdmModel GetEdmModel()
 	return builder.GetEdmModel();
 }
 var builder = WebApplication.CreateBuilder(args);
+var mapperConfig = new MapperConfiguration(mc =>
+{
+	mc.AddProfile(new MappingProfile());
+});
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<CapstoneContext>(opt =>
 {
