@@ -111,7 +111,7 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<Board>()
                        .HasOne(sc => sc.Project)
                        .WithOne(s => s.Board)
-                       .HasForeignKey<Project>(sc => sc.BoardId);
+                       .HasForeignKey<Project>(sc => sc.ProjectId);
         }
 
         public DbSet<Attachment>? Attachments { get; set; }
