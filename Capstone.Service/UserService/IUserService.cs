@@ -25,5 +25,6 @@ namespace Capstone.Service.UserService
 		Task<User> GetUserByIdAsync(Guid id);
 		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
 		Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken);
+		
 	}
 }
