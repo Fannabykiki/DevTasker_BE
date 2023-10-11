@@ -219,14 +219,6 @@ namespace Capstone.Service.UserService
 
 		public async Task<string> CreateToken(User user)
 		{
-			//var claims = new Claim[]
-		 //  {
-			//	new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-			//	new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-			//	new Claim("IsAdmin",user.IsAdmin.ToString()),
-			//	new Claim("UserId",user.UserId.ToString()),
-			//	new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
-		 //  };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
