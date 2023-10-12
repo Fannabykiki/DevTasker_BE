@@ -12,7 +12,7 @@ namespace Capstone.Service.UserService
         Task<User> LoginUser(string username, string password);
         Task<User> GetUserByEmailAsync(string email);
         Task<IEnumerable<User>> GetAllUserAsync();
-        Task<PagedResponse<ViewPagedUsersResponse>> GetUsersAsync(int pageSize = 2, int pageNumber = 1, StatusEnum? status = null, string? search = null);
+        Task<List<ViewPagedUsersResponse>> GetUsersAsync();
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
