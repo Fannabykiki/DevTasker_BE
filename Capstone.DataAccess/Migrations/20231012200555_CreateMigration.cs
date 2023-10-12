@@ -25,18 +25,16 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PermissionSchemas",
+                name: "Permissions",
                 columns: table => new
                 {
-                    SchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PermissionSchemas", x => x.SchemaId);
+                    table.PrimaryKey("PK_Permissions", x => x.PermissionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,6 +48,19 @@ namespace Capstone.DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PriorityLevels", x => x.LevelId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.RoleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,40 +146,28 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permissions",
+                name: "PermissionSchemas",
                 columns: table => new
                 {
                     PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PermissionSchemaSchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Permissions", x => x.PermissionId);
-                    table.ForeignKey(
-                        name: "FK_Permissions_PermissionSchemas_PermissionSchemaSchemaId",
-                        column: x => x.PermissionSchemaSchemaId,
-                        principalTable: "PermissionSchemas",
-                        principalColumn: "SchemaId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.RoleId);
+                    table.PrimaryKey("PK_PermissionSchemas", x => new { x.RoleId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_Roles_PermissionSchemas_RoleId",
+                        name: "FK_PermissionSchemas_Permissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "Permissions",
+                        principalColumn: "PermissionId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PermissionSchemas_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "PermissionSchemas",
-                        principalColumn: "SchemaId",
+                        principalTable: "Roles",
+                        principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -247,30 +246,6 @@ namespace Capstone.DataAccess.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProjectSchemas",
-                columns: table => new
-                {
-                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectSchemas", x => new { x.ProjectId, x.SchemaId });
-                    table.ForeignKey(
-                        name: "FK_ProjectSchemas_PermissionSchemas_SchemaId",
-                        column: x => x.SchemaId,
-                        principalTable: "PermissionSchemas",
-                        principalColumn: "SchemaId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectSchemas_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "ProjectId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -439,9 +414,9 @@ namespace Capstone.DataAccess.Migrations
                 column: "RecerverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Permissions_PermissionSchemaSchemaId",
-                table: "Permissions",
-                column: "PermissionSchemaSchemaId");
+                name: "IX_PermissionSchemas_PermissionId",
+                table: "PermissionSchemas",
+                column: "PermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectMembers_ProjectId",
@@ -457,11 +432,6 @@ namespace Capstone.DataAccess.Migrations
                 name: "IX_ProjectMembers_UserId",
                 table: "ProjectMembers",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProjectSchemas_SchemaId",
-                table: "ProjectSchemas",
-                column: "SchemaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketComments_TaskId",
@@ -508,13 +478,10 @@ namespace Capstone.DataAccess.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "Permissions");
+                name: "PermissionSchemas");
 
             migrationBuilder.DropTable(
                 name: "ProjectMembers");
-
-            migrationBuilder.DropTable(
-                name: "ProjectSchemas");
 
             migrationBuilder.DropTable(
                 name: "TicketHistoryTicketStatus");
@@ -523,16 +490,16 @@ namespace Capstone.DataAccess.Migrations
                 name: "TicketComments");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Permissions");
 
             migrationBuilder.DropTable(
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "TicketHistories");
+                name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "PermissionSchemas");
+                name: "TicketHistories");
 
             migrationBuilder.DropTable(
                 name: "Tickets");

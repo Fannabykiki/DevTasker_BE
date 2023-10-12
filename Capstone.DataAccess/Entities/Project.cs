@@ -17,7 +17,6 @@ namespace Capstone.DataAccess.Entities
         public DateTime? DeleteAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public Board Board { get; set; }
-		public List<ProjectSchemas> ProjectSchemas { get; set; }
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
     }
 }

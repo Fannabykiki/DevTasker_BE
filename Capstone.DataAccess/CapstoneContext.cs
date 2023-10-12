@@ -12,7 +12,7 @@ namespace Capstone.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
+			modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
 
             modelBuilder.Entity<Attachment>()
                        .HasOne(tc => tc.User)
@@ -108,17 +108,17 @@ namespace Capstone.DataAccess
 
 			modelBuilder.Entity<Role>().HasKey(sc => new { sc.RoleId });
 
-			modelBuilder.Entity<Role>()
-					.HasOne(sc => sc.PermissionSchema)
-					.WithMany(s => s.Roles)
-					.HasForeignKey(sc => sc.RoleId);
+			modelBuilder.Entity<PermissionSchema>().HasKey(sc => new { sc.RoleId,sc.PermissionId });
 
-			modelBuilder.Entity<ProjectSchemas>().HasKey(sc => new { sc.ProjectId,sc.SchemaId });
+			modelBuilder.Entity<PermissionSchema>()
+					   .HasOne(sc => sc.Permission)
+					   .WithMany(s => s.PermissionSchemas)
+					   .HasForeignKey(sc => sc.PermissionId);
 
-			modelBuilder.Entity<ProjectSchemas>()
-					.HasOne(sc => sc.Project)
-					.WithMany(s => s.ProjectSchemas)
-					.HasForeignKey(sc => sc.ProjectId);
+			modelBuilder.Entity<PermissionSchema>()
+					   .HasOne(sc => sc.Role)
+					   .WithMany(s => s.PermissionSchemas)
+					   .HasForeignKey(sc => sc.RoleId);
 		}
 
 		public DbSet<Attachment>? Attachments { get; set; }
@@ -136,6 +136,5 @@ namespace Capstone.DataAccess
         public DbSet<Entities.TicketStatus>? TicketStatuses { get; set; }
         public DbSet<TicketType>? TicketTypes { get; set; }
         public DbSet<User>? Users { get; set; }
-        public DbSet<ProjectSchemas>? ProjectSchemas { get; set; }
     }
 }
