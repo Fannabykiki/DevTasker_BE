@@ -8,6 +8,8 @@ using Capstone.Service.Project;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.CodeAnalysis;
 
 namespace Capstone.API.Controllers
 {
@@ -35,7 +37,18 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-        
-        
+
+        [EnableQuery]
+        [HttpGet("projects")]
+        public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> CreateProject()
+        {
+            var result = await _projectService.GetAllProjects();
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(result);
+        }
     }
 }

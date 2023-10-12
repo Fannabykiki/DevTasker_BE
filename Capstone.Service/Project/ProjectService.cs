@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using AutoMapper;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
@@ -12,11 +13,13 @@ public class ProjectService : IProjectService
 {
     private readonly CapstoneContext _context;
     private readonly IProjectRepository _projectRepository;
+    private readonly IMapper _mapper;
 
-    public ProjectService(CapstoneContext context, IProjectRepository projectRepository)
+    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper)
     {
         _context = context;
         _projectRepository = projectRepository;
+        _mapper = mapper;
     }
 
     public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
@@ -44,5 +47,11 @@ public class ProjectService : IProjectService
         {
             return false;
         }
+    }
+
+    public async Task<IEnumerable<GetAllProjectViewModel>> GetAllProjects()
+    {
+        var projects = await _projectRepository.GetAllWithOdata(x => true, null);
+        return _mapper.Map<List<GetAllProjectViewModel>>(projects); 
     }
 }
