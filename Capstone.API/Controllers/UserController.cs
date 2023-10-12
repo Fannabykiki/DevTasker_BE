@@ -43,6 +43,10 @@ namespace Capstone.API.Controllers
         public async Task<ActionResult<PagedResponse<ViewPagedUsersResponse>>> GetUsers(PagedRequest pagedRequest)
         {
             var response = await _usersService.GetUsersAsync(pagedRequest.pageSize, pagedRequest.pageNumber, pagedRequest.status, pagedRequest.search);
+            if (response == null)
+            {
+                return BadRequest("Three are no User!");
+            }
             return Ok(response);
 
         }
