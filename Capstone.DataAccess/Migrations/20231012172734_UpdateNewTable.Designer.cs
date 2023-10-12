@@ -4,6 +4,7 @@ using Capstone.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    partial class CapstoneContextModelSnapshot : ModelSnapshot
+    [Migration("20231012172734_UpdateNewTable")]
+    partial class UpdateNewTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,7 +128,7 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PermissionSchemaSchemaId")
+                    b.Property<Guid?>("PermissionSchemaSchemaId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("PermissionId");
@@ -566,9 +568,7 @@ namespace Capstone.DataAccess.Migrations
                 {
                     b.HasOne("Capstone.DataAccess.Entities.PermissionSchema", "PermissionSchema")
                         .WithMany("Permissions")
-                        .HasForeignKey("PermissionSchemaSchemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PermissionSchemaSchemaId");
 
                     b.Navigation("PermissionSchema");
                 });
@@ -620,7 +620,7 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired();
 
                     b.HasOne("Capstone.DataAccess.Entities.PermissionSchema", "PermissionSchema")
-                        .WithMany()
+                        .WithMany("ProjectSchemas")
                         .HasForeignKey("SchemaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -740,6 +740,8 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.PermissionSchema", b =>
                 {
                     b.Navigation("Permissions");
+
+                    b.Navigation("ProjectSchemas");
 
                     b.Navigation("Roles");
                 });

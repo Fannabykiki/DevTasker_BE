@@ -5,5 +5,7 @@ namespace Capstone.Service.Project;
 public interface IProjectService
 {
     Task<bool> CreateProject(CreateProjectRequest createProjectRequest);
-    Task<IEnumerable<GetAllProjectViewModel>> GetAllProjects();
+
+    Task<IEnumerable<GetAllProjectViewModel>> GetAllProjects(Guid UserId);
+
 }

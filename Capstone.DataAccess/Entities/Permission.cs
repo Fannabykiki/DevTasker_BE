@@ -9,6 +9,6 @@ namespace Capstone.DataAccess.Entities
         public string Name { get; set; }
         public string? Description { get; set; }
 
-        public PermissionSchema? PermissionSchema { get; set; }
+        public PermissionSchema PermissionSchema { get; set; }
     }
 }
