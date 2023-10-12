@@ -11,9 +11,7 @@ namespace Capstone.DataAccess.Entities
         public StatusEnum ProjectStatus { get; set; }
         public DateTime StartDate{ get; set; }
         public DateTime EndDate { get; set; }
-        public string Token { get; set; }
         public Guid CreateBy { get; set; }
-        public Guid BoardId { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public

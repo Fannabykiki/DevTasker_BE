@@ -222,14 +222,6 @@ namespace Capstone.Service.UserService
 
 		public async Task<string> CreateToken(User user)
 		{
-			//var claims = new Claim[]
-		 //  {
-			//	new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-			//	new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-			//	new Claim("IsAdmin",user.IsAdmin.ToString()),
-			//	new Claim("UserId",user.UserId.ToString()),
-			//	new Claim(ClaimTypes.NameIdentifier, user.UserName.ToString()),
-		 //  };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
@@ -406,39 +398,17 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<PagedResponse<ViewPagedUsersResponse>> GetUsersAsync(int pageSize, int pageNumber, StatusEnum? status, string? search)
+        public async Task<List<ViewPagedUsersResponse>> GetUsersAsync()
         {
-            int skip = (pageNumber - 1) * pageSize;
-
-            IQueryable<User> query = _userRepository.GetAllAsync(x => x.Email != null, null).AsQueryable();
-
-            if (status != null)
+            IQueryable< User> query = _userRepository.GetAllAsync(null,null);
+            var users = query.Select(x => new ViewPagedUsersResponse
             {
-                query = query.Where(x => x.Status == status);
-            }
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(x => x.UserName.Contains(search) || x.Email.Contains(search));
-            }
-
-            var totalRecords = await query.CountAsync();
-            var users = await query.Skip(skip).Take(pageSize).ToListAsync();
-            var pagedUsers = new List<ViewPagedUsersResponse>();
-            var item = new ViewPagedUsersResponse();
-            foreach (var user in users)
-            {
-                item = new ViewPagedUsersResponse { Id = user.UserId, Name = user.UserName, Email = user.Email, Status = user.Status };
-                pagedUsers.Add(item);
-            }
-            var response = new PagedResponse<ViewPagedUsersResponse>()
-            {
-                Data = pagedUsers,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalRecords = totalRecords
-            };
-            return response;
+                Id = x.UserId,
+                Email = x.Email,
+                Name = x.UserName,
+                Status = x.Status,
+            }).ToList();
+            return users;
         }
     }
 }
