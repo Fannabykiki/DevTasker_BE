@@ -16,7 +16,6 @@ namespace Capstone.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
         private readonly ILoggerManager _logger;
         private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
@@ -24,7 +23,7 @@ namespace Capstone.API.Controllers
 		private readonly IConfiguration _config;
 
 
-		public UserController(IUserRepository userRepository, ILoggerManager logger, IUserService usersService, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+		public UserController(ILoggerManager logger, IUserService usersService, IConfiguration config, IHttpContextAccessor httpContextAccessor)
 		{
 			_logger = logger;
 			_usersService = usersService;
@@ -39,8 +38,6 @@ namespace Capstone.API.Controllers
 				_identity = identity as ClaimsIdentity;
 			}
 			_config = config;
-            _userRepository= userRepository;
-
         }
 
         [HttpGet("users")]
