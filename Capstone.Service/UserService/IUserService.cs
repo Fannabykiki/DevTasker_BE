@@ -14,7 +14,6 @@ namespace Capstone.Service.UserService
         Task<IEnumerable<User>> GetAllUserAsync();
         Task<List<ViewPagedUsersResponse>> GetUsersAsync();
         Task<bool> DeleteAsync(Guid id);
-        Task<CreateUserResponse> UpdateUserTokenAsync(RefreshToken updateUserRequest, string email);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
         Task<RefreshToken> GenerateRefreshToken();
