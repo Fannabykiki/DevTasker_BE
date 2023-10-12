@@ -22,6 +22,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
     <PackageReference Include="MimeKit" Version="4.2.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
@@ -32,5 +33,6 @@
     <ProjectReference Include="..\Capstone.Common\Capstone.Common.csproj" />
     <ProjectReference Include="..\Capstone.Service\Capstone.Service.csproj" />
   </ItemGroup>
+
 
 </Project>

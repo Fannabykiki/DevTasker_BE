@@ -78,19 +78,17 @@ namespace Capstone.API.Controllers
 
         [HttpPost("users")]
         public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
-        { 
-            var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
+        {
+	        if (createUserRequest.Email != null)
+	        {
+		        await _usersService.GetUserByEmailAsync(createUserRequest.Email);
 
-            if(user != null)
-            {
-                return BadRequest("Email already exist.");
-            }
+		        return BadRequest("Email already exist.");
+	        }
 
-            var result = await _usersService.Register(createUserRequest);
+	        var result = await _usersService.Register(createUserRequest);
 
-            if (result == null) return StatusCode(500);
-
-            return Ok(result);
+	        return Ok(result);
         }
 
         [HttpPut("users/{id}")]
@@ -101,9 +99,6 @@ namespace Capstone.API.Controllers
                 return BadRequest(ModelState);
 
             var result = await _usersService.UpdateProfileAsync(request, id);
-
-            if (result == null)
-            return BadRequest(result);
 
             return Ok(result);
 
