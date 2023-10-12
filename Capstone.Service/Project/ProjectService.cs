@@ -13,13 +13,15 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly IPermissionSchemaRepository _permissionSchemaRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
 		_roleRepository = roleRepository;
 		_mapper = mapper;
+		_permissionSchemaRepository = permissionSchemaRepository;
 	}
 
 	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
@@ -64,17 +66,31 @@ public class ProjectService : IProjectService
 			{
 				RoleId = Guid.NewGuid(),
                 RoleName = createRoleRequest.RoleName,
-                Description = createRoleRequest.Descroption
+                Description = createRoleRequest.Description
 			};
 
-			await _roleRepository.CreateAsync(newRoleRequest);
+			var newRole = await _roleRepository.CreateAsync(newRoleRequest);
 
+            foreach (var PermissionId in createRoleRequest.PermissionId)
+            {
+                var newSchema = new PermissionSchema
+                {
+                    PermissionId = PermissionId,
+                    Description = createRoleRequest.SchemaDes,
+                    SchemaName = createRoleRequest.SchemaName,
+                    RoleId = newRole.RoleId
+                };
+				await _permissionSchemaRepository.CreateAsync(newSchema);
+			}
+			_permissionSchemaRepository.SaveChanges();
 			_projectRepository.SaveChanges();
+			transaction.Commit();
 
 			return true;
 		}
 		catch (Exception)
 		{
+			transaction.RollBack();
 			return false;
 		}
 	}

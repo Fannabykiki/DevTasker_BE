@@ -35,7 +35,6 @@ static IEdmModel GetEdmModel()
 	builder.EntitySet<Board>("Boards");
 	builder.EntitySet<Notification>("Notifications");
 	builder.EntitySet<User>("Users");
-	builder.EntitySet<PermissionSchema>("PermissionSchemas");
 	builder.EntitySet<Permission>("Permissions");
 	builder.EntitySet<Project>("Projects");
 	builder.EntitySet<Role>("Roles");
@@ -70,6 +69,8 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
 builder.Services.AddScoped<IRoleRepository,RoleRepository>();
+builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepository>();
+
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));

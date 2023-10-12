@@ -39,6 +39,18 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-    }
+
+		[HttpPost("roles")]
+		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
+		{
+			var result = await _projectService.CreateProjectRole(createRoleRequest);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
+	}
 }
 
