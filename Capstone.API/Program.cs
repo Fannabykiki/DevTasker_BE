@@ -71,6 +71,10 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IRoleRepository,RoleRepository>();
 builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepository>();
 
+builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
+builder.Services.AddScoped<IBoardRepository,BoardRepository>();
+
+
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
