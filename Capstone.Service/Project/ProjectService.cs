@@ -3,6 +3,7 @@ using Capstone.Common.DTOs.Project;
 using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 
 namespace Capstone.Service.Project;
@@ -13,15 +14,19 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IPermissionSchemaRepository _permissionSchemaRepository;
+    private readonly IBoardRepository _boardRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
 		_roleRepository = roleRepository;
 		_mapper = mapper;
 		_permissionSchemaRepository = permissionSchemaRepository;
+		_projectMemberRepository = projectMemberRepository;
+		_boardRepository = boardRepository;
 	}
 
 	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
@@ -36,17 +41,55 @@ public class ProjectService : IProjectService
                 CreateAt = createProjectRequest.CreateAt,
                 EndDate = createProjectRequest.EndDate,
                 StartDate = createProjectRequest.StartDate,
-                PrivacyStatus = true,
+                PrivacyStatus = createProjectRequest.PrivacyStatus,
                 ProjectStatus = StatusEnum.Active,
-                CreateBy = createProjectRequest.CreateBy
+                CreateBy = createProjectRequest.CreateBy,
+                Description = createProjectRequest.Description,
             };
 
-            await _projectRepository.CreateAsync(newProjectRequest);
-            _projectRepository.SaveChanges();
+            var newBoard = new Board
+            {
+                BoardId = Guid.NewGuid(),
+                CreateAt = DateTime.UtcNow,
+                ProjectId = newProjectRequest.ProjectId,
+                Title = "",
+            };
+            await _boardRepository.CreateAsync(newBoard);
+            _boardRepository.SaveChanges();
+            var newProject = await _projectRepository.CreateAsync(newProjectRequest);
+
+			var roleAdmin = await _roleRepository.GetAsync(x => x.RoleName.Equals("Member"), null);
+
+            var newPO = new ProjectMember
+            {
+                IsOwner = true,
+                MemberId = Guid.NewGuid(),
+                ProjectId = newProject.ProjectId,
+                UserId = newProject.CreateBy,
+                RoleId = roleAdmin.RoleId
+            };
+
+			var admin = new ProjectMember
+			{
+				IsOwner = false,
+				MemberId = Guid.NewGuid(),
+				ProjectId = newProject.ProjectId,
+				UserId = Guid.Parse("afa06cdd77134b819163c45556e4fa4c"),
+				RoleId = roleAdmin.RoleId
+			};
+
+            await _projectMemberRepository.CreateAsync(admin);
+			await _projectMemberRepository.CreateAsync(newPO);
+
+			_projectRepository.SaveChanges();
+			_projectMemberRepository.SaveChanges();
+
+            transaction.Commit();
             return true;
         }
         catch (Exception)
         {
+            transaction.RollBack();
             return false;
         }
     }
@@ -94,4 +137,6 @@ public class ProjectService : IProjectService
 			return false;
 		}
 	}
+
+
 }
