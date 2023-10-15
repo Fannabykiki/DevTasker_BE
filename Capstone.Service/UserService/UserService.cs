@@ -9,30 +9,30 @@ using MailKit.Security;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.Enums;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Capstone.Service.UserService
 {
-    public class UserService : IUserService
+	public class UserService : IUserService
     {
         private readonly CapstoneContext _context;
         private readonly IUserRepository _userRepository;
+		private readonly IMapper _mapper;
 
-        public UserService(CapstoneContext context, IUserRepository userRepository)
-        {
-            _context = context;
-            _userRepository = userRepository;
-        }
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper)
+		{
+			_context = context;
+			_userRepository = userRepository;
+			_mapper = mapper;
+		}
 
-        public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
+		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
         {
             try
             {
@@ -82,43 +82,19 @@ namespace Capstone.Service.UserService
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<User>> GetAllUserAsync()
+        public Task<User> GetAllUserAsync()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<User> GetUserByEmailAsync(string email)
+        public async Task<UserViewModel> GetUserByEmailAsync(string email)
         {
             var user = await _userRepository.GetAsync(user => user.Email == email, null);
 
             if (user == null || email == null) return null;
 
-            return new User
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                Gender = user.Gender,
-                Avatar = user.Avatar,
-                JoinedDate = user.JoinedDate,
-                Status = user.Status,
-                IsAdmin = user.IsAdmin,
-                UserName = user.UserName,
-                VerificationToken = user.VerificationToken,
-                VerifiedAt = user.VerifiedAt,
-                Address = user.Address,
-                Attachments = user.Attachments,
-                IsFirstTime = user.IsFirstTime,
-                Notifications = user.Notifications,
-                PassResetToken = user.PassResetToken,
-                PasswordHash = user.PasswordHash,
-                PasswordSalt = user.PasswordSalt,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                TokenCreated = user.TokenCreated,
-                TokenExpires = user.TokenExpires,
-                ResetTokenExpires = user.ResetTokenExpires,
-            };
-        }
+			return _mapper.Map<UserViewModel>(user);
+		}
 
         public async Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id)
         {
@@ -193,7 +169,7 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<User> LoginUser(string email, string password)
+        public async Task<UserViewModel> LoginUser(string email, string password)
         {
             var user = await _userRepository.GetAsync(x => x.Email == email, null);
             if (user != null)
@@ -204,7 +180,7 @@ namespace Capstone.Service.UserService
                 }
                 else
                 {
-                    return user;
+                    return _mapper.Map<UserViewModel>(user);
                 }
             }
             return null;
@@ -221,7 +197,7 @@ namespace Capstone.Service.UserService
             return refreshToken;
         }
 
-		public async Task<string> CreateToken(User user)
+		public async Task<string> CreateToken(UserViewModel user)
 		{
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));

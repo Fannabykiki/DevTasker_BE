@@ -12,12 +12,12 @@ using System.Security.Claims;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/user-management")]
-    [ApiController]
-    public class UserController : ControllerBase
-    {
-        private readonly ILoggerManager _logger;
-        private readonly IUserService _usersService;
+	[Route("api/user-management")]
+	[ApiController]
+	public class UserController : ControllerBase
+	{
+		private readonly ILoggerManager _logger;
+		private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IConfiguration _config;
@@ -39,7 +39,7 @@ namespace Capstone.API.Controllers
 			}
 			_config = config;
         }
-
+        
         [HttpGet("users")]
         [EnableQuery()]
         public async Task<ActionResult<ViewPagedUsersResponse>> GetUsers()
@@ -50,8 +50,7 @@ namespace Capstone.API.Controllers
                 return BadRequest("Three are no User!");
             }
             return Ok(response);
-
-        }
+		}
 
         [HttpGet("users/{id}")]
         public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
@@ -83,13 +82,16 @@ namespace Capstone.API.Controllers
 	        {
 		        await _usersService.GetUserByEmailAsync(createUserRequest.Email);
 
-		        return BadRequest("Email already exist.");
-	        }
 
-	        var result = await _usersService.Register(createUserRequest);
+			if (user != null)
+			{
+				return BadRequest("Email already exist.");
+			}
 
-	        return Ok(result);
-        }
+			var result = await _usersService.Register(createUserRequest);
+
+			return Ok(result);
+		}
 
         [HttpPut("users/{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
@@ -98,10 +100,11 @@ namespace Capstone.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _usersService.UpdateProfileAsync(request, id);
 
-            return Ok(result);
+			var result = await _usersService.UpdateProfileAsync(request, id);
 
-        }
-    }
+			return Ok(result);
+
+		}
+	}
 }
