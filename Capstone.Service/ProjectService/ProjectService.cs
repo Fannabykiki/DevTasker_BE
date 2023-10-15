@@ -5,7 +5,7 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 
-namespace Capstone.Service.Project;
+namespace Capstone.Service.ProjectService;
 
 public class ProjectService : IProjectService
 {

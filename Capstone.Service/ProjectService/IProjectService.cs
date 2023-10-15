@@ -1,6 +1,6 @@
 ﻿using Capstone.Common.DTOs.Project;
 
-namespace Capstone.Service.Project;
+namespace Capstone.Service.ProjectService;
 
 public interface IProjectService
 {

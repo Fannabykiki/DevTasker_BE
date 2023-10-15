@@ -1,6 +1,6 @@
 using Capstone.Common.DTOs.Project;
 using Capstone.Service.LoggerService;
-using Capstone.Service.Project;
+using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 
