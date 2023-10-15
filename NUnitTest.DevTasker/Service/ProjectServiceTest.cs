@@ -120,13 +120,13 @@ namespace NUnitTest.DevTasker.Service
             // Arrange
             var createProjectRequest = new CreateProjectRequest
             {
-                ProjectName = "Test Project",
+                ProjectName = null,
                 CreateAt = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(1),
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
                 CreateBy = Guid.NewGuid(),
-                Description = "Test Project Description"
+                Description =null,
             };
 
             // Thiết lập cho phương thức DatabaseTransaction() trả về transaction mock
