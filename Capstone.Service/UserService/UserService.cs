@@ -82,11 +82,6 @@ namespace Capstone.Service.UserService
             throw new NotImplementedException();
         }
 
-        public Task<User> GetAllUserAsync()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<UserViewModel> GetUserByEmailAsync(string email)
         {
             var user = await _userRepository.GetAsync(user => user.Email == email, null);

@@ -11,7 +11,6 @@ namespace Capstone.Service.UserService
     {
         Task<UserViewModel> LoginUser(string username, string password);
         Task<UserViewModel> GetUserByEmailAsync(string email);
-        Task<IEnumerable<User>> GetAllUserAsync();
         Task<List<ViewPagedUsersResponse>> GetUsersAsync();
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> VerifyUser(string email);
