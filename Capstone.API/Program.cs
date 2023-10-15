@@ -16,6 +16,8 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
+using Capstone.Service.Mapping;
+using Capstone.Service.Project;
 using static System.Reflection.Metadata.BlobBuilder;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
@@ -33,7 +35,6 @@ static IEdmModel GetEdmModel()
 	builder.EntitySet<Board>("Boards");
 	builder.EntitySet<Notification>("Notifications");
 	builder.EntitySet<User>("Users");
-	builder.EntitySet<PermissionSchema>("PermissionSchemas");
 	builder.EntitySet<Permission>("Permissions");
 	builder.EntitySet<Project>("Projects");
 	builder.EntitySet<Role>("Roles");
@@ -48,6 +49,12 @@ static IEdmModel GetEdmModel()
 	return builder.GetEdmModel();
 }
 var builder = WebApplication.CreateBuilder(args);
+var mapperConfig = new MapperConfiguration(mc =>
+{
+	mc.AddProfile(new MappingProfile());
+});
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<CapstoneContext>(opt =>
 {
@@ -57,6 +64,17 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
+builder.Services.AddScoped<IRoleRepository,RoleRepository>();
+builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepository>();
+
+builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
+builder.Services.AddScoped<IBoardRepository,BoardRepository>();
+
+
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));

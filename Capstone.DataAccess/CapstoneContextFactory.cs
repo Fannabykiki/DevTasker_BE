@@ -9,6 +9,7 @@ namespace Capstone.DataAccess
         {
             var optionsBuilder = new DbContextOptionsBuilder<CapstoneContext>();
             optionsBuilder.UseSqlServer("Server=capstone.ct7404ko8aq4.us-east-2.rds.amazonaws.com;uid=devtasker;Password=PhanNam2001;Database=Capstone;TrustServerCertificate=True;Encrypt=True");
+            //optionsBuilder.UseSqlServer("Server=DESKTOP-OF0V18H\\FANNABY;uid=sa;Password=123456;Database=Capstone;TrustServerCertificate=True;Encrypt=True");
             return new CapstoneContext(optionsBuilder.Options);
         }
     }

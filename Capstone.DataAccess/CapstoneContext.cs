@@ -12,7 +12,7 @@ namespace Capstone.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
+			modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
 
             modelBuilder.Entity<Attachment>()
                        .HasOne(tc => tc.User)
@@ -33,7 +33,7 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TicketHistory>().HasKey(sc => new { sc.HistoryId });
 
             modelBuilder.Entity<TicketHistory>()
-                       .HasOne<Ticket>(tc => tc.Ticket)
+                       .HasOne(tc => tc.Ticket)
                        .WithMany(wi => wi.TaskHistories)
                        .HasForeignKey(tc => tc.TicketId)
                        .OnDelete(DeleteBehavior.Restrict);
@@ -41,7 +41,7 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TicketComment>().HasKey(sc => new { sc.CommentId });
 
             modelBuilder.Entity<TicketComment>()
-                       .HasOne<Ticket>(tc => tc.Ticket)
+                       .HasOne(tc => tc.Ticket)
                        .WithMany(wi => wi.TaskComments)
                        .HasForeignKey(tc => tc.TaskId)
                        .OnDelete(DeleteBehavior.Restrict);
@@ -73,14 +73,7 @@ namespace Capstone.DataAccess
                        .WithOne(s => s.TaskType)
                        .HasForeignKey<Ticket>(sc => sc.TicketId);
 
-            modelBuilder.Entity<Project>().HasKey(sc => new { sc.ProjectId });
-
-            modelBuilder.Entity<Project>()
-                       .HasOne(sc => sc.PermissionSchema)
-                       .WithMany(s => s.Projects)
-                       .HasForeignKey(sc => sc.ProjectId);
-
-            modelBuilder.Entity<Ticket>().HasKey(sc => new { sc.TicketId });
+			modelBuilder.Entity<Ticket>().HasKey(sc => new { sc.TicketId });
 
             modelBuilder.Entity<Ticket>()
                        .HasOne(sc => sc.PriorityLevel)
@@ -112,9 +105,23 @@ namespace Capstone.DataAccess
                        .HasOne(sc => sc.Project)
                        .WithOne(s => s.Board)
                        .HasForeignKey<Project>(sc => sc.ProjectId);
-        }
 
-        public DbSet<Attachment>? Attachments { get; set; }
+			modelBuilder.Entity<Role>().HasKey(sc => new { sc.RoleId });
+
+			modelBuilder.Entity<PermissionSchema>().HasKey(sc => new { sc.RoleId,sc.PermissionId });
+
+			modelBuilder.Entity<PermissionSchema>()
+					   .HasOne(sc => sc.Permission)
+					   .WithMany(s => s.PermissionSchemas)
+					   .HasForeignKey(sc => sc.PermissionId);
+
+			modelBuilder.Entity<PermissionSchema>()
+					   .HasOne(sc => sc.Role)
+					   .WithMany(s => s.PermissionSchemas)
+					   .HasForeignKey(sc => sc.RoleId);
+		}
+
+		public DbSet<Attachment>? Attachments { get; set; }
         public DbSet<Board>? Boards { get; set; }
         public DbSet<Notification>? Notifications { get; set; }
         public DbSet<Permission>? Permissions { get; set; }
