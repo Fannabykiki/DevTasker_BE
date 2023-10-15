@@ -9,30 +9,30 @@ using MailKit.Security;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.Enums;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Capstone.Service.UserService
 {
-    public class UserService : IUserService
+	public class UserService : IUserService
     {
         private readonly CapstoneContext _context;
         private readonly IUserRepository _userRepository;
+		private readonly IMapper _mapper;
 
-        public UserService(CapstoneContext context, IUserRepository userRepository)
-        {
-            _context = context;
-            _userRepository = userRepository;
-        }
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper)
+		{
+			_context = context;
+			_userRepository = userRepository;
+			_mapper = mapper;
+		}
 
-        public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
+		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
         {
             try
             {
@@ -82,43 +82,14 @@ namespace Capstone.Service.UserService
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<User>> GetAllUserAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<User> GetUserByEmailAsync(string email)
+        public async Task<UserViewModel> GetUserByEmailAsync(string email)
         {
             var user = await _userRepository.GetAsync(user => user.Email == email, null);
 
             if (user == null || email == null) return null;
 
-            return new User
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                Gender = user.Gender,
-                Avatar = user.Avatar,
-                JoinedDate = user.JoinedDate,
-                Status = user.Status,
-                IsAdmin = user.IsAdmin,
-                UserName = user.UserName,
-                VerificationToken = user.VerificationToken,
-                VerifiedAt = user.VerifiedAt,
-                Address = user.Address,
-                Attachments = user.Attachments,
-                IsFirstTime = user.IsFirstTime,
-                Notifications = user.Notifications,
-                PassResetToken = user.PassResetToken,
-                PasswordHash = user.PasswordHash,
-                PasswordSalt = user.PasswordSalt,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                TokenCreated = user.TokenCreated,
-                TokenExpires = user.TokenExpires,
-                ResetTokenExpires = user.ResetTokenExpires,
-            };
-        }
+			return _mapper.Map<UserViewModel>(user);
+		}
 
         public async Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id)
         {
@@ -136,12 +107,12 @@ namespace Capstone.Service.UserService
 
                     // Update user properties from request
 
-                    user.UserName = updateProfileRequest.UserName == null ? user.UserName : updateProfileRequest.UserName;
-                    user.PhoneNumber = updateProfileRequest.PhoneNumber == null ? user.PhoneNumber : updateProfileRequest.PhoneNumber;
-                    user.Address = updateProfileRequest.Address == null ? user.Address : updateProfileRequest.Address;
-                    user.Gender = updateProfileRequest.Gender == null ? user.Gender : updateProfileRequest.Gender;
-                    user.Status = updateProfileRequest.Status == null ? user.Status : updateProfileRequest.Status;
-
+                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
+                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+                    user.Address = updateProfileRequest.Address ?? user.Address;
+                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
+                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
                     // Save changes
 
                     var result = await _userRepository.UpdateAsync(user);
@@ -151,6 +122,7 @@ namespace Capstone.Service.UserService
                     return new UpdateProfileResponse
                     {
                         IsSucced = true,
+                        VerifyToken = result.VerificationToken
                     };
                 }
                 catch (Exception)
@@ -192,7 +164,7 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<User> LoginUser(string email, string password)
+        public async Task<UserViewModel> LoginUser(string email, string password)
         {
             var user = await _userRepository.GetAsync(x => x.Email == email, null);
             if (user != null)
@@ -203,7 +175,7 @@ namespace Capstone.Service.UserService
                 }
                 else
                 {
-                    return user;
+                    return _mapper.Map<UserViewModel>(user);
                 }
             }
             return null;
@@ -220,7 +192,7 @@ namespace Capstone.Service.UserService
             return refreshToken;
         }
 
-		public async Task<string> CreateToken(User user)
+		public async Task<string> CreateToken(UserViewModel user)
 		{
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
@@ -344,6 +316,40 @@ namespace Capstone.Service.UserService
                     }
 
                     CreatePasswordHash(resetPasswordRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    updateRequest.PasswordHash = passwordHash;
+                    updateRequest.PasswordSalt = passwordSalt;
+                    updateRequest.PassResetToken = null;
+                    updateRequest.ResetTokenExpires = null;
+
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return false;
+                }
+            }
+        }
+        public async Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
+                    if (updateRequest == null)
+                    {
+                        return false;
+                    }
+
+                    CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
 
                     updateRequest.PasswordHash = passwordHash;
                     updateRequest.PasswordSalt = passwordSalt;

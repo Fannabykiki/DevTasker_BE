@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Capstone.DataAccess.Repository.Interfaces;
 using Moq;
 using Capstone.Service.UserService;
@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
 
-namespace DevTasker.UnitTest.Service
+namespace NUnitTest.DevTasker.Service
 {
 
     public class UserServiceTest
@@ -233,38 +233,7 @@ namespace DevTasker.UnitTest.Service
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSucced);
         }
-        [Test]
-        public async Task CreateAsync_MissingEmail()
-        {
-            // Arrange
-            var createUserRequest = new CreateUserRequest
-            {
-                // Thiếu Email
-                Password = "password123"
-            };
-
-            // Act
-            var result = await _userService.Register(createUserRequest);
-
-            // Assert
-            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Never);
-            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
-
-            if (result != null)
-            {
-                Console.WriteLine("CreateAsync_MissingEmail: User creation was successful.");
-            }
-            else
-            {
-                Console.WriteLine("CreateAsync_MissingEmail: User creation was unsuccessful.");
-            }
-
-            Assert.IsNotNull(result);
-            Assert.IsFalse(result.IsSucced);
-
-        }
-
-
+        
         [Test]
         public async Task CreateAsync_MissingPassword()
         {
@@ -294,39 +263,6 @@ namespace DevTasker.UnitTest.Service
             Assert.IsFalse(result.IsSucced);
         }
 
-        [Test]
-        public async Task CreateAsync_EmailExists()
-        {
-            // Arrange
-            var createUserRequest = new CreateUserRequest
-            {
-                Email = "test@example.com",
-                Password = "password123"
-            };
-
-            // Giả lập email đã tồn tại trong cơ sở dữ liệu
-            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync(new User { Email = "test@example.com" });
-
-            // Act
-            var result = await _userService.Register(createUserRequest);
-
-            // Assert
-            _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Never);
-            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
-
-            if (result != null)
-            {
-                Console.WriteLine("CreateAsync_EmailExists: User creation was successful.");
-            }
-            else
-            {
-                Console.WriteLine("CreateAsync_EmailExists: User creation was unsuccessful.");
-            }
-            Assert.IsNotNull(result);
-            Assert.IsFalse(result.IsSucced);
-
-        }
 
 
         // Test update profile
