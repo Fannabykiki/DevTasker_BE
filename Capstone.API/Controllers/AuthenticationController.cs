@@ -221,6 +221,36 @@ namespace Capstone.API.Controllers
 
 			return Ok("A verification email send to user");
 		}
+		
+		[HttpPost("change-password")]
+		public async Task<IActionResult> changePassword(ChangePasswordRequest changePasswordRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.RefreshToken != changePasswordRequest.Token)
+			{
+				return NotFound("Invalid token");
+			}
+			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
+			{
+				return BadRequest("User not verified!");
+			}
+            if (!await _usersService.VerifyPasswordHash(changePasswordRequest.CurrentPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                return BadRequest("Password not correct!");
+            }
+			if (changePasswordRequest.NewPassword.Equals(changePasswordRequest.ConfirmPassword) == false)
+            {
+                return BadRequest("New Password not match!");
+            }
+
+            await _usersService.ChangePassWord(changePasswordRequest);
+
+			return Ok("Password have been change!");
+		}
 
 		[HttpPost("send-email")]
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
