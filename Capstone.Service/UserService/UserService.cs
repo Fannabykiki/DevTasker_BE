@@ -112,12 +112,12 @@ namespace Capstone.Service.UserService
 
                     // Update user properties from request
 
-                    user.UserName = updateProfileRequest.UserName == null ? user.UserName : updateProfileRequest.UserName;
-                    user.PhoneNumber = updateProfileRequest.PhoneNumber == null ? user.PhoneNumber : updateProfileRequest.PhoneNumber;
-                    user.Address = updateProfileRequest.Address == null ? user.Address : updateProfileRequest.Address;
-                    user.Gender = updateProfileRequest.Gender == null ? user.Gender : updateProfileRequest.Gender;
-                    user.Status = updateProfileRequest.Status == null ? user.Status : updateProfileRequest.Status;
-
+                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
+                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+                    user.Address = updateProfileRequest.Address ?? user.Address;
+                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
+                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
                     // Save changes
 
                     var result = await _userRepository.UpdateAsync(user);
@@ -127,6 +127,7 @@ namespace Capstone.Service.UserService
                     return new UpdateProfileResponse
                     {
                         IsSucced = true,
+                        VerifyToken = result.VerificationToken
                     };
                 }
                 catch (Exception)
@@ -341,6 +342,40 @@ namespace Capstone.Service.UserService
                 }
             }
         }
+        public async Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
+                    if (updateRequest == null)
+                    {
+                        return false;
+                    }
+
+                    CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    updateRequest.PasswordHash = passwordHash;
+                    updateRequest.PasswordSalt = passwordSalt;
+                    updateRequest.PassResetToken = null;
+                    updateRequest.ResetTokenExpires = null;
+
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return false;
+                }
+            }
+        }
 
         public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken)
         {
@@ -374,39 +409,17 @@ namespace Capstone.Service.UserService
             }
         }
 
-        public async Task<PagedResponse<ViewPagedUsersResponse>> GetUsersAsync(int pageSize, int pageNumber, StatusEnum? status, string? search)
+        public async Task<List<ViewPagedUsersResponse>> GetUsersAsync()
         {
-            int skip = (pageNumber - 1) * pageSize;
-
-            IQueryable<User> query = _userRepository.GetAllAsync(x => x.Email != null, null).AsQueryable();
-
-            if (status != null)
+            IQueryable< User> query = _userRepository.GetAllAsync(null,null);
+            var users = query.Select(x => new ViewPagedUsersResponse
             {
-                query = query.Where(x => x.Status == status);
-            }
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(x => x.UserName.Contains(search) || x.Email.Contains(search));
-            }
-
-            var totalRecords = await query.CountAsync();
-            var users = await query.Skip(skip).Take(pageSize).ToListAsync();
-            var pagedUsers = new List<ViewPagedUsersResponse>();
-            var item = new ViewPagedUsersResponse();
-            foreach (var user in users)
-            {
-                item = new ViewPagedUsersResponse { Id = user.UserId, Name = user.UserName, Email = user.Email, Status = user.Status };
-                pagedUsers.Add(item);
-            }
-            var response = new PagedResponse<ViewPagedUsersResponse>()
-            {
-                Data = pagedUsers,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalRecords = totalRecords
-            };
-            return response;
+                Id = x.UserId,
+                Email = x.Email,
+                Name = x.UserName,
+                Status = x.Status,
+            }).ToList();
+            return users;
         }
     }
 }

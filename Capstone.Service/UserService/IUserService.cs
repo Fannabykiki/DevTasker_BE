@@ -11,8 +11,8 @@ namespace Capstone.Service.UserService
     {
         Task<UserViewModel> LoginUser(string username, string password);
         Task<UserViewModel> GetUserByEmailAsync(string email);
-        Task<User> GetAllUserAsync();
-        Task<PagedResponse<ViewPagedUsersResponse>> GetUsersAsync(int pageSize = 2, int pageNumber = 1, StatusEnum? status = null, string? search = null);
+        Task<IEnumerable<User>> GetAllUserAsync();
+        Task<List<ViewPagedUsersResponse>> GetUsersAsync();
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
@@ -21,6 +21,7 @@ namespace Capstone.Service.UserService
         Task SendVerifyEmail(EmailRequest emailRequest);
         Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
 		Task<bool> ResetPassWord(ResetPasswordRequest resetPasswordRequest);
+		Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest);
 		Task<bool> ForgotPassword(string email);
 		Task<User> GetUserByIdAsync(Guid id);
 		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);

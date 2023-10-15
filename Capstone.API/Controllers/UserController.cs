@@ -7,6 +7,7 @@ using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using System.Security.Claims;
 
 namespace Capstone.API.Controllers
@@ -37,20 +38,50 @@ namespace Capstone.API.Controllers
 				_identity = identity as ClaimsIdentity;
 			}
 			_config = config;
+        }
+        
+        [HttpGet("users")]
+        [EnableQuery()]
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetUsers()
+        {
+            var response = await _usersService.GetUsersAsync();
+            if (response == null)
+            {
+                return BadRequest("Three are no User!");
+            }
+            return Ok(response);
 		}
 
-		[HttpPost("users-paged")]
-		public async Task<ActionResult<PagedResponse<ViewPagedUsersResponse>>> GetUsers(PagedRequest pagedRequest)
-		{
-			var response = await _usersService.GetUsersAsync(pagedRequest.pageSize, pagedRequest.pageNumber, pagedRequest.status, pagedRequest.search);
-			return Ok(response);
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(Guid id)
+        {
+            var user = await _usersService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-		}
+            return new GetUserProfileResponse
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                Avatar = user.Avatar,
+                Gender = user.Gender,
+                Status = user.Status,
+                IsAdmin = user.IsAdmin,
+            };
 
-		[HttpPost("users")]
-		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
-		{
-			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
+        }
+
+        [HttpPost("users")]
+        public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
+        {
+	        if (createUserRequest.Email != null)
+	        {
+		        await _usersService.GetUserByEmailAsync(createUserRequest.Email);
+
 
 			if (user != null)
 			{
@@ -62,12 +93,13 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpPut("/users/{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
-		{
-			// Validate model
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+        {
+            // Validate model
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
 
 			var result = await _usersService.UpdateProfileAsync(request, id);
 
