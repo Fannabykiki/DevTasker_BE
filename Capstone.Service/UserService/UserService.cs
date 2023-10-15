@@ -136,12 +136,12 @@ namespace Capstone.Service.UserService
 
                     // Update user properties from request
 
-                    user.UserName = updateProfileRequest.UserName == null ? user.UserName : updateProfileRequest.UserName;
-                    user.PhoneNumber = updateProfileRequest.PhoneNumber == null ? user.PhoneNumber : updateProfileRequest.PhoneNumber;
-                    user.Address = updateProfileRequest.Address == null ? user.Address : updateProfileRequest.Address;
-                    user.Gender = updateProfileRequest.Gender == null ? user.Gender : updateProfileRequest.Gender;
-                    user.Status = updateProfileRequest.Status == null ? user.Status : updateProfileRequest.Status;
-
+                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
+                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+                    user.Address = updateProfileRequest.Address ?? user.Address;
+                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
+                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
                     // Save changes
 
                     var result = await _userRepository.UpdateAsync(user);
@@ -151,6 +151,7 @@ namespace Capstone.Service.UserService
                     return new UpdateProfileResponse
                     {
                         IsSucced = true,
+                        VerifyToken = result.VerificationToken
                     };
                 }
                 catch (Exception)
@@ -344,6 +345,40 @@ namespace Capstone.Service.UserService
                     }
 
                     CreatePasswordHash(resetPasswordRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    updateRequest.PasswordHash = passwordHash;
+                    updateRequest.PasswordSalt = passwordSalt;
+                    updateRequest.PassResetToken = null;
+                    updateRequest.ResetTokenExpires = null;
+
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return false;
+                }
+            }
+        }
+        public async Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
+                    if (updateRequest == null)
+                    {
+                        return false;
+                    }
+
+                    CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
 
                     updateRequest.PasswordHash = passwordHash;
                     updateRequest.PasswordSalt = passwordSalt;
