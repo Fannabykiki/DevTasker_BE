@@ -3,7 +3,6 @@ using Capstone.Common.DTOs.Project;
 using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 
 namespace Capstone.Service.Project;
@@ -94,7 +93,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<IEnumerable<GetAllProjectViewModel>> GetAllProjects(Guid UserId)
+    public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid UserId)
     {
         var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(x=> x.UserId == UserId));
         return _mapper.Map<List<GetAllProjectViewModel>>(projects);
@@ -138,5 +137,9 @@ public class ProjectService : IProjectService
 		}
 	}
 
-
+	public async Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId)
+	{
+		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+		return _mapper.Map<List<ViewMemberProject>>(projects);
+	}
 }

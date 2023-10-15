@@ -9,7 +9,7 @@ namespace Capstone.API.Extentions.Validation.UserValidator
 		{
 
 			RuleFor(x => x.Email).NotEmpty().WithMessage("Email is required")
-				.Matches(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$")
+				.Matches(@"^([\w\.]+)@([\w\-]+)((\.(\w){2,3})+)$")
 				.WithMessage("Email format not match");
 
 			RuleFor(x => x.Password)

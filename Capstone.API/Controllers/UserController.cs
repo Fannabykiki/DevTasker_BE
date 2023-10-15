@@ -11,12 +11,12 @@ using System.Security.Claims;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/user-management")]
-    [ApiController]
-    public class UserController : ControllerBase
-    {
-        private readonly ILoggerManager _logger;
-        private readonly IUserService _usersService;
+	[Route("api/user-management")]
+	[ApiController]
+	public class UserController : ControllerBase
+	{
+		private readonly ILoggerManager _logger;
+		private readonly IUserService _usersService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IConfiguration _config;
@@ -39,40 +39,40 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
-        [HttpPost("users-paged")]
-        public async Task<ActionResult<PagedResponse<ViewPagedUsersResponse>>> GetUsers(PagedRequest pagedRequest)
-        {
-            var response = await _usersService.GetUsersAsync(pagedRequest.pageSize, pagedRequest.pageNumber, pagedRequest.status, pagedRequest.search);
-            return Ok(response);
+		[HttpPost("users-paged")]
+		public async Task<ActionResult<PagedResponse<ViewPagedUsersResponse>>> GetUsers(PagedRequest pagedRequest)
+		{
+			var response = await _usersService.GetUsersAsync(pagedRequest.pageSize, pagedRequest.pageNumber, pagedRequest.status, pagedRequest.search);
+			return Ok(response);
 
-        }
+		}
 
-        [HttpPost("users")]
-        public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
-        {
-	        if (createUserRequest.Email != null)
-	        {
-		        await _usersService.GetUserByEmailAsync(createUserRequest.Email);
+		[HttpPost("users")]
+		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
 
-		        return BadRequest("Email already exist.");
-	        }
+			if (user != null)
+			{
+				return BadRequest("Email already exist.");
+			}
 
-	        var result = await _usersService.Register(createUserRequest);
+			var result = await _usersService.Register(createUserRequest);
 
-	        return Ok(result);
-        }
+			return Ok(result);
+		}
 
-        [HttpPut("/users/{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
-        {
-            // Validate model
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+		[HttpPut("/users/{id}")]
+		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+		{
+			// Validate model
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
 
-            var result = await _usersService.UpdateProfileAsync(request, id);
+			var result = await _usersService.UpdateProfileAsync(request, id);
 
-            return Ok(result);
+			return Ok(result);
 
-        }
-    }
+		}
+	}
 }
