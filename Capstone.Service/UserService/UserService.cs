@@ -358,7 +358,6 @@ namespace Capstone.Service.UserService
 
                     await _userRepository.UpdateAsync(updateRequest);
                     _userRepository.SaveChanges();
-
                     transaction.Commit();
 
                     return true;
@@ -371,24 +370,19 @@ namespace Capstone.Service.UserService
                 }
             }
         }
-        public async Task<bool> ChangeUserStatus(ChangePasswordRequest changePasswordRequest)
+        public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
         {
             using (var transaction = _userRepository.DatabaseTransaction())
             {
                 try
                 {
-                    var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
+                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null);
                     if (updateRequest == null)
                     {
                         return false;
                     }
 
-                    CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
-
-                    updateRequest.PasswordHash = passwordHash;
-                    updateRequest.PasswordSalt = passwordSalt;
-                    updateRequest.PassResetToken = null;
-                    updateRequest.ResetTokenExpires = null;
+                    updateRequest.Status = changeUserStatusRequest.StatusChangeTo;
 
                     await _userRepository.UpdateAsync(updateRequest);
                     _userRepository.SaveChanges();

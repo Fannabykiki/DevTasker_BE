@@ -19,6 +19,7 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
+using Capstone.API.Helper;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -73,6 +74,8 @@ builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepositor
 
 builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
+
+builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 
 
