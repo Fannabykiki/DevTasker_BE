@@ -17,7 +17,7 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text;
 using Capstone.Service.Mapping;
-using Capstone.Service.Project;
+using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
 
 static async Task InitializeDatabase(IApplicationBuilder app)

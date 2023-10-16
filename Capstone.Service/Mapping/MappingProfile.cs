@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.User;
+using Capstone.DataAccess.Entities;
 
 namespace Capstone.Service.Mapping;
 
@@ -13,6 +15,8 @@ public class MappingProfile : Profile
         //
         // CreateMap<Books, BookViewModel>().ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
 
-        CreateMap<DataAccess.Entities.Project, GetAllProjectViewModel>();
+        CreateMap<User, UserViewModel>();
+        CreateMap<Project, GetAllProjectViewModel>();
+        CreateMap<ProjectMember, ViewMemberProject>();
     }
 }
