@@ -35,7 +35,7 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
-            var newProjectRequest = new DataAccess.Entities.Project
+            var newProjectRequest = new Project
             {
                 ProjectId = Guid.NewGuid(),
                 ProjectName = createProjectRequest.ProjectName,

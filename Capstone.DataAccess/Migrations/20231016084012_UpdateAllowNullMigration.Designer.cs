@@ -4,6 +4,7 @@ using Capstone.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    partial class CapstoneContextModelSnapshot : ModelSnapshot
+    [Migration("20231016084012_UpdateAllowNullMigration")]
+    partial class UpdateAllowNullMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,16 +253,11 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("Roles");
                 });
@@ -607,17 +604,6 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>
-                {
-                    b.HasOne("Capstone.DataAccess.Entities.Project", "Project")
-                        .WithMany("Roles")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
@@ -727,8 +713,6 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
                     b.Navigation("ProjectMembers");
-
-                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>
