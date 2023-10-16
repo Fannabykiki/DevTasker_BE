@@ -226,7 +226,7 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> changePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.RefreshToken != changePasswordRequest.Token)
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changePasswordRequest.Token)
 			{
 				return NotFound("Invalid token");
 			}

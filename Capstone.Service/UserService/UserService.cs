@@ -400,6 +400,40 @@ namespace Capstone.Service.UserService
                 }
             }
         }
+        public async Task<bool> ChangeUserStatus(ChangePasswordRequest changePasswordRequest)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
+                    if (updateRequest == null)
+                    {
+                        return false;
+                    }
+
+                    CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    updateRequest.PasswordHash = passwordHash;
+                    updateRequest.PasswordSalt = passwordSalt;
+                    updateRequest.PassResetToken = null;
+                    updateRequest.ResetTokenExpires = null;
+
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
+
+                    transaction.Commit();
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return false;
+                }
+            }
+        }
 
         public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken)
         {
