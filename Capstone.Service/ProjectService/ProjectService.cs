@@ -16,8 +16,9 @@ public class ProjectService : IProjectService
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IPermissionSchemaRepository _permissionSchemaRepository;
     private readonly IBoardRepository _boardRepository;
+    private readonly IPermissionRepository _permissionRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permission, IPermissionRepository permissionRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -26,6 +27,7 @@ public class ProjectService : IProjectService
 		_permissionSchemaRepository = permissionSchemaRepository;
 		_projectMemberRepository = projectMemberRepository;
 		_boardRepository = boardRepository;
+		_permissionRepository = permissionRepository;
 	}
 
 	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
@@ -57,15 +59,42 @@ public class ProjectService : IProjectService
             _boardRepository.SaveChanges();
             var newProject = await _projectRepository.CreateAsync(newProjectRequest);
 
-			var roleAdmin = await _roleRepository.GetAsync(x => x.RoleName.Equals("Member"), null);
-
-            var newPO = new ProjectMember
+            var newPORole = new Role()
+            {
+	            RoleId = Guid.NewGuid(),
+				RoleName = "Project Owner",
+				Description = "This project belong to him/her",
+				ProjectId = newProject.ProjectId
+            };
+            
+            var newAdminRole = new Role()
+            {
+	            RoleId = Guid.NewGuid(),
+	            RoleName = "Project Owner",
+	            Description = "Devtasker admin",
+	            ProjectId = newProject.ProjectId
+            };
+           
+            var permissions = await _permissionRepository.GetAllWithOdata(x => true, null);
+			
+            foreach (var Permisison in permissions)
+            {
+	            var newSchemas = new PermissionSchema()
+	            {
+		            Description = "Admin of project",
+		            RoleId = newPORole.RoleId,
+		            SchemaName = "Admin schemas",
+		            PermissionId = Permisison.PermissionId
+	            };
+            }
+            
+            var newPo = new ProjectMember
             {
                 IsOwner = true,
                 MemberId = Guid.NewGuid(),
                 ProjectId = newProject.ProjectId,
                 UserId = newProject.CreateBy,
-                RoleId = roleAdmin.RoleId
+                RoleId = newPORole.RoleId
             };
 
 			var admin = new ProjectMember
@@ -74,11 +103,13 @@ public class ProjectService : IProjectService
 				MemberId = Guid.NewGuid(),
 				ProjectId = newProject.ProjectId,
 				UserId = Guid.Parse("afa06cdd77134b819163c45556e4fa4c"),
-				RoleId = roleAdmin.RoleId
+				RoleId = newAdminRole.RoleId
 			};
-
+			
+			
+			
             await _projectMemberRepository.CreateAsync(admin);
-			await _projectMemberRepository.CreateAsync(newPO);
+			await _projectMemberRepository.CreateAsync(newPo);
 
 			_projectRepository.SaveChanges();
 			_projectMemberRepository.SaveChanges();

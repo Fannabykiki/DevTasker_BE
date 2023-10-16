@@ -9,7 +9,7 @@ namespace Capstone.DataAccess.Entities
         public string RoleName { get; set; }
         public string Description { get; set; }
         public Guid ProjectId { get; set; }
-        public List<PermissionSchema> PermissionSchemas { get; set; }
+        public PermissionSchema PermissionSchema { get; set; }
         public List<ProjectMember>? ProjectMember { get; set; }
         public Project Project { get; set; }
     }

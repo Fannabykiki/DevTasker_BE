@@ -118,10 +118,12 @@ namespace Capstone.DataAccess
 					   .HasOne(sc => sc.Permission)
 					   .WithMany(s => s.PermissionSchemas)
 					   .HasForeignKey(sc => sc.PermissionId);
+			
+			modelBuilder.Entity<Role>().HasKey(sc => new { sc.RoleId });
 
-			modelBuilder.Entity<PermissionSchema>()
-					   .HasOne(sc => sc.Role)
-					   .WithMany(s => s.PermissionSchemas)
+			modelBuilder.Entity<Role>()
+					   .HasOne(sc => sc.PermissionSchema)
+					   .WithMany(s => s.Roles)
 					   .HasForeignKey(sc => sc.RoleId);
 		}
 
