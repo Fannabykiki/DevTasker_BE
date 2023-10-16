@@ -4,6 +4,7 @@ using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using GoogleAuthentication.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -99,7 +100,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{
@@ -142,7 +143,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{
@@ -223,7 +224,7 @@ namespace Capstone.API.Controllers
 		}
 		
 		[HttpPost("change-password")]
-		public async Task<IActionResult> changePassword(ChangePasswordRequest changePasswordRequest)
+		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
 			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.RefreshToken != changePasswordRequest.Token)
@@ -260,6 +261,14 @@ namespace Capstone.API.Controllers
 			return Ok();
 		}
 
+		[HttpPost("send-email-forgot")]
+		public async Task<IActionResult> SendEmailForgotPassword(ForgotPasswordRequest forgotPasswordRequest)
+		{
+			await _usersService.SendResetPasswordEmail(forgotPasswordRequest);
+
+			return Ok();
+		}
+
 		[HttpPost("refresh-token")]
 		public async Task<ActionResult<string>> RefreshToken(string email)
 		{
@@ -292,7 +301,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{

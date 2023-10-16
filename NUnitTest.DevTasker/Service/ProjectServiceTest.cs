@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Project;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.ProjectService;
 using Moq;
@@ -17,27 +18,34 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IRoleRepository> _roleRepositoryMock;
         private Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
+        private Mock<IPermissionRepository> _permissionRepositoryMock;
+        private Mock<IPermissionSchemaRepository> _permissionSchemasRepositoryMock;
+
 
         [SetUp]
-        public void Setup()
-        {
-            _projectRepositoryMock = new Mock<IProjectRepository>();
-            _boardRepositoryMock = new Mock<IBoardRepository>();
-            _roleRepositoryMock = new Mock<IRoleRepository>();
-            _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
-            _databaseTransactionMock = new Mock<IDatabaseTransaction>();
+		public void Setup()
+		{
+			_projectRepositoryMock = new Mock<IProjectRepository>();
+			_boardRepositoryMock = new Mock<IBoardRepository>();
+			_roleRepositoryMock = new Mock<IRoleRepository>();
+			_projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
+			_databaseTransactionMock = new Mock<IDatabaseTransaction>();
+            _permissionRepositoryMock = new Mock<IPermissionRepository>();
+			_permissionSchemasRepositoryMock = new Mock<IPermissionSchemaRepository>();
+			//_projectService = new ProjectService(
+			//	null,
+			//	_projectRepositoryMock.Object,
+			//	_roleRepositoryMock.Object,
+			//	null,
+			//	null,
+			//	_projectMemberRepositoryMock.Object,
+			//	_boardRepositoryMock.Object,
+   //             null,
+			//	_permissionSchemasRepositoryMock.Object
 
-            _projectService = new ProjectService(
-                null,
-                _projectRepositoryMock.Object,
-                _roleRepositoryMock.Object,
-                null,
-                null,
-                _projectMemberRepositoryMock.Object,
-                _boardRepositoryMock.Object
-            );
-        }
-        [Test]
+			//);
+		}
+		[Test]
         public async Task TestCreateProject_Success()
         {
             // Arrange
