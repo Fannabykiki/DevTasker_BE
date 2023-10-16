@@ -206,9 +206,13 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(resetPasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+			if(user.PassResetToken != resetPasswordRequest.Token)
 			{
-				return NotFound("Invalid token");
+				return BadRequest("Invalid Token");
+			}
+			if (user.ResetTokenExpires < DateTime.UtcNow )
+			{
+				return BadRequest("Token has expired");
 			}
 			if (user.Status == Common.Enums.StatusEnum.Inactive)
 			{
@@ -222,7 +226,8 @@ namespace Capstone.API.Controllers
 
 			return Ok("A verification email send to user");
 		}
-		
+
+
 		[HttpPost("change-password")]
 		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
