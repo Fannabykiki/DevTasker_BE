@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
+using AutoMapper;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -19,13 +20,11 @@ namespace NUnitTest.DevTasker.Service
         private UserService _userService;
 
 
-
         [SetUp]
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _userService = new UserService(null, _userRepositoryMock.Object);
-
+         //   _userService = new UserService(null, _userRepositoryMock.Object);
 
         }
 

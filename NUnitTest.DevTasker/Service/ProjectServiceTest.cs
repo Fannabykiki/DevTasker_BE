@@ -2,7 +2,7 @@
 using Capstone.Common.DTOs.Project;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
-using Capstone.Service.Project;
+using Capstone.Service.ProjectService;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
