@@ -9,6 +9,6 @@ namespace Capstone.DataAccess.Entities
         public Guid? PermissionId { get; set; }
         public Guid? RoleId { get; set; }
         public Permission? Permission { get; set; } //1 Schema has many permission 
-        public Role? Role { get; set; } //1 Schema has many role
+        public List<Role>? Roles { get; set; } //1 Schema has many role
     }
 }

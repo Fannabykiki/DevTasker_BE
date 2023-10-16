@@ -250,11 +250,16 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("Roles");
                 });
@@ -598,6 +603,17 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.Project", "Project")
+                        .WithMany("Roles")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
@@ -707,6 +723,8 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
                     b.Navigation("ProjectMembers");
+
+                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>

@@ -106,7 +106,11 @@ namespace Capstone.DataAccess
                        .WithOne(s => s.Board)
                        .HasForeignKey<Project>(sc => sc.ProjectId);
 
-			modelBuilder.Entity<Role>().HasKey(sc => new { sc.RoleId });
+			modelBuilder.Entity<Project>().HasKey(sc => new { sc.ProjectId });
+			modelBuilder.Entity<Project>()
+				.HasMany(sc => sc.Roles)
+				.WithOne(s => s.Project)
+				.HasForeignKey(sc => sc.ProjectId);
 
 			modelBuilder.Entity<PermissionSchema>().HasKey(sc => new { sc.RoleId,sc.PermissionId });
 
@@ -114,10 +118,12 @@ namespace Capstone.DataAccess
 					   .HasOne(sc => sc.Permission)
 					   .WithMany(s => s.PermissionSchemas)
 					   .HasForeignKey(sc => sc.PermissionId);
+			
+			modelBuilder.Entity<Role>().HasKey(sc => new { sc.RoleId });
 
-			modelBuilder.Entity<PermissionSchema>()
-					   .HasOne(sc => sc.Role)
-					   .WithMany(s => s.PermissionSchemas)
+			modelBuilder.Entity<Role>()
+					   .HasOne(sc => sc.PermissionSchema)
+					   .WithMany(s => s.Roles)
 					   .HasForeignKey(sc => sc.RoleId);
 		}
 
@@ -133,7 +139,7 @@ namespace Capstone.DataAccess
         public DbSet<Ticket>? Tickets { get; set; }
         public DbSet<TicketComment>? TicketComments { get; set; }
         public DbSet<TicketHistory>? TicketHistories { get; set; }
-        public DbSet<Entities.TicketStatus>? TicketStatuses { get; set; }
+        public DbSet<TicketStatus>? TicketStatuses { get; set; }
         public DbSet<TicketType>? TicketTypes { get; set; }
         public DbSet<User>? Users { get; set; }
     }

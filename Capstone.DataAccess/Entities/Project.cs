@@ -18,5 +18,6 @@ namespace Capstone.DataAccess.Entities
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public Board Board { get; set; }
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
+        public List<Role> Roles { get; set; } // 1 project has many member
     }
 }
