@@ -5,7 +5,7 @@
 2. Open Package Manager Console
 
 3. Run migration:
-add-migration UpdateMigration -context CapstoneContext -o Migrations
+add-migration UpdateAllowNullMigration -context CapstoneContext -o Migrations
 
 4. Update migration:
 update-database
