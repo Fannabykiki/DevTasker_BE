@@ -4,6 +4,7 @@ using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using GoogleAuthentication.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -58,13 +59,13 @@ namespace Capstone.API.Controllers
 
 			return new GetUserProfileResponse
 			{
+				Fullname = user.Fullname,
 				UserName = user.UserName,
 				Email = user.Email,
 				PhoneNumber = user.PhoneNumber,
 				Address = user.Address,
-				Avatar = user.Avatar,
+				DoB = user.Dob,
 				Gender = user.Gender,
-				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
 
@@ -99,7 +100,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{
@@ -142,7 +143,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{
@@ -205,9 +206,13 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(resetPasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow)
+			if(user.PassResetToken != resetPasswordRequest.Token)
 			{
-				return NotFound("Invalid token");
+				return BadRequest("Invalid Token");
+			}
+			if (user.ResetTokenExpires < DateTime.UtcNow )
+			{
+				return BadRequest("Token has expired");
 			}
 			if (user.Status == Common.Enums.StatusEnum.Inactive)
 			{
@@ -221,12 +226,13 @@ namespace Capstone.API.Controllers
 
 			return Ok("A verification email send to user");
 		}
-		
+
+
 		[HttpPost("change-password")]
-		public async Task<IActionResult> changePassword(ChangePasswordRequest changePasswordRequest)
+		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.RefreshToken != changePasswordRequest.Token)
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changePasswordRequest.Token)
 			{
 				return NotFound("Invalid token");
 			}
@@ -256,6 +262,14 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
 		{
 			await _usersService.SendVerifyEmail(emailRequest);
+
+			return Ok();
+		}
+
+		[HttpPost("send-email-forgot")]
+		public async Task<IActionResult> SendEmailForgotPassword(ForgotPasswordRequest forgotPasswordRequest)
+		{
+			await _usersService.SendResetPasswordEmail(forgotPasswordRequest);
 
 			return Ok();
 		}
@@ -292,7 +306,7 @@ namespace Capstone.API.Controllers
 
 			var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken);
+			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
 			var cookieOptions = new CookieOptions
 			{
