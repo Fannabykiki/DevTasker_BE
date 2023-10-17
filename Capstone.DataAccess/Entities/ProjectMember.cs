@@ -7,7 +7,7 @@ namespace Capstone.DataAccess.Entities
         [Key]
         public Guid MemberId { get; set; }
         public Guid UserId { get; set; }
-        public Guid RoleId { get; set; }
+        public Guid? RoleId { get; set; }
         public Guid ProjectId { get; set; }
         public bool IsOwner { get; set; }
         public User Users { get; set; } // Project member is 1 user

@@ -19,7 +19,6 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
-using Capstone.API.Helper;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -74,9 +73,7 @@ builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepositor
 
 builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
-
-builder.Services.AddScoped<IMailHelper, MailHelper>();
-
+builder.Services.AddScoped<IPermissionRepository,PermissionRepository>();
 
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -95,7 +92,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("http://localhost:port").AllowAnyMethod().AllowAnyHeader();
+    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
 //add authentication
