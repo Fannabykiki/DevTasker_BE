@@ -17,14 +17,15 @@ namespace Capstone.Service.UserService
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
         Task<RefreshToken> GenerateRefreshToken();
 		Task<string> CreateToken(UserViewModel user);
-        Task SendVerifyEmail(EmailRequest emailRequest);
+        Task<bool> SendVerifyEmail(EmailRequest emailRequest);
         Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
 		Task<bool> ResetPassWord(ResetPasswordRequest resetPasswordRequest);
 		Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest);
+		Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId);
 		Task<bool> ForgotPassword(string email);
 		Task<User> GetUserByIdAsync(Guid id);
 		Task<UpdateProfileResponse> UpdateProfileAsync(UpdateProfileRequest updateProfileRequest, Guid id);
-		Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken);
-		
+		Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken,string accessToken);
+		Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest);
 	}
 }

@@ -73,7 +73,7 @@ builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepositor
 
 builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
-
+builder.Services.AddScoped<IPermissionRepository,PermissionRepository>();
 
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -92,7 +92,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("http://localhost:port").AllowAnyMethod().AllowAnyHeader();
+    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
 //add authentication
