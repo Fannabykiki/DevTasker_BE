@@ -111,6 +111,7 @@ namespace Capstone.Service.UserService
                     user.UserName = updateProfileRequest.UserName ?? user.UserName;
                     user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
                     user.Address = updateProfileRequest.Address ?? user.Address;
+                    user.Dob = updateProfileRequest.DoB ?? user.Dob;
                     user.Gender = updateProfileRequest.Gender ?? user.Gender;
                     user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
                     // Save changes
