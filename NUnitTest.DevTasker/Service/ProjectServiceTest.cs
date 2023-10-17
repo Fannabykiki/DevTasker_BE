@@ -21,31 +21,34 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IPermissionRepository> _permissionRepositoryMock;
         private Mock<IPermissionSchemaRepository> _permissionSchemasRepositoryMock;
 
-
         [SetUp]
-		public void Setup()
-		{
-			_projectRepositoryMock = new Mock<IProjectRepository>();
-			_boardRepositoryMock = new Mock<IBoardRepository>();
-			_roleRepositoryMock = new Mock<IRoleRepository>();
-			_projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
-			_databaseTransactionMock = new Mock<IDatabaseTransaction>();
+        public void Setup()
+        {
+            _projectRepositoryMock = new Mock<IProjectRepository>();
+            _boardRepositoryMock = new Mock<IBoardRepository>();
+            _roleRepositoryMock = new Mock<IRoleRepository>();
+            _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
+            _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
-			_permissionSchemasRepositoryMock = new Mock<IPermissionSchemaRepository>();
-			//_projectService = new ProjectService(
-			//	null,
-			//	_projectRepositoryMock.Object,
-			//	_roleRepositoryMock.Object,
-			//	null,
-			//	null,
-			//	_projectMemberRepositoryMock.Object,
-			//	_boardRepositoryMock.Object,
-   //             null,
-			//	_permissionSchemasRepositoryMock.Object
+            _permissionSchemasRepositoryMock = new Mock<IPermissionSchemaRepository>();
 
-			//);
-		}
-		[Test]
+            _projectService = new ProjectService(
+                null,
+                _projectRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+                null,
+                _permissionSchemasRepositoryMock.Object,
+                _projectMemberRepositoryMock.Object,
+                _boardRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                _permissionRepositoryMock.Object
+            );
+        
+
+
+
+        }
+        [Test]
         public async Task TestCreateProject_Success()
         {
             // Arrange
@@ -134,7 +137,7 @@ namespace NUnitTest.DevTasker.Service
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
                 CreateBy = Guid.NewGuid(),
-                Description =null,
+                Description = null,
             };
 
             // Thiết lập cho phương thức DatabaseTransaction() trả về transaction mock
@@ -160,7 +163,7 @@ namespace NUnitTest.DevTasker.Service
             }
             // Assert
 
-            Assert.IsFalse(result); 
+            Assert.IsFalse(result);
             _projectRepositoryMock.Verify(repo => repo.DatabaseTransaction(), Times.Once);
             _databaseTransactionMock.Verify(transaction => transaction.Commit(), Times.Never); // Không commit khi thất bại.
         }
