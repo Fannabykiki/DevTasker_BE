@@ -107,13 +107,14 @@ namespace Capstone.Service.UserService
 
 					// Update user properties from request
 
-					user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
-					user.UserName = updateProfileRequest.UserName ?? user.UserName;
-					user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
-					user.Address = updateProfileRequest.Address ?? user.Address;
-					user.Gender = updateProfileRequest.Gender ?? user.Gender;
-					user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
-					// Save changes
+                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
+                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+                    user.Address = updateProfileRequest.Address ?? user.Address;
+                    user.Dob = updateProfileRequest.DoB ?? user.Dob;
+                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
+                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+                    // Save changes
 
 					var result = await _userRepository.UpdateAsync(user);
 					_userRepository.SaveChanges();
@@ -363,8 +364,36 @@ namespace Capstone.Service.UserService
 					updateRequest.PassResetToken = null;
 					updateRequest.ResetTokenExpires = null;
 
-					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
+                    transaction.Commit();
+
+                    return true;
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+
+                    return false;
+                }
+            }
+        }
+        public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
+        {
+            using (var transaction = _userRepository.DatabaseTransaction())
+            {
+                try
+                {
+                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null);
+                    if (updateRequest == null)
+                    {
+                        return false;
+                    }
+
+                    updateRequest.Status = changeUserStatusRequest.StatusChangeTo;
+
+                    await _userRepository.UpdateAsync(updateRequest);
+                    _userRepository.SaveChanges();
 
 					transaction.Commit();
 
