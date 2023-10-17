@@ -19,6 +19,7 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
+using Capstone.Service.TicketService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -73,6 +74,15 @@ builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepositor
 
 builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
+
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
+builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
+
+
 
 
 
