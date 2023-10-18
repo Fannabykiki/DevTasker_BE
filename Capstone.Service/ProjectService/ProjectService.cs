@@ -1,5 +1,6 @@
 using AutoMapper;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
@@ -46,73 +47,34 @@ public class ProjectService : IProjectService
                 ProjectStatus = StatusEnum.Active,
                 CreateBy = createProjectRequest.CreateBy,
                 Description = createProjectRequest.Description,
+                SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
             };
 
-            var newBoard = new Board
-            {
-                BoardId = Guid.NewGuid(),
-                CreateAt = DateTime.UtcNow,
-                ProjectId = newProjectRequest.ProjectId,
-                Title = "",
-            };
-            await _boardRepository.CreateAsync(newBoard);
-            _boardRepository.SaveChanges();
+
             var newProject = await _projectRepository.CreateAsync(newProjectRequest);
 
-            var newPORole = new Role()
-            {
-	            RoleId = Guid.NewGuid(),
-				RoleName = "Project Owner",
-				Description = "This project belong to him/her",
-				ProjectId = newProject.ProjectId
-            };
-            
-            var newAdminRole = new Role()
-            {
-	            RoleId = Guid.NewGuid(),
-	            RoleName = "Project Owner",
-	            Description = "Devtasker admin",
-	            ProjectId = newProject.ProjectId
-            };
-           
-            var permissions = await _permissionRepository.GetAllWithOdata(x => true, null);
-			
-            foreach (var Permisison in permissions)
-            {
-	            var newSchemas = new PermissionSchema()
-	            {
-		            Description = "Admin of project",
-		            RoleId = newPORole.RoleId,
-		            SchemaName = "Admin schemas",
-		            PermissionId = Permisison.PermissionId
-	            };
-            }
-            
-            var newPo = new ProjectMember
-            {
-                IsOwner = true,
-                MemberId = Guid.NewGuid(),
-                ProjectId = newProject.ProjectId,
-                UserId = newProject.CreateBy,
-                RoleId = newPORole.RoleId
-            };
+			var newPO = new ProjectMember
+			{
+				IsOwner = true,
+				MemberId = Guid.NewGuid(),
+				ProjectId = newProject.ProjectId,
+				UserId = newProject.CreateBy,
+				RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
+			};
 
-			var admin = new ProjectMember
+			var newAdmin = new ProjectMember
 			{
 				IsOwner = false,
 				MemberId = Guid.NewGuid(),
 				ProjectId = newProject.ProjectId,
-				UserId = Guid.Parse("afa06cdd77134b819163c45556e4fa4c"),
-				RoleId = newAdminRole.RoleId
+				UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
+				RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
 			};
-			
-			
-			
-            await _projectMemberRepository.CreateAsync(admin);
-			await _projectMemberRepository.CreateAsync(newPo);
 
-			_projectRepository.SaveChanges();
+			await _projectMemberRepository.CreateAsync(newPO);
+			await _projectMemberRepository.CreateAsync(newAdmin);
 			_projectMemberRepository.SaveChanges();
+			_projectRepository.SaveChanges();
 
             transaction.Commit();
             return true;
@@ -143,20 +105,7 @@ public class ProjectService : IProjectService
 			};
 
 			var newRole = await _roleRepository.CreateAsync(newRoleRequest);
-
-            foreach (var PermissionId in createRoleRequest.PermissionId)
-            {
-                var newSchema = new PermissionSchema
-                {
-                    PermissionId = PermissionId,
-                    Description = createRoleRequest.SchemaDes,
-                    SchemaName = createRoleRequest.SchemaName,
-                    RoleId = newRole.RoleId
-                };
-				await _permissionSchemaRepository.CreateAsync(newSchema);
-			}
-			_permissionSchemaRepository.SaveChanges();
-			_projectRepository.SaveChanges();
+			_roleRepository.SaveChanges();
 			transaction.Commit();
 
 			return true;
@@ -168,9 +117,42 @@ public class ProjectService : IProjectService
 		}
 	}
 
+
 	public async Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId)
 	{
 		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
 		return _mapper.Map<List<ViewMemberProject>>(projects);
+	}
+
+	public async Task<bool> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{	
+			var role = await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId,null);
+			if(role == null)
+			{
+				return false;
+			}
+
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
+			if (member == null || member.IsOwner == true || member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+			{
+				return false;
+			}
+
+			member.RoleId = updateMemberRoleRequest.RoleId;
+			await _projectMemberRepository.UpdateAsync(member);
+			_projectMemberRepository.SaveChanges();
+
+			transaction.Commit();
+				
+			return true;
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return false;
+		}
 	}
 }

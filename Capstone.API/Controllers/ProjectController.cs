@@ -1,4 +1,5 @@
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +58,18 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
 		{
 			var result = await _projectService.CreateProjectRole(createRoleRequest);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
+
+		[HttpPut("roles/{memberId}")]
+		public async Task<IActionResult> UpdateMemberRole(Guid memberId,UpdateMemberRoleRequest updateMemberRoleRequest)
+		{	
+			var result = await _projectService.UpdateMemberRole(memberId,updateMemberRoleRequest);
 			if (result == null)
 			{
 				return StatusCode(500);
