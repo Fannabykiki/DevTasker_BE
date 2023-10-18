@@ -21,12 +21,12 @@ namespace Capstone.API.Controllers
             _ticketService = ticketService;
         }
 
-        [HttpPost("Ticket")]
+       /* [HttpPost("Ticket")]
         public async Task<IActionResult> CreateProject(CreateTicketRequest createTicketRequest)
         {
             var result = await _ticketService.CreateTicket(createTicketRequest);
 
             return Ok(result);
-        }
+        }*/
     }
 }
