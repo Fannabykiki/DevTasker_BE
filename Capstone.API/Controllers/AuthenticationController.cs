@@ -59,13 +59,13 @@ namespace Capstone.API.Controllers
 
 			return new GetUserProfileResponse
 			{
+				Fullname = user.Fullname,
 				UserName = user.UserName,
 				Email = user.Email,
 				PhoneNumber = user.PhoneNumber,
 				Address = user.Address,
-				Avatar = user.Avatar,
+				DoB = user.Dob,
 				Gender = user.Gender,
-				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
 
@@ -232,7 +232,7 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.RefreshToken != changePasswordRequest.Token)
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changePasswordRequest.Token)
 			{
 				return NotFound("Invalid token");
 			}
