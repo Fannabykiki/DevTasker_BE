@@ -3,7 +3,7 @@ using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface IPermissionSchemaRepository : IBaseRepository<PermissionSchema>
+    public interface IPermissionSchemaRepository : IBaseRepository<Schema>
     {
     }
 }
