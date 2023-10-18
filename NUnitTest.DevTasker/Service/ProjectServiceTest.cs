@@ -79,7 +79,6 @@ namespace NUnitTest.DevTasker.Service
                 {
                     BoardId = Guid.NewGuid(),
                     CreateAt = DateTime.UtcNow,
-                    ProjectId = Guid.NewGuid(), // Sử dụng một Guid hợp lệ
                     Title = "",
                 });
 
