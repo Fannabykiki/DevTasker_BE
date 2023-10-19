@@ -96,7 +96,6 @@ public class ProjectService : IProjectService
 
 			await _projectMemberRepository.CreateAsync(newPO);
 			await _projectMemberRepository.CreateAsync(newAdmin);
-
 			_projectMemberRepository.SaveChanges();
 			_boardRepository.SaveChanges();
 			_interationRepository.SaveChanges();
