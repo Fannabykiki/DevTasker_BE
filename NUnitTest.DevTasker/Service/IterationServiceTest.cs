@@ -29,7 +29,6 @@ namespace Capstone.UnitTests.Service
 
             _iterationService = new IterationService(null, _projectRepositoryMock.Object, null, _iterationRepositoryMock.Object);
         }
-
         [Test]
         public async Task CreateIteration_Success()
         {
@@ -62,25 +61,19 @@ namespace Capstone.UnitTests.Service
             };
 
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null)).ReturnsAsync(project);
+
             var transaction = new Mock<IDatabaseTransaction>();
+            // Thiết lập Mock để trả về đối tượng transaction
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
 
             // Act
             var result = await _iterationService.CreateIteration(createIterationRequest, projectId);
-            Assert.False(result);
 
-            if (result)
-            {
-                Console.WriteLine("Success");
-            }
-            else
-            {
-                Console.WriteLine("Fail");
-            }
             // Assert
             Assert.True(result);
             transaction.Verify(t => t.Commit(), Times.Once);
         }
+
 
         [Test]
         public async Task TestCreateIteration_Fail_InterationNameNull()
