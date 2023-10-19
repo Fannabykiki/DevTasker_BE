@@ -50,8 +50,7 @@ public class ProjectService : IProjectService
                 SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
             };
 
-
-            var newProject = await _projectRepository.CreateAsync(newProjectRequest);
+    var newProject = await _projectRepository.CreateAsync(newProjectRequest);
 
 			var newPO = new ProjectMember
 			{
@@ -79,8 +78,9 @@ public class ProjectService : IProjectService
             transaction.Commit();
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine("Error occurred: " + ex.Message);
             transaction.RollBack();
             return false;
         }
