@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    [Migration("20231015195232_AddProjectIdForRoles")]
-    partial class AddProjectIdForRoles
+    [Migration("20231018085110_CreateFirstMigration")]
+    partial class CreateFirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,11 +62,8 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
                 {
-                    b.Property<Guid>("ProjectId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("BoardId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreateAt")
@@ -75,13 +72,48 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("InterationId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ProjectId");
+                    b.HasKey("BoardId");
+
+                    b.HasIndex("InterationId");
 
                     b.ToTable("Boards");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
+                {
+                    b.Property<Guid>("InterationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InterationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("InterationId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Interations");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
@@ -133,29 +165,6 @@ namespace Capstone.DataAccess.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.PermissionSchema", b =>
-                {
-                    b.Property<Guid?>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchemaName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("PermissionSchemas");
-                });
-
             modelBuilder.Entity("Capstone.DataAccess.Entities.PriorityLevel", b =>
                 {
                     b.Property<Guid>("LevelId")
@@ -177,6 +186,7 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
                     b.Property<Guid>("ProjectId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreateAt")
@@ -205,10 +215,15 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<int>("ProjectStatus")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("SchemasId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("ProjectId");
+
+                    b.HasIndex("SchemasId");
 
                     b.ToTable("Projects");
                 });
@@ -225,7 +240,8 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid?>("RoleId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -252,18 +268,52 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
 
-                    b.HasIndex("ProjectId");
-
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Schema", b =>
+                {
+                    b.Property<Guid>("SchemaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SchemaName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SchemaId");
+
+                    b.ToTable("Schema");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.SchemaPermission", b =>
+                {
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SchemaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RoleId", "PermissionId", "SchemaId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("SchemaId");
+
+                    b.ToTable("SchemaPermissions");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
@@ -429,6 +479,9 @@ namespace Capstone.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccessToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
@@ -537,6 +590,28 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.Interation", "Interation")
+                        .WithMany("Boards")
+                        .HasForeignKey("InterationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Interation");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.Project", "Project")
+                        .WithMany("Interations")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.User", "User")
@@ -548,34 +623,15 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.PermissionSchema", b =>
-                {
-                    b.HasOne("Capstone.DataAccess.Entities.Permission", "Permission")
-                        .WithMany("PermissionSchemas")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Capstone.DataAccess.Entities.Role", "Role")
-                        .WithMany("PermissionSchemas")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
-                        .WithOne("Project")
-                        .HasForeignKey("Capstone.DataAccess.Entities.Project", "ProjectId")
+                    b.HasOne("Capstone.DataAccess.Entities.Schema", "Schemas")
+                        .WithMany()
+                        .HasForeignKey("SchemasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Board");
+                    b.Navigation("Schemas");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.ProjectMember", b =>
@@ -605,15 +661,31 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>
+            modelBuilder.Entity("Capstone.DataAccess.Entities.SchemaPermission", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Project", "Project")
-                        .WithMany("Roles")
-                        .HasForeignKey("ProjectId")
+                    b.HasOne("Capstone.DataAccess.Entities.Permission", "Permission")
+                        .WithMany("SchemaPermissions")
+                        .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Project");
+                    b.HasOne("Capstone.DataAccess.Entities.Role", "Role")
+                        .WithMany("SchemaPermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Capstone.DataAccess.Entities.Schema", "Schema")
+                        .WithMany("SchemaPermissions")
+                        .HasForeignKey("SchemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Schema");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
@@ -706,15 +778,17 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
                 {
-                    b.Navigation("Project")
-                        .IsRequired();
-
                     b.Navigation("Tickets");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
+                {
+                    b.Navigation("Boards");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Permission", b =>
                 {
-                    b.Navigation("PermissionSchemas");
+                    b.Navigation("SchemaPermissions");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.PriorityLevel", b =>
@@ -724,16 +798,21 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
-                    b.Navigation("ProjectMembers");
+                    b.Navigation("Interations");
 
-                    b.Navigation("Roles");
+                    b.Navigation("ProjectMembers");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Role", b =>
                 {
-                    b.Navigation("PermissionSchemas");
-
                     b.Navigation("ProjectMember");
+
+                    b.Navigation("SchemaPermissions");
+                });
+
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Schema", b =>
+                {
+                    b.Navigation("SchemaPermissions");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>

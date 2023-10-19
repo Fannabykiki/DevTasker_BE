@@ -262,7 +262,7 @@ namespace Capstone.Service.UserService
 			{
 				return false;
 			}
-			string verificationLink = "https://devtasker.azurewebsite.com/verify-token?verifyToken=" + updateRequest.VerificationToken;
+			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?" + updateRequest.VerificationToken;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 			email.To.Add(MailboxAddress.Parse("" + emailRequest.To));
@@ -462,7 +462,7 @@ namespace Capstone.Service.UserService
 				return false;
 			}
 
-			string verificationLink = "https://devtasker.azurewebsite.com/verify-token?verifyToken=" + forgotRequest.PassResetToken;
+			string verificationLink = "https://devtasker.azurewebsites.net/create-newpwd?" + forgotRequest.PassResetToken;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 			email.To.Add(MailboxAddress.Parse("" + forgotPasswordRequest.To));

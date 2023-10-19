@@ -1,4 +1,6 @@
-﻿using Capstone.Common.Enums;
+﻿using Capstone.Common.DTOs.Project;
+using Capstone.Common.Enums;
+using Capstone.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Capstone.DataAccess.Entities
@@ -14,10 +16,11 @@ namespace Capstone.DataAccess.Entities
         public DateTime EndDate { get; set; }
         public Guid CreateBy { get; set; }
         public DateTime CreateAt { get; set; }
+        public Guid SchemasId { get; set; }
         public DateTime? DeleteAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
-        public Board Board { get; set; }
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
-        public List<Role> Roles { get; set; } // 1 project has many member
+		public List<Interation> Interations { get; set; }
+		public Schema Schemas { get; set; }
     }
 }

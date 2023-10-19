@@ -1,4 +1,5 @@
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +29,10 @@ namespace Capstone.API.Controllers
         }
 
         [EnableQuery]
-        [HttpGet("projects/{userId}")]
-        public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectByUserId(Guid userId)
+        [HttpGet("projects/user/{memberId:Guid}")]
+        public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectByUserId(Guid memberId)
         {
-            var result = await _projectService.GetProjectByUserId(userId);
+            var result = await _projectService.GetProjectByUserId(memberId);
             if (result == null)
             {
                 return StatusCode(500);
@@ -41,10 +42,10 @@ namespace Capstone.API.Controllers
         }
 
 		[EnableQuery]
-		[HttpGet("projects/{projectId}")]
-		public async Task<ActionResult<IQueryable<ViewMemberProject>>> GetMemberByProjectId(Guid projectctId)
+		[HttpGet("projects/{projectId:Guid}")]
+		public async Task<ActionResult<IQueryable<ViewMemberProject>>> GetMemberByProjectId(Guid projectId)
 		{
-			var result = await _projectService.GetMemberByProjectId(projectctId);
+			var result = await _projectService.GetMemberByProjectId(projectId);
 			if (result == null)
 			{
 				return StatusCode(500);
@@ -57,6 +58,18 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
 		{
 			var result = await _projectService.CreateProjectRole(createRoleRequest);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
+
+		[HttpPut("roles/{memberId}")]
+		public async Task<IActionResult> UpdateMemberRole(Guid memberId,UpdateMemberRoleRequest updateMemberRoleRequest)
+		{	
+			var result = await _projectService.UpdateMemberRole(memberId,updateMemberRoleRequest);
 			if (result == null)
 			{
 				return StatusCode(500);

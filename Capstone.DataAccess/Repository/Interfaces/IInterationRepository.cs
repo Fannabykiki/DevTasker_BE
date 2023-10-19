@@ -2,8 +2,7 @@
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface IProjectRepository : IBaseRepository<Project>
-    {
-
-    }
+	public interface IInterationRepository : IBaseRepository<Interation>
+	{
+	}
 }

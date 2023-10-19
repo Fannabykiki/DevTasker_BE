@@ -5,25 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Capstone.DataAccess.Migrations
 {
-    public partial class InitialDatabase : Migration
+    public partial class CreateFirstMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Boards",
-                columns: table => new
-                {
-                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Boards", x => x.ProjectId);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
@@ -61,6 +46,19 @@ namespace Capstone.DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.RoleId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schema",
+                columns: table => new
+                {
+                    SchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schema", x => x.SchemaId);
                 });
 
             migrationBuilder.CreateTable(
@@ -106,6 +104,7 @@ namespace Capstone.DataAccess.Migrations
                     ResetTokenExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
                     VerifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TokenCreated = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TokenExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Gender = table.Column<int>(type: "int", nullable: true),
@@ -131,6 +130,7 @@ namespace Capstone.DataAccess.Migrations
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SchemasId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PrivacyStatus = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -138,36 +138,41 @@ namespace Capstone.DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_Projects", x => x.ProjectId);
                     table.ForeignKey(
-                        name: "FK_Projects_Boards_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Boards",
-                        principalColumn: "ProjectId",
+                        name: "FK_Projects_Schema_SchemasId",
+                        column: x => x.SchemasId,
+                        principalTable: "Schema",
+                        principalColumn: "SchemaId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PermissionSchemas",
+                name: "SchemaPermissions",
                 columns: table => new
                 {
+                    SchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PermissionSchemas", x => new { x.RoleId, x.PermissionId });
+                    table.PrimaryKey("PK_SchemaPermissions", x => new { x.RoleId, x.PermissionId, x.SchemaId });
                     table.ForeignKey(
-                        name: "FK_PermissionSchemas_Permissions_PermissionId",
+                        name: "FK_SchemaPermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
                         principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PermissionSchemas_Roles_RoleId",
+                        name: "FK_SchemaPermissions_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "RoleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SchemaPermissions_Schema_SchemaId",
+                        column: x => x.SchemaId,
+                        principalTable: "Schema",
+                        principalColumn: "SchemaId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -195,57 +200,24 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tickets",
+                name: "Interations",
                 columns: table => new
                 {
-                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Decription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InterationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InterationName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DeleteTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AssignTo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TicketType = table.Column<int>(type: "int", nullable: false),
-                    PriorityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PrevId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TicketStatus = table.Column<int>(type: "int", nullable: false),
-                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tickets", x => x.TicketId);
+                    table.PrimaryKey("PK_Interations", x => x.InterationId);
                     table.ForeignKey(
-                        name: "FK_Tickets_Boards_BoardId",
-                        column: x => x.BoardId,
-                        principalTable: "Boards",
+                        name: "FK_Interations_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
                         principalColumn: "ProjectId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_PriorityLevels_PriorityId",
-                        column: x => x.PriorityId,
-                        principalTable: "PriorityLevels",
-                        principalColumn: "LevelId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_TicketStatuses_TicketId",
-                        column: x => x.TicketId,
-                        principalTable: "TicketStatuses",
-                        principalColumn: "StatusId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_TicketTypes_TicketId",
-                        column: x => x.TicketId,
-                        principalTable: "TicketTypes",
-                        principalColumn: "TypeId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -280,6 +252,82 @@ namespace Capstone.DataAccess.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Boards",
+                columns: table => new
+                {
+                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    InterationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Boards", x => x.BoardId);
+                    table.ForeignKey(
+                        name: "FK_Boards_Interations_InterationId",
+                        column: x => x.InterationId,
+                        principalTable: "Interations",
+                        principalColumn: "InterationId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tickets",
+                columns: table => new
+                {
+                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Decription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeleteTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AssignTo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketType = table.Column<int>(type: "int", nullable: false),
+                    PriorityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PrevId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketStatus = table.Column<int>(type: "int", nullable: false),
+                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tickets", x => x.TicketId);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Boards_BoardId",
+                        column: x => x.BoardId,
+                        principalTable: "Boards",
+                        principalColumn: "BoardId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_PriorityLevels_PriorityId",
+                        column: x => x.PriorityId,
+                        principalTable: "PriorityLevels",
+                        principalColumn: "LevelId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_TicketStatuses_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "TicketStatuses",
+                        principalColumn: "StatusId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_TicketTypes_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "TicketTypes",
+                        principalColumn: "TypeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -409,14 +457,19 @@ namespace Capstone.DataAccess.Migrations
                 column: "TicketId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Boards_InterationId",
+                table: "Boards",
+                column: "InterationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Interations_ProjectId",
+                table: "Interations",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Notifications_RecerverId",
                 table: "Notifications",
                 column: "RecerverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PermissionSchemas_PermissionId",
-                table: "PermissionSchemas",
-                column: "PermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectMembers_ProjectId",
@@ -432,6 +485,21 @@ namespace Capstone.DataAccess.Migrations
                 name: "IX_ProjectMembers_UserId",
                 table: "ProjectMembers",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_SchemasId",
+                table: "Projects",
+                column: "SchemasId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SchemaPermissions_PermissionId",
+                table: "SchemaPermissions",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SchemaPermissions_SchemaId",
+                table: "SchemaPermissions",
+                column: "SchemaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketComments_TaskId",
@@ -478,10 +546,10 @@ namespace Capstone.DataAccess.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "PermissionSchemas");
+                name: "ProjectMembers");
 
             migrationBuilder.DropTable(
-                name: "ProjectMembers");
+                name: "SchemaPermissions");
 
             migrationBuilder.DropTable(
                 name: "TicketHistoryTicketStatus");
@@ -491,9 +559,6 @@ namespace Capstone.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permissions");
-
-            migrationBuilder.DropTable(
-                name: "Projects");
 
             migrationBuilder.DropTable(
                 name: "Roles");
@@ -518,6 +583,15 @@ namespace Capstone.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Interations");
+
+            migrationBuilder.DropTable(
+                name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Schema");
         }
     }
 }

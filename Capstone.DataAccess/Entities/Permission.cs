@@ -8,6 +8,6 @@ namespace Capstone.DataAccess.Entities
         public Guid PermissionId { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
-        public List<PermissionSchema> PermissionSchemas { get; set; }
+        public List<SchemaPermission> SchemaPermissions { get; set; }
     }
 }
