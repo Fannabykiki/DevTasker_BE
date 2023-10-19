@@ -32,21 +32,17 @@ namespace NUnitTest.DevTasker.Service
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
             _permissionSchemasRepositoryMock = new Mock<IPermissionSchemaRepository>();
 
-            _projectService = new ProjectService(
-                null,
-                _projectRepositoryMock.Object,
-                _roleRepositoryMock.Object,
-                null,
-                _permissionSchemasRepositoryMock.Object,
-                _projectMemberRepositoryMock.Object,
-                _boardRepositoryMock.Object,
-                _permissionRepositoryMock.Object,
-                _permissionRepositoryMock.Object
-            );
-        
-
-
-
+            //_projectService = new ProjectService(
+            //    null,
+            //    _projectRepositoryMock.Object,
+            //    _roleRepositoryMock.Object,
+            //    null,
+            //    _permissionSchemasRepositoryMock.Object,
+            //    _projectMemberRepositoryMock.Object,
+            //    _boardRepositoryMock.Object,
+            //    _permissionRepositoryMock.Object,
+            //    _permissionRepositoryMock.Object
+            //);
         }
         [Test]
         public async Task TestCreateProject_Success()
