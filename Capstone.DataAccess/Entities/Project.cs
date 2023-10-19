@@ -1,4 +1,6 @@
-﻿using Capstone.Common.Enums;
+﻿using Capstone.Common.DTOs.Project;
+using Capstone.Common.Enums;
+using Capstone.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Capstone.DataAccess.Entities
@@ -20,5 +22,5 @@ namespace Capstone.DataAccess.Entities
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
 		public List<Interation> Interations { get; set; }
 		public Schema Schemas { get; set; }
-	}
+    }
 }
