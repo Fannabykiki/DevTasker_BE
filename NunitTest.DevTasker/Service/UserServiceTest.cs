@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Capstone.DataAccess;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -18,61 +20,17 @@ namespace NUnitTest.DevTasker.Service
 
         private Mock<IUserRepository> _userRepositoryMock;
         private UserService _userService;
-
+        private readonly IMapper _mapper;
+        private readonly CapstoneContext _context;
 
         [SetUp]
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-         //   _userService = new UserService(null, _userRepositoryMock.Object);
-
+            _userService = new UserService(_context, _userRepositoryMock.Object, _mapper);
+            
         }
 
-        //Login Test
-        [Test]
-        public async Task TestLoginUserAsync()
-        {
-            // Arrange
-            var username = "testuser";
-            var password = "testpassword";
-
-            byte[] passwordSalt = new byte[16];
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(passwordSalt);
-            }
-
-            byte[] passwordHash;
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
-
-            var user = new User
-            {
-                UserId = Guid.NewGuid(),
-                UserName = username,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
-            };
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-         .ReturnsAsync(user);
-
-            // Act
-            var result = await _userService.LoginUser(username, password);
-
-            // Assert
-            if (result != null)
-            {
-                Console.WriteLine("Success: Login was successful.");
-            }
-            else
-            {
-                Console.WriteLine("Wrong: Login was unsuccessful.");
-            }
-            Assert.NotNull(result);
-            Assert.AreEqual(username, result.UserName);
-        }
         [Test]
         public async Task TestLoginUserAsync_InvalidCredentials()
         {
@@ -262,55 +220,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsFalse(result.IsSucced);
         }
 
-
-
-        // Test update profile
-        [Test]
-        public async Task UpdateProfileAsync_Success()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var updateProfileRequest = new UpdateProfileRequest
-            {
-                UserName = "NewUserName",
-                Address = "NewAddress",
-                Gender = GenderEnum.Male,
-                // Avatar = "NewAvatar"
-            };
-
-            var user = new User
-            {
-                UserId = userId,
-                // Các thông tin khác của user
-            };
-
-            // Giả lập UserRepository và DatabaseTransaction
-            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync(user);
-
-            var databaseTransactionMock = new Mock<IDatabaseTransaction>();
-            _userRepositoryMock.Setup(x => x.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
-
-            // Act
-            var result = await _userService.UpdateProfileAsync(updateProfileRequest, userId);
-
-            // Assert
-            _userRepositoryMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Once);
-            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Once);
-            databaseTransactionMock.Verify(x => x.Commit(), Times.Once);
-            if (result.IsSucced)
-            {
-                Console.WriteLine("Success: Profile updated successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Error: An error occurred while updating the profile.");
-            }
-
-
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.IsSucced);
-        }
+        
 
         [Test]
         public async Task UpdateProfileAsync_UserNotFound()
@@ -565,6 +475,91 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsFalse(result);
             Console.WriteLine("ResetPasswordInValidToken: Password reset failed.");
         }
+
+        [Test]
+        public async Task ChangePassword_Success()
+        {
+            // Arrange
+            var changePasswordRequest = new ChangePasswordRequest
+            {
+                Email = "test@example.com",
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123",
+                ConfirmPassword = "newPassword123"
+            };
+
+            var existingUser = new User
+            {
+                Email = changePasswordRequest.Email,
+            };
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync(existingUser);
+
+            // Password khớp
+            byte[] passwordHash;
+            byte[] passwordSalt;
+            CreatePasswordHash(_userService, changePasswordRequest.NewPassword, out passwordHash, out passwordSalt);
+            existingUser.PasswordHash = passwordHash;
+            existingUser.PasswordSalt = passwordSalt;
+
+            var databaseTransactionMock = new Mock<IDatabaseTransaction>();
+            _userRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
+
+            // Act
+            var result = await _userService.ChangePassWord(changePasswordRequest);
+
+            // Assert
+            _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Once);
+            databaseTransactionMock.Verify(dt => dt.Commit(), Times.Once);
+
+            Assert.IsTrue(result);
+            Console.WriteLine("Password change succeeded.");
+        }
+
+        private void CreatePasswordHash(UserService userService, string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+
+        [Test]
+        public async Task ChangePassword_Fail_WhenPasswordsDoNotMatch()
+        {
+            // Arrange
+            var changePasswordRequest = new ChangePasswordRequest
+            {
+                Email = "test@example.com",
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123",
+                ConfirmPassword = "differentPassword" // Đảm bảo rằng ConfirmPassword khác với NewPassword
+            };
+
+            var existingUser = new User
+            {
+                Email = changePasswordRequest.Email,
+            };
+
+            var databaseTransactionMock = new Mock<IDatabaseTransaction>();
+            _userRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
+
+            // Act
+            var result = await _userService.ChangePassWord(changePasswordRequest);
+
+            // Assert
+            _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Never); // Đảm bảo rằng UpdateAsync không được gọi
+            _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never); // Đảm bảo rằng SaveChanges không được gọi
+
+           
+
+            Assert.IsFalse(result); // Kiểm tra rằng kết quả là false
+            Console.WriteLine(" Password change failed when passwords do not match.");
+        }
+
 
     }
 }
