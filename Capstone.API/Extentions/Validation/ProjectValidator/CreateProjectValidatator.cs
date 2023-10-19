@@ -14,7 +14,7 @@ public class CreateProjectValidatator : AbstractValidator<CreateProjectRequest>
         RuleFor(request => request.CreateBy).NotEmpty().WithMessage("Creator cannot be left blank");
         RuleFor(request => request.CreateAt).NotEmpty().WithMessage("Creation date cannot be blank");
         RuleFor(request => request.EndDate)
-            .Must((request, endDate) => endDate < request.StartDate)
-            .WithMessage("The end date must be greater than the start date");
+            .Must((request, endDate) => endDate > request.StartDate)
+            .WithMessage("The end date must be less than the start date");
     }
 }

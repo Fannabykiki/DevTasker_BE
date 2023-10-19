@@ -19,6 +19,8 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
+using Capstone.Service.TicketService;
+using Capstone.Service.IterationService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -75,6 +77,15 @@ builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
 builder.Services.AddScoped<IPermissionRepository,PermissionRepository>();
 
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
+builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
+
+builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
+builder.Services.AddScoped<IIterationService, IterationService>();
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
