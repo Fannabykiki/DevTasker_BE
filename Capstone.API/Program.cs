@@ -21,6 +21,7 @@ using Capstone.Service.ProjectService;
 using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
+using Capstone.Service.BoardService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -86,6 +87,11 @@ builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
 
 builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
 builder.Services.AddScoped<IIterationService, IterationService>();
+
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+
+
 
 
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Capstone.Common.DTOs.Task
+namespace Capstone.Common.DTOs.Board
 {
-    public class ViewAllTaskInProject
+    internal class DeleteBoardRequest
     {
     }
 }
