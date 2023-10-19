@@ -58,13 +58,13 @@ namespace Capstone.API.Controllers
 
 			return new GetUserProfileResponse
 			{
+				Fullname = user.Fullname,
 				UserName = user.UserName,
 				Email = user.Email,
 				PhoneNumber = user.PhoneNumber,
 				Address = user.Address,
-				Avatar = user.Avatar,
+				DoB = user.Dob,
 				Gender = user.Gender,
-				Status = user.Status,
 				IsAdmin = user.IsAdmin,
 			};
 
@@ -93,6 +93,25 @@ namespace Capstone.API.Controllers
 
 
 			var result = await _usersService.UpdateProfileAsync(request, id);
+
+			return Ok(result);
+
+		}
+		
+		[HttpPut("users/change-status/{id}")]
+		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest,Guid id)
+		{
+            var user = await _usersService.GetUserByIdAsync(changeUserStatusRequest.ChangeBy);
+			if (user.IsAdmin == null || user.IsAdmin == false)
+			{
+				return Unauthorized();
+			}
+            if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changeUserStatusRequest.VerifyToken)
+            {
+                return NotFound("Invalid token");
+            }
+
+            var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
 
 			return Ok(result);
 
