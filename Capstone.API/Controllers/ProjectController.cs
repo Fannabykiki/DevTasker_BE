@@ -76,7 +76,49 @@ namespace Capstone.API.Controllers
 			}
 
 			return Ok(result);
+		}	
+		
+		[HttpPut("projects/info/{projectId}")]
+		public async Task<IActionResult> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo)
+		{	
+			var result = await _projectService.UpdateProjectInfo(projectId,updateProjectNameInfo);
+
+			return Ok(result);
 		}
+		
+		[HttpPut("projects/privacy/{projectId}")]
+		public async Task<IActionResult> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
+		{	
+			var result = await _projectService.UpdateProjectPrivacy(projectId,updateProjectPrivacyRequest);
+
+			return Ok(result);
+		}
+		
+		[HttpDelete("projects/{projectId}")]
+		public async Task<IActionResult> DeleteProject(Guid projectId)
+		{
+			var project = await _projectService.GetProjectByProjectId(projectId);
+			if (project.DeleteAt is not null)
+			{
+				return BadRequest("Project is already deleted");
+			}
+			var result = await _projectService.DeleteProject(projectId);
+			
+			return Ok(result);
+		}
+		
+		[HttpPut("project/restoration/{projectId}")]
+		public async Task<IActionResult> RestoreProjectStatus(Guid projectId)
+		{
+			var project = await _projectService.GetProjectByProjectId(projectId);
+			if (project.ExpireAt >= DateTime.UtcNow)
+			{
+				return BadRequest("Can not restore Project. Over 30 days");
+			}
+			var result = await _projectService.RestoreProject(projectId);
+
+			return Ok(result);
+		}	
 	}
 }
 
