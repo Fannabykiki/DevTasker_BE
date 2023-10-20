@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Board
 {
-    internal class DeleteBoardRequest
+    public class DeleteBoardRequest
     {
+        public Guid BoardId { get; set; }
+        public DateTime? DeleteAt { get; set; }
+        public Guid? InterationId { get; set; }
     }
 }

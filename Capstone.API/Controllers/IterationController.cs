@@ -29,7 +29,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Iteration/{UpdateIterationId}")]
+        [HttpPut("Iteration/{iterationId}")]
         public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
         {
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);

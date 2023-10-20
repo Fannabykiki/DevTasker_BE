@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Board-management")]
     [ApiController]
     public class BoardController : ControllerBase
     {
@@ -22,9 +22,21 @@ namespace Capstone.API.Controllers
 
 
         [HttpPost("Board")]
-        public async Task<IActionResult> CreateBoard(CreateBoardRequest createBoardRequest, Guid iterationId)
+        public async Task<IActionResult> CreateBoard( Guid iterationId, CreateBoardRequest createBoardRequest)
         {
             var result = await _boardService.CreateBoard(createBoardRequest, iterationId);
+
+            return Ok(result);
+        }
+
+        [HttpPut("Board/{boardId}")]
+        public async Task<IActionResult> UpdateBoard( Guid boardId, UpdateBoardRequest updateBoardRequest)
+        {
+            var result = await _boardService.UpdateBoard(updateBoardRequest, boardId);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
 
             return Ok(result);
         }

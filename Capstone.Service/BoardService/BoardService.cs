@@ -3,6 +3,10 @@ using Capstone.Common.DTOs.Board;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using Capstone.Common.Enums;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Math.EC.Rfc7748;
+using Capstone.Common.DTOs.User;
 
 namespace Capstone.Service.BoardService
 {
@@ -27,10 +31,12 @@ namespace Capstone.Service.BoardService
 
             try
             {
+                var statusValue = (int)createBoardRequest.Status;
                 var newBoard = new Board
                 {
                     Title = createBoardRequest.Title,
                     CreateAt = DateTime.UtcNow,
+                    Status = (StatusEnum?)(BoardStatusEnum)statusValue,
                     InterationId = interationId
                 };
 
@@ -54,9 +60,38 @@ namespace Capstone.Service.BoardService
             }
         }
 
-        public Task<bool> UpdateBoard(UpdateBoardRequest updateBoardRequest, Guid iterationId)
+        public async Task<bool> UpdateBoard(UpdateBoardRequest updateBoardRequest, Guid boardId)
         {
-            throw new NotImplementedException();
+            using (var transaction = _boardRepository.DatabaseTransaction())
+            {
+                try
+                {
+                   
+                    var board = await _boardRepository.GetAsync(x => x.BoardId == boardId, null);
+                    board.Title = updateBoardRequest.Title;
+                    board.Status = updateBoardRequest.Status;
+                    board.UpdateAt = DateTime.UtcNow;
+
+                    if (updateBoardRequest.InterationId != null && updateBoardRequest.InterationId != board.InterationId)
+                    {
+                        board.InterationId = updateBoardRequest.InterationId;
+                    }
+
+                    await _boardRepository.UpdateAsync(board);
+                     _boardRepository.SaveChanges();
+
+                  
+                    transaction.Commit();
+
+                    return true;
+
+                }
+                catch (Exception)
+                {
+                    transaction.RollBack();
+                    return false;
+                }
+            }
         }
     }
 }
