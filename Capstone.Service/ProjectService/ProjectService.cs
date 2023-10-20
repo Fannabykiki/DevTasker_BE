@@ -114,7 +114,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid UserId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(x => x.UserId == UserId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.ProjectStatus == StatusEnum.Active, x => x.ProjectMembers.Where(x => x.UserId == UserId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
@@ -180,5 +180,92 @@ public class ProjectService : IProjectService
 			transaction.RollBack();
 			return false;
 		}
+	}
+
+	public async Task<bool> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			project.ProjectName = updateProjectNameInfo.ProjectName;
+			project.Description = updateProjectNameInfo.Description;
+			await _projectRepository.UpdateAsync(project);
+			_projectRepository.SaveChanges();
+			transaction.Commit();
+			return true;
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return false;
+		}
+	}
+
+	public async Task<bool> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			project.PrivacyStatus = updateProjectPrivacyRequest.PrivacyStatus;
+			await _projectRepository.UpdateAsync(project);
+			_projectRepository.SaveChanges();
+			transaction.Commit();
+			return true;
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return false;
+		}
+	}
+
+	public async Task<bool> DeleteProject(Guid projectId)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			project.ProjectStatus = StatusEnum.Inactive;
+			project.DeleteAt = DateTime.UtcNow;
+			project.ExpireAt = DateTime.UtcNow.AddDays(30);
+			await _projectRepository.UpdateAsync(project);
+			_projectRepository.SaveChanges();
+			transaction.Commit();
+			return true;
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return false;
+		}
+	}
+
+	public async Task<bool> RestoreProject(Guid projectId)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			project.ProjectStatus = StatusEnum.Active;
+			project.DeleteAt = null;
+			project.ExpireAt = null;
+			await _projectRepository.UpdateAsync(project);
+			_projectRepository.SaveChanges();
+			transaction.Commit();
+			return true;
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return false;
+		}
+	}
+
+	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
+	{
+		var projects = await _projectRepository.GetAsync(x=>x.ProjectId == projectId, null)!;
+		return _mapper.Map<GetAllProjectViewModel>(projects);
 	}
 }
