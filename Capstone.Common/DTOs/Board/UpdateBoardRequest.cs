@@ -10,6 +10,7 @@ namespace Capstone.Common.DTOs.Board
     {
         public string Title { get; set; }
         public Guid? InterationId { get; set; }
+        public DateTime? UpdateAt { get; set; }
     }
 }
 
