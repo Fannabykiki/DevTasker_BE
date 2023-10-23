@@ -4,7 +4,7 @@ namespace Capstone.Service.TicketService
 {
     public  interface ITicketService
     {
-        Task<bool> CreateTicket(CreateTicketRequest createTicketRequest);
+        Task<bool> CreateTicket(CreateTicketRequest createTicketRequest, Guid boardId);
 
     }
 }
