@@ -8,8 +8,8 @@ namespace Capstone.Common.DTOs.PermissionSchema
 {
     public class GetAllPermissionSchemaResponse
     {
-        public Guid SchemaId { get; set; }
-        public string SchemaName { get; set; }
-        public string Description { get; set; }
-    }
+		public Guid SchemaId { get; set; }
+		public string SchemaName { get; set; }
+		public string Description { get; set; }
+	}
 }

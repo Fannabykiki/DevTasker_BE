@@ -17,7 +17,7 @@ namespace Capstone.DataAccess.Entities
         public Guid CreateBy { get; set; }
         public TicketTypeEnum TicketType  { get; set; }
         public Guid PriorityId { get; set; }
-        public Guid PrevId { get; set; }
+        public Guid? PrevId { get; set; }
         public TaskStatusEnum TicketStatus { get; set; }
         public Guid BoardId { get; set; }
         public User User { get; set; } // 1 task just create by 1 user, assign to 1 user 
