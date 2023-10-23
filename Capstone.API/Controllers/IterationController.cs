@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Iteration-management")]
     [ApiController]
     public class IterationController : ControllerBase
     {
@@ -29,7 +29,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Iteration/UpdateIterationRequest")]
+        [HttpPut("Iteration/{iterationId}")]
         public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
         {
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);

@@ -1,9 +1,9 @@
 ﻿using Capstone.Common.DTOs.Iteration;
 using FluentValidation;
 
-public class CreateIterationtValidatator : AbstractValidator<CreateIterationRequest>
+public class CreateIterationValidatator : AbstractValidator<CreateIterationRequest>
 {
-    public CreateIterationtValidatator()
+    public CreateIterationValidatator()
     {
         RuleFor(request => request.InterationName).NotEmpty().WithMessage("Iteration name cannot be empty");
         RuleFor(request => request.StartDate).NotEmpty().WithMessage("Start date cannot be blank");
