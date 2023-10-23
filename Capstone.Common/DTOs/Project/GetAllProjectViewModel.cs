@@ -4,7 +4,7 @@ namespace Capstone.Common.DTOs.Project;
 
 public class GetAllProjectViewModel
 {
-	public string ProjectId { get; set; }
+	public Guid ProjectId { get; set; }
 	public string ProjectName { get; set; }
 	public string Description { get; set; }
 	public StatusEnum ProjectStatus { get; set; }
