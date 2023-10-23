@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
+using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.TicketService
 {
@@ -16,9 +19,9 @@ namespace Capstone.Service.TicketService
         private readonly ITicketTypeRepository ticketTypeRepository;
         private readonly IMapper _mapper;
         private readonly IBoardRepository _boardRepository;
+        private readonly IUserRepository _userRepository;
 
-
-        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IBoardRepository boardRepository)
+        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IBoardRepository boardRepository, IUserRepository userRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -28,43 +31,44 @@ namespace Capstone.Service.TicketService
             this.ticketTypeRepository = ticketTypeRepository;
             _mapper = mapper;
             _boardRepository = boardRepository;
+            _userRepository = userRepository;
         }
 
-        public async Task<bool> CreateTicket(CreateTicketRequest createTicketRequest)
+        public async Task<bool> CreateTicket(CreateTicketRequest request, Guid boardId)
         {
-            using var transaction = _ticketRepository.DatabaseTransaction();
+            using var transaction = _boardRepository.DatabaseTransaction();
+
             try
             {
-                var newTask = new DataAccess.Entities.Ticket
+                var board = await _boardRepository.GetAsync(x => x.BoardId == boardId, null);
+
+                
+                var assignToUser = await _userRepository.GetAsync(x => x.UserId == request.AssignTo, null);
+                if (assignToUser == null)
                 {
-                    TicketId = Guid.NewGuid(),
-                    Title = createTicketRequest.Title,
-                    Decription = createTicketRequest.Decription,
-                    StartDate = createTicketRequest.StartDate,
-                    DueDate = createTicketRequest.DueDate,
-                    CreateTime = DateTime.Now,
-                    DeleteTime = null,
-                    AssignTo = createTicketRequest.AssignTo,
-                    CreateBy = createTicketRequest.CreateBy,
-                    TicketType = createTicketRequest.TicketType,
-                    PriorityId = createTicketRequest.PriorityId,
-                    PrevId = createTicketRequest.PrevId,
-                    TicketStatus = createTicketRequest.TicketStatus,
-                    BoardId = createTicketRequest.BoardId
-                };
-                await _ticketRepository.CreateAsync(newTask);
+                    throw new ArgumentException($"User with ID {request.AssignTo} does not exist", nameof(request.AssignTo));
+                }
+
+                var ticket = _mapper.Map<CreateTicketRequest, Ticket>(request);
+
+                ticket.BoardId = boardId;
+
+                await _ticketRepository.UpdateAsync(ticket);
                 await _context.SaveChangesAsync();
 
                 transaction.Commit();
-                return true;
 
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.RollBack();
                 return false;
             }
         }
+
+
+
     }
 }
 
