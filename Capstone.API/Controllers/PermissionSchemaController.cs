@@ -10,6 +10,7 @@ using Capstone.Service.PermissionSchemaService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.API.Controllers
@@ -27,15 +28,16 @@ namespace Capstone.API.Controllers
             _permissionSchemaService = permissionSchemaService;
         }
 
-        [HttpGet("Schemas")]
-        public async Task<IActionResult> GetAllSchema()
+		[EnableQuery]
+        [HttpGet("schemas")]
+        public async Task<ActionResult<IQueryable<GetAllPermissionSchemaResponse>>> GetAllSchema()
         {
             var result = await _permissionSchemaService.GetAllSchema();
 
             return Ok(result);
         }
 
-        [HttpGet("Schemas/{schemaId:Guid}")]
+        [HttpGet("schemas/{schemaId:Guid}")]
         public async Task<IActionResult> GetSchemaById(Guid schemaId)
         {
             var result = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
@@ -43,7 +45,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("Schemas")]
+        [HttpPost("schemas")]
         public async Task<IActionResult> CreateSchema(CreateNewSchemaRequest request)
         {
             var result = await _permissionSchemaService.CreateNewPermissionSchema(request);
@@ -51,7 +53,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Schemas/{schemaId:Guid}")]
+        [HttpPut("schemas/{schemaId:Guid}")]
         public async Task<IActionResult> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest request)
         {
             var result = await _permissionSchemaService.UpdateSchemaPermissionRoles(schemaId, request);
