@@ -18,9 +18,11 @@ using System.Reflection;
 using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
+using Capstone.Service.PermissionSchemaService;
 using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
+using Capstone.Service.BoardService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -71,7 +73,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
 builder.Services.AddScoped<IRoleRepository,RoleRepository>();
-builder.Services.AddScoped<IPermissionSchemaRepository,PermissionSchemaRepository>();
+builder.Services.AddScoped<ISchemaRepository,SchemaRepository>();
 
 builder.Services.AddScoped<IProjectMemberRepository,ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository,BoardRepository>();
@@ -86,6 +88,17 @@ builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
 
 builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
 builder.Services.AddScoped<IIterationService, IterationService>();
+
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+
+
+
+
+
+
+builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaRepository>();
+builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService> ();
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));

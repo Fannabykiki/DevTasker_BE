@@ -106,7 +106,7 @@ namespace Capstone.API.Controllers
 			{
 				return Unauthorized();
 			}
-            if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changeUserStatusRequest.VerifyToken)
+            if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.AccessToken  != changeUserStatusRequest.VerifyToken)
             {
                 return NotFound("Invalid token");
             }

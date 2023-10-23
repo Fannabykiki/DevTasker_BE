@@ -34,5 +34,10 @@
     <ProjectReference Include="..\Capstone.Service\Capstone.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extentions\Validation\PermissionSchemaValidator\" />
+    <Folder Include="Extentions\Validation\RoleValidator\" />
+  </ItemGroup>
+
 
 </Project>
