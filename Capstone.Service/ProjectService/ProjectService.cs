@@ -15,12 +15,12 @@ public class ProjectService : IProjectService
 	private readonly IMapper _mapper;
 	private readonly IRoleRepository _roleRepository;
 	private readonly IProjectMemberRepository _projectMemberRepository;
-	private readonly IPermissionSchemaRepository _permissionSchemaRepository;
+	private readonly ISchemaRepository _permissionSchemaRepository;
 	private readonly IBoardRepository _boardRepository;
 	private readonly IInterationRepository _interationRepository;
 	private readonly IPermissionRepository _permissionRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, IPermissionSchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permission, IPermissionRepository permissionRepository, IInterationRepository interationRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permission, IPermissionRepository permissionRepository, IInterationRepository interationRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;

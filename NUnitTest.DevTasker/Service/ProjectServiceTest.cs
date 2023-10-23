@@ -31,7 +31,7 @@ namespace NUnitTest.DevTasker.Service
             _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
-            _permissionSchemasRepositoryMock = new Mock<IPermissionSchemaRepository>();
+            _permissionSchemasRepositoryMock = new Mock<ISchemaRepository>();
 
             _projectService = new ProjectService(
             null,
