@@ -5,7 +5,7 @@
 2. Open Package Manager Console
 
 3. Run migration:
-add-migration CreateFirstMigration -context CapstoneContext -o Migrations
+add-migration UpdateFieldBoardTableMigration -context CapstoneContext -o Migrations
 Add-Migration UpdateUserTokenMigration --Context CapstoneContext
 dotnet ef migrations add UpdateRoleRelationship --context CapstoneContext
 
