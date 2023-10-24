@@ -53,6 +53,16 @@ namespace Capstone.API.Controllers
 
 			return Ok(result);
 		}
+		
+		[EnableQuery]
+		[HttpGet("projects/info/{projectId:Guid}")]
+		public async Task<ActionResult<List<ViewProjectInfoRequest>>> GetFullInfoProjectByProjectId(Guid projectId)
+		{
+			var result = await _projectService.GetInfoProjectByProjectId(projectId);
+
+			return Ok(result);
+		}
+
 
 		[HttpPost("roles")]
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
