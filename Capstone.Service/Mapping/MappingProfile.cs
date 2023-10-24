@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
@@ -12,5 +13,6 @@ public class MappingProfile : Profile
         CreateMap<User, UserViewModel>();
         CreateMap<Project, GetAllProjectViewModel>();
         CreateMap<ProjectMember, ViewMemberProject>();
+        CreateMap<Schema, GetAllPermissionSchemaResponse>();
     }
 }
