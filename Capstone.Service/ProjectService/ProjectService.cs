@@ -76,7 +76,7 @@ public class ProjectService : IProjectService
 
 			await _boardRepository.CreateAsync(newBoard);
 
-			var newPO = new ProjectMember
+			var newPo = new ProjectMember
 			{
 				IsOwner = true,
 				MemberId = Guid.NewGuid(),
@@ -94,7 +94,7 @@ public class ProjectService : IProjectService
 				RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
 			};
 
-			await _projectMemberRepository.CreateAsync(newPO);
+			await _projectMemberRepository.CreateAsync(newPo);
 			await _projectMemberRepository.CreateAsync(newAdmin);
 			_projectMemberRepository.SaveChanges();
 			_boardRepository.SaveChanges();
@@ -112,9 +112,9 @@ public class ProjectService : IProjectService
 		}
 	}
 
-	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid UserId)
+	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => x.ProjectStatus == StatusEnum.Active, x => x.ProjectMembers.Where(x => x.UserId == UserId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.ProjectStatus == StatusEnum.Active, x => x.ProjectMembers.Where(m => m.UserId == userId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
@@ -130,7 +130,7 @@ public class ProjectService : IProjectService
 				Description = createRoleRequest.Description
 			};
 
-			var newRole = await _roleRepository.CreateAsync(newRoleRequest);
+		 await _roleRepository.CreateAsync(newRoleRequest);
 			_roleRepository.SaveChanges();
 			transaction.Commit();
 
@@ -155,14 +155,10 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			var role = await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null);
-			if (role == null)
-			{
-				return false;
-			}
+			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
-			if (member == null || member.IsOwner == true || member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
+			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true )
 			{
 				return false;
 			}
@@ -267,5 +263,37 @@ public class ProjectService : IProjectService
 	{
 		var projects = await _projectRepository.GetAsync(x=>x.ProjectId == projectId, null)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
+	}
+
+	public async Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId)
+	{
+		var projectInfoRequests = new List<ViewProjectInfoRequest>();
+		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
+		var projectInfoRequest = new ViewProjectInfoRequest
+		{
+			ProjectId = project.ProjectId,
+			ProjectName = project.ProjectName,
+			Description = project.Description,
+			ProjectStatus = project.ProjectStatus,
+			StartDate = project.StartDate,
+			EndDate = project.EndDate,
+			CreateBy = project.CreateBy,
+			CreateAt = project.CreateAt,
+			PrivacyStatus = project.PrivacyStatus,
+			ProjectMembers = project.ProjectMembers
+				.Select(member => new ViewMemberProject
+				{
+					MemberId = member.MemberId,
+					UserId = member.UserId,
+					RoleId = member.RoleId,
+					ProjectId = member.ProjectId,
+					IsOwner = member.IsOwner
+				})
+				.ToList()
+		};
+
+		projectInfoRequests.Add(projectInfoRequest);
+
+		return projectInfoRequests;
 	}
 }

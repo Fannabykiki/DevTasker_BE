@@ -8,7 +8,7 @@ namespace Capstone.DataAccess.Repository.Implements
 {
     public class SchemaRepository : BaseRepository<Schema>, ISchemaRepository
     {
-		protected readonly CapstoneContext _context;
+		private new readonly CapstoneContext _context;
 		public SchemaRepository(CapstoneContext context) : base(context)
         {
 			_context = context;
