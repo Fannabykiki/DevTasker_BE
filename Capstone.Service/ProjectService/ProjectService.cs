@@ -269,31 +269,35 @@ public class ProjectService : IProjectService
 	{
 		var projectInfoRequests = new List<ViewProjectInfoRequest>();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
-		var projectInfoRequest = new ViewProjectInfoRequest
+		var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
+		if (!members.Any()) return projectInfoRequests;
 		{
-			ProjectId = project.ProjectId,
-			ProjectName = project.ProjectName,
-			Description = project.Description,
-			ProjectStatus = project.ProjectStatus,
-			StartDate = project.StartDate,
-			EndDate = project.EndDate,
-			CreateBy = project.CreateBy,
-			CreateAt = project.CreateAt,
-			PrivacyStatus = project.PrivacyStatus,
-			ProjectMembers = project.ProjectMembers
-				.Select(member => new ViewMemberProject
-				{
-					MemberId = member.MemberId,
-					UserId = member.UserId,
-					RoleId = member.RoleId,
-					ProjectId = member.ProjectId,
-					IsOwner = member.IsOwner
-				})
-				.ToList()
-		};
-
-		projectInfoRequests.Add(projectInfoRequest);
-
+			var projectInfoRequest = new ViewProjectInfoRequest
+			{
+				ProjectId = project.ProjectId,
+				ProjectName = project.ProjectName,
+				Description = project.Description,
+				ProjectStatus = project.ProjectStatus,
+				StartDate = project.StartDate,
+				EndDate = project.EndDate,
+				CreateBy = project.CreateBy,
+				CreateAt = project.CreateAt,
+				PrivacyStatus = project.PrivacyStatus,
+				ProjectMembers = project.ProjectMembers
+					.Select(m => new ViewMemberProject
+					{
+						MemberId = m.MemberId,
+						UserId = m.UserId,
+						RoleId = m.RoleId,
+						ProjectId = m.ProjectId,
+						IsOwner = m.IsOwner
+						,RoleName = m.Role.RoleName
+					
+					})
+					.ToList()
+			};
+			projectInfoRequests.Add(projectInfoRequest);
+		}
 		return projectInfoRequests;
 	}
 }
