@@ -16,4 +16,5 @@ public interface IProjectService
 	Task<bool> DeleteProject(Guid projectId);
 	Task<bool> RestoreProject(Guid projectId);
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
+	Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId);
 }

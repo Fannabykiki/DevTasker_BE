@@ -19,8 +19,9 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
         private Mock<IPermissionRepository> _permissionRepositoryMock;
-        private Mock<IPermissionSchemaRepository> _permissionSchemasRepositoryMock;
+        
         private Mock<IInterationRepository> _interationRepositoryMock;
+        private Mock<IDatabaseTransaction> _transactionMock;
 
         [SetUp]
         public void Setup()
@@ -31,21 +32,23 @@ namespace NUnitTest.DevTasker.Service
             _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
-            _permissionSchemasRepositoryMock = new Mock<ISchemaRepository>();
+            
+
+            
+            _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
             _projectService = new ProjectService(
-            null,
-            _projectRepositoryMock.Object,
-            _roleRepositoryMock.Object,
-            null,
-            _permissionSchemasRepositoryMock.Object,
-            _projectMemberRepositoryMock.Object,
-            _boardRepositoryMock.Object,
-            _permissionRepositoryMock.Object,
-            _permissionRepositoryMock.Object,
-            null 
-                        );
-
+                null,
+                _projectRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+                null,
+                null,
+                _projectMemberRepositoryMock.Object,
+                _boardRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                null
+            );
         }
         [Test]
         public async Task TestCreateProject_Success()
@@ -113,6 +116,8 @@ namespace NUnitTest.DevTasker.Service
 
             // Act
             var result = await _projectService.CreateProject(createProjectRequest);
+
+            // Assert
             if (result)
             {
                 Console.WriteLine("Success");
@@ -121,11 +126,77 @@ namespace NUnitTest.DevTasker.Service
             {
                 Console.WriteLine("Fail");
             }
-            // Assert
-
             Assert.IsFalse(result);
             _projectRepositoryMock.Verify(repo => repo.DatabaseTransaction(), Times.Once);
             _databaseTransactionMock.Verify(transaction => transaction.Commit(), Times.Never);
+        }
+
+        [Test]
+        public async Task UpdateProjectInfo_Success()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var updateProjectNameInfo = new UpdateProjectNameInfo
+            {
+                ProjectName = "Valid Project Name",
+                Description = "Valid Description"
+            };
+
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null)).ReturnsAsync(new Project { ProjectId = projectId });
+            _databaseTransactionMock.Setup(tx => tx.Commit());
+
+            // Act
+            var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
+
+            // Assert
+            if (result)
+            {
+                Console.WriteLine("Success");
+            }
+            else
+            {
+                Console.WriteLine("Fail");
+            }
+            Assert.IsTrue(result);
+            _projectRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Project>()), Times.Once);
+            _projectRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Once);
+            _databaseTransactionMock.Verify(transaction => transaction.Commit(), Times.Once);
+        }
+
+        [Test]
+        public async Task UpdateProjectInfo_Fail()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var updateProjectNameInfo = new UpdateProjectNameInfo
+            {
+                ProjectName = "",  // ProjectName rỗng
+                Description = "Valid Description"
+            };
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ReturnsAsync(new Project { ProjectId = projectId });
+           
+            _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction())
+                .Returns(_databaseTransactionMock.Object);
+
+            _projectRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Project>()))
+                .Throws<ArgumentException>();
+
+            // Act
+            var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
+
+            // Assert
+            if (result)
+            {
+                Console.WriteLine("Success");
+            }
+            else
+            {
+                Console.WriteLine("Fail");
+            }
+            Assert.IsFalse(result);
+            _projectRepositoryMock.Verify(repo => repo.DatabaseTransaction(), Times.Once);
+            _databaseTransactionMock.Verify(tx => tx.RollBack(), Times.Once);
         }
 
     }
