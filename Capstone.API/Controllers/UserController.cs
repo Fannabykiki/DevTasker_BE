@@ -66,7 +66,8 @@ namespace Capstone.API.Controllers
 				DoB = user.Dob,
 				Gender = user.Gender,
 				IsAdmin = user.IsAdmin,
-			};
+                Status = user.Status
+            };
 
 		}
 
