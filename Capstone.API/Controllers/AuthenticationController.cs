@@ -44,14 +44,6 @@ namespace Capstone.API.Controllers
 		{
 			var user = await _usersService.GetUserByIdAsync(id);
 
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
-			{
-				return BadRequest("User is inactive");
-			}
-			if (user.VerifiedAt == null)
-			{
-				return BadRequest("User not verified!");
-			}
 			if (user == null)
 			{
 				return NotFound();
@@ -66,7 +58,7 @@ namespace Capstone.API.Controllers
 				Address = user.Address,
 				DoB = user.Dob,
 				Gender = user.Gender,
-				IsAdmin = user.IsAdmin,
+				IsAdmin = user.IsAdmin
 			};
 
 		}
@@ -171,10 +163,6 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("User is inactive");
 			}
-			if (user.VerifiedAt == null)
-			{
-				return BadRequest("User not verified!");
-			}
 
 			var token = await _usersService.CreateToken(user);
 
@@ -269,7 +257,7 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changePasswordRequest.Token)
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.AccessToken != changePasswordRequest.Token)
 			{
 				return NotFound("Invalid token");
 			}
