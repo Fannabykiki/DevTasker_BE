@@ -12,9 +12,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
-using Capstone.Common.DTOs.Paging;
-using Capstone.Common.Enums;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
 
@@ -278,6 +275,7 @@ namespace Capstone.Service.UserService
 						};
 					}
 
+					updateRequest.Status = Common.Enums.StatusEnum.Active;
 					updateRequest.VerifiedAt = DateTime.UtcNow;
 
 					await _userRepository.UpdateAsync(updateRequest);
