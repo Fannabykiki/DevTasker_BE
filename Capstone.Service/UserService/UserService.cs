@@ -96,6 +96,7 @@ namespace Capstone.Service.UserService
                         VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
                         Email = createUserGGLoginRequest.Email,
                         Status = Common.Enums.StatusEnum.Active,
+						VerifiedAt = DateTime.UtcNow
                     };
 
                     var newUser = await _userRepository.CreateAsync(newUserRequest);
