@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.Permission;
+using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -13,7 +14,7 @@ namespace Capstone.DataAccess.Repository.Implements
         {
             _context = context;
         }
-				
-    }
+
+	}
     
 }

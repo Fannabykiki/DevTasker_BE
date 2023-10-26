@@ -35,23 +35,23 @@ namespace Capstone.Service.IterationService
 
             try
             {
-                var newIterationRequest = new Interation
-                {
-                    InterationName = createIterationRequest.InterationName,
-                    StartDate = createIterationRequest.StartDate,
-                    EndDate = createIterationRequest.EndDate,
-                    ProjectId = projectId,
-                    Status = createIterationRequest.Status
-                };
+                //var newIterationRequest = new Interation
+                //{
+                //    InterationName = createIterationRequest.InterationName,
+                //    StartDate = createIterationRequest.StartDate,
+                //    EndDate = createIterationRequest.EndDate,
+                //    ProjectId = projectId,
+                //    Status = createIterationRequest.Status
+                //};
 
                
-                var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
-                project.Interations.Add(newIteration);
-                await _projectRepository.UpdateAsync(project);
+                //var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
+                //var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+                //project.Interations.Add(newIteration);
+                //await _projectRepository.UpdateAsync(project);
 
-                _iterationRepository.SaveChanges();
-                _projectRepository.SaveChanges();
+                //_iterationRepository.SaveChanges();
+                //_projectRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;

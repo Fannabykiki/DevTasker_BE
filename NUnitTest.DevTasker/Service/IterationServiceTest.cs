@@ -48,7 +48,7 @@ namespace Capstone.UnitTests.Service
                 InterationName = createIterationRequest.InterationName,
                 StartDate = createIterationRequest.StartDate,
                 EndDate = createIterationRequest.EndDate,
-                ProjectId = projectId,
+                //ProjectId = projectId,
                 Status = createIterationRequest.Status
             };
 
@@ -57,7 +57,7 @@ namespace Capstone.UnitTests.Service
             var project = new Project
             {
                 ProjectId = projectId,
-                Interations = new List<Interation>()
+                //Interations = new List<Interation>()
             };
 
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null)).ReturnsAsync(project);

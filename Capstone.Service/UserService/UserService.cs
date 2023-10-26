@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MimeKit.Text;
 using AutoMapper;
+using System.Security.Claims;
 
 namespace Capstone.Service.UserService
 {
@@ -192,6 +193,10 @@ namespace Capstone.Service.UserService
 
 		public async Task<string> CreateToken(UserViewModel user)
 		{
+			var claims = new Claim[]
+		  {
+			new Claim("UserId",user.UserId.ToString()),
+		  };
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
@@ -200,7 +205,7 @@ namespace Capstone.Service.UserService
 			var expired = DateTime.UtcNow.AddMinutes(JwtConstant.ExpiredTime);
 
 			var token = new JwtSecurityToken(JwtConstant.Issuer,
-				JwtConstant.Audience,
+				JwtConstant.Audience, claims,
 				expires: expired, signingCredentials: signIn);
 
 			var tokenString = new JwtSecurityTokenHandler().WriteToken(token);

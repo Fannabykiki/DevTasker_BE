@@ -1,4 +1,5 @@
 using AutoMapper;
+using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
@@ -15,22 +16,24 @@ public class ProjectService : IProjectService
 	private readonly IMapper _mapper;
 	private readonly IRoleRepository _roleRepository;
 	private readonly IProjectMemberRepository _projectMemberRepository;
-	private readonly ISchemaRepository _permissionSchemaRepository;
+	private readonly ISchemaRepository _schemaRepository;
 	private readonly IBoardRepository _boardRepository;
 	private readonly IInterationRepository _interationRepository;
 	private readonly IPermissionRepository _permissionRepository;
+	private readonly IPermissionSchemaRepository _permissionScemaRepo;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permission, IPermissionRepository permissionRepository, IInterationRepository interationRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
 		_roleRepository = roleRepository;
 		_mapper = mapper;
-		_permissionSchemaRepository = permissionSchemaRepository;
+		_schemaRepository = permissionSchemaRepository;
 		_projectMemberRepository = projectMemberRepository;
 		_boardRepository = boardRepository;
 		_permissionRepository = permissionRepository;
 		_interationRepository = interationRepository;
+		_permissionScemaRepo = permissionScemaRepo;
 	}
 
 	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
@@ -38,68 +41,68 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			var newProjectRequest = new Project
-			{
-				ProjectId = Guid.NewGuid(),
-				ProjectName = createProjectRequest.ProjectName,
-				CreateAt = createProjectRequest.CreateAt,
-				EndDate = createProjectRequest.EndDate,
-				StartDate = createProjectRequest.StartDate,
-				PrivacyStatus = createProjectRequest.PrivacyStatus,
-				ProjectStatus = StatusEnum.Active,
-				CreateBy = createProjectRequest.CreateBy,
-				Description = createProjectRequest.Description,
-				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
-			};
+			//var newProjectRequest = new Project
+			//{
+			//	ProjectId = Guid.NewGuid(),
+			//	ProjectName = createProjectRequest.ProjectName,
+			//	CreateAt = createProjectRequest.CreateAt,
+			//	EndDate = createProjectRequest.EndDate,
+			//	StartDate = createProjectRequest.StartDate,
+			//	PrivacyStatus = createProjectRequest.PrivacyStatus,
+			//	ProjectStatus = StatusEnum.Active,
+			//	CreateBy = createProjectRequest.CreateBy,
+			//	Description = createProjectRequest.Description,
+			//	SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
+			//};
 
-			var newProject = await _projectRepository.CreateAsync(newProjectRequest);
+			//var newProject = await _projectRepository.CreateAsync(newProjectRequest);
 
-			var newInteration = new Interation
-			{
-				StartDate = createProjectRequest.StartDate,
-				EndDate = createProjectRequest.StartDate.AddDays(7),
-				ProjectId = newProject.ProjectId,
-				Status = InterationStatusEnum.Current,
-				InterationId = Guid.NewGuid(),
-				InterationName = "Interation 1"
-			};
+			//var newInteration = new Interation
+			//{
+			//	StartDate = createProjectRequest.StartDate,
+			//	EndDate = createProjectRequest.StartDate.AddDays(7),
+			//	ProjectId = newProject.ProjectId,
+			//	Status = InterationStatusEnum.Current,
+			//	InterationId = Guid.NewGuid(),
+			//	InterationName = "Interation 1"
+			//};
 
-			var interation = await _interationRepository.CreateAsync(newInteration);
+			//var interation = await _interationRepository.CreateAsync(newInteration);
 
-			var newBoard = new Board
-			{
-				BoardId = Guid.NewGuid(),
-				CreateAt = createProjectRequest.CreateAt,
-				InterationId = interation.InterationId,
-				Title = "Board 1",
-			};
+			//var newBoard = new Board
+			//{
+			//	BoardId = Guid.NewGuid(),
+			//	CreateAt = createProjectRequest.CreateAt,
+			//	InterationId = interation.InterationId,
+			//	Title = "Board 1",
+			//};
 
-			await _boardRepository.CreateAsync(newBoard);
+			//await _boardRepository.CreateAsync(newBoard);
 
-			var newPo = new ProjectMember
-			{
-				IsOwner = true,
-				MemberId = Guid.NewGuid(),
-				ProjectId = newProject.ProjectId,
-				UserId = newProject.CreateBy,
-				RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
-			};
+			//var newPo = new ProjectMember
+			//{
+			//	IsOwner = true,
+			//	MemberId = Guid.NewGuid(),
+			//	ProjectId = newProject.ProjectId,
+			//	UserId = newProject.CreateBy,
+			//	RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
+			//};
 
-			var newAdmin = new ProjectMember
-			{
-				IsOwner = false,
-				MemberId = Guid.NewGuid(),
-				ProjectId = newProject.ProjectId,
-				UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
-				RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
-			};
+			//var newAdmin = new ProjectMember
+			//{
+			//	IsOwner = false,
+			//	MemberId = Guid.NewGuid(),
+			//	ProjectId = newProject.ProjectId,
+			//	UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
+			//	RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
+			//};
 
-			await _projectMemberRepository.CreateAsync(newPo);
-			await _projectMemberRepository.CreateAsync(newAdmin);
-			_projectMemberRepository.SaveChanges();
-			_boardRepository.SaveChanges();
-			_interationRepository.SaveChanges();
-			_projectRepository.SaveChanges();
+			//await _projectMemberRepository.CreateAsync(newPo);
+			//await _projectMemberRepository.CreateAsync(newAdmin);
+			//_projectMemberRepository.SaveChanges();
+			//_boardRepository.SaveChanges();
+			//_interationRepository.SaveChanges();
+			//_projectRepository.SaveChanges();
 
 			transaction.Commit();
 			return true;
@@ -130,7 +133,7 @@ public class ProjectService : IProjectService
 				Description = createRoleRequest.Description
 			};
 
-		 await _roleRepository.CreateAsync(newRoleRequest);
+			await _roleRepository.CreateAsync(newRoleRequest);
 			_roleRepository.SaveChanges();
 			transaction.Commit();
 
@@ -158,7 +161,7 @@ public class ProjectService : IProjectService
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
-			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true )
+			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true)
 			{
 				return false;
 			}
@@ -261,7 +264,7 @@ public class ProjectService : IProjectService
 
 	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
 	{
-		var projects = await _projectRepository.GetAsync(x=>x.ProjectId == projectId, null)!;
+		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
 	}
 
@@ -295,5 +298,23 @@ public class ProjectService : IProjectService
 		projectInfoRequests.Add(projectInfoRequest);
 
 		return projectInfoRequests;
+	}
+
+	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
+	{
+		var newPermisisonViewModel = new List<PermissionViewModel>();
+		var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;
+		var permissions = await _permissionScemaRepo.GetPermissionByUserId(role.RoleId);
+		foreach (var permisison in permissions)
+		{
+			var permissionViewModel = new PermissionViewModel
+			{
+				Description = permisison.Description,
+				Name = permisison.Name,
+				PermissionId = permisison.PermissionId,
+			};
+			newPermisisonViewModel.Add(permissionViewModel);
+		}
+		return newPermisisonViewModel;
 	}
 }
