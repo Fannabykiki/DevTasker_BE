@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Iteration;
+﻿using AutoMapper;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.Enums;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -19,17 +20,28 @@ namespace Capstone.UnitTests.Service
         private Mock<IInterationRepository> _iterationRepositoryMock;
         private Mock<IProjectRepository> _projectRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
-
+        private Mock<IMapper> _mapperMock;
+        private Mock<IBoardRepository> _boardRepositoryMock;
+        private readonly ITicketRepository _ticketRepository;
         [SetUp]
         public void Setup()
         {
             _iterationRepositoryMock = new Mock<IInterationRepository>();
             _projectRepositoryMock = new Mock<IProjectRepository>();
             _transactionMock = new Mock<IDatabaseTransaction>();
+            _mapperMock = new Mock<IMapper>();
+            _boardRepositoryMock = new Mock<IBoardRepository>();
+            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            //_iterationService = new IterationService(null, _projectRepositoryMock.Object, null, _iterationRepositoryMock.Object);
+            _iterationService = new IterationService(
+                null,
+                _projectRepositoryMock.Object,
+                _mapperMock.Object,
+                 _iterationRepositoryMock.Object,
+                 _boardRepositoryMock.Object,
+                null
+               );
         }
-        [Test]
         public async Task CreateIteration_Success()
         {
             // Arrange
