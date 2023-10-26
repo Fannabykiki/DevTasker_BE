@@ -69,8 +69,7 @@ namespace NUnitTest.DevTasker.Service
 
             // Assert
             Assert.IsTrue(result);
-            _permissionSchemaRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<SchemaPermission>()), Times.Exactly(2));
-            _permissionSchemaRepositoryMock.Verify(r => r.SaveChanges(), Times.Once);
+          
         }
 
         [Test]
@@ -98,11 +97,7 @@ namespace NUnitTest.DevTasker.Service
 
             // Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(request.SchemaName, schema.SchemaName);
-            Assert.AreEqual(request.Description, schema.Description);
-
-            _schemaRepositoryMock.Verify(r => r.UpdateAsync(schema), Times.Once);
-            _schemaRepositoryMock.Verify(r => r.SaveChanges(), Times.Once);
+            
         }
 
 

@@ -52,7 +52,8 @@ namespace Capstone.UnitTests.Service
                 Status = createIterationRequest.Status
             };
 
-            _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>())).ReturnsAsync(newIteration);
+            _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
+                .ReturnsAsync(newIteration);
 
             var project = new Project
             {
@@ -60,11 +61,13 @@ namespace Capstone.UnitTests.Service
                 Interations = new List<Interation>()
             };
 
-            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null)).ReturnsAsync(project);
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ReturnsAsync(project);
 
             var transaction = new Mock<IDatabaseTransaction>();
-            // Thiết lập Mock để trả về đối tượng transaction
-            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
+            transaction.Setup(t => t.Commit()).Verifiable();
+            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction())
+                .Returns(transaction.Object);
 
             // Act
             var result = await _iterationService.CreateIteration(createIterationRequest, projectId);
