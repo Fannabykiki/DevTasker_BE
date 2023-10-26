@@ -15,6 +15,7 @@ using MimeKit.Text;
 using AutoMapper;
 using System.Security.Claims;
 
+
 namespace Capstone.Service.UserService
 {
 	public class UserService : IUserService
@@ -75,7 +76,54 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public Task<bool> DeleteAsync(Guid id)
+        public async Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
+        {
+            try
+            {
+                var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null);
+                if (user == null)
+				{
+					Random random = new Random();
+                    CreatePasswordHash(Convert.ToString(RandomNumberGenerator.GetBytes(64)), out byte[] passwordHash, out byte[] passwordSalt);
+
+                    var newUserRequest = new User
+                    {
+                        UserId = Guid.NewGuid(),
+                        PasswordHash = passwordHash,
+                        PasswordSalt = passwordSalt,
+                        IsAdmin = false,
+                        JoinedDate = DateTime.UtcNow,
+                        IsFirstTime = true,
+                        VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
+                        Email = createUserGGLoginRequest.Email,
+                        Status = Common.Enums.StatusEnum.Active,
+						VerifiedAt = DateTime.UtcNow
+                    };
+
+                    var newUser = await _userRepository.CreateAsync(newUserRequest);
+                    _userRepository.SaveChanges();
+
+                    return new CreateUserResponse
+                    {
+                        IsSucced = true,
+                        VerifyToken = newUser.VerificationToken
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return new CreateUserResponse
+                {
+                    IsSucced = false,
+                };
+            }
+        }
+
+        public Task<bool> DeleteAsync(Guid id)
 		{
 			throw new NotImplementedException();
 		}

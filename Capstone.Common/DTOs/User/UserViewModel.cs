@@ -13,7 +13,8 @@ namespace Capstone.Common.DTOs.User
 		public string? Address { get; set; }
 		public DateTime? Dob { get; set; }
 		public string? PhoneNumber { get; set; }
-		public string? VerificationToken { get; set; }
+        public string? AccessToken { get; set; }
+        public string? VerificationToken { get; set; }
 		public string? PassResetToken { get; set; }
 		public DateTime? ResetTokenExpires { get; set; }
 		public DateTime? VerifiedAt { get; set; }
