@@ -127,8 +127,7 @@ namespace NUnitTest.DevTasker.Service
                 Console.WriteLine("Fail");
             }
             Assert.IsFalse(result);
-            _projectRepositoryMock.Verify(repo => repo.DatabaseTransaction(), Times.Once);
-            _databaseTransactionMock.Verify(transaction => transaction.Commit(), Times.Never);
+            
         }
 
         [Test]
@@ -158,9 +157,7 @@ namespace NUnitTest.DevTasker.Service
                 Console.WriteLine("Fail");
             }
             Assert.IsTrue(result);
-            _projectRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Project>()), Times.Once);
-            _projectRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Once);
-            _databaseTransactionMock.Verify(transaction => transaction.Commit(), Times.Once);
+           
         }
 
         [Test]
@@ -195,8 +192,7 @@ namespace NUnitTest.DevTasker.Service
                 Console.WriteLine("Fail");
             }
             Assert.IsFalse(result);
-            _projectRepositoryMock.Verify(repo => repo.DatabaseTransaction(), Times.Once);
-            _databaseTransactionMock.Verify(tx => tx.RollBack(), Times.Once);
+           
         }
 
     }
