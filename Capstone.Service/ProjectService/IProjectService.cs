@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.Permission;
+using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
 
@@ -16,5 +17,6 @@ public interface IProjectService
 	Task<bool> DeleteProject(Guid projectId);
 	Task<bool> RestoreProject(Guid projectId);
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
+	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
 	Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId);
 }

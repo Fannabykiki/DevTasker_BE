@@ -21,7 +21,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime? ExpireAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
-		public List<Interation> Interations { get; set; }
+		public Board Board { get; set; }
 		public Schema Schemas { get; set; }
     }
 }

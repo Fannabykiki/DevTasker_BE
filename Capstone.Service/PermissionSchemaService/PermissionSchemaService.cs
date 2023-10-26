@@ -167,7 +167,6 @@ namespace Capstone.Service.PermissionSchemaService
                             var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
                             await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
                         }
-                        
                     }
 
                     foreach (var role in permission.RoleIds)
