@@ -44,14 +44,6 @@ namespace Capstone.API.Controllers
 		{
 			var user = await _usersService.GetUserByIdAsync(id);
 
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
-			{
-				return BadRequest("User is inactive");
-			}
-			if (user.VerifiedAt == null)
-			{
-				return BadRequest("User not verified!");
-			}
 			if (user == null)
 			{
 				return NotFound();
@@ -66,12 +58,26 @@ namespace Capstone.API.Controllers
 				Address = user.Address,
 				DoB = user.Dob,
 				Gender = user.Gender,
-				IsAdmin = user.IsAdmin,
+				IsAdmin = user.IsAdmin
 			};
 
 		}
 
-		[HttpGet("external-login/token")]
+        [HttpGet("external-login")]
+        public IActionResult Login()
+        {
+
+            var clientId = _config["Authentication:Google:ClientId"];
+
+            var redirectUrl = _config["Authentication:Google:CallBackUrl"];
+
+            var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
+
+            return Redirect(authUrl);
+
+        }
+
+        [HttpGet("external-login/token")]
 		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
 		{
 			GoogleProfile googleUser = new GoogleProfile();
@@ -83,8 +89,9 @@ namespace Capstone.API.Controllers
 				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
 				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
 				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
+                
 
-			}
+            }
 			catch (Exception ex)
 			{
 
@@ -93,33 +100,55 @@ namespace Capstone.API.Controllers
 			var user = await _usersService.GetUserByEmailAsync(googleUser.Email);
 			if (user == null)
 			{
-				return NotFound();
+				var userGG = new CreateUserGGLoginRequest
+                {
+					Email = googleUser.Email,
+					Address = googleUser.Locale,
+					Avatar= googleUser.Picture
+				};
+				await _usersService.CreateNewUser(userGG);
+
+                user = await _usersService.GetUserByEmailAsync(googleUser.Email);
+
 			}
+            if (user == null)
+            {
+                return NotFound("User not exist");
+            }
+            if (user.Status == Common.Enums.StatusEnum.Inactive)
+            {
+                return BadRequest("User is inactive");
+            }
+            if (user.VerifiedAt == null)
+            {
+                return BadRequest("User not verified!");
+            }
 
-			var token = await _usersService.CreateToken(user);
+            var token = await _usersService.CreateToken(user);
 
-			var refreshToken = await _usersService.GenerateRefreshToken();
+            var refreshToken = await _usersService.GenerateRefreshToken();
 
-			await _usersService.SetRefreshToken(user.Email, refreshToken, token);
+            await _usersService.SetRefreshToken(user.Email, refreshToken, token);
 
-			var cookieOptions = new CookieOptions
-			{
-				HttpOnly = true,
-				Expires = refreshToken.Expires,
-			};
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = refreshToken.Expires,
+            };
 
-			Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
-			return new LoginResponse
-			{
-				IsAdmin = user.IsAdmin,
-				UserId = user.UserId,
-				UserName = user.UserName,
-				Email = user.Email,
-				Token = token,
-				IsFirstTime = user.IsFirstTime
-			};
-		}
+            return new LoginResponse
+            {
+                IsAdmin = user.IsAdmin,
+                UserId = user.UserId,
+                Email = user.Email,
+                Token = token,
+                IsFirstTime = user.IsFirstTime,
+                IsVerify = user.VerifiedAt,
+                VerifyToken = user.VerificationToken
+            };
+        }
 
 
 		[HttpPost("token")]
@@ -133,10 +162,6 @@ namespace Capstone.API.Controllers
 			if (user.Status == Common.Enums.StatusEnum.Inactive)
 			{
 				return BadRequest("User is inactive");
-			}
-			if (user.VerifiedAt == null)
-			{
-				return BadRequest("User not verified!");
 			}
 
 			var token = await _usersService.CreateToken(user);
@@ -232,7 +257,7 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
 		{
 			var user = await _usersService.GetUserByEmailAsync(changePasswordRequest.Email);
-			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.VerificationToken != changePasswordRequest.Token)
+			if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.AccessToken != changePasswordRequest.Token)
 			{
 				return NotFound("Invalid token");
 			}
