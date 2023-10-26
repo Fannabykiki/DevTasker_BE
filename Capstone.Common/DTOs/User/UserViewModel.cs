@@ -18,7 +18,6 @@ namespace Capstone.Common.DTOs.User
 		public string? PassResetToken { get; set; }
 		public DateTime? ResetTokenExpires { get; set; }
 		public DateTime? VerifiedAt { get; set; }
-		public string AccessToken { get; set; }
 		public string? RefreshToken { get; set; }
 		public DateTime? TokenCreated { get; set; }
 		public DateTime? TokenExpires { get; set; }
