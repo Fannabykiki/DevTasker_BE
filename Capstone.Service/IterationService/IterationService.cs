@@ -41,30 +41,30 @@ namespace Capstone.Service.IterationService
         
         public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid projectId)
         {
-            var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-            foreach (var interation in interations)
-            {
-                if (interation.Status == InterationStatusEnum.Current)
-                {
-                    var listWorkItem = new List<WorkItemResponse>();
-                    foreach (var board in interation.Boards)
-                    {
-                        var workItems = board.Tickets.Where(x => x.PrevId == null);
+            // var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+            // foreach (var interation in interations)
+            // {
+            //     if (interation.Status == InterationStatusEnum.Current)
+            //     {
+            //         var listWorkItem = new List<WorkItemResponse>();
+            //         foreach (var board in interation.Boards)
+            //         {
+            //             var workItems = board.Tickets.Where(x => x.PrevId == null);
+            //
+            //             var listTaskInWorkItem = new List<TicketResponse>();
+            //             foreach (var workItem in workItems)
+            //             {
+            //                 var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
+            //             }
+            //         }
+            //     }
+            // }
 
-                        var listTaskInWorkItem = new List<TicketResponse>();
-                        foreach (var workItem in workItems)
-                        {
-                            var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
-                        }
-                    }
-                }
-            }
-
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-
-            // Map iterations to response model
-            var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
-            return response;
+            // var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+            //
+            // // Map iterations to response model
+            // var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
+            return null;
         }
 
        
