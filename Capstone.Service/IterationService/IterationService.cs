@@ -1,9 +1,13 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +38,7 @@ namespace Capstone.Service.IterationService
             _ticketRepository = ticketRepository;
 
         }
-
+        
         public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid projectId)
         {
             var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
@@ -62,6 +66,8 @@ namespace Capstone.Service.IterationService
             var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
             return response;
         }
+
+       
 
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
         {

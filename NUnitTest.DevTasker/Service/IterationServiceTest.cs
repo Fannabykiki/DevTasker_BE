@@ -27,7 +27,7 @@ namespace Capstone.UnitTests.Service
             _projectRepositoryMock = new Mock<IProjectRepository>();
             _transactionMock = new Mock<IDatabaseTransaction>();
 
-            _iterationService = new IterationService(null, _projectRepositoryMock.Object, null, _iterationRepositoryMock.Object);
+            //_iterationService = new IterationService(null, _projectRepositoryMock.Object, null, _iterationRepositoryMock.Object);
         }
         [Test]
         public async Task CreateIteration_Success()
