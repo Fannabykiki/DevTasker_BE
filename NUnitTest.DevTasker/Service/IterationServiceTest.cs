@@ -35,14 +35,13 @@ namespace Capstone.UnitTests.Service
 
             _iterationService = new IterationService(
                 null,
-                _projectRepositoryMock.Object, 
+                _projectRepositoryMock.Object,
                 _mapperMock.Object,
                  _iterationRepositoryMock.Object,
                  _boardRepositoryMock.Object,
                 null
                );
         }
-        [Test]
         public async Task CreateIteration_Success()
         {
             // Arrange
