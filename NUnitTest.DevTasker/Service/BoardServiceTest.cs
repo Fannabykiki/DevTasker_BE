@@ -56,7 +56,7 @@ namespace NUnitTest.DevTasker.Service
             var fakeInteration = new Interation
             {
                 InterationId = interationId,
-                Boards = new List<Board>()
+                //Boards = new List<Board>()
             };
 
             _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
@@ -71,7 +71,7 @@ namespace NUnitTest.DevTasker.Service
             _iterationRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Interation>()))
                 .Callback<Interation>(async (updatedInteration) =>
                 {
-                    fakeInteration.Boards.Add(updatedInteration.Boards.Single());
+                    //fakeInteration.Boards.Add(updatedInteration.Boards.Single());
                 });
 
             // Act
@@ -124,7 +124,7 @@ namespace NUnitTest.DevTasker.Service
                 BoardId = boardId,
                 Title = "Initial Board Title",
                 Status = (StatusEnum?)BoardStatusEnum.InProgress, 
-                InterationId = Guid.NewGuid(),
+                //InterationId = Guid.NewGuid(),
             };
             _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
             _boardRepositoryMock.Setup(repo => repo.GetAsync(

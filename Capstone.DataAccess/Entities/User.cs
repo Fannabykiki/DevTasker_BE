@@ -21,7 +21,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime? ResetTokenExpires { get; set; }
         public DateTime? VerifiedAt { get; set; }
         public string? RefreshToken { get; set; }
-        public string? AccessToken { get; set; }
+        public string AccessToken { get; set; }
         public DateTime? TokenCreated { get; set; }
         public DateTime? TokenExpires { get; set; }
         public GenderEnum? Gender { get; set; } //Male = 0,  Female = 1, Other = 2
