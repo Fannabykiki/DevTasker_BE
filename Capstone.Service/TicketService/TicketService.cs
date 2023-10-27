@@ -4,6 +4,7 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.TicketService
@@ -33,6 +34,8 @@ namespace Capstone.Service.TicketService
             _userRepository = userRepository;
             _iterationRepository = iterationRepository;
         }
+        
+       
         public async Task<bool> CreateTicket(CreateTicketRequest request, Guid iterationId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
@@ -46,6 +49,44 @@ namespace Capstone.Service.TicketService
 
                 transaction.Commit();
                 return true;
+            }
+            catch (Exception)
+            {
+                transaction.RollBack();
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
+        {
+            using var transaction = _iterationRepository.DatabaseTransaction();
+
+            try
+            {
+                var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+
+                if (ticketEntity != null)
+                {
+                    ticketEntity.Title = updateTicketRequest.Title;
+                    ticketEntity.Decription = updateTicketRequest.Decription;
+                    ticketEntity.StartDate = updateTicketRequest.StartDate;
+                    ticketEntity.DueDate = updateTicketRequest.DueDate;
+                    ticketEntity.AssignTo = updateTicketRequest.AssignTo;
+                    ticketEntity.TicketType = updateTicketRequest.TicketType;
+                    ticketEntity.PriorityId = updateTicketRequest.PriorityId;
+                    ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
+                    ticketEntity.InterationId = updateTicketRequest.InterationId;
+
+                    await _context.SaveChangesAsync();
+
+                    transaction.Commit();
+                    return true;
+                }
+                else
+                {
+                    transaction.RollBack();
+                    return false;
+                }
             }
             catch (Exception)
             {

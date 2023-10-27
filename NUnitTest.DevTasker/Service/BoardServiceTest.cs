@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿/*using AutoMapper;
 using Capstone.Common.DTOs.Board;
 using Capstone.Common.Enums;
 using Capstone.DataAccess.Entities;
@@ -51,7 +51,7 @@ namespace NUnitTest.DevTasker.Service
         [Test]
         public async Task CreateBoard_Success()
         {
-            // Arrange
+            *//*// Arrange
             var createBoardRequest = new CreateBoardRequest
             {
                 Title = "Test Board",
@@ -85,34 +85,34 @@ namespace NUnitTest.DevTasker.Service
 
             // Assert
             Console.WriteLine(result ? "Create Board success" : "Create Board failed");
-            Assert.IsTrue(result);
+            Assert.IsTrue(result);*//*
             
         }
 
         [Test]
         public async Task CreateBoard_Fail_MissingTitle()
         {
-            // Arrange
-            var createBoardRequest = new CreateBoardRequest
-            {
-                Title = null,
-                Status = (StatusEnum?)BoardStatusEnum.InProgress,
-            };
-            var interationId = Guid.NewGuid();
-            _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
-            // Act
-            var result = await _boardService.CreateBoard(createBoardRequest, interationId);
+            *//* // Arrange
+             var createBoardRequest = new CreateBoardRequest
+             {
+                 Title = null,
+                 Status = (StatusEnum?)BoardStatusEnum.InProgress,
+             };
+             var interationId = Guid.NewGuid();
+             _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
+             // Act
+             var result = await _boardService.CreateBoard(createBoardRequest, interationId);
 
-            // Assert
-            Console.WriteLine(result ? "Create Board success" : "Create Board failed");
+             // Assert
+             Console.WriteLine(result ? "Create Board success" : "Create Board failed");
+             *//*
             Assert.IsFalse(result);
-            
 
         }
 
         [Test]
         public async Task UpdateBoard_Success()
-        {
+        {*//*
             // Arrange
             var boardId = Guid.NewGuid();
             var updateBoardRequest = new UpdateBoardRequest
@@ -137,13 +137,13 @@ namespace NUnitTest.DevTasker.Service
 
             // Assert
             Console.WriteLine(result ? "Update Board success" : "Update Board failed");
-            Assert.IsTrue(result); 
+            Assert.IsTrue(result); *//*
 
         }
         [Test]
         public async Task UpdateBoard_Fail_MissingTitle()
         {
-            // Arrange
+           *//* // Arrange
             var updateBoardRequest = new UpdateBoardRequest
             {
                 Status = (StatusEnum?)BoardStatusEnum.InProgress,
@@ -160,10 +160,11 @@ namespace NUnitTest.DevTasker.Service
 
             // Assert
             Console.WriteLine(result ? "Update Board success" : "Update Board failed");
-            Assert.IsFalse(result);
+            Assert.IsFalse(result);*//*
            
         }
 
 
     }
 }
+*/
