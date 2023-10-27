@@ -67,8 +67,6 @@ namespace Capstone.Service.IterationService
             return null;
         }
 
-       
-
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();

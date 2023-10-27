@@ -105,10 +105,12 @@ namespace Capstone.DataAccess
 					   .HasOne(sc => sc.Project)
 					   .WithOne(s => s.Board)
 					   .HasForeignKey<Project>(sc => sc.ProjectId);
-
-			modelBuilder.Entity<Board>()
-					   .HasMany(sc => sc.Interations)
-					   .WithOne(s => s.Board)
+			
+			modelBuilder.Entity<Interation>().HasKey(sc => new { sc.InterationId });
+			
+			modelBuilder.Entity<Interation>()
+					   .HasOne(sc => sc.Board)
+					   .WithMany(s => s.Interations)
 					   .HasForeignKey(sc => sc.BoardId);
 
 			modelBuilder.Entity<SchemaPermission>().HasKey(sc => new { sc.RoleId, sc.PermissionId,sc.SchemaId });
