@@ -2,6 +2,7 @@
 using Capstone.Common.DTOs.Board;
 using Capstone.Common.Enums;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.BoardService;
 using Capstone.Service.IterationService;
@@ -24,6 +25,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IInterationRepository> _iterationRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IMapper> _mapperMock;
+        private Mock <IProjectRepository> _projectRepository;
 
 
         [SetUp]
@@ -38,8 +40,12 @@ namespace NUnitTest.DevTasker.Service
                 null,
                 _boardRepositoryMock.Object,
                 _mapperMock.Object,
-                _iterationRepositoryMock.Object
+                _iterationRepositoryMock.Object,
+                _projectRepository.Object
+
             );
+
+           
         }
 
         [Test]

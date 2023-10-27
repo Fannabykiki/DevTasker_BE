@@ -33,43 +33,26 @@ namespace Capstone.Service.TicketService
             _userRepository = userRepository;
             _iterationRepository = iterationRepository;
         }
-
         public async Task<bool> CreateTicket(CreateTicketRequest request, Guid iterationId)
         {
-            /*using var transaction = _iterationRepository.DatabaseTransaction();
+            using var transaction = _iterationRepository.DatabaseTransaction();
 
             try
             {
-                // var board = await _boardRepository.GetAsync(x => x.BoardId == boardId, null);
-                //
-                //
-                // var assignToUser = await _userRepository.GetAsync(x => x.UserId == request.AssignTo, null);
-                // if (assignToUser == null)
-                // {
-                //     throw new ArgumentException($"User with ID {request.AssignTo} does not exist", nameof(request.AssignTo));
-                // }
-                //
-                // var ticket = _mapper.Map<CreateTicketRequest, Ticket>(request);
-                //
-                // ticket.BoardId = boardId;
-                //
-                // await _ticketRepository.UpdateAsync(ticket);
-                // await _context.SaveChangesAsync();
+                var ticketEntity = _mapper.Map<Ticket>(request);
+                ticketEntity.InterationId = iterationId;
+                _context.Tickets.Add(ticketEntity);
+                await _context.SaveChangesAsync();
 
                 transaction.Commit();
-
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 transaction.RollBack();
                 return false;
             }
-            */
-            return false;
         }
-
-
 
     }
 }

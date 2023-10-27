@@ -16,6 +16,6 @@ namespace Capstone.Common.DTOs.Task
         public Guid PriorityId { get; set; }
         public Guid PrevId { get; set; }
         public TaskStatusEnum TicketStatus { get; set; }
-        public Guid BoardId { get; set; }
+        public Guid InterationId { get; set; }
     }
 }

@@ -1,18 +1,8 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.PermissionSchema;
-using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Capstone.Service.IterationService
 {
