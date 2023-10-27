@@ -11,5 +11,6 @@ namespace Capstone.DataAccess.Entities
         public Guid BoardId { get; set; }
         public InterationStatusEnum Status { get; set; }
         public Board Board { get; set; }
+        public List<Ticket> Tickets { get; set; }
     }
 }

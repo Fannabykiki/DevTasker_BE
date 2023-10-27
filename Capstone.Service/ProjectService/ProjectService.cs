@@ -41,68 +41,70 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			//var newProjectRequest = new Project
-			//{
-			//	ProjectId = Guid.NewGuid(),
-			//	ProjectName = createProjectRequest.ProjectName,
-			//	CreateAt = createProjectRequest.CreateAt,
-			//	EndDate = createProjectRequest.EndDate,
-			//	StartDate = createProjectRequest.StartDate,
-			//	PrivacyStatus = createProjectRequest.PrivacyStatus,
-			//	ProjectStatus = StatusEnum.Active,
-			//	CreateBy = createProjectRequest.CreateBy,
-			//	Description = createProjectRequest.Description,
-			//	SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
-			//};
+			var projectId = Guid.NewGuid();
 
-			//var newProject = await _projectRepository.CreateAsync(newProjectRequest);
+			var newProjectRequest = new Project
+			{	
+				ProjectId = projectId,
+				ProjectName = createProjectRequest.ProjectName,
+				CreateAt = createProjectRequest.CreateAt,
+				EndDate = createProjectRequest.EndDate,
+				StartDate = createProjectRequest.StartDate,
+				PrivacyStatus = createProjectRequest.PrivacyStatus,
+				ProjectStatus = StatusEnum.Active,
+				CreateBy = createProjectRequest.CreateBy,
+				Description = createProjectRequest.Description,
+				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
+				Board = new Board
+				{
+					BoardId = Guid.NewGuid(),
+					ProjectId = projectId,
+					DeleteAt = null,
+					CreateAt = DateTime.UtcNow,
+					Status = StatusEnum.Active,
+					Title = "Board Default",
+					UpdateAt = null,
+				}
+			};
 
-			//var newInteration = new Interation
-			//{
-			//	StartDate = createProjectRequest.StartDate,
-			//	EndDate = createProjectRequest.StartDate.AddDays(7),
-			//	ProjectId = newProject.ProjectId,
-			//	Status = InterationStatusEnum.Current,
-			//	InterationId = Guid.NewGuid(),
-			//	InterationName = "Interation 1"
-			//};
+			var newProject = await _projectRepository.CreateAsync(newProjectRequest);
+			await _projectRepository.SaveChanges();
 
-			//var interation = await _interationRepository.CreateAsync(newInteration);
+			var newInteration = new Interation
+			{
+				StartDate = DateTime.UtcNow,
+				Status = InterationStatusEnum.Current,
+				BoardId = newProjectRequest.Board.BoardId,
+				EndDate = DateTime.UtcNow.AddDays(14),
+				InterationName = "Interation 1",
+				InterationId = Guid.NewGuid(),
+			};
 
-			//var newBoard = new Board
-			//{
-			//	BoardId = Guid.NewGuid(),
-			//	CreateAt = createProjectRequest.CreateAt,
-			//	InterationId = interation.InterationId,
-			//	Title = "Board 1",
-			//};
+			await _interationRepository.CreateAsync(newInteration);
+			await _interationRepository.SaveChanges();
 
-			//await _boardRepository.CreateAsync(newBoard);
+			var newPo = new ProjectMember
+			{
+				IsOwner = true,
+				MemberId = Guid.NewGuid(),
+				ProjectId = newProject.ProjectId,
+				UserId = newProject.CreateBy,
+				RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
+			};
 
-			//var newPo = new ProjectMember
-			//{
-			//	IsOwner = true,
-			//	MemberId = Guid.NewGuid(),
-			//	ProjectId = newProject.ProjectId,
-			//	UserId = newProject.CreateBy,
-			//	RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
-			//};
+			var newAdmin = new ProjectMember
+			{
+				IsOwner = false,
+				MemberId = Guid.NewGuid(),
+				ProjectId = newProject.ProjectId,
+				UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
+				RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
+			};
 
-			//var newAdmin = new ProjectMember
-			//{
-			//	IsOwner = false,
-			//	MemberId = Guid.NewGuid(),
-			//	ProjectId = newProject.ProjectId,
-			//	UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
-			//	RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
-			//};
+			await _projectMemberRepository.CreateAsync(newPo);
+			await _projectMemberRepository.CreateAsync(newAdmin);
 
-			//await _projectMemberRepository.CreateAsync(newPo);
-			//await _projectMemberRepository.CreateAsync(newAdmin);
-			//_projectMemberRepository.SaveChanges();
-			//_boardRepository.SaveChanges();
-			//_interationRepository.SaveChanges();
-			//_projectRepository.SaveChanges();
+			await _projectMemberRepository.SaveChanges();
 
 			transaction.Commit();
 			return true;
