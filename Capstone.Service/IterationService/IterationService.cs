@@ -36,60 +36,59 @@ namespace Capstone.Service.IterationService
             _iterationRepository = iterationRepository;
             _boardRepository = boardRepository;
             _ticketRepository = ticketRepository;
-
         }
-        
-        public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid projectId)
-        {
-            // var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-            // foreach (var interation in interations)
-            // {
-            //     if (interation.Status == InterationStatusEnum.Current)
-            //     {
-            //         var listWorkItem = new List<WorkItemResponse>();
-            //         foreach (var board in interation.Boards)
-            //         {
-            //             var workItems = board.Tickets.Where(x => x.PrevId == null);
-            //
-            //             var listTaskInWorkItem = new List<TicketResponse>();
-            //             foreach (var workItem in workItems)
-            //             {
-            //                 var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
-            //             }
-            //         }
-            //     }
-            // }
 
-            // var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-            //
-            // // Map iterations to response model
-            // var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
+        public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid boardId)
+        {
+            /*var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
+            foreach (var interation in interations)
+            {
+                if (interation.Status == InterationStatusEnum.Current)
+                {
+                    var listWorkItem = new List<WorkItemResponse>();
+                    foreach (var board in interation.tick)
+                    {
+                        var workItems = board.Tickets.Where(x => x.PrevId == null);
+
+                        var listTaskInWorkItem = new List<TicketResponse>();
+                        foreach (var workItem in workItems)
+                        {
+                            var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
+                        }
+                    }
+                }
+            }
+
+            var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+
+            // Map iterations to response model
+            var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);*/
             return null;
         }
 
-        public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
+        public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boarId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
             try
             {
-                //var newIterationRequest = new Interation
-                //{
-                //    InterationName = createIterationRequest.InterationName,
-                //    StartDate = createIterationRequest.StartDate,
-                //    EndDate = createIterationRequest.EndDate,
-                //    ProjectId = projectId,
-                //    Status = createIterationRequest.Status
-                //};
+                var newIterationRequest = new Interation
+                {
+                   InterationName = createIterationRequest.InterationName,
+                   StartDate = createIterationRequest.StartDate,
+                   EndDate = createIterationRequest.EndDate,
+                    BoardId = boarId,
+                   Status = createIterationRequest.Status
+                };
 
                
-                //var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                //var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
-                //project.Interations.Add(newIteration);
-                //await _projectRepository.UpdateAsync(project);
+                var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
+                var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
+                board.Interations.Add(newIteration);
+                await _boardRepository.UpdateAsync(board);
 
-                //_iterationRepository.SaveChanges();
-                //_projectRepository.SaveChanges();
+                _iterationRepository.SaveChanges();
+                _projectRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
@@ -100,14 +99,14 @@ namespace Capstone.Service.IterationService
                 return false;
             }
         }
-        public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
+        public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid boardId)
         {
 
             using var transaction = _iterationRepository.DatabaseTransaction();
 
             try
             {
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
+                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == boardId, null);
 
                 if (iteration != null)
                 {

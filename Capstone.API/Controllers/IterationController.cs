@@ -24,17 +24,17 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPost("Iteration")]
-        public async Task<IActionResult> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
+        public async Task<IActionResult> CreateIteration(CreateIterationRequest createIterationRequest, Guid boardId)
         {
-            var result = await _iterationService.CreateIteration(createIterationRequest, projectId);
+            var result = await _iterationService.CreateIteration(createIterationRequest, boardId);
 
             return Ok(result);
         }
 
         [HttpPut("Iteration/{iterationId}")]
-        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
+        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid boardId)
         {
-            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, boardId);
             if (result == null)
             {
                 return StatusCode(500);

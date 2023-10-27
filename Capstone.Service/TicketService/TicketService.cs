@@ -18,10 +18,10 @@ namespace Capstone.Service.TicketService
         private readonly ITicketHistoryRepository _ticketHistoryRepository;
         private readonly ITicketTypeRepository ticketTypeRepository;
         private readonly IMapper _mapper;
-        private readonly IBoardRepository _boardRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IInterationRepository _iterationRepository;
 
-        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IBoardRepository boardRepository, IUserRepository userRepository)
+        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -30,17 +30,17 @@ namespace Capstone.Service.TicketService
             _ticketHistoryRepository = ticketHistoryRepository;
             this.ticketTypeRepository = ticketTypeRepository;
             _mapper = mapper;
-            _boardRepository = boardRepository;
             _userRepository = userRepository;
+            _iterationRepository = iterationRepository;
         }
 
-        public async Task<bool> CreateTicket(CreateTicketRequest request, Guid boardId)
+        public async Task<bool> CreateTicket(CreateTicketRequest request, Guid iterationId)
         {
-            using var transaction = _boardRepository.DatabaseTransaction();
+            /*using var transaction = _iterationRepository.DatabaseTransaction();
 
             try
             {
-                var board = await _boardRepository.GetAsync(x => x.BoardId == boardId, null);
+                var board = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
 
                 
                 var assignToUser = await _userRepository.GetAsync(x => x.UserId == request.AssignTo, null);
@@ -65,6 +65,8 @@ namespace Capstone.Service.TicketService
                 transaction.RollBack();
                 return false;
             }
+            */
+            return false;
         }
 
 
