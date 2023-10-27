@@ -19,7 +19,7 @@ namespace Capstone.DataAccess.Entities
         public Guid PriorityId { get; set; }
         public Guid? PrevId { get; set; }
         public TaskStatusEnum TicketStatus { get; set; }
-        public Guid BoardId { get; set; }
+        public Guid InterationId { get; set; }
         public User User { get; set; } // 1 task just create by 1 user, assign to 1 user 
         public TicketType TaskType { get; set; } // 1 task has many type 
         public List<TicketComment> TaskComments { get; set; } // 1 task has many type 
@@ -27,6 +27,6 @@ namespace Capstone.DataAccess.Entities
         public List<TicketHistory> TaskHistories { get; set; } // many history of change
         public PriorityLevel PriorityLevel { get; set; } // has 1 priority level 
         public List<Attachment> Attachments { get; set; } // has many attachments
-        public Board Board  { get; set; } // has many attachments
+        public Interation Interation  { get; set; } // has many attachments
     }
 }

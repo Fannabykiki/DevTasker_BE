@@ -6,7 +6,7 @@
 
 3. Run migration:
 add-migration ChangeRelationshipMigration -context CapstoneContext -o Migrations
-dotnet ef migrations add CreateDatabase
+dotnet ef migrations add ChangeRelationshipMigration
 
 4. Update migration:
 update-database
