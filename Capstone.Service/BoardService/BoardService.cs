@@ -31,23 +31,23 @@ namespace Capstone.Service.BoardService
 
             try
             {
-                var statusValue = (int)createBoardRequest.Status;
-                var newBoard = new Board
-                {
-                    Title = createBoardRequest.Title,
-                    CreateAt = DateTime.UtcNow,
-                    Status = (StatusEnum?)(BoardStatusEnum)statusValue,
-                    InterationId = interationId
-                };
+                //var statusValue = (int)createBoardRequest.Status;
+                //var newBoard = new Board
+                //{
+                //    Title = createBoardRequest.Title,
+                //    CreateAt = DateTime.UtcNow,
+                //    Status = (StatusEnum?)(BoardStatusEnum)statusValue,
+                //    InterationId = interationId
+                //};
 
                
-                await _boardRepository.CreateAsync(newBoard);
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
-                iteration.Boards.Add(newBoard);
-                await _iterationRepository.UpdateAsync(iteration);
+                //await _boardRepository.CreateAsync(newBoard);
+                //var iteration = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
+                //iteration.Boards.Add(newBoard);
+                //await _iterationRepository.UpdateAsync(iteration);
                
-                _boardRepository.SaveChanges();
-                _iterationRepository.SaveChanges();
+                //_boardRepository.SaveChanges();
+                //_iterationRepository.SaveChanges();
 
                 transaction.Commit();
 
@@ -72,10 +72,10 @@ namespace Capstone.Service.BoardService
                     board.Status = updateBoardRequest.Status;
                     board.UpdateAt = DateTime.UtcNow;
 
-                    if (updateBoardRequest.InterationId != null && updateBoardRequest.InterationId != board.InterationId)
-                    {
-                        board.InterationId = updateBoardRequest.InterationId;
-                    }
+                    //if (updateBoardRequest.InterationId != null && updateBoardRequest.InterationId != board.InterationId)
+                    //{
+                    //    board.InterationId = updateBoardRequest.InterationId;
+                    //}
 
                     await _boardRepository.UpdateAsync(board);
                      _boardRepository.SaveChanges();

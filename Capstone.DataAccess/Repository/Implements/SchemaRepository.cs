@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
-    public class SchemaRepository : BaseRepository<Schema>, ISchemaRepository
-    {
+	public class SchemaRepository : BaseRepository<Schema>, ISchemaRepository
+	{
 		private new readonly CapstoneContext _context;
 		public SchemaRepository(CapstoneContext context) : base(context)
-        {
+		{
 			_context = context;
 		}
-        public async Task <List<RoleDTO>> GetPermissionRolesBySchemaId(Guid permissionId, Guid schemaId)
+		public async Task<List<RoleDTO>> GetPermissionRolesBySchemaId(Guid permissionId, Guid schemaId)
 		{
 			var role = await _context.SchemaPermissions
 				.Where(sp => sp.SchemaId == schemaId && sp.PermissionId == permissionId)
@@ -27,8 +27,8 @@ namespace Capstone.DataAccess.Repository.Implements
 				})
 				.ToListAsync();
 			return role;
-			}
-				
 		}
+
 	}
+}
 
