@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Iteration
 {
-    //public class GetAllInterrationByProjectIdResonse
+    //public class GetInterrationByBoardIdResonse
     //{
     //    public Guid InterationId { get; set; }
     //    public string InterationName { get; set; }
@@ -19,20 +19,12 @@ namespace Capstone.Common.DTOs.Iteration
     //    public List<Board> Boards { get; set; }
     //}
 
-    public class GetAllInterrationByProjectIdResonse
+    public class GetInterrationByBoardIdResonse
     {
         public Guid InterationId { get; set; }
         public string InterationName { get; set; }
         public InterationStatusEnum Status { get; set; }
-        public IList<BoardResponse> Boards { get; set; }
-    }
-
-    public class BoardResponse
-    {
-        public Guid BoardId { get; set; }
-        public string Title { get; set; }
-
-        public IList<WorkItemResponse> workItems { get; set; }
+        public List<WorkItemResponse>? workItemResponses { get; set; }
     }
 
     public class WorkItemResponse
@@ -41,7 +33,7 @@ namespace Capstone.Common.DTOs.Iteration
         public string Title { get; set; }
         public TicketTypeEnum TicketType { get; set; }
         public TaskStatusEnum TicketStatus { get; set; }
-        public IList<TicketResponse> Tickets { get; set; }
+        public List<TicketResponse> Tickets { get; set; }
     }
     
     public class TicketResponse
