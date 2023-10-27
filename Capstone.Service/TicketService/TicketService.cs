@@ -40,21 +40,21 @@ namespace Capstone.Service.TicketService
 
             try
             {
-                var board = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
-
-                
-                var assignToUser = await _userRepository.GetAsync(x => x.UserId == request.AssignTo, null);
-                if (assignToUser == null)
-                {
-                    throw new ArgumentException($"User with ID {request.AssignTo} does not exist", nameof(request.AssignTo));
-                }
-
-                var ticket = _mapper.Map<CreateTicketRequest, Ticket>(request);
-
-                ticket.BoardId = boardId;
-
-                await _ticketRepository.UpdateAsync(ticket);
-                await _context.SaveChangesAsync();
+                // var board = await _boardRepository.GetAsync(x => x.BoardId == boardId, null);
+                //
+                //
+                // var assignToUser = await _userRepository.GetAsync(x => x.UserId == request.AssignTo, null);
+                // if (assignToUser == null)
+                // {
+                //     throw new ArgumentException($"User with ID {request.AssignTo} does not exist", nameof(request.AssignTo));
+                // }
+                //
+                // var ticket = _mapper.Map<CreateTicketRequest, Ticket>(request);
+                //
+                // ticket.BoardId = boardId;
+                //
+                // await _ticketRepository.UpdateAsync(ticket);
+                // await _context.SaveChangesAsync();
 
                 transaction.Commit();
 
