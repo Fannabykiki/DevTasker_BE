@@ -15,6 +15,5 @@ namespace Capstone.DataAccess.Entities
         public Guid? ProjectId { get; set; }
         public List<Interation> Interations { get; set; }
         public Project Project { get; set; }
-        public List<Ticket> Tickets { get; set; }
     }
 }
