@@ -32,9 +32,9 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPut("Iteration/{iterationId}")]
-        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid boardId)
+        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
         {
-            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, boardId);
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
             if (result == null)
             {
                 return StatusCode(500);

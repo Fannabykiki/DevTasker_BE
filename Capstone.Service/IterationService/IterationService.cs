@@ -89,14 +89,14 @@ namespace Capstone.Service.IterationService
                 return false;
             }
         }
-        public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid boardId)
+        public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
         {
 
             using var transaction = _iterationRepository.DatabaseTransaction();
 
             try
             {
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == boardId, null);
+                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
 
                 if (iteration != null)
                 {

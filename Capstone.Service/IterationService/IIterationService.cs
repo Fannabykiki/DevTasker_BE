@@ -8,6 +8,6 @@ namespace Capstone.Service.IterationService
         //Task<IEnumerable<GetAllIterationResponse>> GetAllIteration();
         Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid boardId);
         Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boardId);
-        Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid boardId);
+        Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId);
     }
 }
