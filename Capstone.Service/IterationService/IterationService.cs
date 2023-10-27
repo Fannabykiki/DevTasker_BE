@@ -41,33 +41,31 @@ namespace Capstone.Service.IterationService
         
         public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid projectId)
         {
-            var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-            foreach (var interation in interations)
-            {
-                if (interation.Status == InterationStatusEnum.Current)
-                {
-                    var listWorkItem = new List<WorkItemResponse>();
-                    foreach (var board in interation.Boards)
-                    {
-                        var workItems = board.Tickets.Where(x => x.PrevId == null);
+            // var interations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+            // foreach (var interation in interations)
+            // {
+            //     if (interation.Status == InterationStatusEnum.Current)
+            //     {
+            //         var listWorkItem = new List<WorkItemResponse>();
+            //         foreach (var board in interation.Boards)
+            //         {
+            //             var workItems = board.Tickets.Where(x => x.PrevId == null);
+            //
+            //             var listTaskInWorkItem = new List<TicketResponse>();
+            //             foreach (var workItem in workItems)
+            //             {
+            //                 var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
+            //             }
+            //         }
+            //     }
+            // }
 
-                        var listTaskInWorkItem = new List<TicketResponse>();
-                        foreach (var workItem in workItems)
-                        {
-                            var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
-                        }
-                    }
-                }
-            }
-
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-
-            // Map iterations to response model
-            var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
-            return response;
+            // var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+            //
+            // // Map iterations to response model
+            // var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);
+            return null;
         }
-
-       
 
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
         {
@@ -75,23 +73,23 @@ namespace Capstone.Service.IterationService
 
             try
             {
-                var newIterationRequest = new Interation
-                {
-                    InterationName = createIterationRequest.InterationName,
-                    StartDate = createIterationRequest.StartDate,
-                    EndDate = createIterationRequest.EndDate,
-                    ProjectId = projectId,
-                    Status = createIterationRequest.Status
-                };
+                //var newIterationRequest = new Interation
+                //{
+                //    InterationName = createIterationRequest.InterationName,
+                //    StartDate = createIterationRequest.StartDate,
+                //    EndDate = createIterationRequest.EndDate,
+                //    ProjectId = projectId,
+                //    Status = createIterationRequest.Status
+                //};
 
                
-                var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
-                project.Interations.Add(newIteration);
-                await _projectRepository.UpdateAsync(project);
+                //var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
+                //var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+                //project.Interations.Add(newIteration);
+                //await _projectRepository.UpdateAsync(project);
 
-                _iterationRepository.SaveChanges();
-                _projectRepository.SaveChanges();
+                //_iterationRepository.SaveChanges();
+                //_projectRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
