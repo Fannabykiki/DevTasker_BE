@@ -69,7 +69,7 @@ namespace Capstone.DataAccess
 
             modelBuilder.Entity<TicketType>()
                 .HasOne(sc => sc.Ticket)
-                .WithOne(s => s.TaskType)
+                .WithOne(s => s.TicketType)
                 .HasForeignKey<Ticket>(sc => sc.TicketId);
 
             modelBuilder.Entity<Ticket>().HasKey(sc => new { sc.TicketId });
