@@ -61,9 +61,9 @@ namespace Capstone.Service.TicketService
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
-            try
-            {
-                var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+            /* try
+             {
+                 var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
 
                 if (ticketEntity != null)
                 {
@@ -77,22 +77,23 @@ namespace Capstone.Service.TicketService
                     // ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
                     // ticketEntity.InterationId = updateTicketRequest.InterationId;
 
-                    await _context.SaveChangesAsync();
+                     await _context.SaveChangesAsync();
 
-                    transaction.Commit();
-                    return true;
-                }
-                else
-                {
-                    transaction.RollBack();
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                transaction.RollBack();
-                return false;
-            }
+                     transaction.Commit();
+                     return true;
+                 }
+                 else
+                 {
+                     transaction.RollBack();
+                     return false;
+                 }
+             }
+             catch (Exception)
+             {
+                 transaction.RollBack();
+                 return false;
+             }*/
+            return true;
         }
 
     }
