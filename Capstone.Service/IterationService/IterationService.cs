@@ -161,5 +161,28 @@ namespace Capstone.Service.IterationService
                 return false;
             }
         }
+
+        public async Task<IEnumerable<GetInterrationByIdResonse>> GetIterationsById(Guid iterationId)
+        {
+           
+                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
+
+                if (iteration == null)
+                {
+                    // Trả về null hoặc danh sách trống nếu không tìm thấy phiên bản dựa trên iterationId.
+                    return new List<GetInterrationByIdResonse>();
+                }
+
+                var response = new GetInterrationByIdResonse
+                {
+                    InterationId = iteration.InterationId,
+                    InterationName = iteration.InterationName,
+                    Status = iteration.Status
+                };
+
+                return new List<GetInterrationByIdResonse> { response };
+            
+
+        }
     }
 }
