@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -27,6 +28,70 @@ namespace Capstone.Service.IterationService
             _boardRepository = boardRepository;
             _ticketRepository = ticketRepository;
         }
+        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
+        {
+            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
+
+            var result = new List<GetInterrationByBoardIdResonse>();
+
+            foreach (var iteration in iterations)
+            {
+                var response = new GetInterrationByBoardIdResonse
+                {
+                    InterationId = iteration.InterationId,
+                    InterationName = iteration.InterationName,
+                    Status = iteration.Status
+                };
+
+                if (iteration.Status == InterationStatusEnum.Current)
+                {
+                    response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
+                }
+
+                result.Add(response);
+            }
+
+            return result;
+        }
+
+        private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
+        {
+            var workItems = new List<WorkItemResponse>();
+
+            foreach (var ticket in iteration.Tickets)
+            {
+                if (ticket.PrevId == null)
+                {
+                    var item = new WorkItemResponse
+                    {
+                        TicketId = ticket.TicketId,
+                        Title = ticket.Title,
+                        TicketType = ticket.TicketType,
+                        TicketStatus = ticket.TicketStatus
+                    };
+
+                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
+
+                    workItems.Add(item);
+                }
+            }
+
+            return workItems;
+        }
+
+        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, List<Ticket> allTickets)
+        {
+            return allTickets
+              .Where(x => x.PrevId == parentId)
+              .Select(x => new TicketResponse
+              {
+                  TicketId = x.TicketId,
+                  Title = x.Title,
+                  TicketStatus = x.TicketStatus,
+                  TicketType = x.TicketType
+              })
+              .ToList();
+        }
 
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boarId)
         {
@@ -36,14 +101,14 @@ namespace Capstone.Service.IterationService
             {
                 var newIterationRequest = new Interation
                 {
-                   InterationName = createIterationRequest.InterationName,
-                   StartDate = createIterationRequest.StartDate,
-                   EndDate = createIterationRequest.EndDate,
+                    InterationName = createIterationRequest.InterationName,
+                    StartDate = createIterationRequest.StartDate,
+                    EndDate = createIterationRequest.EndDate,
                     BoardId = boarId,
-                   Status = createIterationRequest.Status
+                    Status = createIterationRequest.Status
                 };
 
-               
+
                 var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
                 var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
                 board.Interations.Add(newIteration);
