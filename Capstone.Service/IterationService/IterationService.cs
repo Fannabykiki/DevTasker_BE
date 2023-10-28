@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -27,7 +28,6 @@ namespace Capstone.Service.IterationService
             _boardRepository = boardRepository;
             _ticketRepository = ticketRepository;
         }
-        
         public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
         {
             var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
@@ -101,14 +101,14 @@ namespace Capstone.Service.IterationService
             {
                 var newIterationRequest = new Interation
                 {
-                   InterationName = createIterationRequest.InterationName,
-                   StartDate = createIterationRequest.StartDate,
-                   EndDate = createIterationRequest.EndDate,
+                    InterationName = createIterationRequest.InterationName,
+                    StartDate = createIterationRequest.StartDate,
+                    EndDate = createIterationRequest.EndDate,
                     BoardId = boarId,
-                   Status = createIterationRequest.Status
+                    Status = createIterationRequest.Status
                 };
 
-               
+
                 var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
                 var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
                 board.Interations.Add(newIteration);

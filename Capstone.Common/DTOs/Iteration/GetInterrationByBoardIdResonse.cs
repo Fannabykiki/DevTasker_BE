@@ -35,7 +35,7 @@ namespace Capstone.Common.DTOs.Iteration
         public TaskStatusEnum TicketStatus { get; set; }
         public List<TicketResponse> Tickets { get; set; }
     }
-    
+
     public class TicketResponse
     {
         public Guid TicketId { get; set; }
