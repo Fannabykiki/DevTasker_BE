@@ -23,6 +23,8 @@ using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
 using Capstone.Service.BoardService;
+using Capstone.API.Extentions.AuthorizeMiddleware;
+using Microsoft.AspNetCore.Authorization;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -98,7 +100,6 @@ builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService> ()
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
-
 builder.Services.AddControllers()
                 .AddFluentValidation(options =>
                 {
@@ -135,7 +136,15 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAuthorization(
+	options =>
+	{
+		options.AddPolicy("CanView", policy =>
+		{
+			policy.Requirements.Add(new PermissionRequirement(null));
+		});
+	}
+	);
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
