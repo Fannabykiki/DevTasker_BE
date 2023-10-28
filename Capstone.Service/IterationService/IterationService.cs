@@ -27,33 +27,70 @@ namespace Capstone.Service.IterationService
             _boardRepository = boardRepository;
             _ticketRepository = ticketRepository;
         }
-
-        public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid boardId)
+        
+        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
         {
-            /*var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
-            foreach (var interation in interations)
-            {
-                if (interation.Status == InterationStatusEnum.Current)
-                {
-                    var listWorkItem = new List<WorkItemResponse>();
-                    foreach (var board in interation.tick)
-                    {
-                        var workItems = board.Tickets.Where(x => x.PrevId == null);
+            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
 
-                        var listTaskInWorkItem = new List<TicketResponse>();
-                        foreach (var workItem in workItems)
-                        {
-                            var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
-                        }
-                    }
+            var result = new List<GetInterrationByBoardIdResonse>();
+
+            foreach (var iteration in iterations)
+            {
+                var response = new GetInterrationByBoardIdResonse
+                {
+                    InterationId = iteration.InterationId,
+                    InterationName = iteration.InterationName,
+                    Status = iteration.Status
+                };
+
+                if (iteration.Status == InterationStatusEnum.Current)
+                {
+                    response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
+                }
+
+                result.Add(response);
+            }
+
+            return result;
+        }
+
+        private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
+        {
+            var workItems = new List<WorkItemResponse>();
+
+            foreach (var ticket in iteration.Tickets)
+            {
+                if (ticket.PrevId == null)
+                {
+                    var item = new WorkItemResponse
+                    {
+                        TicketId = ticket.TicketId,
+                        Title = ticket.Title,
+                        TicketType = ticket.TicketType,
+                        TicketStatus = ticket.TicketStatus
+                    };
+
+                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
+
+                    workItems.Add(item);
                 }
             }
 
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+            return workItems;
+        }
 
-            // Map iterations to response model
-            var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);*/
-            return null;
+        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, List<Ticket> allTickets)
+        {
+            return allTickets
+              .Where(x => x.PrevId == parentId)
+              .Select(x => new TicketResponse
+              {
+                  TicketId = x.TicketId,
+                  Title = x.Title,
+                  TicketStatus = x.TicketStatus,
+                  TicketType = x.TicketType
+              })
+              .ToList();
         }
 
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boarId)
