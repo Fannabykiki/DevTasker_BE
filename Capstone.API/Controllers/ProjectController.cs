@@ -1,4 +1,4 @@
-using Capstone.API.Extentions;
+using Capstone.API.Extentions.AuthorizeMiddleware;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace Capstone.API.Controllers
 {
-	[Route("api/project-management")]
+    [Route("api/project-management")]
 	[ApiController]
 	public class ProjectController : ControllerBase
 	{
