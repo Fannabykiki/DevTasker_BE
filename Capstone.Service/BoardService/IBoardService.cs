@@ -10,7 +10,7 @@ namespace Capstone.Service.BoardService
 {
     public interface IBoardService 
     {
-        Task<bool> CreateBoard(CreateBoardRequest createBoardRequest, Guid iterationId);
+        Task<bool> CreateBoard(CreateBoardRequest createBoardRequest, Guid projectId);
         Task<bool> UpdateBoard(UpdateBoardRequest updateBoardRequest, Guid boardId);
     }
 }

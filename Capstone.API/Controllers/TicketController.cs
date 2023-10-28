@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
@@ -22,9 +23,21 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPost("Ticket")]
-        public async Task<IActionResult> CreateProject(CreateTicketRequest createTicketRequest, Guid boardId)
+        public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
         {
-            var result = await _ticketService.CreateTicket(createTicketRequest, boardId);
+            var result = await _ticketService.CreateTicket(createTicketRequest, interationId);
+
+            return Ok(result);
+        }
+
+        [HttpPut("Ticket/{ticketId}")]
+        public async Task<IActionResult> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
+        {
+            var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
 
             return Ok(result);
         }

@@ -24,9 +24,9 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPost("Iteration")]
-        public async Task<IActionResult> CreateIteration(CreateIterationRequest createIterationRequest, Guid projectId)
+        public async Task<IActionResult> CreateIteration(CreateIterationRequest createIterationRequest, Guid boardId)
         {
-            var result = await _iterationService.CreateIteration(createIterationRequest, projectId);
+            var result = await _iterationService.CreateIteration(createIterationRequest, boardId);
 
             return Ok(result);
         }
@@ -43,13 +43,13 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-       /* [EnableQuery]
-        [HttpGet("Iteration")]
-        public async Task<ActionResult<IQueryable<GetAllIterationResponse>>> GetAllIteration()
+
+        [HttpGet("Iteration/{boardId}")]
+        public async Task<ActionResult<IQueryable<GetInterrationByBoardIdResonse>>> GetAllIteration(Guid boardId)
         {
-            var result = await _iterationService.GetAllIteration();
+            var result = await _iterationService.GetIterationsByBoardId(boardId);
 
             return Ok(result);
-        }*/
+        }
     }
 }
