@@ -44,10 +44,5 @@ namespace Capstone.Common.DTOs.Iteration
         public TaskStatusEnum TicketStatus { get; set; }
     }
 
-    public class GetInterrationByIdResonse
-    {
-        public Guid InterationId { get; set; }
-        public string InterationName { get; set; }
-        public InterationStatusEnum Status { get; set; }
-    }
+   
 }
