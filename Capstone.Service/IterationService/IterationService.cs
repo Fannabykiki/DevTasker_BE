@@ -28,34 +28,6 @@ namespace Capstone.Service.IterationService
             _ticketRepository = ticketRepository;
         }
 
-        public async Task<List<GetAllInterrationByProjectIdResonse>> GetIterationsByProjectId(Guid boardId)
-        {
-            /*var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
-            foreach (var interation in interations)
-            {
-                if (interation.Status == InterationStatusEnum.Current)
-                {
-                    var listWorkItem = new List<WorkItemResponse>();
-                    foreach (var board in interation.tick)
-                    {
-                        var workItems = board.Tickets.Where(x => x.PrevId == null);
-
-                        var listTaskInWorkItem = new List<TicketResponse>();
-                        foreach (var workItem in workItems)
-                        {
-                            var taskInWorkItems = board.Tickets.Where(x => x.PrevId == workItem.TicketId);
-                        }
-                    }
-                }
-            }
-
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-
-            // Map iterations to response model
-            var response = _mapper.Map<List<GetAllInterrationByProjectIdResonse>>(interations);*/
-            return null;
-        }
-
         public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boarId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
