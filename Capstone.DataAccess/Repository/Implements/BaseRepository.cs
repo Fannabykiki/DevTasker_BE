@@ -87,9 +87,9 @@ namespace Capstone.DataAccess.Repository.Implements
             return predicate == null ? _dbSet : _dbSet.Where(predicate);
         }
 
-        public int SaveChanges()
+        public async Task<int> SaveChanges()
         {
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<T> UpdateAsync(T entity)

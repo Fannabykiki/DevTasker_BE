@@ -41,9 +41,11 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
+			var projectId = Guid.NewGuid();
+
 			var newProjectRequest = new Project
-			{
-				ProjectId = Guid.NewGuid(),
+			{	
+				ProjectId = projectId,
 				ProjectName = createProjectRequest.ProjectName,
 				CreateAt = createProjectRequest.CreateAt,
 				EndDate = createProjectRequest.EndDate,
@@ -52,35 +54,34 @@ public class ProjectService : IProjectService
 				ProjectStatus = StatusEnum.Active,
 				CreateBy = createProjectRequest.CreateBy,
 				Description = createProjectRequest.Description,
-				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")
+				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
+				Board = new Board
+				{
+					BoardId = Guid.NewGuid(),
+					ProjectId = projectId,
+					DeleteAt = null,
+					CreateAt = DateTime.UtcNow,
+					Status = StatusEnum.Active,
+					Title = "Board Default",
+					UpdateAt = null,
+				}
 			};
 
 			var newProject = await _projectRepository.CreateAsync(newProjectRequest);
-
-			var newBoard = new Board()
-			{
-				BoardId = Guid.NewGuid(),
-				ProjectId = newProject.ProjectId,
-				DeleteAt = null,
-				CreateAt = DateTime.UtcNow,
-				Status = StatusEnum.Active,
-				Title = "Board Default",
-				UpdateAt = null,
-			};
-
-			var board = await _boardRepository.CreateAsync(newBoard);
+			await _projectRepository.SaveChanges();
 
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.UtcNow,
 				Status = InterationStatusEnum.Current,
-				BoardId = board.BoardId,
+				BoardId = newProjectRequest.Board.BoardId,
 				EndDate = DateTime.UtcNow.AddDays(14),
 				InterationName = "Interation 1",
 				InterationId = Guid.NewGuid(),
 			};
 
 			await _interationRepository.CreateAsync(newInteration);
+			await _interationRepository.SaveChanges();
 
 			var newPo = new ProjectMember
 			{
@@ -102,10 +103,8 @@ public class ProjectService : IProjectService
 
 			await _projectMemberRepository.CreateAsync(newPo);
 			await _projectMemberRepository.CreateAsync(newAdmin);
-			_projectMemberRepository.SaveChanges();
-			_boardRepository.SaveChanges();
-			_interationRepository.SaveChanges();
-			_projectRepository.SaveChanges();
+
+			await _projectMemberRepository.SaveChanges();
 
 			transaction.Commit();
 			return true;

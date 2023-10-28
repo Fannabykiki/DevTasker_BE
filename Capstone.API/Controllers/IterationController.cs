@@ -43,13 +43,13 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-       /* [EnableQuery]
-        [HttpGet("Iteration")]
-        public async Task<ActionResult<IQueryable<GetAllIterationResponse>>> GetAllIteration()
+
+        [HttpGet("Iteration/{boardId}")]
+        public async Task<ActionResult<IQueryable<GetInterrationByBoardIdResonse>>> GetAllIteration(Guid boardId)
         {
-            var result = await _iterationService.GetAllIteration();
+            var result = await _iterationService.GetIterationsByBoardId(boardId);
 
             return Ok(result);
-        }*/
+        }
     }
 }
