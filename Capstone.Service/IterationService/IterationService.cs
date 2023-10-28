@@ -67,8 +67,8 @@ namespace Capstone.Service.IterationService
                     {
                         TicketId = ticket.TicketId,
                         Title = ticket.Title,
-                        TicketType = ticket.TicketType,
-                        TicketStatus = ticket.TicketStatus
+                        //TicketType = ticket.TicketType,
+                       // TicketStatus = ticket.TicketStatus
                     };
 
                     item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
@@ -88,8 +88,8 @@ namespace Capstone.Service.IterationService
               {
                   TicketId = x.TicketId,
                   Title = x.Title,
-                  TicketStatus = x.TicketStatus,
-                  TicketType = x.TicketType
+                 // TicketStatus = x.TicketStatus,
+                  //TicketType = x.TicketType
               })
               .ToList();
         }
