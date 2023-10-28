@@ -42,7 +42,7 @@ namespace Capstone.Service.IterationService
                     InterationName = iteration.InterationName,
                     Status = iteration.Status
                 };
-
+                
                 if (iteration.Status == InterationStatusEnum.Current)
                 {
                     response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
@@ -56,6 +56,7 @@ namespace Capstone.Service.IterationService
 
         private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
         {
+            if (iteration.Tickets == null) return null;
             var workItems = new List<WorkItemResponse>();
 
             foreach (var ticket in iteration.Tickets)
