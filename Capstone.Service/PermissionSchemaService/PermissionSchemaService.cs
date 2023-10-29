@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Schema;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
@@ -39,7 +40,7 @@ namespace Capstone.Service.PermissionSchemaService
 		public async Task<IEnumerable<GetAllPermissionSchemaResponse>> GetAllSchema()
         {
 			var schemas = await _schemaRepository.GetAllWithOdata(x => true,null);
-            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas); ;
+            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas); 
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
@@ -267,6 +268,31 @@ namespace Capstone.Service.PermissionSchemaService
             //    transaction.RollBack();
             //    return false;
             //}
+        }
+
+        public async Task<IEnumerable<GetAllRoleResponse>> GetRolesBySchemaId(Guid SchemaId)
+        {
+            var schema = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == SchemaId, null);
+            var roleIds = schema.Select(x => x.RoleId).ToList();
+            HashSet<Guid> guids= new HashSet<Guid>();
+            var roles = new List<GetAllRoleResponse>();
+
+            foreach (var roleId in roleIds)
+            {
+                guids.Add((Guid)roleId);
+            }
+
+            foreach (var roleId in guids)
+            {
+                var role = await _roleRepository.GetAsync(x => x.RoleId == roleId, null);
+                roles.Add(new GetAllRoleResponse
+                {
+                    RoleId = role.RoleId,
+                    RoleName = role.RoleName,
+                    Description = role.Description 
+                });
+            }
+            return _mapper.Map<List<GetAllRoleResponse>>(roles);
         }
     }
 }

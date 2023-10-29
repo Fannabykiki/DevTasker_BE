@@ -1,5 +1,6 @@
 ﻿using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Schema;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Capstone.Service.PermissionSchemaService
     {
         Task<IEnumerable<GetAllPermissionSchemaResponse>> GetAllSchema();
         Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId);
+        Task<IEnumerable<GetAllRoleResponse>> GetRolesBySchemaId(Guid SchemaId);
         Task<bool> CreateNewPermissionSchema(CreateNewSchemaRequest createNewSchemaRequest);
         Task<bool> UpdateSchema(Guid schemaId, UpdateSchemaRequest updateSchemaRequest);
         Task<bool> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest crearePermissionSchemaRequest);

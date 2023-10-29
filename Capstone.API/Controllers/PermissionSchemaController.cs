@@ -36,6 +36,15 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+        
+        [EnableQuery]
+        [HttpGet("schemas/{schemaId}/roles")]
+        public async Task<ActionResult<IQueryable<GetAllPermissionSchemaResponse>>> GetAllRolesInSchema(Guid schemaId)
+        {
+            var result = await _permissionSchemaService.GetRolesBySchemaId(schemaId);
+
+            return Ok(result);
+        }
 
         [HttpGet("schemas/{schemaId:Guid}")]
         public async Task<IActionResult> GetSchemaById(Guid schemaId)
