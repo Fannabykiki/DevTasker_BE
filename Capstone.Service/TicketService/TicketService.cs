@@ -14,7 +14,7 @@ namespace Capstone.Service.TicketService
 
         private readonly CapstoneContext _context;
         private readonly ITicketRepository _ticketRepository;
-        private readonly ITicketStatusRepository _statusRepository;
+        private readonly IStatusRepository _statusRepository;
         private readonly ITicketTypeRepository _typeRepository;
         private readonly ITicketHistoryRepository _ticketHistoryRepository;
         private readonly ITicketTypeRepository ticketTypeRepository;
@@ -22,7 +22,7 @@ namespace Capstone.Service.TicketService
         private readonly IUserRepository _userRepository;
         private readonly IInterationRepository _iterationRepository;
 
-        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
+        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, IStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
