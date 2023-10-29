@@ -40,7 +40,7 @@ namespace Capstone.Service.IterationService
                 {
                     InterationId = iteration.InterationId,
                     InterationName = iteration.InterationName,
-                    Status = iteration.Status
+                    Status = iteration.Status.ToString(),
                 };
                 
                 if (iteration.Status == InterationStatusEnum.Current)
@@ -59,39 +59,39 @@ namespace Capstone.Service.IterationService
             if (iteration.Tickets == null) return null;
             var workItems = new List<WorkItemResponse>();
 
-            // foreach (var ticket in iteration.Tickets)
-            // {
-            //     if (ticket.PrevId == null)
-            //     {
-            //         var item = new WorkItemResponse
-            //         {
-            //             TicketId = ticket.TicketId,
-            //             Title = ticket.Title,
-            //             TicketType = ticket.TicketType,
-            //             TicketStatus = ticket.TicketStatus
-            //         };
-            //
-            //         item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
-            //
-            //         workItems.Add(item);
-            //     }
-            // }
+            foreach (var ticket in iteration.Tickets)
+            {
+                if (ticket.PrevId == null)
+                {
+                    var item = new WorkItemResponse
+                    {
+                        TicketId = ticket.TicketId,
+                        Title = ticket.Title,
+                        TicketType = ticket.TicketType.Title,
+                        TicketStatus = ticket.TaskStatus.Title
+                    };
+
+                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
+
+                    workItems.Add(item);
+                }
+            }
 
             return workItems;
         }
 
         private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, List<Ticket> allTickets)
         {
-            // return allTickets
-            //   .Where(x => x.PrevId == parentId)
-            //   .Select(x => new TicketResponse
-            //   {
-            //       TicketId = x.TicketId,
-            //       Title = x.Title,
-            //       TicketStatus = x.TicketStatus,
-            //       TicketType = x.TicketType
-            //   })
-            //   .ToList();
+            return allTickets
+              .Where(x => x.PrevId == parentId)
+              .Select(x => new TicketResponse
+              {
+                  TicketId = x.TicketId,
+                  Title = x.Title,
+                  TicketType = x.TicketType.Title,
+                  TicketStatus = x.TaskStatus.Title
+              })
+              .ToList();
             return null;
         }
 

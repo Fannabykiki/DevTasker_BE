@@ -46,26 +46,29 @@ namespace Capstone.Service.PermissionSchemaService
         {   
             var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
             var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId,x => x.Permission);
+            var permissions = await _permissionRepository.GetAllWithOdata(x =>true,null);
             var permissionRoles = new List<PermissionRolesDTO>();
 
-            foreach (var role in permissionSchemas)
+            foreach (var permission in permissions)
             {
-				var roles = await _schemaRepository.GetPermissionRolesBySchemaId(role.PermissionId,schemaId);
+				var per = permissionSchemas.Where(x => x.PermissionId == permission.PermissionId);
+				var roles = per.Select(x => x.RoleId);
 				var permissionInRoles = new List<RoleInPermissionDTO>();
 				foreach (var item in roles)
                 {
+                    var role = await _roleRepository.GetAsync(x => x.RoleId == item, null);
                     permissionInRoles.Add(new RoleInPermissionDTO
                     {
-                        Description = item.Description,
-                        RoleId = item.RoleId,
-                        RoleName = item.RoleName,
+                        Description = role.Description,
+                        RoleId = role.RoleId,
+                        RoleName = role.RoleName,
                     });
 				}
-				permissionRoles.Add(new PermissionRolesDTO
+                permissionRoles.Add(new PermissionRolesDTO
 				{
-					PermissionId = role.PermissionId,
-					Name = role.Permission.Name,
-					Description = role.Permission.Description,
+					PermissionId = permission.PermissionId,
+					Name = permission.Name,
+					Description = permission.Description,
                     Roles = permissionInRoles
 				});
 			}
