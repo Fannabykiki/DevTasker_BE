@@ -149,10 +149,15 @@ public class ProjectService : IProjectService
 	}
 
 
-	public async Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId)
+	public async Task<ListViewMemberProject> GetMemberByProjectId(Guid projectId)
 	{
 		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
-		return _mapper.Map<List<ViewMemberProject>>(projects);
+		var listMem =  _mapper.Map<List<ViewMemberProject>>(projects);
+		return new ListViewMemberProject {
+			Members = listMem,
+			numberOfMember = listMem.Count()
+        };
+
 	}
 
 	public async Task<bool> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)

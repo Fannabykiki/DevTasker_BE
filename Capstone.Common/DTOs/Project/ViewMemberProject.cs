@@ -8,4 +8,11 @@
 		public Guid ProjectId { get; set; }
 		public bool IsOwner { get; set; }
 	}
+	public class ListViewMemberProject
+	{
+		public List<ViewMemberProject> Members { get; set; }
+		public int numberOfMember { get; set; }
+	}
+
+
 }
