@@ -1,4 +1,5 @@
-﻿using Capstone.Common.Enums;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Capstone.Common.Enums;
 
 namespace Capstone.DataAccess.Entities
 {
@@ -9,8 +10,11 @@ namespace Capstone.DataAccess.Entities
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
         public Guid BoardId { get; set; }
-        public InterationStatusEnum Status { get; set; }
+        [ForeignKey("Status")] 
+        public Guid StatusId { get; set; }
         public Board Board { get; set; }
+        [ForeignKey("StatusId")]
+        public Status Status { get; set; }
         public List<Ticket> Tickets { get; set; }
     }
 }

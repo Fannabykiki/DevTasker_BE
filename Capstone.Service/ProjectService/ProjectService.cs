@@ -51,7 +51,7 @@ public class ProjectService : IProjectService
 				EndDate = createProjectRequest.EndDate,
 				StartDate = createProjectRequest.StartDate,
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
-				ProjectStatus = StatusEnum.Active,
+				StatusId = Guid.Parse(""),
 				CreateBy = createProjectRequest.CreateBy,
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
@@ -61,7 +61,7 @@ public class ProjectService : IProjectService
 					ProjectId = projectId,
 					DeleteAt = null,
 					CreateAt = DateTime.UtcNow,
-					Status = StatusEnum.Active,
+					StatusId = Guid.Parse(""),
 					Title = "Board Default",
 					UpdateAt = null,
 				}
@@ -73,7 +73,7 @@ public class ProjectService : IProjectService
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.UtcNow,
-				Status = InterationStatusEnum.Current,
+				StatusId = Guid.Parse(""),
 				BoardId = newProjectRequest.Board.BoardId,
 				EndDate = DateTime.UtcNow.AddDays(14),
 				InterationName = "Interation 1",
@@ -119,7 +119,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => x.ProjectStatus == StatusEnum.Active, x => x.ProjectMembers.Where(m => m.UserId == userId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse(""), x => x.ProjectMembers.Where(m => m.UserId == userId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
@@ -228,7 +228,7 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.ProjectStatus = StatusEnum.Inactive;
+			project.StatusId = Guid.Parse("");
 			project.DeleteAt = DateTime.UtcNow;
 			project.ExpireAt = DateTime.UtcNow.AddDays(30);
 			await _projectRepository.UpdateAsync(project);
@@ -249,7 +249,7 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.ProjectStatus = StatusEnum.Active;
+			project.StatusId = Guid.Parse("");
 			project.DeleteAt = null;
 			project.ExpireAt = null;
 			await _projectRepository.UpdateAsync(project);
@@ -279,7 +279,7 @@ public class ProjectService : IProjectService
 			ProjectId = project.ProjectId,
 			ProjectName = project.ProjectName,
 			Description = project.Description,
-			ProjectStatus = project.ProjectStatus,
+			StatusId = project.StatusId,
 			StartDate = project.StartDate,
 			EndDate = project.EndDate,
 			CreateBy = project.CreateBy,

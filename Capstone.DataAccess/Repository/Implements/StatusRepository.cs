@@ -3,9 +3,9 @@ using Capstone.DataAccess.Repository.Interfaces;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
-    public class TicketStatusRepository : BaseRepository<TicketStatus>, ITicketStatusRepository
+    public class StatusRepository : BaseRepository<Status>, IStatusRepository
     {
-        public TicketStatusRepository(CapstoneContext context) : base(context)
+        public StatusRepository(CapstoneContext context) : base(context)
         {
         }
     }

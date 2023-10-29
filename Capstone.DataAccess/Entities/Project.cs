@@ -11,7 +11,7 @@ namespace Capstone.DataAccess.Entities
         public Guid ProjectId { get; set; }
         public string ProjectName { get; set; }
 		public string Description { get; set; }
-		public StatusEnum ProjectStatus { get; set; }
+		public Guid StatusId { get; set; }
         public DateTime StartDate{ get; set; }
         public DateTime EndDate { get; set; }
         public Guid CreateBy { get; set; }
@@ -22,6 +22,7 @@ namespace Capstone.DataAccess.Entities
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
 		public Board Board { get; set; }
-		public Schema Schemas { get; set; }
+		public Status Status { get; set; }
+		public Schema Schema { get; set; }
     }
 }
