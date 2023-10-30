@@ -163,5 +163,29 @@ namespace Capstone.Service.IterationService
                 return false;
             }
         }
+
+        public async Task<IEnumerable<GetInterrationByIdResonse>> GetIterationsById(Guid iterationId)
+        {
+            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
+
+            if (iteration == null)
+            {
+                return new List<GetInterrationByIdResonse>();
+            }
+
+            
+            var response = new GetInterrationByIdResonse
+            {
+                InterationId = iteration.InterationId,
+                InterationName = iteration.InterationName,
+                StartDate = iteration.StartDate,
+                EndDate = iteration.EndDate,
+                BoardId = iteration.BoardId,
+                Status = iteration.Status
+            };
+
+            return new List<GetInterrationByIdResonse> { response };
+        }
+
     }
 }
