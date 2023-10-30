@@ -14,7 +14,8 @@ using System.Text;
 using MimeKit.Text;
 using AutoMapper;
 using System.Security.Claims;
-
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Capstone.Service.UserService
 {
@@ -23,12 +24,15 @@ namespace Capstone.Service.UserService
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
 		private readonly IMapper _mapper;
+		private readonly IServiceScopeFactory _serviceScopeFactory;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper)
+
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
 		{
 			_context = context;
 			_userRepository = userRepository;
 			_mapper = mapper;
+			_serviceScopeFactory = serviceScopeFactory;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
@@ -76,54 +80,54 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-        public async Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
-        {
-            try
-            {
-                var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null);
-                if (user == null)
+		public async Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
+		{
+			try
+			{
+				var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null);
+				if (user == null)
 				{
 					Random random = new Random();
-                    CreatePasswordHash(Convert.ToString(RandomNumberGenerator.GetBytes(64)), out byte[] passwordHash, out byte[] passwordSalt);
+					CreatePasswordHash(Convert.ToString(RandomNumberGenerator.GetBytes(64)), out byte[] passwordHash, out byte[] passwordSalt);
 
-                    var newUserRequest = new User
-                    {
-                        UserId = Guid.NewGuid(),
-                        PasswordHash = passwordHash,
-                        PasswordSalt = passwordSalt,
-                        IsAdmin = false,
-                        JoinedDate = DateTime.UtcNow,
-                        IsFirstTime = true,
-                        VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
-                        Email = createUserGGLoginRequest.Email,
-                        Status = Common.Enums.StatusEnum.Active,
+					var newUserRequest = new User
+					{
+						UserId = Guid.NewGuid(),
+						PasswordHash = passwordHash,
+						PasswordSalt = passwordSalt,
+						IsAdmin = false,
+						JoinedDate = DateTime.UtcNow,
+						IsFirstTime = true,
+						VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
+						Email = createUserGGLoginRequest.Email,
+						Status = Common.Enums.StatusEnum.Active,
 						VerifiedAt = DateTime.UtcNow
-                    };
+					};
 
-                    var newUser = await _userRepository.CreateAsync(newUserRequest);
-                    _userRepository.SaveChanges();
+					var newUser = await _userRepository.CreateAsync(newUserRequest);
+					_userRepository.SaveChanges();
 
-                    return new CreateUserResponse
-                    {
-                        IsSucced = true,
-                        VerifyToken = newUser.VerificationToken
-                    };
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception)
-            {
-                return new CreateUserResponse
-                {
-                    IsSucced = false,
-                };
-            }
-        }
+					return new CreateUserResponse
+					{
+						IsSucced = true,
+						VerifyToken = newUser.VerificationToken
+					};
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception)
+			{
+				return new CreateUserResponse
+				{
+					IsSucced = false,
+				};
+			}
+		}
 
-        public Task<bool> DeleteAsync(Guid id)
+		public Task<bool> DeleteAsync(Guid id)
 		{
 			throw new NotImplementedException();
 		}
@@ -153,14 +157,14 @@ namespace Capstone.Service.UserService
 
 					// Update user properties from request
 
-                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
-                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
-                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
-                    user.Address = updateProfileRequest.Address ?? user.Address;
-                    user.Dob = updateProfileRequest.DoB ?? user.Dob;
-                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
-                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
-                    // Save changes
+					user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+					user.UserName = updateProfileRequest.UserName ?? user.UserName;
+					user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+					user.Address = updateProfileRequest.Address ?? user.Address;
+					user.Dob = updateProfileRequest.DoB ?? user.Dob;
+					user.Gender = updateProfileRequest.Gender ?? user.Gender;
+					user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+					// Save changes
 
 					var result = await _userRepository.UpdateAsync(user);
 					_userRepository.SaveChanges();
@@ -211,18 +215,32 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<UserViewModel> LoginUser(string email, string password)
+		public async Task<UserViewModel?> LoginUser(string email, string password)
 		{
-			var user = await _userRepository.GetAsync(x => x.Email == email, null);
-			if (user != null)
+			using (var transaction = _userRepository.DatabaseTransaction())
 			{
-				if (!await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+				try
 				{
-					return null;
+					var user = await _userRepository.GetAsync(x => x.Email == email, null);
+					if (user != null)
+					{
+						if (!await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+						{
+							return null;
+						}
+						else
+						{
+							return _mapper.Map<UserViewModel>(user);
+						}
+					}
 				}
-				else
+				catch(Exception ex) 
 				{
-					return _mapper.Map<UserViewModel>(user);
+					transaction.RollBack();
+				}
+				finally
+				{
+					transaction.Dispose();
 				}
 			}
 			return null;
@@ -268,7 +286,9 @@ namespace Capstone.Service.UserService
 
 		public async Task<CreateUserResponse> VerifyUser(string email)
 		{
-			using (var transaction = _userRepository.DatabaseTransaction())
+			using var scope = _serviceScopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
+			using (var transaction = context.Database.BeginTransaction())
 			{
 				try
 				{
@@ -296,12 +316,16 @@ namespace Capstone.Service.UserService
 				}
 				catch (Exception)
 				{
-					transaction.RollBack();
+					transaction.Rollback();
 
 					return new CreateUserResponse
 					{
 						IsSucced = false,
 					};
+				}
+				finally
+				{
+					transaction.Dispose();
 				}
 			}
 		}
@@ -415,36 +439,36 @@ namespace Capstone.Service.UserService
 					updateRequest.PassResetToken = null;
 					updateRequest.ResetTokenExpires = null;
 
-                    await _userRepository.UpdateAsync(updateRequest);
-                    _userRepository.SaveChanges();
-                    transaction.Commit();
+					await _userRepository.UpdateAsync(updateRequest);
+					_userRepository.SaveChanges();
+					transaction.Commit();
 
-                    return true;
-                }
-                catch (Exception)
-                {
-                    transaction.RollBack();
+					return true;
+				}
+				catch (Exception)
+				{
+					transaction.RollBack();
 
-                    return false;
-                }
-            }
-        }
-        public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
-        {
-            using (var transaction = _userRepository.DatabaseTransaction())
-            {
-                try
-                {
-                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null);
-                    if (updateRequest == null)
-                    {
-                        return false;
-                    }
+					return false;
+				}
+			}
+		}
+		public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
+		{
+			using (var transaction = _userRepository.DatabaseTransaction())
+			{
+				try
+				{
+					var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null);
+					if (updateRequest == null)
+					{
+						return false;
+					}
 
-                    updateRequest.Status = changeUserStatusRequest.StatusChangeTo;
+					updateRequest.Status = changeUserStatusRequest.StatusChangeTo;
 
-                    await _userRepository.UpdateAsync(updateRequest);
-                    _userRepository.SaveChanges();
+					await _userRepository.UpdateAsync(updateRequest);
+					_userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -461,7 +485,9 @@ namespace Capstone.Service.UserService
 
 		public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken, string accessToken)
 		{
-			using (var transaction = _userRepository.DatabaseTransaction())
+			using var scope = _serviceScopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
+			using (var transaction = context.Database.BeginTransaction())
 			{
 				try
 				{
@@ -485,9 +511,13 @@ namespace Capstone.Service.UserService
 				}
 				catch (Exception)
 				{
-					transaction.RollBack();
+					transaction.Rollback();
 
 					return false;
+				}
+				finally
+				{
+					transaction.Dispose();
 				}
 			}
 		}
