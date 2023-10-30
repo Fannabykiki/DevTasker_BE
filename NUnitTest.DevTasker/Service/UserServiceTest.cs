@@ -27,7 +27,7 @@ namespace NUnitTest.DevTasker.Service
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-           
+            // _userService = new UserService(_context, _userRepositoryMock.Object, _mapper);
             
         }
 
