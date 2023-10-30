@@ -27,7 +27,7 @@ namespace NUnitTest.DevTasker.Service
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            // _userService = new UserService(_context, _userRepositoryMock.Object, _mapper);
+           
             
         }
 
@@ -235,7 +235,7 @@ namespace NUnitTest.DevTasker.Service
                 //Avatar = "NewAvatar"
             };
 
-            // Giả lập UserRepository trả về null, tức là người dùng không tồn tại
+           
             _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
                 .ReturnsAsync((User)null);
 
@@ -284,8 +284,8 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Once);
             _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Once);
-            databaseTransactionMock.Verify(dt => dt.Commit(), Times.Once); // Kiểm tra giao dịch đã được commit
-            databaseTransactionMock.Verify(dt => dt.RollBack(), Times.Never); // Kiểm tra giao dịch không bị rollback
+            databaseTransactionMock.Verify(dt => dt.Commit(), Times.Once); 
+            databaseTransactionMock.Verify(dt => dt.RollBack(), Times.Never);
 
             if (result.IsSucced)
             {
@@ -317,8 +317,8 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Never);
             _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never);
-            databaseTransactionMock.Verify(dt => dt.Commit(), Times.Never); // Kiểm tra giao dịch không được commit
-            databaseTransactionMock.Verify(dt => dt.RollBack(), Times.Never); // Kiểm tra giao dịch không bị rollback
+            databaseTransactionMock.Verify(dt => dt.Commit(), Times.Never); 
+            databaseTransactionMock.Verify(dt => dt.RollBack(), Times.Never); 
 
             if (result.IsSucced)
             {
@@ -340,7 +340,7 @@ namespace NUnitTest.DevTasker.Service
             string email = "nonexistent@example.com";
 
             _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null); // Giả lập không tìm thấy người dùng
+                .ReturnsAsync((User)null); 
 
             var databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _userRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
@@ -387,11 +387,11 @@ namespace NUnitTest.DevTasker.Service
             var user = new User
             {
                 Email = email,
-                // Các thông tin khác của người dùng
+                
             };
 
             _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync(user); // Giả lập tìm thấy người dùng
+                .ReturnsAsync(user); 
             var databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _userRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
 
@@ -423,7 +423,7 @@ namespace NUnitTest.DevTasker.Service
             {
                 Email = resetPasswordRequest.Email,
                 // Các thông tin khác của người dùng
-                PassResetToken = "validtoken" // Giả lập token hợp lệ
+                PassResetToken = "validtoken"
             };
 
             _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
@@ -536,7 +536,7 @@ namespace NUnitTest.DevTasker.Service
                 Email = "test@example.com",
                 CurrentPassword = "oldPassword123",
                 NewPassword = "newPassword123",
-                ConfirmPassword = "differentPassword" // Đảm bảo rằng ConfirmPassword khác với NewPassword
+                ConfirmPassword = "differentPassword" 
             };
 
             var existingUser = new User
@@ -551,8 +551,8 @@ namespace NUnitTest.DevTasker.Service
             var result = await _userService.ChangePassWord(changePasswordRequest);
 
             // Assert
-            _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Never); // Đảm bảo rằng UpdateAsync không được gọi
-            _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never); // Đảm bảo rằng SaveChanges không được gọi
+            _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Never); 
+            _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never); 
 
            
 
