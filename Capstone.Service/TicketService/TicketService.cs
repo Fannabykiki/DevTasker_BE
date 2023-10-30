@@ -65,17 +65,17 @@ namespace Capstone.Service.TicketService
              {
                  var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
 
-                 if (ticketEntity != null)
-                 {
-                     ticketEntity.Title = updateTicketRequest.Title;
-                     ticketEntity.Decription = updateTicketRequest.Decription;
-                     ticketEntity.StartDate = updateTicketRequest.StartDate;
-                     ticketEntity.DueDate = updateTicketRequest.DueDate;
-                     ticketEntity.AssignTo = updateTicketRequest.AssignTo;
-                     ticketEntity.TicketType = updateTicketRequest.TicketType;
-                     ticketEntity.PriorityId = updateTicketRequest.PriorityId;
-                     ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
-                     ticketEntity.InterationId = updateTicketRequest.InterationId;
+                if (ticketEntity != null)
+                {
+                    // ticketEntity.Title = updateTicketRequest.Title;
+                    // ticketEntity.Decription = updateTicketRequest.Decription;
+                    // ticketEntity.StartDate = updateTicketRequest.StartDate;
+                    // ticketEntity.DueDate = updateTicketRequest.DueDate;
+                    // ticketEntity.AssignTo = updateTicketRequest.AssignTo;
+                    // ticketEntity.TicketType = updateTicketRequest.TicketType;
+                    // ticketEntity.PriorityId = updateTicketRequest.PriorityId;
+                    // ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
+                    // ticketEntity.InterationId = updateTicketRequest.InterationId;
 
                      await _context.SaveChangesAsync();
 
