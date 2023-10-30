@@ -2,6 +2,7 @@
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
+using Capstone.DataAccess.Entities;
 using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
 using Microsoft.AspNetCore.Http;
@@ -51,5 +52,19 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("Iteration")]
+        public async Task<ActionResult<IEnumerable<GetInterrationByIdResonse>>> GetIterationById(Guid iterationId)
+        {
+            var result = await _iterationService.GetIterationsById(iterationId);
+
+            if (result == null || !result.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+
     }
 }

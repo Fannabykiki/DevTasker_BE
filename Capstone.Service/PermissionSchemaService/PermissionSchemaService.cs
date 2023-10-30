@@ -46,29 +46,26 @@ namespace Capstone.Service.PermissionSchemaService
         {   
             var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
             var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId,x => x.Permission);
-            var permissions = await _permissionRepository.GetAllWithOdata(x =>true,null);
             var permissionRoles = new List<PermissionRolesDTO>();
 
-            foreach (var permission in permissions)
+            foreach (var role in permissionSchemas)
             {
-				var per = permissionSchemas.Where(x => x.PermissionId == permission.PermissionId);
-				var roles = per.Select(x => x.RoleId);
+				var roles = await _schemaRepository.GetPermissionRolesBySchemaId(role.PermissionId,schemaId);
 				var permissionInRoles = new List<RoleInPermissionDTO>();
 				foreach (var item in roles)
                 {
-                    var role = await _roleRepository.GetAsync(x => x.RoleId == item, null);
                     permissionInRoles.Add(new RoleInPermissionDTO
                     {
-                        Description = role.Description,
-                        RoleId = role.RoleId,
-                        RoleName = role.RoleName,
+                        Description = item.Description,
+                        RoleId = item.RoleId,
+                        RoleName = item.RoleName,
                     });
 				}
-                permissionRoles.Add(new PermissionRolesDTO
+				permissionRoles.Add(new PermissionRolesDTO
 				{
-					PermissionId = permission.PermissionId,
-					Name = permission.Name,
-					Description = permission.Description,
+					PermissionId = role.PermissionId,
+					Name = role.Permission.Name,
+					Description = role.Permission.Description,
                     Roles = permissionInRoles
 				});
 			}
@@ -151,122 +148,55 @@ namespace Capstone.Service.PermissionSchemaService
         public async Task<bool> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest request)
         {
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
-
             try
             {
-                // Validate inputs
-                if (schemaId == Guid.Empty) return false;
-                if (request == null || request.rolePermissions == null) return false;
+                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+                if(schema == null) return false;
 
-                // Get schema
-                var permissionSchema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId,null);
-                if (permissionSchema == null) return false;
-
-                // Loop through permission changes
-                foreach (var permissionRequest in request.rolePermissions)
+                foreach (var permission in request.rolePermissions)
                 {
-                    // Validate
-                    if (permissionRequest.PermissionId == Guid.Empty) continue;
+                    var per = _permissionRepository.GetAllAsync(x => x.PermissionId == permission.PermissionId, null);
+                    if (per == null) return false;
 
-                    // Handle role changes
-                    foreach (var roleId in permissionRequest.RoleIds)
+                    var listCurentRole = _permissionSchemaRepository.GetAllAsync(x=>x.PermissionId == permission.PermissionId && x.SchemaId == schemaId, null).Select(x => x.RoleId);
+
+                    foreach (var curentRole in listCurentRole)
                     {
-                        var role = await _roleRepository.GetAsync(x => x.RoleId == roleId,null);
-                        if (role == null) continue;
-
-                        // Check if mapping exists
-                        var mapping = await _permissionSchemaRepository.GetAsync(x =>
-                          x.SchemaId == schemaId &&
-                          x.PermissionId == permissionRequest.PermissionId &&
-                          x.RoleId == roleId,null);
-
-                        if (mapping == null)
+                        if (!permission.RoleIds.Contains((Guid)curentRole))
                         {
-                            // Add new mapping if doesn't exist
-                            await _permissionSchemaRepository.CreateAsync(new SchemaPermission
-                            {
-                                SchemaId = schemaId,
-                                PermissionId = permissionRequest.PermissionId,
-                                RoleId = roleId
-                            });
+                            var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
+                            await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
                         }
                     }
 
-                    // Remove revoked roles
-                    var itemDelete = await _permissionSchemaRepository.GetAsync(x =>
-                      x.SchemaId == schemaId &&
-                      x.PermissionId == permissionRequest.PermissionId &&
-                      !permissionRequest.RoleIds.Contains((Guid)x.RoleId), null);
+                    foreach (var role in permission.RoleIds)
+                    {
+                        var rol = _roleRepository.GetAllAsync(x => x.RoleId == role, null);
+                        if (rol == null) return false;
 
-                    await _permissionSchemaRepository.DeleteAsync(itemDelete);
+                        var permissionSchema = await _permissionSchemaRepository.GetAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == role, null);
+                        if (permissionSchema == null)
+                        {
+                            await _permissionSchemaRepository.CreateAsync(new SchemaPermission
+                            {
+                                SchemaId = schemaId,
+                                PermissionId = permission.PermissionId,
+                                RoleId = role
+                            });
+                        }
+                    }
                 }
-
-                // Save changes
-                await _permissionSchemaRepository.SaveChanges();
+                _permissionSchemaRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
-
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                // Handle error
-                Console.WriteLine($"Error updating schema {schemaId} permissions: {ex.Message}");
+                Console.WriteLine("Error occurred: " + ex.Message);
                 transaction.RollBack();
                 return false;
             }
-
-
-            //using var transaction = _permissionSchemaRepository.DatabaseTransaction();
-            //try
-            //{
-            //    var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
-            //    if(schema == null) return false;
-
-            //    foreach (var permission in request.rolePermissions)
-            //    {
-            //        var per = _permissionRepository.GetAllAsync(x => x.PermissionId == permission.PermissionId, null);
-            //        if (per == null) return false;
-
-            //        var listCurentRole = _permissionSchemaRepository.GetAllAsync(x=>x.PermissionId == permission.PermissionId && x.SchemaId == schemaId, null).Select(x => x.RoleId);
-
-            //        foreach (var curentRole in listCurentRole)
-            //        {
-            //            if (!permission.RoleIds.Contains((Guid)curentRole))
-            //            {
-            //                var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
-            //                await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
-            //            }
-            //        }
-
-            //        foreach (var role in permission.RoleIds)
-            //        {
-            //            var rol = _roleRepository.GetAllAsync(x => x.RoleId == role, null);
-            //            if (rol == null) return false;
-
-            //            var permissionSchema = await _permissionSchemaRepository.GetAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == role, null);
-            //            if (permissionSchema == null)
-            //            {
-            //                await _permissionSchemaRepository.CreateAsync(new SchemaPermission
-            //                {
-            //                    SchemaId = schemaId,
-            //                    PermissionId = permission.PermissionId,
-            //                    RoleId = role
-            //                });
-            //            }
-            //        }
-            //    }
-            //    _permissionSchemaRepository.SaveChanges();
-
-            //    transaction.Commit();
-            //    return true;
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("Error occurred: " + ex.Message);
-            //    transaction.RollBack();
-            //    return false;
-            //}
         }
     }
 }

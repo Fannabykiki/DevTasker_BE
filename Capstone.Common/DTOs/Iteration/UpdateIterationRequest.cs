@@ -12,6 +12,6 @@ namespace Capstone.Common.DTOs.Iteration
         public string InterationName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public Guid StatusId { get; set; }
+        public InterationStatusEnum Status { get; set; }
     }
 }

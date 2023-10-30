@@ -14,8 +14,7 @@ using System.Text;
 using MimeKit.Text;
 using AutoMapper;
 using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+
 
 namespace Capstone.Service.UserService
 {
@@ -24,14 +23,12 @@ namespace Capstone.Service.UserService
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
 		private readonly IMapper _mapper;
-		private readonly IServiceScopeFactory _serviceScopeFactory;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper)
 		{
 			_context = context;
 			_userRepository = userRepository;
 			_mapper = mapper;
-			_serviceScopeFactory = serviceScopeFactory;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
@@ -216,36 +213,19 @@ namespace Capstone.Service.UserService
 
 		public async Task<UserViewModel> LoginUser(string email, string password)
 		{
-			using var scope = _serviceScopeFactory.CreateScope();
-			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
-			using (var transaction = context.Database.BeginTransaction())
+			var user = await _userRepository.GetAsync(x => x.Email == email, null);
+			if (user != null)
 			{
-				try
+				if (!await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
 				{
-					var user = await _userRepository.GetAsync(x => x.Email == email, null);
-
-					if (user != null)
-					{
-						if (!await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-						{
-							return null;
-						}
-						return _mapper.Map<UserViewModel>(user);
-					}
-					transaction.Commit();
 					return null;
 				}
-				catch (Exception ex)
+				else
 				{
-					transaction.Rollback();
-					throw ex;
+					return _mapper.Map<UserViewModel>(user);
 				}
-				finally
-				{
-					transaction.Dispose();
-				}
-
 			}
+			return null;
 		}
 
 		public async Task<RefreshToken> GenerateRefreshToken()
@@ -481,12 +461,10 @@ namespace Capstone.Service.UserService
 
 		public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken, string accessToken)
 		{
-			using var scope = _serviceScopeFactory.CreateScope();
-			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
-			using (var transaction = context.Database.BeginTransaction())
+			using (var transaction = _userRepository.DatabaseTransaction())
 			{
 				try
-				{	
+				{
 					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
 					if (updateRequest == null)
 					{
@@ -507,13 +485,9 @@ namespace Capstone.Service.UserService
 				}
 				catch (Exception)
 				{
-					transaction.Rollback();
+					transaction.RollBack();
 
 					return false;
-				}
-				finally
-				{
-					transaction.Dispose();
 				}
 			}
 		}
