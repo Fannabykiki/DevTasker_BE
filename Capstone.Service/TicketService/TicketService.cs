@@ -14,7 +14,7 @@ namespace Capstone.Service.TicketService
 
         private readonly CapstoneContext _context;
         private readonly ITicketRepository _ticketRepository;
-        private readonly IStatusRepository _statusRepository;
+        private readonly ITicketStatusRepository _statusRepository;
         private readonly ITicketTypeRepository _typeRepository;
         private readonly ITicketHistoryRepository _ticketHistoryRepository;
         private readonly ITicketTypeRepository ticketTypeRepository;
@@ -22,7 +22,7 @@ namespace Capstone.Service.TicketService
         private readonly IUserRepository _userRepository;
         private readonly IInterationRepository _iterationRepository;
 
-        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, IStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
+        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -61,9 +61,9 @@ namespace Capstone.Service.TicketService
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
-            try
-            {
-                var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+            /* try
+             {
+                 var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
 
                 if (ticketEntity != null)
                 {
@@ -77,22 +77,23 @@ namespace Capstone.Service.TicketService
                     // ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
                     // ticketEntity.InterationId = updateTicketRequest.InterationId;
 
-                    await _context.SaveChangesAsync();
+                     await _context.SaveChangesAsync();
 
-                    transaction.Commit();
-                    return true;
-                }
-                else
-                {
-                    transaction.RollBack();
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                transaction.RollBack();
-                return false;
-            }
+                     transaction.Commit();
+                     return true;
+                 }
+                 else
+                 {
+                     transaction.RollBack();
+                     return false;
+                 }
+             }
+             catch (Exception)
+             {
+                 transaction.RollBack();
+                 return false;
+             }*/
+            return true;
         }
 
     }

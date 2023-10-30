@@ -48,7 +48,7 @@ static IEdmModel GetEdmModel()
 	builder.EntitySet<TicketComment>("TicketComments");
 	builder.EntitySet<TicketHistory>("TicketHistorys");
 	builder.EntitySet<TicketType>("TicketTypes");
-	builder.EntitySet<Status>("Status");
+	builder.EntitySet<TicketStatus>("TicketStatuss");
 	builder.EntitySet<PriorityLevel>("PriorityLevels");
 	builder.EntitySet<ProjectMember>("ProjectMembers");
 
@@ -86,7 +86,7 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
-builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
 
 builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
 builder.Services.AddScoped<IIterationService, IterationService>();
