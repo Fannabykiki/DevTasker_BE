@@ -51,7 +51,7 @@ public class ProjectService : IProjectService
 				EndDate = createProjectRequest.EndDate,
 				StartDate = createProjectRequest.StartDate,
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
-				StatusId = Guid.Parse(""),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 				CreateBy = createProjectRequest.CreateBy,
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
@@ -61,7 +61,7 @@ public class ProjectService : IProjectService
 					ProjectId = projectId,
 					DeleteAt = null,
 					CreateAt = DateTime.UtcNow,
-					StatusId = Guid.Parse(""),
+					StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 					Title = "Board Default",
 					UpdateAt = null,
 				}
@@ -73,7 +73,7 @@ public class ProjectService : IProjectService
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.UtcNow,
-				StatusId = Guid.Parse(""),
+				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProjectRequest.Board.BoardId,
 				EndDate = DateTime.UtcNow.AddDays(14),
 				InterationName = "Interation 1",
@@ -119,7 +119,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse(""), x => x.ProjectMembers.Where(m => m.UserId == userId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
@@ -175,7 +175,7 @@ public class ProjectService : IProjectService
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
-			_projectMemberRepository.SaveChanges();
+			await _projectMemberRepository.SaveChanges();
 
 			transaction.Commit();
 
@@ -197,7 +197,7 @@ public class ProjectService : IProjectService
 			project.ProjectName = updateProjectNameInfo.ProjectName;
 			project.Description = updateProjectNameInfo.Description;
 			await _projectRepository.UpdateAsync(project);
-			_projectRepository.SaveChanges();
+			await _projectRepository.SaveChanges();
 			transaction.Commit();
 			return true;
 		}
@@ -216,7 +216,7 @@ public class ProjectService : IProjectService
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
 			project.PrivacyStatus = updateProjectPrivacyRequest.PrivacyStatus;
 			await _projectRepository.UpdateAsync(project);
-			_projectRepository.SaveChanges();
+			await _projectRepository.SaveChanges();
 			transaction.Commit();
 			return true;
 		}
@@ -237,7 +237,7 @@ public class ProjectService : IProjectService
 			project.DeleteAt = DateTime.UtcNow;
 			project.ExpireAt = DateTime.UtcNow.AddDays(30);
 			await _projectRepository.UpdateAsync(project);
-			_projectRepository.SaveChanges();
+			await _projectRepository.SaveChanges();
 			transaction.Commit();
 			return true;
 		}
@@ -258,7 +258,7 @@ public class ProjectService : IProjectService
 			project.DeleteAt = null;
 			project.ExpireAt = null;
 			await _projectRepository.UpdateAsync(project);
-			_projectRepository.SaveChanges();
+			await _projectRepository.SaveChanges();
 			transaction.Commit();
 			return true;
 		}

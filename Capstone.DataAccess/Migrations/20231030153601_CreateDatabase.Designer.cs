@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    [Migration("20231029111835_CreateDatabase")]
+    [Migration("20231030153601_CreateDatabase")]
     partial class CreateDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -541,8 +541,8 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("TokenCreated")
                         .HasColumnType("datetime2");
@@ -560,6 +560,8 @@ namespace Capstone.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Users");
                 });
@@ -799,6 +801,17 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Ticket");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.User", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                        .WithMany("Users")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Status");
+                });
+
             modelBuilder.Entity("StatusTicketHistory", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.TicketHistory", null)
@@ -862,6 +875,8 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Projects");
 
                     b.Navigation("Tickets");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>

@@ -153,6 +153,12 @@ namespace Capstone.DataAccess
 				.WithOne(s => s.Status)
 				.HasForeignKey(sc => sc.StatusId)
 				.OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.Users)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
 		}
 
 		public DbSet<Attachment>? Attachments { get; set; }
