@@ -48,7 +48,7 @@ static IEdmModel GetEdmModel()
 	builder.EntitySet<TicketComment>("TicketComments");
 	builder.EntitySet<TicketHistory>("TicketHistorys");
 	builder.EntitySet<TicketType>("TicketTypes");
-	builder.EntitySet<TicketStatus>("TicketStatuss");
+	builder.EntitySet<Status>("TicketStatuss");
 	builder.EntitySet<PriorityLevel>("PriorityLevels");
 	builder.EntitySet<ProjectMember>("ProjectMembers");
 
