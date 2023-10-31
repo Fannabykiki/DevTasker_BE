@@ -40,13 +40,13 @@ namespace Capstone.Service.IterationService
                 {
                     InterationId = iteration.InterationId,
                     InterationName = iteration.InterationName,
-                    Status = iteration.Status
+                    // Status = iteration.Status
                 };
                 
-                if (iteration.Status == InterationStatusEnum.Current)
-                {
-                    response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
-                }
+                // if (iteration.Status == InterationStatusEnum.Current)
+                // {
+                //     response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
+                // }
 
                 result.Add(response);
             }
@@ -107,7 +107,7 @@ namespace Capstone.Service.IterationService
                     StartDate = createIterationRequest.StartDate,
                     EndDate = createIterationRequest.EndDate,
                     BoardId = boarId,
-                    Status = createIterationRequest.Status
+                    // Status = createIterationRequest.Status
                 };
 
 
@@ -142,7 +142,7 @@ namespace Capstone.Service.IterationService
                     iteration.InterationName = updateIterationRequest.InterationName;
                     iteration.StartDate = updateIterationRequest.StartDate;
                     iteration.EndDate = updateIterationRequest.EndDate;
-                    iteration.Status = updateIterationRequest.Status;
+                    // iteration.Status = updateIterationRequest.Status;
 
 
                     await _iterationRepository.UpdateAsync(iteration);
@@ -181,7 +181,7 @@ namespace Capstone.Service.IterationService
                 StartDate = iteration.StartDate,
                 EndDate = iteration.EndDate,
                 BoardId = iteration.BoardId,
-                Status = iteration.Status
+                // Status = iteration.Status
             };
 
             return new List<GetInterrationByIdResonse> { response };

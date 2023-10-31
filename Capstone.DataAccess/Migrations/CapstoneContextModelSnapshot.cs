@@ -219,8 +219,8 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SchemaId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("ProjectStatus")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("SchemasId")
                         .HasColumnType("uniqueidentifier");
@@ -233,7 +233,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasKey("ProjectId");
 
-                    b.HasIndex("SchemaId");
+                    b.HasIndex("SchemasId");
 
                     b.HasIndex("StatusId");
 
@@ -450,11 +450,11 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime?>("ChangeAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CurrentStatusId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CurrentStatus")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("PreviousStatusId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("PreviousStatus")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
@@ -653,9 +653,9 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Schema", "Schema")
+                    b.HasOne("Capstone.DataAccess.Entities.Schema", "Schemas")
                         .WithMany()
-                        .HasForeignKey("SchemaId")
+                        .HasForeignKey("SchemasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -667,7 +667,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("Board");
 
-                    b.Navigation("Schema");
+                    b.Navigation("Schemas");
 
                     b.Navigation("Status");
                 });
@@ -829,7 +829,8 @@ namespace Capstone.DataAccess.Migrations
                 {
                     b.Navigation("Interations");
 
-                    b.Navigation("Project");
+                    b.Navigation("Project")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
