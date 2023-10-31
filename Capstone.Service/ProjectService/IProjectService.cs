@@ -9,7 +9,7 @@ public interface IProjectService
 {
     Task<bool> CreateProject(CreateProjectRequest createProjectRequest);
     Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);
-	Task<ListViewMemberProject> GetMemberByProjectId(Guid projectId);
+	Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId);
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);
 	Task<bool> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
 	Task<bool> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);

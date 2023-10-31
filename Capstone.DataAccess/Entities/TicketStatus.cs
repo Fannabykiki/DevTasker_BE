@@ -2,7 +2,7 @@
 
 namespace Capstone.DataAccess.Entities
 {
-    public class Status
+    public class TicketStatus
     {
         [Key]
         public Guid StatusId { get; set; }

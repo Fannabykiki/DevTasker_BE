@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Capstone.Common.DTOs.Role
+namespace Capstone.Service.TicketCommentService
 {
-    public class GetAllRoleResponse
+    public interface ITicketCommentService
     {
+
     }
 }
