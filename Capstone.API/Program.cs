@@ -36,21 +36,21 @@ static async Task InitializeDatabase(IApplicationBuilder app)
 }
 static IEdmModel GetEdmModel()
 {
-    ODataConventionModelBuilder builder = new();
-    builder.EntitySet<Attachment>("Attachments");
-    builder.EntitySet<Board>("Boards");
-    builder.EntitySet<Notification>("Notifications");
-    builder.EntitySet<User>("Users");
-    builder.EntitySet<Permission>("Permissions");
-    builder.EntitySet<Project>("Projects");
-    builder.EntitySet<Role>("Roles");
-    builder.EntitySet<Ticket>("Tickets");
-    builder.EntitySet<TicketComment>("TicketComments");
-    builder.EntitySet<TicketHistory>("TicketHistorys");
-    builder.EntitySet<TicketType>("TicketTypes");
-    builder.EntitySet<TicketStatus>("TicketStatuss");
-    builder.EntitySet<PriorityLevel>("PriorityLevels");
-    builder.EntitySet<ProjectMember>("ProjectMembers");
+	ODataConventionModelBuilder builder = new();
+	builder.EntitySet<Attachment>("Attachments");
+	builder.EntitySet<Board>("Boards");
+	builder.EntitySet<Notification>("Notifications");
+	builder.EntitySet<User>("Users");
+	builder.EntitySet<Permission>("Permissions");
+	builder.EntitySet<Project>("Projects");
+	builder.EntitySet<Role>("Roles");
+	builder.EntitySet<Ticket>("Tickets");
+	builder.EntitySet<TicketComment>("TicketComments");
+	builder.EntitySet<TicketHistory>("TicketHistorys");
+	builder.EntitySet<TicketType>("TicketTypes");
+	builder.EntitySet<TicketStatus>("TicketStatuss");
+	builder.EntitySet<PriorityLevel>("PriorityLevels");
+	builder.EntitySet<ProjectMember>("ProjectMembers");
 
     return builder.GetEdmModel();
 }

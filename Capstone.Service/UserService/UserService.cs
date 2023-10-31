@@ -14,7 +14,8 @@ using System.Text;
 using MimeKit.Text;
 using AutoMapper;
 using System.Security.Claims;
-
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Capstone.Service.UserService
 {
@@ -23,19 +24,21 @@ namespace Capstone.Service.UserService
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
 		private readonly IMapper _mapper;
+		private readonly IServiceScopeFactory _serviceScopeFactory;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper)
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
 		{
 			_context = context;
 			_userRepository = userRepository;
 			_mapper = mapper;
+			_serviceScopeFactory = serviceScopeFactory;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
 		{
 			try
 			{
-				var user = await _userRepository.GetAsync(user => user.Email == createUserRequest.Email, null);
+				var user = await _userRepository.GetAsync(user => user.Email == createUserRequest.Email, null)!;
 				if (user == null)
 				{
 					CreatePasswordHash(createUserRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -50,11 +53,11 @@ namespace Capstone.Service.UserService
 						IsFirstTime = true,
 						VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
 						Email = createUserRequest.Email,
-						Status = Common.Enums.StatusEnum.Inactive,
+						StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
 					};
 
 					var newUser = await _userRepository.CreateAsync(newUserRequest);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					return new CreateUserResponse
 					{
@@ -76,11 +79,11 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-        public async Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
+        public async Task<CreateUserResponse?> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
         {
             try
             {
-                var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null);
+                var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null)!;
                 if (user == null)
 				{
 					Random random = new Random();
@@ -96,12 +99,12 @@ namespace Capstone.Service.UserService
                         IsFirstTime = true,
                         VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
                         Email = createUserGGLoginRequest.Email,
-                        Status = Common.Enums.StatusEnum.Active,
+                        StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
 						VerifiedAt = DateTime.UtcNow
                     };
 
                     var newUser = await _userRepository.CreateAsync(newUserRequest);
-                    _userRepository.SaveChanges();
+                    await _userRepository.SaveChanges();
 
                     return new CreateUserResponse
                     {
@@ -130,7 +133,7 @@ namespace Capstone.Service.UserService
 
 		public async Task<UserViewModel> GetUserByEmailAsync(string email)
 		{
-			var user = await _userRepository.GetAsync(user => user.Email == email, null);
+			var user = await _userRepository.GetAsync(user => user.Email == email, null)!;
 
 			if (user == null || email == null) return null;
 
@@ -143,7 +146,7 @@ namespace Capstone.Service.UserService
 			{
 				try
 				{
-					var user = await _userRepository.GetAsync(x => x.UserId == id, null);
+					var user = await _userRepository.GetAsync(x => x.UserId == id, null)!;
 
 					if (user == null)
 						return new UpdateProfileResponse
@@ -159,11 +162,11 @@ namespace Capstone.Service.UserService
                     user.Address = updateProfileRequest.Address ?? user.Address;
                     user.Dob = updateProfileRequest.DoB ?? user.Dob;
                     user.Gender = updateProfileRequest.Gender ?? user.Gender;
-                    user.VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+					user.IsFirstTime = false;
                     // Save changes
 
 					var result = await _userRepository.UpdateAsync(user);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 					return new UpdateProfileResponse
@@ -186,12 +189,8 @@ namespace Capstone.Service.UserService
 
 		public async Task<User> GetUserByIdAsync(Guid id)
 		{
-			var user = await _userRepository.GetAsync(x => x.UserId == id, null);
-			if (user != null)
-			{
-				return user;
-			}
-			return null;
+			var user = await _userRepository.GetAsync(x => x.UserId == id, null)!;
+			return user;
 		}
 
 		private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -202,33 +201,43 @@ namespace Capstone.Service.UserService
 				passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 			}
 		}
-		public async Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+		public Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
 		{
-			using (var hmac = new HMACSHA512(passwordSalt))
-			{
-				var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-				return computedHash.SequenceEqual(passwordHash);
-			}
+			using var hmac = new HMACSHA512(passwordSalt);
+			var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+			return Task.FromResult(computedHash.SequenceEqual(passwordHash));
 		}
 
 		public async Task<UserViewModel> LoginUser(string email, string password)
 		{
-			var user = await _userRepository.GetAsync(x => x.Email == email, null);
-			if (user != null)
+			using var scope = _serviceScopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
+			using (var transaction = context.Database.BeginTransaction())
 			{
-				if (!await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+				try
 				{
-					return null;
-				}
-				else
-				{
+					var user = await _userRepository.GetAsync(x => x.Email == email, null)!;
+
+					if (user.PasswordSalt != null && user.PasswordHash != null && !await VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+					{
+						return null;
+					}
 					return _mapper.Map<UserViewModel>(user);
 				}
+				catch (Exception ex)
+				{
+					transaction.Rollback();
+					throw ex;
+				}
+				finally
+				{
+					transaction.Dispose();
+				}
+
 			}
-			return null;
 		}
 
-		public async Task<RefreshToken> GenerateRefreshToken()
+		public Task<RefreshToken> GenerateRefreshToken()
 		{
 			var refreshToken = new RefreshToken()
 			{
@@ -236,10 +245,10 @@ namespace Capstone.Service.UserService
 				Expires = DateTime.UtcNow.AddDays(7),
 				Created = DateTime.UtcNow
 			};
-			return refreshToken;
+			return Task.FromResult(refreshToken);
 		}
 
-		public async Task<string> CreateToken(UserViewModel user)
+		public Task<string> CreateToken(UserViewModel user)
 		{
 			var claims = new Claim[]
 		  {
@@ -258,7 +267,7 @@ namespace Capstone.Service.UserService
 
 			var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-			return tokenString;
+			return Task.FromResult(tokenString);
 		}
 
 		public Task<CreateUserResponse> UpdateUserAsync(DateTime verifyAt)
@@ -272,20 +281,13 @@ namespace Capstone.Service.UserService
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
-					if (updateRequest == null)
-					{
-						return new CreateUserResponse
-						{
-							IsSucced = false,
-						};
-					}
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null)!;
 
-					updateRequest.Status = Common.Enums.StatusEnum.Active;
+					updateRequest.StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE");
 					updateRequest.VerifiedAt = DateTime.UtcNow;
 
 					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -308,11 +310,7 @@ namespace Capstone.Service.UserService
 
 		public async Task<bool> SendVerifyEmail(EmailRequest emailRequest)
 		{
-			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest.To, null);
-			if (updateRequest == null)
-			{
-				return false;
-			}
+			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest.To, null)!;
 			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?" + updateRequest.VerificationToken;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
@@ -337,17 +335,13 @@ namespace Capstone.Service.UserService
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
-					if (updateRequest == null)
-					{
-						return false;
-					}
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null)!;
 
 					updateRequest.PassResetToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
 					updateRequest.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
 
 					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -368,11 +362,7 @@ namespace Capstone.Service.UserService
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == resetPasswordRequest.Email, null);
-					if (updateRequest == null)
-					{
-						return false;
-					}
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == resetPasswordRequest.Email, null)!;
 
 					CreatePasswordHash(resetPasswordRequest.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -382,7 +372,7 @@ namespace Capstone.Service.UserService
 					updateRequest.ResetTokenExpires = null;
 
 					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -402,11 +392,7 @@ namespace Capstone.Service.UserService
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null);
-					if (updateRequest == null)
-					{
-						return false;
-					}
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == changePasswordRequest.Email, null)!;
 
 					CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -416,7 +402,7 @@ namespace Capstone.Service.UserService
 					updateRequest.ResetTokenExpires = null;
 
                     await _userRepository.UpdateAsync(updateRequest);
-                    _userRepository.SaveChanges();
+                    await _userRepository.SaveChanges();
                     transaction.Commit();
 
                     return true;
@@ -435,16 +421,12 @@ namespace Capstone.Service.UserService
             {
                 try
                 {
-                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null);
-                    if (updateRequest == null)
-                    {
-                        return false;
-                    }
+                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
 
-                    updateRequest.Status = changeUserStatusRequest.StatusChangeTo;
+                    updateRequest.StatusId = changeUserStatusRequest.StatusIdChangeTo;
 
                     await _userRepository.UpdateAsync(updateRequest);
-                    _userRepository.SaveChanges();
+                    await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -461,15 +443,13 @@ namespace Capstone.Service.UserService
 
 		public async Task<bool> SetRefreshToken(string? email, RefreshToken refreshToken, string accessToken)
 		{
-			using (var transaction = _userRepository.DatabaseTransaction())
+			using var scope = _serviceScopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<CapstoneContext>();
+			using (var transaction = context.Database.BeginTransaction())
 			{
 				try
-				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null);
-					if (updateRequest == null)
-					{
-						return false;
-					}
+				{	
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null)!;
 
 					updateRequest.AccessToken = accessToken;
 					updateRequest.TokenCreated = refreshToken.Created;
@@ -477,7 +457,7 @@ namespace Capstone.Service.UserService
 					updateRequest.RefreshToken = refreshToken.Token;
 
 					await _userRepository.UpdateAsync(updateRequest);
-					_userRepository.SaveChanges();
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -485,9 +465,13 @@ namespace Capstone.Service.UserService
 				}
 				catch (Exception)
 				{
-					transaction.RollBack();
+					transaction.Rollback();
 
 					return false;
+				}
+				finally
+				{
+					transaction.Dispose();
 				}
 			}
 		}
@@ -500,18 +484,15 @@ namespace Capstone.Service.UserService
 				Id = x.UserId,
 				Email = x.Email,
 				Name = x.UserName,
-				Status = x.Status,
+				StatusId = x.StatusId, //Get status name instead of id
 			}).ToList();
 			return users;
+			
 		}
 
 		public async Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest)
 		{
-			var forgotRequest = await _userRepository.GetAsync(s => s.Email == forgotPasswordRequest.To, null);
-			if (forgotRequest == null)
-			{
-				return false;
-			}
+			var forgotRequest = await _userRepository.GetAsync(s => s.Email == forgotPasswordRequest.To, null)!;
 
 			string verificationLink = "https://devtasker.azurewebsites.net/create-newpwd?" + forgotRequest.PassResetToken;
 			var email = new MimeMessage();

@@ -286,9 +286,13 @@ namespace Capstone.API.Controllers
 
 		[HttpPost("send-email")]
 		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
-		{
-			await _usersService.SendVerifyEmail(emailRequest);
+		{	
 
+			var user = await _usersService.SendVerifyEmail(emailRequest);
+			if(user == false)
+			{
+				return BadRequest("User not exist in system");
+			}
 			return Ok();
 		}
 
