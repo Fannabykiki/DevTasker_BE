@@ -9,6 +9,6 @@ namespace Capstone.Common.DTOs.User
 {
 	public class UpdateProfileResponse : BaseResponse
 	{
-        public string VerifyToken { get; set; }
+        public string? VerifyToken { get; set; }
     }
 }

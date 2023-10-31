@@ -9,7 +9,8 @@ namespace Capstone.DataAccess.Entities
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
         public Guid BoardId { get; set; }
-        public InterationStatusEnum Status { get; set; }
+        public Guid StatusId { get; set; }
+        public Status Status { get; set; }
         public Board Board { get; set; }
         public List<Ticket> Tickets { get; set; }
     }

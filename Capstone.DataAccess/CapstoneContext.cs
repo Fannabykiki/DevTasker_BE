@@ -80,7 +80,7 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.PriorityId);
 
             modelBuilder.Entity<Ticket>()
-                .HasOne(sc => sc.TaskStatus)
+                .HasOne(sc => sc.Status)
                 .WithMany(s => s.Tickets)
                 .HasForeignKey(sc => sc.TicketId);
 
@@ -133,9 +133,35 @@ namespace Capstone.DataAccess
                 .HasOne(sc => sc.Role)
                 .WithMany(s => s.SchemaPermissions)
                 .HasForeignKey(sc => sc.RoleId);
-        }
+            
+            modelBuilder.Entity<Status>().HasKey(sc => new { sc.StatusId});
+            
+            modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.Boards)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-        public DbSet<Attachment>? Attachments { get; set; }
+			modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.Interations)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+				.OnDelete(DeleteBehavior.NoAction);
+
+			modelBuilder.Entity<Status>()
+				.HasMany(sc => sc.Projects)
+				.WithOne(s => s.Status)
+				.HasForeignKey(sc => sc.StatusId)
+				.OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.Users)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+		}
+
+		public DbSet<Attachment>? Attachments { get; set; }
         public DbSet<Board>? Boards { get; set; }
         public DbSet<Notification>? Notifications { get; set; }
         public DbSet<Permission>? Permissions { get; set; }
@@ -150,7 +176,7 @@ namespace Capstone.DataAccess
         public DbSet<Schema>? Schemas { get; set; }
         public DbSet<TicketComment>? TicketComments { get; set; }
         public DbSet<TicketHistory>? TicketHistories { get; set; }
-        public DbSet<TicketStatus>? TicketStatuses { get; set; }
+        public DbSet<Status>? Status { get; set; }
         public DbSet<TicketType>? TicketTypes { get; set; }
         public DbSet<User>? Users { get; set; }
     }
