@@ -2,7 +2,7 @@
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface ITicketStatusRepository : IBaseRepository<TicketStatus>
+    public interface ITicketStatusRepository : IBaseRepository<Status>
     {
     }
 }
