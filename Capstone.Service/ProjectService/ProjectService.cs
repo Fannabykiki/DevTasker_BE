@@ -2,7 +2,6 @@ using AutoMapper;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
-using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -51,8 +50,7 @@ public class ProjectService : IProjectService
 				EndDate = createProjectRequest.EndDate,
 				StartDate = createProjectRequest.StartDate,
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
-				StatusId = Guid.Parse(""),
-				CreateBy = createProjectRequest.CreateBy,
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), CreateBy = createProjectRequest.CreateBy,
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
 				Board = new Board
@@ -61,7 +59,7 @@ public class ProjectService : IProjectService
 					ProjectId = projectId,
 					DeleteAt = null,
 					CreateAt = DateTime.UtcNow,
-					StatusId = Guid.Parse(""),
+					StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 					Title = "Board Default",
 					UpdateAt = null,
 				}
@@ -73,7 +71,7 @@ public class ProjectService : IProjectService
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.UtcNow,
-				StatusId = Guid.Parse(""),
+				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProjectRequest.Board.BoardId,
 				EndDate = DateTime.UtcNow.AddDays(14),
 				InterationName = "Interation 1",
@@ -136,7 +134,7 @@ public class ProjectService : IProjectService
 			};
 
 			await _roleRepository.CreateAsync(newRoleRequest);
-			_roleRepository.SaveChanges();
+			await _roleRepository.SaveChanges();
 			transaction.Commit();
 
 			return true;
@@ -228,7 +226,7 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.ProjectStatus = StatusEnum.Inactive;
+			project.StatusId = Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7");
 			project.DeleteAt = DateTime.UtcNow;
 			project.ExpireAt = DateTime.UtcNow.AddDays(30);
 			await _projectRepository.UpdateAsync(project);
@@ -249,7 +247,7 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.ProjectStatus = StatusEnum.Active;
+			project.StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE");
 			project.DeleteAt = null;
 			project.ExpireAt = null;
 			await _projectRepository.UpdateAsync(project);
@@ -274,31 +272,35 @@ public class ProjectService : IProjectService
 	{
 		var projectInfoRequests = new List<ViewProjectInfoRequest>();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
-		var projectInfoRequest = new ViewProjectInfoRequest
+		var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
+		if (!members.Any()) return projectInfoRequests;
 		{
-			ProjectId = project.ProjectId,
-			ProjectName = project.ProjectName,
-			Description = project.Description,
-			ProjectStatus = project.ProjectStatus,
-			StartDate = project.StartDate,
-			EndDate = project.EndDate,
-			CreateBy = project.CreateBy,
-			CreateAt = project.CreateAt,
-			PrivacyStatus = project.PrivacyStatus,
-			ProjectMembers = project.ProjectMembers
-				.Select(member => new ViewMemberProject
-				{
-					MemberId = member.MemberId,
-					UserId = member.UserId,
-					RoleId = member.RoleId,
-					ProjectId = member.ProjectId,
-					IsOwner = member.IsOwner
-				})
-				.ToList()
-		};
-
-		projectInfoRequests.Add(projectInfoRequest);
-
+			var projectInfoRequest = new ViewProjectInfoRequest
+			{
+				ProjectId = project.ProjectId,
+				ProjectName = project.ProjectName,
+				Description = project.Description,
+				StatusId = project.StatusId,
+				StartDate = project.StartDate,
+				EndDate = project.EndDate,
+				CreateBy = project.CreateBy,
+				CreateAt = project.CreateAt,
+				PrivacyStatus = project.PrivacyStatus,
+				ProjectMembers = project.ProjectMembers
+					.Select(m => new ViewMemberProject
+					{
+						MemberId = m.MemberId,
+						UserId = m.UserId,
+						RoleId = m.RoleId,
+						ProjectId = m.ProjectId,
+						IsOwner = m.IsOwner
+						,RoleName = m.Role.RoleName
+					
+					})
+					.ToList()
+			};
+			projectInfoRequests.Add(projectInfoRequest);
+		}
 		return projectInfoRequests;
 	}
 

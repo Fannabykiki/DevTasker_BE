@@ -18,7 +18,7 @@ namespace Capstone.Service.UserService
         Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest);
         Task<RefreshToken> GenerateRefreshToken();
 		Task<string> CreateToken(UserViewModel user);
-        Task<bool> SendVerifyEmail(EmailRequest emailRequest);
+        Task<bool> SendVerifyEmail(string emailRequest);
         Task<bool> VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
 		Task<bool> ResetPassWord(ResetPasswordRequest resetPasswordRequest);
 		Task<bool> ChangePassWord(ChangePasswordRequest changePasswordRequest);
