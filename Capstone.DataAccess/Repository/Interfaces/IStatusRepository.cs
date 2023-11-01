@@ -1,8 +1,8 @@
 ﻿using Capstone.DataAccess.Entities;
 
-namespace Capstone.DataAccess.Repository.Interfaces
+namespace Capstone.DataAccess.Repository.Interfaces;
+
+public interface IStatusRepository : IBaseRepository<Status>
 {
-    public interface IStatusRepository : IBaseRepository<Status>
-    {
-    }
+    
 }

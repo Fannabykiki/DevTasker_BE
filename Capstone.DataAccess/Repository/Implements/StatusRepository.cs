@@ -1,12 +1,12 @@
 ﻿using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 
-namespace Capstone.DataAccess.Repository.Implements
+namespace Capstone.DataAccess.Repository.Implements;
+
+public class StatusRepository : BaseRepository<Status>, IStatusRepository
 {
-    public class StatusRepository : BaseRepository<Status>, IStatusRepository
+    public StatusRepository(CapstoneContext context) : base(context)
     {
-        public StatusRepository(CapstoneContext context) : base(context)
-        {
-        }
     }
 }
+    
