@@ -12,7 +12,8 @@ namespace Capstone.DataAccess.Entities
         public DateTime StartDate { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime CreateTime{ get; set; }
-        public DateTime? DeleteTime { get; set; }
+        public DateTime? DeleteAt { get; set; }
+        public bool? IsDelete { get; set; }
         public Guid AssignTo { get; set; }
         public Guid CreateBy { get; set; }
         public ProjectMember ProjectMember { get; set; } // 1 task just create by 1 user, assign to 1 user 

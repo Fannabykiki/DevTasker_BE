@@ -9,5 +9,6 @@ namespace Capstone.Service.TicketService
         Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId);
 
         Task<IQueryable<Ticket>> GetAllTicketAsync();
+        Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId);
     }
 }

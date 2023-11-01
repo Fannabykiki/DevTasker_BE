@@ -32,6 +32,14 @@ namespace Capstone.API.Controllers
             return Ok(response);
         }
         
+        [HttpGet("ticket/{ticketId}")]
+        [EnableQuery()]
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicketByInterationId(Guid interationId)
+        {
+            var response = await _ticketService.GetAllTicketByInterationIdAsync(interationId);
+            return Ok(response);
+        }
+        
         [HttpPost("ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
         {

@@ -47,7 +47,6 @@ namespace Capstone.Service.TicketService
             var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
             {
-                // var ticketEntity = _mapper.Map<Ticket>(request);
                 var ticketEntity = new Ticket()
                 {
                     TicketId = Guid.NewGuid(),
@@ -60,7 +59,7 @@ namespace Capstone.Service.TicketService
                     TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
                     PriorityId = request.PriorityId,
                     PrevId = null,
-                    StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
+                    StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
                     InterationId = interationId,
                     AssignTo = request.AssignTo
                 };
@@ -103,12 +102,18 @@ namespace Capstone.Service.TicketService
                    transaction.RollBack();
                    return false;
                }
-            return true;
         }
 
         public Task<IQueryable<Ticket>> GetAllTicketAsync()
         {
-            var query = _ticketRepository.GetAllAsync(x => true, null);
+            var query = _ticketRepository.GetAllAsync(x => x.IsDelete != false, null);
+
+            return Task.FromResult(query);
+        }
+
+        public Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId)
+        {
+            var query = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete == false, null);
 
             return Task.FromResult(query);
         }
