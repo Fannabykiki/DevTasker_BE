@@ -284,16 +284,22 @@ namespace Capstone.API.Controllers
 			return Ok("Password have been change!");
 		}
 
-		[HttpPost("send-email")]
-		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
-		{	
+		[HttpPost("register")]
+		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
 
-			var user = await _usersService.SendVerifyEmail(emailRequest);
-			if(user == false)
+			if (user != null)
+			{
+				return BadRequest("Email already exist.");
+			}
+			var result = await _usersService.Register(createUserRequest);
+			var mail = await _usersService.SendVerifyEmail(createUserRequest.Email);
+			if (mail == false)
 			{
 				return BadRequest("User not exist in system");
 			}
-			return Ok();
+			return Ok(result);
 		}
 
 		[HttpPost("send-email-forgot")]

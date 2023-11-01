@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.User;
+﻿using Capstone.Common.DTOs.Email;
+using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
@@ -71,19 +72,6 @@ namespace Capstone.API.Controllers
 
 		}
 
-		[HttpPost("users")]
-		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
-		{
-			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
-
-			if (user != null)
-			{
-				return BadRequest("Email already exist.");
-			}
-			var result = await _usersService.Register(createUserRequest);
-
-			return Ok(result);
-		}
 
 		[HttpPut("users/{id}")]
 		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
