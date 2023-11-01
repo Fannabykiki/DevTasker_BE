@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Project;
+using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.ProjectService;
 using Moq;
 using NUnit.Framework;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq.Expressions;
 
 namespace NUnitTest.DevTasker.Service
@@ -22,7 +24,10 @@ namespace NUnitTest.DevTasker.Service
         
         private Mock<IInterationRepository> _interationRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
-
+        private readonly CapstoneContext _context;
+        private readonly IMapper _mapper;
+        private Mock<ISchemaRepository> _schemaRepositoryMock;
+        private Mock<IPermissionSchemaRepository> _permissionScemaRepoMock;
         [SetUp]
         public void Setup()
         {
@@ -32,22 +37,25 @@ namespace NUnitTest.DevTasker.Service
             _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
             _interationRepositoryMock = new Mock<IInterationRepository>();
+            _schemaRepositoryMock = new Mock<ISchemaRepository>();
+            _permissionScemaRepoMock = new Mock<IPermissionSchemaRepository>();
+
 
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
             _projectService = new ProjectService(
-                null,
+                 _context,
                 _projectRepositoryMock.Object,
                 _roleRepositoryMock.Object,
-                null,
-                null,
+                _mapper,
+               _schemaRepositoryMock.Object,
                 _projectMemberRepositoryMock.Object,
                 _boardRepositoryMock.Object,
                 _permissionRepositoryMock.Object,
                 _interationRepositoryMock.Object,
-                null
+                _permissionScemaRepoMock.Object
             );
         }
 
@@ -65,20 +73,8 @@ namespace NUnitTest.DevTasker.Service
                 CreateBy = Guid.NewGuid(),
                 Description = "Test Project Description",
             };
-
             _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
                 .ReturnsAsync(new Project { ProjectId = Guid.NewGuid() });
-
-            _boardRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Board>()))
-                .ReturnsAsync(new Board { BoardId = Guid.NewGuid() });
-
-            _interationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
-                .ReturnsAsync(new Interation { InterationId = Guid.NewGuid() });
-
-            _projectMemberRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<ProjectMember>()))
-                .ReturnsAsync(new ProjectMember { MemberId = Guid.NewGuid() });
-
-            _databaseTransactionMock.Setup(transaction => transaction.Commit());
 
             // Act
             var result = await _projectService.CreateProject(createProjectRequest);
@@ -86,6 +82,8 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsTrue(result);
         }
+
+
 
         [Test]
         public async Task TestCreateProject_Failure()

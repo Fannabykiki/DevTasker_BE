@@ -13,3 +13,4 @@ public class CreateProjectRequest
    public StatusEnum ProjectStatus { get; set; }
    public bool PrivacyStatus { get; set; }
 }
+
