@@ -27,7 +27,7 @@ namespace Capstone.API.Controllers
         [HttpPost("Iteration")]
         public async Task<IActionResult> CreateIteration(CreateIterationRequest createIterationRequest, Guid boardId)
         {
-            var result = await _iterationService.CreateIteration(createIterationRequest, boardId);
+            var result = await _iterationService.CreateInteration(createIterationRequest, boardId);
 
             return Ok(result);
         }
