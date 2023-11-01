@@ -1,5 +1,4 @@
-﻿using Capstone.Common.DTOs.Task;
-using Capstone.Common.DTOs.Ticket;
+﻿using Capstone.Common.DTOs.Ticket;
 using Capstone.DataAccess.Entities;
 
 namespace Capstone.Service.TicketService

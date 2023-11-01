@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.Ticket;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
@@ -65,7 +64,6 @@ namespace Capstone.Service.TicketService
                     InterationId = interationId,
                     AssignTo = request.AssignTo
                 };
-             //   ticketEntity.InterationId = interationId;
                  await _ticketRepository.CreateAsync(ticketEntity);
                 await _ticketRepository.SaveChanges();
                 transaction.Commit();
@@ -77,59 +75,34 @@ namespace Capstone.Service.TicketService
                 transaction.RollBack();
                 return false;
             }
-            // try
-            // {
-            //     var ticketEntity = _mapper.Map<Ticket>(request);
-            //     ticketEntity.InterationId = iterationId;
-            //     _context.Tickets?.Add(ticketEntity);
-            //     await _context.SaveChangesAsync();
-            //
-            //     transaction.Commit();
-            //     return true;
-            // }
-            // catch (Exception)
-            // {
-            //     transaction.RollBack();
-            //     return false;
-            // }
         }
 
         public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
-            /* try
-             {
-                 var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+               try
+               {
+                   var ticketEntity = await _ticketRepository.GetAsync(t => t.TicketId == ticketId, null)!;
 
-                if (ticketEntity != null)
-                {
-                    // ticketEntity.Title = updateTicketRequest.Title;
-                    // ticketEntity.Decription = updateTicketRequest.Decription;
-                    // ticketEntity.StartDate = updateTicketRequest.StartDate;
-                    // ticketEntity.DueDate = updateTicketRequest.DueDate;
-                    // ticketEntity.AssignTo = updateTicketRequest.AssignTo;
-                    // ticketEntity.TicketType = updateTicketRequest.TicketType;
-                    // ticketEntity.PriorityId = updateTicketRequest.PriorityId;
-                    // ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
-                    // ticketEntity.InterationId = updateTicketRequest.InterationId;
+                   ticketEntity.Title = updateTicketRequest.Title;
+                  ticketEntity.Decription = updateTicketRequest.Decription;
+                  ticketEntity.DueDate = updateTicketRequest.DueDate;
+                  ticketEntity.AssignTo = updateTicketRequest.AssignTo;
+                  ticketEntity.TypeId = updateTicketRequest.TypeId;
+                  ticketEntity.PriorityId = updateTicketRequest.PriorityId;
+                  ticketEntity.StatusId = updateTicketRequest.StatusId;
+                  await _ticketRepository.UpdateAsync(ticketEntity);
+                  await _context.SaveChangesAsync();
 
-                     await _context.SaveChangesAsync();
-
-                     transaction.Commit();
-                     return true;
-                 }
-                 else
-                 {
-                     transaction.RollBack();
-                     return false;
-                 }
-             }
-             catch (Exception)
-             {
-                 transaction.RollBack();
-                 return false;
-             }*/
+                  transaction.Commit();
+                  return true;
+               }
+               catch (Exception ex)
+               {
+                   transaction.RollBack();
+                   return false;
+               }
             return true;
         }
 

@@ -1,6 +1,5 @@
 ﻿using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.Ticket;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -25,15 +24,15 @@ namespace Capstone.API.Controllers
             _ticketService = ticketService;
         }
 
-        [HttpGet("Ticket")]
+        [HttpGet("ticket")]
         [EnableQuery()]
-        public async Task<ActionResult<ViewPagedUsersResponse>> GetUsers()
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicket()
         {
             var response = await _ticketService.GetAllTicketAsync();
             return Ok(response);
         }
         
-        [HttpPost("Ticket")]
+        [HttpPost("ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
         {
             var result = await _ticketService.CreateTicket(createTicketRequest, interationId);
@@ -41,14 +40,10 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Ticket/{ticketId}")]
+        [HttpPut("ticket/{ticketId}")]
         public async Task<IActionResult> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
         {
             var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
 
             return Ok(result);
         }
