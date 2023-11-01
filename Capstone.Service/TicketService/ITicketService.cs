@@ -11,6 +11,6 @@ namespace Capstone.Service.TicketService
         Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId);
         Task<bool> DeleteTicket(Guid ticketId);
         
-        
+        //
     }
 }
