@@ -95,7 +95,7 @@ namespace Capstone.Service.IterationService
             return null;
         }
 
-        public async Task<bool> CreateIteration(CreateIterationRequest createIterationRequest, Guid boarId)
+        public async Task<bool> CreateInteration(CreateIterationRequest createIterationRequest, Guid boarId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
@@ -112,12 +112,12 @@ namespace Capstone.Service.IterationService
 
 
                 var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
-                board.Interations.Add(newIteration);
-                await _boardRepository.UpdateAsync(board);
+                // var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
+                // board.Interations.Add(newIteration);
+                // await _boardRepository.UpdateAsync(board);
 
-                _iterationRepository.SaveChanges();
-                _projectRepository.SaveChanges();
+                // _iterationRepository.SaveChanges();
+                // _projectRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
