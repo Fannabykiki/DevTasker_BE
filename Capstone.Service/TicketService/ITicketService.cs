@@ -7,9 +7,10 @@ namespace Capstone.Service.TicketService
     {
         Task<bool> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId);
         Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId);
-
         Task<IQueryable<Ticket>> GetAllTicketAsync();
         Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId);
         Task<bool> DeleteTicket(Guid ticketId);
+        
+        
     }
 }

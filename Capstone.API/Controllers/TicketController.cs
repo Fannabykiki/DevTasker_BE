@@ -1,11 +1,7 @@
-﻿using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.Ticket;
+﻿using Capstone.Common.DTOs.Ticket;
 using Capstone.Common.DTOs.User;
-using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 
