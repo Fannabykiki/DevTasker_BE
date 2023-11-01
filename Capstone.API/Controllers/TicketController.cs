@@ -1,11 +1,14 @@
 ﻿using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.Ticket;
+using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
@@ -22,6 +25,14 @@ namespace Capstone.API.Controllers
             _ticketService = ticketService;
         }
 
+        [HttpGet("Ticket")]
+        [EnableQuery()]
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetUsers()
+        {
+            var response = await _ticketService.GetAllTicketAsync();
+            return Ok(response);
+        }
+        
         [HttpPost("Ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
         {
