@@ -32,8 +32,47 @@ namespace NUnitTest.DevTasker.Service
              _userService = new UserService(_context, _userRepositoryMock.Object, _mapper, _serviceScopeFactory);
             
         }
-        
-            
+        [Test]
+        public async Task TestLoginUserAsync_InvalidCredentials()
+        {
+            // Arrange
+            var username = "testuser";
+            var correctPassword = "testpassword";
+            var incorrectPassword = "wrongpassword";
+            byte[] passwordSalt = new byte[16];
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(passwordSalt);
+            }
+            byte[] passwordHash;
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(correctPassword));
+            }
+            var user = new User
+            {
+                UserId = Guid.NewGuid(),
+                UserName = username,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
+            };
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync(user);
+            // Act
+            var result = await _userService.LoginUser(username, incorrectPassword);
+            // Assert
+            if (result != null)
+            {
+                Console.WriteLine("Success: Login was successful.");
+            }
+            else
+            {
+                Console.WriteLine("Wrong: Login was unsuccessful.");
+            }
+            Assert.Null(result);
+        }
+
+
         // Test Register
         [Test]
         public async Task CreateAsync_Success()

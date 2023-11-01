@@ -9,6 +9,10 @@ namespace Capstone.DataAccess
         {
         }
 
+        public CapstoneContext()
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
