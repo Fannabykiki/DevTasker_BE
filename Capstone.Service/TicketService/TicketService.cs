@@ -106,16 +106,36 @@ namespace Capstone.Service.TicketService
 
         public Task<IQueryable<Ticket>> GetAllTicketAsync()
         {
-            var query = _ticketRepository.GetAllAsync(x => x.IsDelete != false, null);
+            var result = _ticketRepository.GetAllAsync(x => x.IsDelete != true, null);
 
-            return Task.FromResult(query);
+            return Task.FromResult(result);
         }
 
         public Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId)
         {
-            var query = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete == false, null);
+            var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete == false, null);
 
-            return Task.FromResult(query);
+            return Task.FromResult(result);
+        }
+
+        public async Task<bool> DeleteTicket(Guid ticketId)
+        {
+            using var transaction = _iterationRepository.DatabaseTransaction();
+            try
+            {
+                var selectedTicket  = await _ticketRepository.GetAsync(x => x.TicketId == ticketId, null)!;
+                selectedTicket.DeleteAt = DateTime.UtcNow;
+                selectedTicket.IsDelete = true;
+                await _ticketRepository.UpdateAsync(selectedTicket);
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception e)
+            {
+                transaction.RollBack();
+                return false;
+            }
         }
     }
 }

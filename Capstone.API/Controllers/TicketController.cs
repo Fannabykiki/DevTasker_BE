@@ -55,5 +55,13 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+        
+        [HttpPut("ticket/delete/{ticketId}")]
+        public async Task<IActionResult> DeleteTicket(Guid ticketId)
+        {
+            var result = await _ticketService.DeleteTicket( ticketId);
+
+            return Ok(result);
+        }
     }
 }
