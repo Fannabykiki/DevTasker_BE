@@ -66,7 +66,7 @@ namespace Capstone.UnitTests.Service
                 StartDate = createIterationRequest.StartDate,
                 EndDate = createIterationRequest.EndDate,
                 BoardId = boardId,
-                Status = createIterationRequest.Status
+                // Status = createIterationRequest.Status
             };
 
             _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
@@ -181,7 +181,7 @@ namespace Capstone.UnitTests.Service
                 InterationName = "Old Iteration",
                 StartDate = DateTime.Now.AddDays(-7),
                 EndDate = DateTime.Now,
-                Status = InterationStatusEnum.Future
+                // Status = InterationStatusEnum.Future
             };
 
             _iterationRepositoryMock.Setup(repo => repo.GetAsync(
