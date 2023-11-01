@@ -1,4 +1,5 @@
-﻿using Capstone.API.Helper;
+﻿using Capstone.Common.DTOs.Email;
+using Capstone.API.Helper;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.StatusService;
@@ -72,24 +73,11 @@ namespace Capstone.API.Controllers
 				DoB = user.Dob,
 				Gender = user.Gender,
 				IsAdmin = user.IsAdmin,
-                StatusId = user.StatusId
+                StatusId = user.StatusId,
+				IsFirstTime = user.IsFirstTime,
             };
-
 		}
 
-		[HttpPost("users")]
-		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
-		{
-			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
-
-			if (user != null)
-			{
-				return BadRequest("Email already exist.");
-			}
-			var result = await _usersService.Register(createUserRequest);
-
-			return Ok(result);
-		}
 
 		[HttpPut("users/{id}")]
 		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
@@ -97,7 +85,6 @@ namespace Capstone.API.Controllers
 			// Validate model
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
-
 
 			var result = await _usersService.UpdateProfileAsync(request, id);
 

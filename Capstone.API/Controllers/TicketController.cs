@@ -1,11 +1,9 @@
-﻿using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.Task;
-using Capstone.DataAccess.Repository.Interfaces;
+﻿using Capstone.Common.DTOs.Ticket;
+using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
@@ -22,7 +20,23 @@ namespace Capstone.API.Controllers
             _ticketService = ticketService;
         }
 
-        [HttpPost("Ticket")]
+        [HttpGet("ticket")]
+        [EnableQuery()]
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicket()
+        {
+            var response = await _ticketService.GetAllTicketAsync();
+            return Ok(response);
+        }
+        
+        [HttpGet("ticket/{ticketId}")]
+        [EnableQuery()]
+        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicketByInterationId(Guid interationId)
+        {
+            var response = await _ticketService.GetAllTicketByInterationIdAsync(interationId);
+            return Ok(response);
+        }
+        
+        [HttpPost("ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
         {
             var result = await _ticketService.CreateTicket(createTicketRequest, interationId);
@@ -30,14 +44,18 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Ticket/{ticketId}")]
+        [HttpPut("ticket/{ticketId}")]
         public async Task<IActionResult> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
         {
             var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
+
+            return Ok(result);
+        }
+        
+        [HttpPut("ticket/delete/{ticketId}")]
+        public async Task<IActionResult> DeleteTicket(Guid ticketId)
+        {
+            var result = await _ticketService.DeleteTicket( ticketId);
 
             return Ok(result);
         }

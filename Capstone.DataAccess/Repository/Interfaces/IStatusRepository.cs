@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Capstone.DataAccess.Repository.Interfaces
+namespace Capstone.DataAccess.Repository.Interfaces;
+
+public interface IStatusRepository : IBaseRepository<Status>
 {
-    public interface IStatusRepository : IBaseRepository<Status>
-    {
-    }
+    
 }

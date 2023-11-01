@@ -68,9 +68,9 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TicketType>().HasKey(sc => new { sc.TypeId });
 
             modelBuilder.Entity<TicketType>()
-                .HasOne(sc => sc.Ticket)
+                .HasMany(sc => sc.Tickets)
                 .WithOne(s => s.TicketType)
-                .HasForeignKey<Ticket>(sc => sc.TicketId);
+                .HasForeignKey(sc => sc.TypeId);
 
             modelBuilder.Entity<Ticket>().HasKey(sc => new { sc.TicketId });
 
@@ -83,6 +83,16 @@ namespace Capstone.DataAccess
                 .HasOne(sc => sc.Status)
                 .WithMany(s => s.Tickets)
                 .HasForeignKey(sc => sc.TicketId);
+            
+            modelBuilder.Entity<Ticket>()
+                .HasOne(sc => sc.ProjectMember)
+                .WithMany(s => s.Tickets)
+                .HasForeignKey(sc => sc.CreateBy);
+            
+            modelBuilder.Entity<Ticket>()
+                .HasOne(sc => sc.ProjectMember)
+                .WithMany(s => s.Tickets)
+                .HasForeignKey(sc => sc.AssignTo);
 
             modelBuilder.Entity<TicketHistory>().HasKey(sc => new { sc.HistoryId });
 
@@ -156,6 +166,12 @@ namespace Capstone.DataAccess
             
             modelBuilder.Entity<Status>()
                 .HasMany(sc => sc.Users)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.Tickets)
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
