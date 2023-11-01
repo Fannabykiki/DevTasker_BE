@@ -67,9 +67,9 @@ namespace Capstone.API.Controllers
 				DoB = user.Dob,
 				Gender = user.Gender,
 				IsAdmin = user.IsAdmin,
-                StatusId = user.StatusId
+                StatusId = user.StatusId,
+				IsFirstTime = user.IsFirstTime,
             };
-
 		}
 
 
@@ -79,7 +79,6 @@ namespace Capstone.API.Controllers
 			// Validate model
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
-
 
 			var result = await _usersService.UpdateProfileAsync(request, id);
 

@@ -62,7 +62,6 @@ namespace Capstone.Service.UserService
 					return new CreateUserResponse
 					{
 						IsSucced = true,
-						VerifyToken = newUser.VerificationToken
 					};
 				}
 				else
