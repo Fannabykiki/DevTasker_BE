@@ -115,11 +115,11 @@ namespace Capstone.API.Controllers
             {
                 return NotFound("User not exist");
             }
-            if (user.Status == Common.Enums.StatusEnum.Inactive)
-            {
-                return BadRequest("User is inactive");
-            }
-            if (user.VerifiedAt == null)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
+			{
+				return BadRequest("User is inactive");
+			}
+			if (user.VerifiedAt == null)
             {
                 return BadRequest("User not verified!");
             }
@@ -159,7 +159,7 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
 				return BadRequest("User is inactive");
 			}
@@ -213,7 +213,7 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("User not exist");
 			}
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
 				return BadRequest("User is inactive");
 			}
@@ -239,7 +239,7 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Token has expired");
 			}
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
 				return BadRequest("User is inactive");
 			}
@@ -262,7 +262,7 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Invalid token");
 			}
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
 				return BadRequest("User is inactive");
 			}
@@ -284,16 +284,22 @@ namespace Capstone.API.Controllers
 			return Ok("Password have been change!");
 		}
 
-		[HttpPost("send-email")]
-		public async Task<IActionResult> SendEmail(EmailRequest emailRequest)
-		{	
+		[HttpPost("register")]
+		public async Task<IActionResult> Register([FromBody] CreateUserRequest createUserRequest)
+		{
+			var user = await _usersService.GetUserByEmailAsync(createUserRequest.Email);
 
-			var user = await _usersService.SendVerifyEmail(emailRequest);
-			if(user == false)
+			if (user != null)
+			{
+				return BadRequest("Email already exist.");
+			}
+			var result = await _usersService.Register(createUserRequest);
+			var mail = await _usersService.SendVerifyEmail(createUserRequest.Email);
+			if (mail == false)
 			{
 				return BadRequest("User not exist in system");
 			}
-			return Ok();
+			return Ok(result);
 		}
 
 		[HttpPost("send-email-forgot")]
@@ -311,7 +317,7 @@ namespace Capstone.API.Controllers
 
 			var user = await _usersService.GetUserByEmailAsync(email);
 
-			if (user.Status == Common.Enums.StatusEnum.Inactive)
+			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
 				return BadRequest("User is inactive");
 			}

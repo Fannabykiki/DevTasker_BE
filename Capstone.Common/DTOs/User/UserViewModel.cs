@@ -24,7 +24,7 @@ namespace Capstone.Common.DTOs.User
 		public GenderEnum? Gender { get; set; } //Male = 0,  Female = 1, Other = 2
 		public DateTime JoinedDate { get; set; }
 		public bool IsFirstTime { get; set; } //true
-		public StatusEnum Status { get; set; } // Active = 1,Inactive = 2
+		public Guid StatusId { get; set; } // Active = 1,Inactive = 2
 		public bool IsAdmin { get; set; } //True: Admin , False : User
 	}
 }

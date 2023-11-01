@@ -87,7 +87,7 @@ namespace Capstone.UnitTests.Service
                 .Returns(transaction.Object);
 
             // Act
-            var result = await _iterationService.CreateIteration(createIterationRequest, boardId);
+            var result = await _iterationService.CreateInteration(createIterationRequest, boardId);
 
             // Assert
             Assert.True(result);
@@ -113,7 +113,7 @@ namespace Capstone.UnitTests.Service
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
 
             // Act
-            var result = await _iterationService.CreateIteration(createRequest, projectId);
+            var result = await _iterationService.CreateInteration(createRequest, projectId);
             Assert.False(result);
 
             if (result)
@@ -146,7 +146,7 @@ namespace Capstone.UnitTests.Service
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
 
             // Act
-            var result = await _iterationService.CreateIteration(createIterationRequest, projectId);
+            var result = await _iterationService.CreateInteration(createIterationRequest, projectId);
             // Assert
             Assert.False(result);
 
