@@ -107,7 +107,7 @@ namespace Capstone.Service.IterationService
                     StartDate = createIterationRequest.StartDate,
                     EndDate = createIterationRequest.EndDate,
                     BoardId = boarId,
-                    // Status = createIterationRequest.Status
+                   StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A")
                 };
 
 
@@ -135,27 +135,19 @@ namespace Capstone.Service.IterationService
 
             try
             {
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
+                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
 
-                if (iteration != null)
-                {
-                    iteration.InterationName = updateIterationRequest.InterationName;
-                    iteration.StartDate = updateIterationRequest.StartDate;
-                    iteration.EndDate = updateIterationRequest.EndDate;
-                    // iteration.Status = updateIterationRequest.Status;
+                iteration.InterationName = updateIterationRequest.InterationName;
+                iteration.StartDate = updateIterationRequest.StartDate;
+                iteration.EndDate = updateIterationRequest.EndDate;
+                // iteration.Status = updateIterationRequest.Status;
 
 
-                    await _iterationRepository.UpdateAsync(iteration);
+                await _iterationRepository.UpdateAsync(iteration);
 
-                    _iterationRepository.SaveChanges();
-                    transaction.Commit();
-                    return true;
-                }
-                else
-                {
-                    transaction.RollBack();
-                    return false;
-                }
+                await _iterationRepository.SaveChanges();
+                transaction.Commit();
+                return true;
             }
             catch (Exception)
             {
@@ -166,14 +158,9 @@ namespace Capstone.Service.IterationService
 
         public async Task<IEnumerable<GetInterrationByIdResonse>> GetIterationsById(Guid iterationId)
         {
-            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null);
+            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
 
-            if (iteration == null)
-            {
-                return new List<GetInterrationByIdResonse>();
-            }
 
-            
             var response = new GetInterrationByIdResonse
             {
                 InterationId = iteration.InterationId,
@@ -181,7 +168,7 @@ namespace Capstone.Service.IterationService
                 StartDate = iteration.StartDate,
                 EndDate = iteration.EndDate,
                 BoardId = iteration.BoardId,
-                // Status = iteration.Status
+                 StatusId = iteration.StatusId
             };
 
             return new List<GetInterrationByIdResonse> { response };

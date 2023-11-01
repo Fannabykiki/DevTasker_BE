@@ -51,6 +51,7 @@ namespace Capstone.Service.TicketService
                 // var ticketEntity = _mapper.Map<Ticket>(request);
                 var ticketEntity = new Ticket()
                 {
+                    TicketId = Guid.NewGuid(),
                     Title = request.Title,
                     Decription = request.Decription,
                     StartDate = request.StartDate,
@@ -60,11 +61,12 @@ namespace Capstone.Service.TicketService
                     TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
                     PriorityId = request.PriorityId,
                     PrevId = null,
-                    StatusId = request.StatusId,
-                    InterationId = interationId
+                    StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
+                    InterationId = interationId,
+                    AssignTo = request.AssignTo
                 };
              //   ticketEntity.InterationId = interationId;
-                var newProject = await _ticketRepository.CreateAsync(ticketEntity);
+                 await _ticketRepository.CreateAsync(ticketEntity);
                 await _ticketRepository.SaveChanges();
                 transaction.Commit();
                 return true;

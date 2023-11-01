@@ -12,10 +12,6 @@ namespace Capstone.Common.DTOs.Ticket
         public DateTime CreateTime { get; set; }
         public Guid AssignTo { get; set; }
         public Guid CreateBy { get; set; }
-        public TicketTypeEnum TicketType { get; set; }
         public Guid PriorityId { get; set; }
-        public Guid PrevId { get; set; }
-        public Guid StatusId { get; set; }
-        public Guid InterationId { get; set; }
     }
 }

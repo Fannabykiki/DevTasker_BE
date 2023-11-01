@@ -15,7 +15,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime? DeleteTime { get; set; }
         public Guid AssignTo { get; set; }
         public Guid CreateBy { get; set; }
-        public User User { get; set; } // 1 task just create by 1 user, assign to 1 user 
+        public ProjectMember ProjectMember { get; set; } // 1 task just create by 1 user, assign to 1 user 
         public Guid TypeId { get; set; } // 1 task has many type 
         public TicketType TicketType { get; set; }
         public Guid? PrevId { get; set; }
