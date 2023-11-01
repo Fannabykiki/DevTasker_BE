@@ -12,6 +12,7 @@ namespace Capstone.Common.DTOs.User
 		public DateTime? DoB{ get; set; }
 		public GenderEnum? Gender { get; set; } //Male = 0,  Female = 1, Other = 2
 		public bool IsAdmin { get; set; }
+        public Guid StatusId { get; set; } // Active = 1,Inactive = 2
 
-	}
+    }
 }

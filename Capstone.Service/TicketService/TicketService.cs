@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
+using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.TicketService
 {
@@ -15,10 +19,10 @@ namespace Capstone.Service.TicketService
         private readonly ITicketHistoryRepository _ticketHistoryRepository;
         private readonly ITicketTypeRepository ticketTypeRepository;
         private readonly IMapper _mapper;
-        private readonly IBoardRepository _boardRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IInterationRepository _iterationRepository;
 
-
-        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IBoardRepository boardRepository)
+        public TicketService(CapstoneContext context, ITicketRepository ticketRepository, ITicketStatusRepository statusRepository, ITicketTypeRepository typeRepository, ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository, IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -27,37 +31,24 @@ namespace Capstone.Service.TicketService
             _ticketHistoryRepository = ticketHistoryRepository;
             this.ticketTypeRepository = ticketTypeRepository;
             _mapper = mapper;
-            _boardRepository = boardRepository;
+            _userRepository = userRepository;
+            _iterationRepository = iterationRepository;
         }
-
-        public async Task<bool> CreateTicket(CreateTicketRequest createTicketRequest)
+        
+       
+        public async Task<bool> CreateTicket(CreateTicketRequest request, Guid iterationId)
         {
-            using var transaction = _ticketRepository.DatabaseTransaction();
+            using var transaction = _iterationRepository.DatabaseTransaction();
+
             try
             {
-                var newTask = new DataAccess.Entities.Ticket
-                {
-                    TicketId = Guid.NewGuid(),
-                    Title = createTicketRequest.Title,
-                    Decription = createTicketRequest.Decription,
-                    StartDate = createTicketRequest.StartDate,
-                    DueDate = createTicketRequest.DueDate,
-                    CreateTime = DateTime.Now,
-                    DeleteTime = null,
-                    AssignTo = createTicketRequest.AssignTo,
-                    CreateBy = createTicketRequest.CreateBy,
-                    TicketType = createTicketRequest.TicketType,
-                    PriorityId = createTicketRequest.PriorityId,
-                    PrevId = createTicketRequest.PrevId,
-                    TicketStatus = createTicketRequest.TicketStatus,
-                    BoardId = createTicketRequest.BoardId
-                };
-                await _ticketRepository.CreateAsync(newTask);
+                var ticketEntity = _mapper.Map<Ticket>(request);
+                ticketEntity.InterationId = iterationId;
+                _context.Tickets.Add(ticketEntity);
                 await _context.SaveChangesAsync();
 
                 transaction.Commit();
                 return true;
-
             }
             catch (Exception)
             {
@@ -65,6 +56,46 @@ namespace Capstone.Service.TicketService
                 return false;
             }
         }
+
+        public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
+        {
+            using var transaction = _iterationRepository.DatabaseTransaction();
+
+            /* try
+             {
+                 var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+
+                if (ticketEntity != null)
+                {
+                    // ticketEntity.Title = updateTicketRequest.Title;
+                    // ticketEntity.Decription = updateTicketRequest.Decription;
+                    // ticketEntity.StartDate = updateTicketRequest.StartDate;
+                    // ticketEntity.DueDate = updateTicketRequest.DueDate;
+                    // ticketEntity.AssignTo = updateTicketRequest.AssignTo;
+                    // ticketEntity.TicketType = updateTicketRequest.TicketType;
+                    // ticketEntity.PriorityId = updateTicketRequest.PriorityId;
+                    // ticketEntity.TicketStatus = updateTicketRequest.TicketStatus;
+                    // ticketEntity.InterationId = updateTicketRequest.InterationId;
+
+                     await _context.SaveChangesAsync();
+
+                     transaction.Commit();
+                     return true;
+                 }
+                 else
+                 {
+                     transaction.RollBack();
+                     return false;
+                 }
+             }
+             catch (Exception)
+             {
+                 transaction.RollBack();
+                 return false;
+             }*/
+            return true;
+        }
+
     }
 }
 

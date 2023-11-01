@@ -44,7 +44,6 @@ namespace Capstone.Service.PermissionSchemaService
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
         {   
-
             var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
             var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId,x => x.Permission);
             var permissionRoles = new List<PermissionRolesDTO>();
@@ -168,7 +167,6 @@ namespace Capstone.Service.PermissionSchemaService
                             var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
                             await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
                         }
-                        
                     }
 
                     foreach (var role in permission.RoleIds)

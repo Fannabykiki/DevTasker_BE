@@ -17,11 +17,13 @@ namespace Capstone.DataAccess.Entities
         public Guid CreateBy { get; set; }
         public DateTime CreateAt { get; set; }
         public Guid SchemasId { get; set; }
+        public Guid StatusId { get; set; }
         public DateTime? DeleteAt { get; set; }
         public DateTime? ExpireAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member
-		public List<Interation> Interations { get; set; }
+		public Board Board { get; set; }
+		public Status Status { get; set; }
 		public Schema Schemas { get; set; }
     }
 }

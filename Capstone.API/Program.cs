@@ -23,6 +23,8 @@ using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
 using Capstone.Service.BoardService;
+using Capstone.API.Extentions.AuthorizeMiddleware;
+using Microsoft.AspNetCore.Authorization;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -46,7 +48,7 @@ static IEdmModel GetEdmModel()
 	builder.EntitySet<TicketComment>("TicketComments");
 	builder.EntitySet<TicketHistory>("TicketHistorys");
 	builder.EntitySet<TicketType>("TicketTypes");
-	builder.EntitySet<TicketStatus>("TicketStatuss");
+	builder.EntitySet<Status>("TicketStatuss");
 	builder.EntitySet<PriorityLevel>("PriorityLevels");
 	builder.EntitySet<ProjectMember>("ProjectMembers");
 
@@ -92,17 +94,12 @@ builder.Services.AddScoped<IIterationService, IterationService>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 builder.Services.AddScoped<IBoardService, BoardService>();
 
-
-
-
-
-
 builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaRepository>();
 builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService> ();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
-
 builder.Services.AddControllers()
                 .AddFluentValidation(options =>
                 {
@@ -135,12 +132,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                };
            }
        );
-
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAuthorization(
+	options =>
+	{
+		options.AddPolicy("CanView", policy =>
+		{
+			policy.Requirements.Add(new PermissionRequirement(null));
+		});
+	}
+	);
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);

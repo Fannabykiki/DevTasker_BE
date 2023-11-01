@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    [Migration("20231019154155_AddNewFieldBoardTable")]
-    partial class AddNewFieldBoardTable
+    [Migration("20231031111512_CreateDatabase")]
+    partial class CreateDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -72,8 +72,10 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("InterationId")
-                        .IsRequired()
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StatusId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -85,7 +87,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasKey("BoardId");
 
-                    b.HasIndex("InterationId");
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Boards");
                 });
@@ -96,6 +98,9 @@ namespace Capstone.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -103,18 +108,17 @@ namespace Capstone.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("InterationId");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("BoardId");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Interations");
                 });
@@ -189,7 +193,6 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
                     b.Property<Guid>("ProjectId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreateAt")
@@ -208,6 +211,9 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ExpireAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("PrivacyStatus")
                         .HasColumnType("bit");
 
@@ -224,9 +230,14 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("ProjectId");
 
                     b.HasIndex("SchemasId");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Projects");
                 });
@@ -319,15 +330,27 @@ namespace Capstone.DataAccess.Migrations
                     b.ToTable("SchemaPermissions");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Status", b =>
+                {
+                    b.Property<Guid>("StatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("StatusId");
+
+                    b.ToTable("Status");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AssignTo")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BoardId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CreateBy")
@@ -345,7 +368,10 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PrevId")
+                    b.Property<Guid>("InterationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PrevId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("PriorityId")
@@ -354,22 +380,22 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("TicketStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TicketType")
-                        .HasColumnType("int");
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TypeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TicketId");
 
-                    b.HasIndex("BoardId");
+                    b.HasIndex("InterationId");
 
                     b.HasIndex("PriorityId");
 
@@ -446,21 +472,6 @@ namespace Capstone.DataAccess.Migrations
                     b.ToTable("TicketHistories");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.TicketStatus", b =>
-                {
-                    b.Property<Guid>("StatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("StatusId");
-
-                    b.ToTable("TicketStatuses");
-                });
-
             modelBuilder.Entity("Capstone.DataAccess.Entities.TicketType", b =>
                 {
                     b.Property<Guid>("TypeId")
@@ -530,8 +541,8 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("TokenCreated")
                         .HasColumnType("datetime2");
@@ -550,10 +561,12 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("StatusId");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TicketHistoryTicketStatus", b =>
+            modelBuilder.Entity("StatusTicketHistory", b =>
                 {
                     b.Property<Guid>("TaskHistoriesHistoryId")
                         .HasColumnType("uniqueidentifier");
@@ -565,7 +578,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasIndex("TaskStatusStatusId");
 
-                    b.ToTable("TicketHistoryTicketStatus");
+                    b.ToTable("StatusTicketHistory");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Attachment", b =>
@@ -595,24 +608,32 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Interation", "Interation")
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
                         .WithMany("Boards")
-                        .HasForeignKey("InterationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Interation");
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Project", "Project")
+                    b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
                         .WithMany("Interations")
-                        .HasForeignKey("ProjectId")
+                        .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Project");
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                        .WithMany("Interations")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
@@ -628,13 +649,29 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
+                    b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
+                        .WithOne("Project")
+                        .HasForeignKey("Capstone.DataAccess.Entities.Project", "ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Capstone.DataAccess.Entities.Schema", "Schemas")
                         .WithMany()
                         .HasForeignKey("SchemasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                        .WithMany("Projects")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
                     b.Navigation("Schemas");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.ProjectMember", b =>
@@ -693,9 +730,9 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
+                    b.HasOne("Capstone.DataAccess.Entities.Interation", "Interation")
                         .WithMany("Tickets")
-                        .HasForeignKey("BoardId")
+                        .HasForeignKey("InterationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -705,13 +742,13 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.TicketStatus", "TaskStatus")
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
                         .WithMany("Tickets")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.TicketType", "TaskType")
+                    b.HasOne("Capstone.DataAccess.Entities.TicketType", "TicketType")
                         .WithOne("Ticket")
                         .HasForeignKey("Capstone.DataAccess.Entities.Ticket", "TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -723,13 +760,13 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Board");
+                    b.Navigation("Interation");
 
                     b.Navigation("PriorityLevel");
 
-                    b.Navigation("TaskStatus");
+                    b.Navigation("Status");
 
-                    b.Navigation("TaskType");
+                    b.Navigation("TicketType");
 
                     b.Navigation("User");
                 });
@@ -764,7 +801,18 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Ticket");
                 });
 
-            modelBuilder.Entity("TicketHistoryTicketStatus", b =>
+            modelBuilder.Entity("Capstone.DataAccess.Entities.User", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                        .WithMany("Users")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("StatusTicketHistory", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.TicketHistory", null)
                         .WithMany()
@@ -772,7 +820,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.TicketStatus", null)
+                    b.HasOne("Capstone.DataAccess.Entities.Status", null)
                         .WithMany()
                         .HasForeignKey("TaskStatusStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -781,12 +829,15 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
                 {
-                    b.Navigation("Tickets");
+                    b.Navigation("Interations");
+
+                    b.Navigation("Project")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Interation", b =>
                 {
-                    b.Navigation("Boards");
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Permission", b =>
@@ -801,8 +852,6 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Project", b =>
                 {
-                    b.Navigation("Interations");
-
                     b.Navigation("ProjectMembers");
                 });
 
@@ -818,6 +867,19 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("SchemaPermissions");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Status", b =>
+                {
+                    b.Navigation("Boards");
+
+                    b.Navigation("Interations");
+
+                    b.Navigation("Projects");
+
+                    b.Navigation("Tickets");
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Ticket", b =>
                 {
                     b.Navigation("Attachments");
@@ -830,11 +892,6 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.TicketComment", b =>
                 {
                     b.Navigation("Attachments");
-                });
-
-            modelBuilder.Entity("Capstone.DataAccess.Entities.TicketStatus", b =>
-                {
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.TicketType", b =>

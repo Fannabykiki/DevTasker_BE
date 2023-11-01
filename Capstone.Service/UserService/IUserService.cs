@@ -15,6 +15,7 @@ namespace Capstone.Service.UserService
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);
+        Task<CreateUserResponse> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest);
         Task<RefreshToken> GenerateRefreshToken();
 		Task<string> CreateToken(UserViewModel user);
         Task<bool> SendVerifyEmail(EmailRequest emailRequest);

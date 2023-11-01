@@ -16,20 +16,22 @@ namespace Capstone.Service.BoardService
         private readonly IBoardRepository _boardRepository;
         private readonly IMapper _mapper;
         private readonly IInterationRepository _iterationRepository;
+        private readonly IProjectRepository _projectRepository;
 
-        public BoardService(CapstoneContext context, IBoardRepository boardRepository, IMapper mapper, IInterationRepository iterationRepository)
+        public BoardService(CapstoneContext context, IBoardRepository boardRepository, IMapper mapper, IInterationRepository iterationRepository, IProjectRepository projectRepository)
         {
             _context = context;
             _boardRepository = boardRepository;
             _mapper = mapper;
             _iterationRepository = iterationRepository;
+            _projectRepository = projectRepository;
         }
 
-        public async Task<bool> CreateBoard(CreateBoardRequest createBoardRequest, Guid interationId)
+        public async Task<bool> CreateBoard(CreateBoardRequest createBoardRequest, Guid projectId)
         {
             using var transaction = _boardRepository.DatabaseTransaction();
 
-            try
+            /*try
             {
                 var statusValue = (int)createBoardRequest.Status;
                 var newBoard = new Board
@@ -37,15 +39,15 @@ namespace Capstone.Service.BoardService
                     Title = createBoardRequest.Title,
                     CreateAt = DateTime.UtcNow,
                     Status = (StatusEnum?)(BoardStatusEnum)statusValue,
-                    InterationId = interationId
+                    ProjectId = projectId
                 };
 
-               
+
                 await _boardRepository.CreateAsync(newBoard);
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
-                iteration.Boards.Add(newBoard);
-                await _iterationRepository.UpdateAsync(iteration);
-               
+                var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+                project.Boards.Add(newBoard);
+                await _iterationRepository.UpdateAsync(project);
+
                 _boardRepository.SaveChanges();
                 _iterationRepository.SaveChanges();
 
@@ -57,11 +59,12 @@ namespace Capstone.Service.BoardService
             {
                 transaction.RollBack();
                 return false;
-            }
+            }*/
+            return false;
         }
 
         public async Task<bool> UpdateBoard(UpdateBoardRequest updateBoardRequest, Guid boardId)
-        {
+        {/*
             using (var transaction = _boardRepository.DatabaseTransaction())
             {
                 try
@@ -91,7 +94,8 @@ namespace Capstone.Service.BoardService
                     transaction.RollBack();
                     return false;
                 }
-            }
+            }*/
+            return false;
         }
     }
 }

@@ -27,7 +27,8 @@ namespace Capstone.DataAccess.Entities
         public GenderEnum? Gender { get; set; } //Male = 0,  Female = 1, Other = 2
         public DateTime JoinedDate { get; set; }
         public bool IsFirstTime { get; set; } //true
-        public StatusEnum Status { get; set; } // Active = 1,Inactive = 2
+        public Guid StatusId { get; set; }
+        public Status Status { get; set; }
         public bool IsAdmin { get; set; } //True: Admin , False : User
         public List<TicketComment> TaskComments { get; set; } // 1 user can comment in many task
         public List<Attachment> Attachments { get; set; } // 1 user can upload many attachment is task
