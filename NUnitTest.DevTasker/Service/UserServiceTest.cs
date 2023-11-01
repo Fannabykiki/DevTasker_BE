@@ -11,6 +11,7 @@ using Capstone.Common.Enums;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Capstone.DataAccess;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -22,12 +23,14 @@ namespace NUnitTest.DevTasker.Service
         private UserService _userService;
         private readonly IMapper _mapper;
         private readonly CapstoneContext _context;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
 
         [SetUp]
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            // _userService = new UserService(_context, _userRepositoryMock.Object, _mapper);
+             _userService = new UserService(_context, _userRepositoryMock.Object, _mapper, _serviceScopeFactory);
             
         }
 
