@@ -62,7 +62,6 @@ namespace Capstone.Service.UserService
 					return new CreateUserResponse
 					{
 						IsSucced = true,
-						VerifyToken = newUser.VerificationToken
 					};
 				}
 				else
@@ -308,13 +307,13 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<bool> SendVerifyEmail(EmailRequest emailRequest)
+		public async Task<bool> SendVerifyEmail(string emailRequest)
 		{
-			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest.To, null)!;
+			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest, null)!;
 			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?" + updateRequest.VerificationToken;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
-			email.To.Add(MailboxAddress.Parse("" + emailRequest.To));
+			email.To.Add(MailboxAddress.Parse("" + emailRequest));
 			email.Subject = "DevTakser verification step";
 			email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Please verify your email address</h1><p>Click the link below to verify your email:</p><a href=\"{verificationLink}\">Verify Email</a>" };
 
