@@ -45,6 +45,14 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("ticket/sub-ticket")]
+        public async Task<IActionResult> CreateSubTicket(CreateTicketRequest createTicketRequest,Guid prevId)
+        {
+            var result = await _ticketService.CreateSubTicket(createTicketRequest, prevId);
+
+            return Ok(result);
+        }
+        
         [HttpPut("ticket/{ticketId}")]
         public async Task<IActionResult> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
         {

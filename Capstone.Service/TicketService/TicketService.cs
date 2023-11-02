@@ -2,10 +2,7 @@
 using Capstone.Common.DTOs.Ticket;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.TicketService
 {
@@ -40,11 +37,9 @@ namespace Capstone.Service.TicketService
             _statusRepository = statusRepository;
         }
 
-
         public async Task<bool> CreateTicket(CreateTicketRequest request, Guid interationId)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
-            var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
             {
                 var ticketEntity = new Ticket()
@@ -61,9 +56,10 @@ namespace Capstone.Service.TicketService
                     PrevId = null,
                     StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
                     InterationId = interationId,
-                    AssignTo = request.AssignTo
+                    AssignTo = request.AssignTo,
+                    IsDelete = false
                 };
-                 await _ticketRepository.CreateAsync(ticketEntity);
+                await _ticketRepository.CreateAsync(ticketEntity);
                 await _ticketRepository.SaveChanges();
                 transaction.Commit();
                 return true;
@@ -80,28 +76,28 @@ namespace Capstone.Service.TicketService
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
-               try
-               {
-                   var ticketEntity = await _ticketRepository.GetAsync(t => t.TicketId == ticketId, null)!;
+            try
+            {
+                var ticketEntity = await _ticketRepository.GetAsync(t => t.TicketId == ticketId, null)!;
 
-                   ticketEntity.Title = updateTicketRequest.Title;
-                  ticketEntity.Decription = updateTicketRequest.Decription;
-                  ticketEntity.DueDate = updateTicketRequest.DueDate;
-                  ticketEntity.AssignTo = updateTicketRequest.AssignTo;
-                  ticketEntity.TypeId = updateTicketRequest.TypeId;
-                  ticketEntity.PriorityId = updateTicketRequest.PriorityId;
-                  ticketEntity.StatusId = updateTicketRequest.StatusId;
-                  await _ticketRepository.UpdateAsync(ticketEntity);
-                  await _context.SaveChangesAsync();
+                ticketEntity.Title = updateTicketRequest.Title;
+                ticketEntity.Decription = updateTicketRequest.Decription;
+                ticketEntity.DueDate = updateTicketRequest.DueDate;
+                ticketEntity.AssignTo = updateTicketRequest.AssignTo;
+                ticketEntity.TypeId = updateTicketRequest.TypeId;
+                ticketEntity.PriorityId = updateTicketRequest.PriorityId;
+                ticketEntity.StatusId = updateTicketRequest.StatusId;
+                await _ticketRepository.UpdateAsync(ticketEntity);
+                await _context.SaveChangesAsync();
 
-                  transaction.Commit();
-                  return true;
-               }
-               catch (Exception ex)
-               {
-                   transaction.RollBack();
-                   return false;
-               }
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.RollBack();
+                return false;
+            }
         }
 
         public Task<IQueryable<Ticket>> GetAllTicketAsync()
@@ -113,7 +109,7 @@ namespace Capstone.Service.TicketService
 
         public Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId)
         {
-            var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete != false, null);
+            var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete != true, null);
 
             return Task.FromResult(result);
         }
@@ -123,7 +119,8 @@ namespace Capstone.Service.TicketService
             using var transaction = _iterationRepository.DatabaseTransaction();
             try
             {
-                var selectedTicket  = await _ticketRepository.GetAsync(x => x.TicketId == ticketId, null)!;
+                var selectedTicket =
+                    await _ticketRepository.GetAsync(x => x.TicketId == ticketId && x.IsDelete != true, null)!;
                 selectedTicket.DeleteAt = DateTime.UtcNow;
                 selectedTicket.IsDelete = true;
                 await _ticketRepository.UpdateAsync(selectedTicket);
@@ -133,6 +130,43 @@ namespace Capstone.Service.TicketService
             }
             catch (Exception e)
             {
+                transaction.RollBack();
+                return false;
+            }
+        }
+
+        public async Task<bool> CreateSubTicket(CreateTicketRequest request, Guid prevId)
+        {
+            using var transaction = _iterationRepository.DatabaseTransaction();
+            var selectedTicket =
+                await _ticketRepository.GetAsync(x => x.TicketId == prevId && x.IsDelete != true, null)!;
+            try
+            {
+                var subTicketEntity = new Ticket()
+                {
+                    TicketId = Guid.NewGuid(),
+                    Title = request.Title,
+                    Decription = request.Decription,
+                    StartDate = request.StartDate,
+                    DueDate = request.DueDate,
+                    CreateTime = DateTime.Now,
+                    CreateBy = request.CreateBy,
+                    TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+                    PriorityId = request.PriorityId,
+                    PrevId = prevId,
+                    StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
+                    InterationId = selectedTicket.InterationId,
+                    AssignTo = request.AssignTo,
+                    IsDelete = false
+                };
+                await _ticketRepository.CreateAsync(subTicketEntity);
+                await _ticketRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
                 transaction.RollBack();
                 return false;
             }
