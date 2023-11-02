@@ -1,14 +1,5 @@
-﻿using AutoMapper;
-using Capstone.DataAccess;
-using Capstone.DataAccess.Entities;
+﻿using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Capstone.Service.StatusService
 {
@@ -22,7 +13,12 @@ namespace Capstone.Service.StatusService
         }
         public async Task<Status> GetStatusByIdAsync(Guid id)
         {
-            return await _statusRepository.GetAsync(x => x.StatusId == id, null);
+            return await _statusRepository.GetAsync(x => x.StatusId == id, null)!;
+        }
+
+        public Task<IQueryable<Status>> GetAllStatusAsync()
+        {
+            return Task.FromResult(_statusRepository.GetAllAsync(x=> true, null));
         }
     }
 }

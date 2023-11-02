@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/attachment-management")]
     [ApiController]
     public class AttachmentController : ControllerBase
     {

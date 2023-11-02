@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/Board-management")]
+    [Route("api/board-management")]
     [ApiController]
     public class BoardController : ControllerBase
     {

@@ -7,6 +7,5 @@ namespace Capstone.DataAccess.Repository.Interfaces
     public interface IPriorityRepository : IBaseRepository<PriorityLevel>
     {
       //  Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId);
-
     }
 }

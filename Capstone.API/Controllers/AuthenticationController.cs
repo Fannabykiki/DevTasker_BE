@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace Capstone.API.Controllers
 {
-	[Route("api/authentication")]
+	[Route("api/authentication-management")]
 	[ApiController]
 	public class AuthenticationController : ControllerBase
 	{

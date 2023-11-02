@@ -113,7 +113,7 @@ namespace Capstone.Service.TicketService
 
         public Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId)
         {
-            var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete == false, null);
+            var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete != false, null);
 
             return Task.FromResult(result);
         }

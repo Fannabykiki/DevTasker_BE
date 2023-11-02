@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/Iteration-management")]
+    [Route("api/iteration-management")]
     [ApiController]
     public class IterationController : ControllerBase
     {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/ticket-management")]
     [ApiController]
     public class TicketController : ControllerBase
     {
@@ -28,7 +28,8 @@ namespace Capstone.API.Controllers
             return Ok(response);
         }
         
-        [HttpGet("ticket/{ticketId}")]
+      //  [HttpGet("ticket/{ticketId}")]
+        [HttpGet("ticket/byInterationId")]
         [EnableQuery()]
         public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicketByInterationId(Guid interationId)
         {
