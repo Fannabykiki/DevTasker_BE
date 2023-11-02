@@ -310,7 +310,7 @@ namespace Capstone.Service.UserService
 		public async Task<bool> SendVerifyEmail(string emailRequest)
 		{
 			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest, null)!;
-			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?" + updateRequest.VerificationToken;
+			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?"+ "token=" + updateRequest.VerificationToken +"&email=" + emailRequest;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 			email.To.Add(MailboxAddress.Parse("" + emailRequest));

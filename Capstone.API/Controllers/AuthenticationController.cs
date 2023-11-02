@@ -51,15 +51,17 @@ namespace Capstone.API.Controllers
 
 			return new GetUserProfileResponse
 			{
-				Fullname = user.Fullname,
-				UserName = user.UserName,
-				Email = user.Email,
-				PhoneNumber = user.PhoneNumber,
-				Address = user.Address,
-				DoB = user.Dob,
-				Gender = user.Gender,
-				IsAdmin = user.IsAdmin
-			};
+                Fullname = user.Fullname,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                DoB = user.Dob,
+                Gender = user.Gender,
+                IsAdmin = user.IsAdmin,
+                StatusId = user.StatusId,
+                IsFirstTime = user.IsFirstTime,
+            };
 
 		}
 
