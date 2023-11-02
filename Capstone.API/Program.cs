@@ -25,6 +25,8 @@ using Capstone.Service.IterationService;
 using Capstone.Service.BoardService;
 using Capstone.API.Extentions.AuthorizeMiddleware;
 using Microsoft.AspNetCore.Authorization;
+using Capstone.API.Helper;
+using Capstone.Service.StatusService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -98,6 +100,9 @@ builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaReposito
 builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService> ();
 
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+builder.Services.AddScoped<IStatusService, StatusService>();
+
+builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();

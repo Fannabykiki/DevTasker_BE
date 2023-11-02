@@ -17,9 +17,10 @@ namespace Capstone.Service.IterationService
         private readonly IInterationRepository _iterationRepository;
         private readonly IBoardRepository _boardRepository;
         private readonly ITicketRepository _ticketRepository;
+        private readonly IStatusRepository _statusRepository;
 
 
-        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITicketRepository ticketRepository)
+        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITicketRepository ticketRepository, IStatusRepository statusRepository)
         {
             _context = context;
             _projectRepository = projectRepository;
@@ -27,6 +28,7 @@ namespace Capstone.Service.IterationService
             _iterationRepository = iterationRepository;
             _boardRepository = boardRepository;
             _ticketRepository = ticketRepository;
+            _statusRepository = statusRepository;
         }
         public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
         {
@@ -40,14 +42,10 @@ namespace Capstone.Service.IterationService
                 {
                     InterationId = iteration.InterationId,
                     InterationName = iteration.InterationName,
-                    // Status = iteration.Status
+                    Status = iteration.Status.Title
                 };
-                
-                // if (iteration.Status == InterationStatusEnum.Current)
-                // {
-                //     response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
-                // }
 
+                response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
                 result.Add(response);
             }
 
@@ -59,39 +57,39 @@ namespace Capstone.Service.IterationService
             if (iteration.Tickets == null) return null;
             var workItems = new List<WorkItemResponse>();
 
-            // foreach (var ticket in iteration.Tickets)
-            // {
-            //     if (ticket.PrevId == null)
-            //     {
-            //         var item = new WorkItemResponse
-            //         {
-            //             TicketId = ticket.TicketId,
-            //             Title = ticket.Title,
-            //             TicketType = ticket.TicketType,
-            //             TicketStatus = ticket.TicketStatus
-            //         };
-            //
-            //         item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
-            //
-            //         workItems.Add(item);
-            //     }
-            // }
+            foreach (var ticket in iteration.Tickets)
+            {
+                if (ticket.PrevId == null)
+                {
+                    var item = new WorkItemResponse
+                    {
+                        TicketId = ticket.TicketId,
+                        Title = ticket.Title,
+                        TicketType = ticket.TicketType.Title,
+                        TicketStatus = ticket.Status.Title
+                    };
+
+                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, iteration.Tickets);
+
+                    workItems.Add(item);
+                }
+            }
 
             return workItems;
         }
 
         private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, List<Ticket> allTickets)
         {
-            // return allTickets
-            //   .Where(x => x.PrevId == parentId)
-            //   .Select(x => new TicketResponse
-            //   {
-            //       TicketId = x.TicketId,
-            //       Title = x.Title,
-            //       TicketStatus = x.TicketStatus,
-            //       TicketType = x.TicketType
-            //   })
-            //   .ToList();
+            return allTickets
+              .Where(x => x.PrevId == parentId)
+              .Select(x => new TicketResponse
+              {
+                  TicketId = x.TicketId,
+                  Title = x.Title,
+                  TicketType = x.TicketType.Title,
+                  TicketStatus = x.Status.Title
+              })
+              .ToList();
             return null;
         }
 
@@ -140,7 +138,7 @@ namespace Capstone.Service.IterationService
                 iteration.InterationName = updateIterationRequest.InterationName;
                 iteration.StartDate = updateIterationRequest.StartDate;
                 iteration.EndDate = updateIterationRequest.EndDate;
-                // iteration.Status = updateIterationRequest.Status;
+                iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == updateIterationRequest.StatusId, null);
 
 
                 await _iterationRepository.UpdateAsync(iteration);

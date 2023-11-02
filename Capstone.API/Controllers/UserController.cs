@@ -1,6 +1,8 @@
 ﻿using Capstone.Common.DTOs.Email;
+using Capstone.API.Helper;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
+using Capstone.Service.StatusService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -13,17 +15,21 @@ namespace Capstone.API.Controllers
 	public class UserController : ControllerBase
 	{
 		private readonly ILoggerManager _logger;
+		private readonly IMailHelper _mailHelper;
 		private readonly IUserService _usersService;
+		private readonly IStatusService _statusService;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IConfiguration _config;
 
 
-		public UserController(ILoggerManager logger, IUserService usersService, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+		public UserController(ILoggerManager logger, IUserService usersService, IConfiguration config, IHttpContextAccessor httpContextAccessor, IMailHelper mailHelper, IStatusService statusService)
 		{
 			_logger = logger;
-			_usersService = usersService;
-			_httpContextAccessor = httpContextAccessor;
+            _mailHelper = mailHelper;
+            _usersService = usersService;
+			_statusService = statusService;
+            _httpContextAccessor = httpContextAccessor;
 			var identity = httpContextAccessor.HttpContext?.User?.Identity;
 			if (identity == null)
 			{
@@ -100,8 +106,15 @@ namespace Capstone.API.Controllers
             }
 
             var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
+			if (result == true)
+			{
+				var status = await _statusService.GetStatusByIdAsync(id);
+                var userBeChange = await _usersService.GetUserByIdAsync(id);
+				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {status.Title}", changeUserStatusRequest.reason);
+            }
+            
 
-			return Ok(result);
+            return Ok(result);
 
 		}
 	}
