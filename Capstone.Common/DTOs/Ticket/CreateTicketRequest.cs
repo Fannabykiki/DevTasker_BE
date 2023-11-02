@@ -1,6 +1,6 @@
 ﻿using Capstone.Common.Enums;
 
-namespace Capstone.Common.DTOs.Task
+namespace Capstone.Common.DTOs.Ticket
 {
     public class CreateTicketRequest
     {
@@ -12,10 +12,6 @@ namespace Capstone.Common.DTOs.Task
         public DateTime CreateTime { get; set; }
         public Guid AssignTo { get; set; }
         public Guid CreateBy { get; set; }
-        public TicketTypeEnum TicketType { get; set; }
         public Guid PriorityId { get; set; }
-        public Guid PrevId { get; set; }
-        public TaskStatusEnum TicketStatus { get; set; }
-        public Guid InterationId { get; set; }
     }
 }

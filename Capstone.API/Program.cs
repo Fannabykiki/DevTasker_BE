@@ -97,6 +97,8 @@ builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaRepository>();
 builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService>();
 
+builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));

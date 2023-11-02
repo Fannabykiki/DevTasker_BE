@@ -32,7 +32,6 @@ namespace Capstone.DataAccess.Entities
         public bool IsAdmin { get; set; } //True: Admin , False : User
         public List<TicketComment> TaskComments { get; set; } // 1 user can comment in many task
         public List<Attachment> Attachments { get; set; } // 1 user can upload many attachment is task
-        public List<Ticket> Tickets { get; set; } //1 user can assign many task
         public List<Notification> Notifications { get; set; } // 1 user has many noti
         public List<ProjectMember> ProjectMember { get; set; } // 1 user is many porject_member in other project
     }
