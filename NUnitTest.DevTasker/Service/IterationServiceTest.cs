@@ -24,6 +24,7 @@ namespace Capstone.UnitTests.Service
         private Mock<IMapper> _mapperMock;
         private Mock<IBoardRepository> _boardRepositoryMock;
         private Mock<ITicketRepository> _ticketRepositoryMock;
+        private Mock <IStatusRepository> _statusRepositoryMock;
         [SetUp]
         public void Setup()
         {
@@ -32,18 +33,20 @@ namespace Capstone.UnitTests.Service
             _transactionMock = new Mock<IDatabaseTransaction>();
             _mapperMock = new Mock<IMapper>();
             _boardRepositoryMock = new Mock<IBoardRepository>();
-            _ticketRepositoryMock = new Mock<ITicketRepository>(); // Include this mock
+            _ticketRepositoryMock = new Mock<ITicketRepository>();
+            _statusRepositoryMock = new Mock<IStatusRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            //_iterationService = new IterationService(
-            //    null,
-            //    _projectRepositoryMock.Object,
-            //    _mapperMock.Object,
-            //    _iterationRepositoryMock.Object,
-            //    _boardRepositoryMock.Object,
-            //    _ticketRepositoryMock.Object
-            //);
+            _iterationService = new IterationService(
+                null,
+                _projectRepositoryMock.Object,
+                _mapperMock.Object,
+                _iterationRepositoryMock.Object,
+                _boardRepositoryMock.Object,
+               _ticketRepositoryMock.Object,
+               _statusRepositoryMock.Object
+            );
         }
 
         [Test]
@@ -138,9 +141,9 @@ namespace Capstone.UnitTests.Service
                 InterationName = "New Iteration",
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(-7),
+                BoardId = Guid.NewGuid(),
                 Status = InterationStatusEnum.Pass
             };
-
             var projectId = Guid.NewGuid();
             var transaction = new Mock<IDatabaseTransaction>();
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
@@ -164,14 +167,14 @@ namespace Capstone.UnitTests.Service
         [Test]
         public async Task TestUpdateIterationRequest_Success()
         {
-            // Arrange
-            //var updateRequest = new UpdateIterationRequest
-            //{
-            //    InterationName = "Updated Iteration",
-            //    StartDate = DateTime.Now,
-            //    EndDate = DateTime.Now.AddDays(14),
-            //    Status = InterationStatusEnum.Current
-            //};
+           // Arrange
+           var updateRequest = new UpdateIterationRequest
+           {
+               InterationName = "Updated Iteration",
+               StartDate = DateTime.Now,
+               EndDate = DateTime.Now.AddDays(14),
+               StatusId = Guid.NewGuid(),
+           };
 
             var iterationId = Guid.NewGuid();
 
@@ -181,7 +184,7 @@ namespace Capstone.UnitTests.Service
                 InterationName = "Old Iteration",
                 StartDate = DateTime.Now.AddDays(-7),
                 EndDate = DateTime.Now,
-                // Status = InterationStatusEnum.Future
+                StatusId = Guid.NewGuid(),
             };
 
             _iterationRepositoryMock.Setup(repo => repo.GetAsync(
@@ -192,23 +195,18 @@ namespace Capstone.UnitTests.Service
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
 
             // Act
-            //var result = await _iterationService.UpdateIterationRequest(updateRequest, iterationId);
+            var result = await _iterationService.UpdateIterationRequest(updateRequest, iterationId);
+            Assert.True(result);
 
-            // Assert
-            //Assert.True(result);
-
-            //if (result)
-            //{
-            //    Console.WriteLine("Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Fail");
-            //}
+            if (result)
+            {
+                Console.WriteLine("Success");
+            }
+            else
+            {
+                Console.WriteLine("Fail");
+            }
 
         }
-
-
-
     }
 }
