@@ -28,8 +28,7 @@ namespace Capstone.Service.AttachmentServices
             //get Credentials from client_secret.json file 
             UserCredential credential;
             //Root Folder of project
-            string startupPath = Environment.CurrentDirectory;
-            using (var stream = new FileStream(Path.Combine(startupPath,"client_secret.json"), FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(Path.GetFullPath("client_secret.json"), FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
