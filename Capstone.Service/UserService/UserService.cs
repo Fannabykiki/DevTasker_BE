@@ -16,6 +16,8 @@ using AutoMapper;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Microsoft.AspNetCore.Http;
+using System.Security.Principal;
 
 namespace Capstone.Service.UserService
 {
@@ -25,13 +27,25 @@ namespace Capstone.Service.UserService
 		private readonly IUserRepository _userRepository;
 		private readonly IMapper _mapper;
 		private readonly IServiceScopeFactory _serviceScopeFactory;
+		private readonly ClaimsIdentity? _identity;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory, IHttpContextAccessor httpContextAccessor)
 		{
 			_context = context;
 			_userRepository = userRepository;
 			_mapper = mapper;
 			_serviceScopeFactory = serviceScopeFactory;
+			var identity = httpContextAccessor.HttpContext?.User?.Identity;
+			if (identity == null)
+			{
+				_identity = null;
+			}
+			else
+			{
+				_identity = identity as ClaimsIdentity;
+			}
+			_httpContextAccessor = httpContextAccessor;
 		}
 
 		public async Task<CreateUserResponse> Register(CreateUserRequest createUserRequest)
@@ -78,54 +92,54 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-        public async Task<CreateUserResponse?> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
-        {
-            try
-            {
-                var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null)!;
-                if (user == null)
+		public async Task<CreateUserResponse?> CreateNewUser(CreateUserGGLoginRequest createUserGGLoginRequest)
+		{
+			try
+			{
+				var user = await _userRepository.GetAsync(user => user.Email == createUserGGLoginRequest.Email, null)!;
+				if (user == null)
 				{
 					Random random = new Random();
-                    CreatePasswordHash(Convert.ToString(RandomNumberGenerator.GetBytes(64)), out byte[] passwordHash, out byte[] passwordSalt);
+					CreatePasswordHash(Convert.ToString(RandomNumberGenerator.GetBytes(64)), out byte[] passwordHash, out byte[] passwordSalt);
 
-                    var newUserRequest = new User
-                    {
-                        UserId = Guid.NewGuid(),
-                        PasswordHash = passwordHash,
-                        PasswordSalt = passwordSalt,
-                        IsAdmin = false,
-                        JoinedDate = DateTime.UtcNow,
-                        IsFirstTime = true,
-                        VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
-                        Email = createUserGGLoginRequest.Email,
-                        StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
+					var newUserRequest = new User
+					{
+						UserId = Guid.NewGuid(),
+						PasswordHash = passwordHash,
+						PasswordSalt = passwordSalt,
+						IsAdmin = false,
+						JoinedDate = DateTime.UtcNow,
+						IsFirstTime = true,
+						VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
+						Email = createUserGGLoginRequest.Email,
+						StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
 						VerifiedAt = DateTime.UtcNow
-                    };
+					};
 
-                    var newUser = await _userRepository.CreateAsync(newUserRequest);
-                    await _userRepository.SaveChanges();
+					var newUser = await _userRepository.CreateAsync(newUserRequest);
+					await _userRepository.SaveChanges();
 
-                    return new CreateUserResponse
-                    {
-                        IsSucced = true,
-                        VerifyToken = newUser.VerificationToken
-                    };
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception)
-            {
-                return new CreateUserResponse
-                {
-                    IsSucced = false,
-                };
-            }
-        }
+					return new CreateUserResponse
+					{
+						IsSucced = true,
+						VerifyToken = newUser.VerificationToken
+					};
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception)
+			{
+				return new CreateUserResponse
+				{
+					IsSucced = false,
+				};
+			}
+		}
 
-        public Task<bool> DeleteAsync(Guid id)
+		public Task<bool> DeleteAsync(Guid id)
 		{
 			throw new NotImplementedException();
 		}
@@ -155,14 +169,14 @@ namespace Capstone.Service.UserService
 
 					// Update user properties from request
 
-                    user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
-                    user.UserName = updateProfileRequest.UserName ?? user.UserName;
-                    user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
-                    user.Address = updateProfileRequest.Address ?? user.Address;
-                    user.Dob = updateProfileRequest.DoB ?? user.Dob;
-                    user.Gender = updateProfileRequest.Gender ?? user.Gender;
+					user.Fullname = updateProfileRequest.Fullname ?? user.Fullname;
+					user.UserName = updateProfileRequest.UserName ?? user.UserName;
+					user.PhoneNumber = updateProfileRequest.PhoneNumber ?? user.PhoneNumber;
+					user.Address = updateProfileRequest.Address ?? user.Address;
+					user.Dob = updateProfileRequest.DoB ?? user.Dob;
+					user.Gender = updateProfileRequest.Gender ?? user.Gender;
 					user.IsFirstTime = false;
-                    // Save changes
+					// Save changes
 
 					var result = await _userRepository.UpdateAsync(user);
 					await _userRepository.SaveChanges();
@@ -250,9 +264,9 @@ namespace Capstone.Service.UserService
 		public Task<string> CreateToken(UserViewModel user)
 		{
 			var claims = new Claim[]
-		  {
+			{
 			new Claim("UserId",user.UserId.ToString()),
-		  };
+			};
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key));
 
@@ -265,7 +279,6 @@ namespace Capstone.Service.UserService
 				expires: expired, signingCredentials: signIn);
 
 			var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
 			return Task.FromResult(tokenString);
 		}
 
@@ -310,7 +323,7 @@ namespace Capstone.Service.UserService
 		public async Task<bool> SendVerifyEmail(string emailRequest)
 		{
 			var updateRequest = await _userRepository.GetAsync(s => s.Email == emailRequest, null)!;
-			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?"+ "token=" + updateRequest.VerificationToken +"&email=" + emailRequest;
+			string verificationLink = "https://devtasker.azurewebsites.net/verify-account?" + "token=" + updateRequest.VerificationToken + "&email=" + emailRequest;
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 			email.To.Add(MailboxAddress.Parse("" + emailRequest));
@@ -400,32 +413,32 @@ namespace Capstone.Service.UserService
 					updateRequest.PassResetToken = null;
 					updateRequest.ResetTokenExpires = null;
 
-                    await _userRepository.UpdateAsync(updateRequest);
-                    await _userRepository.SaveChanges();
-                    transaction.Commit();
+					await _userRepository.UpdateAsync(updateRequest);
+					await _userRepository.SaveChanges();
+					transaction.Commit();
 
-                    return true;
-                }
-                catch (Exception)
-                {
-                    transaction.RollBack();
+					return true;
+				}
+				catch (Exception)
+				{
+					transaction.RollBack();
 
-                    return false;
-                }
-            }
-        }
-        public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
-        {
-            using (var transaction = _userRepository.DatabaseTransaction())
-            {
-                try
-                {
-                    var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
+					return false;
+				}
+			}
+		}
+		public async Task<bool> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest, Guid userId)
+		{
+			using (var transaction = _userRepository.DatabaseTransaction())
+			{
+				try
+				{
+					var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
 
-                    updateRequest.StatusId = changeUserStatusRequest.StatusIdChangeTo;
+					updateRequest.StatusId = changeUserStatusRequest.StatusIdChangeTo;
 
-                    await _userRepository.UpdateAsync(updateRequest);
-                    await _userRepository.SaveChanges();
+					await _userRepository.UpdateAsync(updateRequest);
+					await _userRepository.SaveChanges();
 
 					transaction.Commit();
 
@@ -447,7 +460,7 @@ namespace Capstone.Service.UserService
 			using (var transaction = context.Database.BeginTransaction())
 			{
 				try
-				{	
+				{
 					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null)!;
 
 					updateRequest.AccessToken = accessToken;
@@ -486,7 +499,7 @@ namespace Capstone.Service.UserService
 				StatusId = x.StatusId, //Get status name instead of id
 			}).ToList();
 			return users;
-			
+
 		}
 
 		public async Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest)

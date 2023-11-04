@@ -1,3 +1,4 @@
+using Capstone.API.Extentions;
 using Capstone.API.Extentions.AuthorizeMiddleware;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
@@ -29,7 +30,8 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects")]
 		public async Task<IActionResult> CreateProject(CreateProjectRequest createProjectRequest)
 		{
-			var result = await _projectService.CreateProject(createProjectRequest);
+			var userId = this.GetCurrentLoginUserId();
+			var result = await _projectService.CreateProject(createProjectRequest,userId);
 
 			return Ok(result);
 		}
