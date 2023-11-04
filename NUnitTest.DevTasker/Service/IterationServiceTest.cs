@@ -38,15 +38,15 @@ namespace Capstone.UnitTests.Service
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            _iterationService = new IterationService(
-                null,
-                _projectRepositoryMock.Object,
-                _mapperMock.Object,
-                _iterationRepositoryMock.Object,
-                _boardRepositoryMock.Object,
-               _ticketRepositoryMock.Object,
-               _statusRepositoryMock.Object
-            );
+            //_iterationService = new IterationService(
+            //    null,
+            //    _projectRepositoryMock.Object,
+            //    _mapperMock.Object,
+            //    _iterationRepositoryMock.Object,
+            //    _boardRepositoryMock.Object,
+            //   _ticketRepositoryMock.Object,
+            //   _statusRepositoryMock.Object
+            //);
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Capstone.UnitTests.Service
                 InterationName = "New Iteration",
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(7),
-                Status = InterationStatusEnum.Pass
+                //Status = InterationStatusEnum.Pass
             };
 
             var boardId = Guid.NewGuid();
@@ -107,7 +107,7 @@ namespace Capstone.UnitTests.Service
                 InterationName = null, // Invalid request
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(7),
-                Status = InterationStatusEnum.Pass
+                //Status = InterationStatusEnum.Pass
             };
 
             var projectId = Guid.NewGuid();
@@ -142,7 +142,7 @@ namespace Capstone.UnitTests.Service
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(-7),
                 BoardId = Guid.NewGuid(),
-                Status = InterationStatusEnum.Pass
+                //Status = InterationStatusEnum.Pass
             };
             var projectId = Guid.NewGuid();
             var transaction = new Mock<IDatabaseTransaction>();
