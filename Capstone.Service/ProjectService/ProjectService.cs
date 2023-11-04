@@ -35,7 +35,7 @@ public class ProjectService : IProjectService
 		_permissionScemaRepo = permissionScemaRepo;
 	}
 
-	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest)
+	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -46,11 +46,12 @@ public class ProjectService : IProjectService
 			{	
 				ProjectId = projectId,
 				ProjectName = createProjectRequest.ProjectName,
-				CreateAt = createProjectRequest.CreateAt,
+				CreateAt = DateTime.UtcNow,
 				EndDate = createProjectRequest.EndDate,
 				StartDate = createProjectRequest.StartDate,
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
-				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), CreateBy = createProjectRequest.CreateBy,
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
+				CreateBy = userId,
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
 				Board = new Board

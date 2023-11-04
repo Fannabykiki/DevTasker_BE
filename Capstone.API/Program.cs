@@ -22,7 +22,6 @@ using Capstone.Service.PermissionSchemaService;
 using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
-using Capstone.Service.BoardService;
 using Capstone.API.Extentions.AuthorizeMiddleware;
 using Microsoft.AspNetCore.Authorization;
 using Capstone.API.Helper;
@@ -95,7 +94,6 @@ builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
 builder.Services.AddScoped<IIterationService, IterationService>();
 
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
-builder.Services.AddScoped<IBoardService, BoardService>();
 
 builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaRepository>();
 builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService>();
@@ -115,7 +113,7 @@ builder.Services.AddControllers()
                 {
                     // Validate child properties and root collection elements
                     options.ImplicitlyValidateChildProperties = true;
-                    options.ImplicitlyValidateRootCollectionElements = true;
+					options.ImplicitlyValidateRootCollectionElements = true;
 
                     // Automatic registration of validators in assembly
                     options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -186,6 +184,8 @@ app.UseRouting();
 app.UseCors("corspolicy");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
