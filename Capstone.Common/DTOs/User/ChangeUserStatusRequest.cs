@@ -11,6 +11,7 @@ namespace Capstone.Common.DTOs.User
     {
         public Guid ChangeBy { get; set; }
         public string VerifyToken { get; set; }
+        public string? reason { get; set; }
         public Guid StatusIdChangeTo { get; set; }
     }
 }

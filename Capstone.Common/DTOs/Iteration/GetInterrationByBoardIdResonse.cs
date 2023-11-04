@@ -12,7 +12,7 @@ namespace Capstone.Common.DTOs.Iteration
     {
         public Guid InterationId { get; set; }
         public string InterationName { get; set; }
-        public InterationStatusEnum Status { get; set; }
+        public string Status { get; set; }
         public List<WorkItemResponse>? workItemResponses { get; set; }
     }
 
@@ -20,8 +20,8 @@ namespace Capstone.Common.DTOs.Iteration
     {
         public Guid TicketId { get; set; }
         public string Title { get; set; }
-        public TicketTypeEnum TicketType { get; set; }
-        public TaskStatusEnum TicketStatus { get; set; }
+        public string TicketType { get; set; }
+        public string TicketStatus { get; set; }
         public List<TicketResponse> Tickets { get; set; }
     }
 
@@ -29,8 +29,8 @@ namespace Capstone.Common.DTOs.Iteration
     {
         public Guid TicketId { get; set; }
         public string Title { get; set; }
-        public TicketTypeEnum TicketType { get; set; }
-        public TaskStatusEnum TicketStatus { get; set; }
+        public string TicketType { get; set; }
+        public string TicketStatus { get; set; }
     }
 
    
