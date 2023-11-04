@@ -49,7 +49,7 @@ namespace NUnitTest.DevTasker.Service
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
             _ticketService = new TicketService(
-                _context, // Sử dụng context ảo
+                _context, 
                 _ticketRepositoryMock.Object,
                 _ticketStatusRepositoryMock.Object,
                 _ticketTypeRepositoryMock.Object,
