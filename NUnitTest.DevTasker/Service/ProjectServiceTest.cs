@@ -5,6 +5,7 @@ using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.ProjectService;
+using Google.Apis.Drive.v3.Data;
 using Moq;
 using NUnit.Framework;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -68,13 +69,12 @@ namespace NUnitTest.DevTasker.Service
             var createProjectRequest = new CreateProjectRequest
             {
                 ProjectName = "Test Project",
-                CreateAt = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(1),
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
-                CreateBy = Guid.NewGuid(),
                 Description = "Test Project Description",
             };
+    
 
             _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
                 .ReturnsAsync(new Project { ProjectId = Guid.NewGuid() });
@@ -91,7 +91,8 @@ namespace NUnitTest.DevTasker.Service
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
 
             // Act
-            var result = await _projectService.CreateProject(createProjectRequest);
+            var userId = new Guid();
+            var result = await _projectService.CreateProject(createProjectRequest, userId);
 
             // Assert
             Assert.IsTrue(result);
@@ -110,7 +111,8 @@ namespace NUnitTest.DevTasker.Service
                 .ThrowsAsync(new Exception("Simulated failure"));
 
             // Act
-            var result = await _projectService.CreateProject(createProjectRequest);
+            var userId = new Guid();
+            var result = await _projectService.CreateProject(createProjectRequest, userId);
 
             // Assert
             Assert.IsFalse(result);
@@ -123,16 +125,16 @@ namespace NUnitTest.DevTasker.Service
             var createProjectRequest = new CreateProjectRequest
             {
                 // Omitting ProjectName, which should cause a failure.
-                CreateAt = DateTime.Now,
+                ProjectName = "",
                 EndDate = DateTime.Now.AddMonths(1),
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
-                CreateBy = Guid.NewGuid(),
                 Description = "Test Project Description",
             };
 
             // Act
-            var result = await _projectService.CreateProject(createProjectRequest);
+            var userId = new Guid();
+            var result = await _projectService.CreateProject(createProjectRequest, userId);
 
             // Assert
             Assert.IsFalse(result);
@@ -145,16 +147,15 @@ namespace NUnitTest.DevTasker.Service
             var createProjectRequest = new CreateProjectRequest
             {
                 ProjectName = "Test Project",
-                CreateAt = DateTime.Now.AddMonths(1), // Create date is greater than the end date.
                 EndDate = DateTime.Now.AddMonths(1),
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
-                CreateBy = Guid.NewGuid(),
                 Description = "Test Project Description",
             };
 
             // Act
-            var result = await _projectService.CreateProject(createProjectRequest);
+            var userId = new Guid();
+            var result = await _projectService.CreateProject(createProjectRequest, userId);
 
             // Assert
             Assert.IsFalse(result);

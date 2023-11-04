@@ -52,6 +52,7 @@ namespace Capstone.Service.TicketService
             var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
             {
+
                 var ticketEntity = new Ticket()
                 {
                     TicketId = Guid.NewGuid(),
