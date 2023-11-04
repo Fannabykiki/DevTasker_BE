@@ -13,6 +13,5 @@ namespace Capstone.Common.DTOs.Iteration
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid BoardId { get; set; }
-        public InterationStatusEnum Status { get; set; }
     }
 }

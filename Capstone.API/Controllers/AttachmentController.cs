@@ -8,9 +8,9 @@ namespace Capstone.API.Controllers
     [ApiController]
     public class AttachmentController : ControllerBase
     {
-        private readonly AttachmentServices _attachmentServices;
+        private readonly IAttachmentServices _attachmentServices;
 
-        public AttachmentController(AttachmentServices attachmentServices)
+        public AttachmentController(IAttachmentServices attachmentServices)
         {
             _attachmentServices = attachmentServices;
         }
@@ -18,7 +18,7 @@ namespace Capstone.API.Controllers
         [HttpGet("attachments")]
         public async Task<IActionResult> List()
         {
-            var files = await _attachmentServices.ListFiles();
+            var files = await _attachmentServices.GetDriveFiles();
             return Ok(files);
         }
         [HttpPost("attachments")]

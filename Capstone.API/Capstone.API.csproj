@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="client_secret.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="GoogleAuthentication" Version="1.0.0" />
@@ -37,6 +41,10 @@
   <ItemGroup>
     <Folder Include="Extentions\Validation\PermissionSchemaValidator\" />
     <Folder Include="Extentions\Validation\RoleValidator\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="client_secret.json" />
   </ItemGroup>
 
 
