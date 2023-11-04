@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Email;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Email;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
@@ -356,6 +357,5 @@ namespace Capstone.API.Controllers
 
 			return Ok(token);
 		}
-
 	}
 }
