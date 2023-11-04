@@ -11,6 +11,7 @@ using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
+using Google.Apis.Util.Store;
 using Microsoft.AspNetCore.Http;
 using Org.BouncyCastle.Asn1.Ocsp;
 
@@ -19,24 +20,31 @@ namespace Capstone.Service.AttachmentServices
     public class AttachmentServices : IAttachmentServices
     {
         private readonly DriveService _driveService;
-        public static string[] Scopes = { DriveService.Scope.Drive };
+        //public static string[] Scopes = { DriveService.Scope.Drive };
+        public static string[] Scopes = { Google.Apis.Drive.v3.DriveService.Scope.Drive };
 
         public static DriveService GetDriveService()
         {
-            var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                new ClientSecrets
-                {
-                    ClientId = "421380454099-dshij1rr3m1csp98vucu6mnb05fv7ee8.apps.googleusercontent.com",
-                    ClientSecret = "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"
-                },
-                new[] { DriveService.Scope.Drive },
-                "user",
-                CancellationToken.None);
-            return new DriveService(new BaseClientService.Initializer()
+            //get Credentials from client_secret.json file 
+            UserCredential credential;
+            //Root Folder of project
+            string startupPath = Environment.CurrentDirectory;
+            using (var stream = new FileStream(Path.Combine(startupPath,"client_secret.json"), FileMode.Open, FileAccess.Read))
             {
-                HttpClientInitializer = (Google.Apis.Http.IConfigurableHttpClientInitializer)credential,
-                // ...
+                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    GoogleClientSecrets.Load(stream).Secrets,
+                    Scopes,
+                    "user",
+                    CancellationToken.None,
+                    new FileDataStore("Drive.Auth.Store")).Result;
+            }
+            //create Drive API service.
+            DriveService service = new Google.Apis.Drive.v3.DriveService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "devtasker",
             });
+            return service;
         }
         public AttachmentServices()
         {
@@ -84,25 +92,56 @@ namespace Capstone.Service.AttachmentServices
             return stream;
         }
 
-        public async Task<List<GoogleDriveFiles>> ListFiles()
+        public async Task< List<GoogleDriveFile>> GetDriveFiles()
         {
-            FilesResource.ListRequest FileListRequest = _driveService.Files.List();
+            Google.Apis.Drive.v3.FilesResource.ListRequest FileListRequest = _driveService.Files.List();
 
-            FileListRequest.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
-
+            // for getting folders only.
+            //FileListRequest.Q = "mimeType='application/vnd.google-apps.folder'";
+            FileListRequest.Fields = "nextPageToken, files(*)";
+            // List files.
             IList<Google.Apis.Drive.v3.Data.File> files = FileListRequest.Execute().Files;
-
-            var flieList = files.Select(x => new GoogleDriveFiles
+            List<GoogleDriveFile> FileList = new List<GoogleDriveFile>();
+            // For getting only folders
+            // files = files.Where(x => x.MimeType == "application/vnd.google-apps.folder").ToList();
+            if (files != null && files.Count > 0)
             {
-                Id = x.Id,
-                Name = x.Name,
-                Size = x.Size,
-                Version = x.Version,
-                CreatedTime = x.CreatedTime
-            });
-
-            return (List<GoogleDriveFiles>)flieList;
+                foreach (var file in files)
+                {
+                    GoogleDriveFile File = new GoogleDriveFile
+                    {
+                        Id = file.Id,
+                        Name = file.Name,
+                        Size = file.Size,
+                        Version = file.Version,
+                        CreatedTime = file.CreatedTime,
+                        Parents = file.Parents,
+                        MimeType = file.MimeType
+                    };
+                    FileList.Add(File);
+                }
+            }
+            return FileList;
         }
+        //public async Task<List<GoogleDriveFiles>> ListFiles()
+        //{
+        //    FilesResource.ListRequest FileListRequest = _driveService.Files.List();
+
+        //    FileListRequest.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
+
+        //    IList<Google.Apis.Drive.v3.Data.File> files = FileListRequest.Execute().Files;
+
+        //    var flieList = files.Select(x => new GoogleDriveFiles
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        Size = x.Size,
+        //        Version = x.Version,
+        //        CreatedTime = x.CreatedTime
+        //    });
+
+        //    return (List<GoogleDriveFiles>)flieList;
+        //}
 
         public Task<bool> RemoveAttachment(string id)
         {

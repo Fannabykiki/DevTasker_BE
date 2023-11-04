@@ -13,7 +13,7 @@ namespace Capstone.Service.AttachmentServices
     {
         Task<string> UploadFileAsync(IFormFile file);
         Stream DownloadFile(string id);
-        Task<List<GoogleDriveFiles>> ListFiles();
+        Task<List<GoogleDriveFile>> GetDriveFiles();
         Task<bool> RemoveAttachment(string id);
         Task<bool> DeleteAttachment(string id);
 

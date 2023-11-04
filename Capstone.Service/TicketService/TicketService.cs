@@ -43,6 +43,11 @@ namespace Capstone.Service.TicketService
 
         public async Task<bool> CreateTicket(CreateTicketRequest request, Guid interationId)
         {
+            /*if (string.IsNullOrWhiteSpace(request.Title))
+            {
+                return false;
+            }*/
+
             using var transaction = _iterationRepository.DatabaseTransaction();
             var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
