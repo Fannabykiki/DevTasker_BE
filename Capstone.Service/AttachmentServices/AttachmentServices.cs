@@ -28,7 +28,8 @@ namespace Capstone.Service.AttachmentServices
             //get Credentials from client_secret.json file 
             UserCredential credential;
             //Root Folder of project
-            using (var stream = new FileStream("D:\\Study\\Fall23\\Capstone\\BE\\Capstone.Service\\client_secret.json", FileMode.Open, FileAccess.Read))
+            string startupPath = Environment.CurrentDirectory;
+            using (var stream = new FileStream(Path.Combine(startupPath,"client_secret.json"), FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
@@ -44,37 +45,6 @@ namespace Capstone.Service.AttachmentServices
                 ApplicationName = "devtasker",
             });
             return service;
-
-
-            //UserCredential credential;
-            //credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-            //          new ClientSecrets
-            //          {
-            //              ClientId = "421380454099-dshij1rr3m1csp98vucu6mnb05fv7ee8.apps.googleusercontent.com",
-            //              ClientSecret = "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"
-            //          },
-            //          new[] { DriveService.Scope.Drive,
-            //          DriveService.Scope.DriveFile },
-            //          "user",
-            //          CancellationToken.None,
-            //          new FileDataStore("Drive.Auth.Store")).Result;
-            //UserCredential credential;
-
-            //using (var stream = new FileStream("D:\\Study\\Fall23\\Capstone\\BE\\Capstone.Service\\client_secret.json", FileMode.Open, FileAccess.Read))
-            //{
-            //    credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-            //        GoogleClientSecrets.Load(stream).Secrets,
-            //        new[] { DriveService.Scope.Drive },
-            //        "user",
-            //        CancellationToken.None).Result;
-            //}
-
-
-            //return new DriveService(new BaseClientService.Initializer()
-            //{
-            //    HttpClientInitializer = (Google.Apis.Http.IConfigurableHttpClientInitializer)credential,
-            //    // ...
-            //});
         }
         public AttachmentServices()
         {
