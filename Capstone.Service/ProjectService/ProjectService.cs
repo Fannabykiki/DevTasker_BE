@@ -35,7 +35,7 @@ public class ProjectService : IProjectService
 		_permissionScemaRepo = permissionScemaRepo;
 	}
 
-	public async Task<bool> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
+	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -43,7 +43,7 @@ public class ProjectService : IProjectService
 			var projectId = Guid.NewGuid();
 
 			var newProjectRequest = new Project
-			{	
+			{
 				ProjectId = projectId,
 				ProjectName = createProjectRequest.ProjectName,
 				CreateAt = DateTime.UtcNow,
@@ -106,19 +106,37 @@ public class ProjectService : IProjectService
 			await _projectMemberRepository.SaveChanges();
 
 			transaction.Commit();
-			return true;
+
+			return new CreateProjectRespone
+			{
+				CreateAt = newProject.CreateAt,
+				CreateBy = newProject.CreateBy,
+				DeleteAt = newProject.DeleteAt,
+				Description = newProject.Description,
+				StartDate = newProject.StartDate,
+				EndDate = newProject.EndDate,
+				PrivacyStatus = newProject.PrivacyStatus,
+				ProjectId = newProject.ProjectId,
+				ProjectName = newProject.ProjectName,
+				SchemasId = newProject.SchemasId,
+				StatusId = newProject.StatusId,
+				IsSucced = true
+			};
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("Error occurred: " + ex.Message);
 			transaction.RollBack();
-			return false;
+			return new CreateProjectRespone
+			{
+				IsSucced = false,
+			};
 		}
 	}
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse(""), x => x.ProjectMembers.Where(m => m.UserId == userId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
@@ -295,8 +313,9 @@ public class ProjectService : IProjectService
 						RoleId = m.RoleId,
 						ProjectId = m.ProjectId,
 						IsOwner = m.IsOwner
-						,RoleName = m.Role.RoleName
-					
+						,
+						RoleName = m.Role.RoleName
+
 					})
 					.ToList()
 			};
