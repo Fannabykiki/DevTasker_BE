@@ -17,7 +17,7 @@ namespace Capstone.API.Extentions.AuthorizeMiddleware
             var projectIdClaim = context.User.FindFirst("projectId")?.Value;
 
             var isUserIdValid = Guid.TryParse(userIdClaim, out Guid userId);
-            var isprojectIdValid = Guid.TryParse(userIdClaim, out Guid projectIdId);
+            var isprojectIdValid = Guid.TryParse(projectIdClaim, out Guid projectIdId);
 
             if (!isUserIdValid || !isprojectIdValid)
             {
