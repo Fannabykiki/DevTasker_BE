@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Capstone.Common.DTOs.GoogleAPI;
+using Capstone.DataAccess.Repository.Interfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
@@ -20,6 +21,7 @@ namespace Capstone.Service.AttachmentServices
     public class AttachmentServices : IAttachmentServices
     {
         private readonly DriveService _driveService;
+        private readonly IAttachmentRepository _attachmentRepository;
         //public static string[] Scopes = { DriveService.Scope.Drive };
         public static string[] Scopes = { Google.Apis.Drive.v3.DriveService.Scope.Drive };
 
@@ -46,9 +48,10 @@ namespace Capstone.Service.AttachmentServices
             });
             return service;
         }
-        public AttachmentServices()
+        public AttachmentServices(IAttachmentRepository attachmentRepository)
         {
             _driveService = GetDriveService(); 
+            _attachmentRepository = attachmentRepository;
         }
         public async Task<bool> DeleteAttachment(string id)
         {
