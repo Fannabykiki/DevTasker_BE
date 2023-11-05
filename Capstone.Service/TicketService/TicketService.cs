@@ -78,31 +78,40 @@ namespace Capstone.Service.TicketService
 
 		public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
 		{
-			using var transaction = _iterationRepository.DatabaseTransaction();
+			      using var transaction = _iterationRepository.DatabaseTransaction();
+            using var transaction = _iterationRepository.DatabaseTransaction();
+            var listStatus = _statusRepository.GetAllAsync(x => true, null);
+            try
+            {
+                var ticketEntity = new Ticket()
+                {
+                    TicketId = Guid.NewGuid(),
+                    Title = request.Title,
+                    Decription = request.Decription,
+                    StartDate = request.StartDate,
+                    DueDate = request.DueDate,
+                    CreateTime = DateTime.Now,
+                    CreateBy = request.CreateBy,
+                    TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+                    PriorityId = request.PriorityId,
+                    PrevId = null,
+                    StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
+                    InterationId = interationId,
+                    AssignTo = request.AssignTo
+                };
+                await _ticketRepository.CreateAsync(ticketEntity);
+                await _ticketRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return false;
+            }
+        }
 
-			try
-			{
-				var ticketEntity = await _ticketRepository.GetAsync(t => t.TicketId == ticketId, null)!;
-
-				ticketEntity.Title = updateTicketRequest.Title;
-				ticketEntity.Decription = updateTicketRequest.Decription;
-				ticketEntity.DueDate = updateTicketRequest.DueDate;
-				ticketEntity.AssignTo = updateTicketRequest.AssignTo;
-				ticketEntity.TypeId = updateTicketRequest.TypeId;
-				ticketEntity.PriorityId = updateTicketRequest.PriorityId;
-				ticketEntity.StatusId = updateTicketRequest.StatusId;
-				await _ticketRepository.UpdateAsync(ticketEntity);
-				await _context.SaveChangesAsync();
-
-				transaction.Commit();
-				return true;
-			}
-			catch (Exception ex)
-			{
-				transaction.RollBack();
-				return false;
-			}
-		}
 
 		public Task<IQueryable<Ticket>> GetAllTicketAsync()
 		{
