@@ -78,7 +78,6 @@ namespace Capstone.Service.TicketService
 
 		public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
 		{
-			      using var transaction = _iterationRepository.DatabaseTransaction();
             using var transaction = _iterationRepository.DatabaseTransaction();
             var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
@@ -86,19 +85,17 @@ namespace Capstone.Service.TicketService
                 var ticketEntity = new Ticket()
                 {
                     TicketId = Guid.NewGuid(),
-                    Title = request.Title,
-                    Decription = request.Decription,
-                    StartDate = request.StartDate,
-                    DueDate = request.DueDate,
+                    Title = updateTicketRequest.Title,
+                    Decription = updateTicketRequest.Decription,
+                    DueDate = updateTicketRequest.DueDate,
                     CreateTime = DateTime.Now,
-                    CreateBy = request.CreateBy,
                     TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
-                    PriorityId = request.PriorityId,
+                    PriorityId = updateTicketRequest.PriorityId,
                     PrevId = null,
                     StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
-                    InterationId = interationId,
-                    AssignTo = request.AssignTo
+                    AssignTo = updateTicketRequest.AssignTo
                 };
+
                 await _ticketRepository.CreateAsync(ticketEntity);
                 await _ticketRepository.SaveChanges();
                 transaction.Commit();
