@@ -22,15 +22,15 @@ namespace Capstone.Service.AttachmentServices
     {
         private readonly DriveService _driveService;
         private readonly IAttachmentRepository _attachmentRepository;
-        //public static string[] Scopes = { DriveService.Scope.Drive };
-        public static string[] Scopes = { Google.Apis.Drive.v3.DriveService.Scope.Drive };
+        public static string[] Scopes = { DriveService.Scope.Drive };
+        //public static string[] Scopes = { Google.Apis.Drive.v3.DriveService.Scope.Drive };
 
         public static DriveService GetDriveService()
         {
             //get Credentials from client_secret.json file 
             UserCredential credential;
             //Root Folder of project
-            string jsonPath = "config/client_secret.json";
+            string jsonPath = "credentials/client_secret.json";
             using (var stream = new FileStream(jsonPath, FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(

@@ -103,6 +103,7 @@ builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService>();
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 
+builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
