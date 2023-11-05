@@ -62,7 +62,7 @@ namespace Capstone.DataAccess.Repository.Implements
             {
                 if (pre != null)
                 {
-                    result = _dbSet.Include(pre).Where(predicate);
+                    result = _dbSet.Where(predicate).Include(pre);
                 }
                 else
                 {
