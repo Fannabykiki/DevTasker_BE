@@ -28,7 +28,7 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPost("projects")]
-		public async Task<IActionResult> CreateProject(CreateProjectRequest createProjectRequest)
+		public async Task<ActionResult<CreateProjectRespone>> CreateProject(CreateProjectRequest createProjectRequest)
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _projectService.CreateProject(createProjectRequest,userId);
