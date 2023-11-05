@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Ticket;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Ticket;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
@@ -38,8 +39,9 @@ namespace Capstone.API.Controllers
         
         [HttpPost("ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
-        {
-            var result = await _ticketService.CreateTicket(createTicketRequest, interationId);
+        {   
+            var userId = this.GetCurrentLoginUserId();
+            var result = await _ticketService.CreateTicket(createTicketRequest, interationId,userId);
 
             return Ok(result);
         }
