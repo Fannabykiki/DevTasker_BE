@@ -5,7 +5,7 @@ namespace Capstone.Service.TicketService
 {
     public  interface ITicketService
     {
-        Task<bool> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId);
+        Task<bool> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId,Guid userId);
         Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId);
         Task<IQueryable<Ticket>> GetAllTicketAsync();
         Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId);
