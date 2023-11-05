@@ -46,9 +46,9 @@ public class ProjectService : IProjectService
 			{
 				ProjectId = projectId,
 				ProjectName = createProjectRequest.ProjectName,
-				CreateAt = DateTime.UtcNow,
-				EndDate = createProjectRequest.EndDate,
-				StartDate = createProjectRequest.StartDate,
+				CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+				EndDate = DateTime.Parse(createProjectRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+				StartDate = DateTime.Parse(createProjectRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
 				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 				CreateBy = userId,
@@ -59,7 +59,7 @@ public class ProjectService : IProjectService
 					BoardId = Guid.NewGuid(),
 					ProjectId = projectId,
 					DeleteAt = null,
-					CreateAt = DateTime.UtcNow,
+					CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 					Title = "Board Default",
 					UpdateAt = null,
@@ -71,10 +71,10 @@ public class ProjectService : IProjectService
 
 			var newInteration = new Interation
 			{
-				StartDate = DateTime.UtcNow,
+				StartDate = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProjectRequest.Board.BoardId,
-				EndDate = DateTime.UtcNow.AddDays(14),
+				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				InterationName = "Interation 1",
 				InterationId = Guid.NewGuid(),
 			};
@@ -109,12 +109,12 @@ public class ProjectService : IProjectService
 
 			return new CreateProjectRespone
 			{
-				CreateAt = newProject.CreateAt,
+				CreateAt = newProject.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 				CreateBy = newProject.CreateBy,
 				DeleteAt = newProject.DeleteAt,
 				Description = newProject.Description,
-				StartDate = newProject.StartDate,
-				EndDate = newProject.EndDate,
+				StartDate = newProject.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+				EndDate = newProject.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 				PrivacyStatus = newProject.PrivacyStatus,
 				ProjectId = newProject.ProjectId,
 				ProjectName = newProject.ProjectName,
@@ -136,7 +136,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
+		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x=> x.ProjectMembers.Where(m => m.UserId == userId));
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 
