@@ -37,10 +37,15 @@ namespace Capstone.API.Controllers
 		}
 
 		[EnableQuery]
-		[HttpGet("projects/user/{memberId:Guid}")]
-		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectByUserId(Guid memberId)
+		[HttpGet("projects")]
+		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectByUserId()
 		{
-			var result = await _projectService.GetProjectByUserId(memberId);
+			var userId = this.GetCurrentLoginUserId();
+			if(userId == Guid.Empty)
+			{
+				return Unauthorized("You dont have permission to access this page");
+			}
+			var result = await _projectService.GetProjectByUserId(userId);
 			if (result == null)
 			{
 				return StatusCode(500);
