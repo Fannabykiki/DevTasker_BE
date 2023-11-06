@@ -341,4 +341,21 @@ public class ProjectService : IProjectService
 		}
 		return newPermisisonViewModel;
 	}
+
+    public async Task<GetAllProjectAdminResponse> GetProjectsAdmin()
+    {
+		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
+		var listProjectResponse = new GetAllProjectAdminResponse();
+		listProjectResponse.TotalProject = projects.Count();
+		listProjectResponse.ActiveProject = projects.Where(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
+		listProjectResponse.CloseProject = projects.Where(x => x.StatusId == Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7")).Count();
+		listProjectResponse.OtherProject = listProjectResponse.TotalProject - (listProjectResponse.ActiveProject+listProjectResponse.CloseProject);
+		listProjectResponse.PercentActive = (int)Math.Round((double)(100 * listProjectResponse.ActiveProject) / listProjectResponse.TotalProject);
+        listProjectResponse.PercentClose = (int)Math.Round((double)(100 * listProjectResponse.CloseProject) / listProjectResponse.TotalProject);
+		listProjectResponse.PercentClose = 100 - (listProjectResponse.PercentActive+listProjectResponse.PercentClose);
+
+		listProjectResponse.getAllProjectViewModels = _mapper.Map<List<GetAllProjectViewModel>>(projects);
+
+        return listProjectResponse;
+    }
 }
