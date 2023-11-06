@@ -16,7 +16,6 @@ namespace Capstone.Common.DTOs.Project
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public UserResponse Manager { get; set; }
-        public UserResponse? Supervisor { get; set; }
         public List<UserResponse>? Member { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
