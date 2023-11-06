@@ -44,7 +44,7 @@ namespace Capstone.API.Controllers
 
 		[HttpGet("users")]
 		[EnableQuery()]
-		public async Task<ActionResult<ViewPagedUsersResponse>> GetUsers()
+		public async Task<ActionResult<GetAllUsersResponse>> GetUsers()
 		{
 			var response = await _usersService.GetUsersAsync();
 			if (response == null)

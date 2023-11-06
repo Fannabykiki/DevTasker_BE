@@ -473,7 +473,7 @@ namespace Capstone.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_CreateBy",
                 table: "Attachments",
-                column: "CreateBy");
+                column: "ByUser");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_TicketId",

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Capstone.Common.DTOs.Comments;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -14,5 +15,7 @@ public class MappingProfile : Profile
         CreateMap<Project, GetAllProjectViewModel>();
         CreateMap<ProjectMember, ViewMemberProject>();
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
+        CreateMap<TicketComment, GetCommentResponse>()
+            .ForMember(dest => dest.CreateByUser, opt => opt.MapFrom(src => src.User)); ;
     }
 }

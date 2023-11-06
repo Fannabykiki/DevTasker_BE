@@ -24,7 +24,7 @@ namespace Capstone.DataAccess.Repository.Implements
         //         ProjectStatus = project.ProjectStatus,
         //         StartDate = project.StartDate,
         //         EndDate = project.EndDate,
-        //         CreateBy = project.CreateBy,
+        //         ByUser = project.ByUser,
         //         CreateAt = project.CreateAt,
         //         PrivacyStatus = project.PrivacyStatus,
         //         ProjectMembers = project.ProjectMembers
