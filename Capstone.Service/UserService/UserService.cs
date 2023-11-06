@@ -499,16 +499,18 @@ namespace Capstone.Service.UserService
 			listUser.PercentActive = (int)Math.Round((double)(100 * listUser.ActiveUsers) / listUser.TotalUser);
             listUser.PercentInActive = 100 - listUser.PercentActive;
 
-			var listU = new List<AllUserResponse>();
+			var listU = new List<UserResponse>();
             foreach (var user in users)
 			{
-				var reponse = new AllUserResponse
+				var reponse = new UserResponse
 				{
 					Id = user.UserId,
 					Name = user.Fullname,
 					Email = user.Email,
-					StatusName = user.Status.Title
-				};
+					PhoneNumber= user.PhoneNumber,
+					StatusName = user.Status.Title,
+                    IsAdmin = user.IsAdmin
+                };
                 listU.Add(reponse);
 
 			}
