@@ -363,25 +363,12 @@ public class ProjectService : IProjectService
         {
             var members = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == project.ProjectId, x => x.Users.Status);
             var manager = new UserResponse();
-            var supervisor = new UserResponse();
             var listMember = new List<UserResponse>();
             foreach (var member in members)
             {
                 if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
                 {
                     manager = new UserResponse
-                    {
-                        Id = member.UserId,
-                        Name = member.Users.Fullname,
-                        Email = member.Users.Email,
-                        IsAdmin = member.Users.IsAdmin,
-                        StatusName = member.Users.Status.Title,
-                    };
-                }
-                else
-                if (member.RoleId == Guid.Parse("8CCDE9CC-85D8-45E9-9248-AAA42A588D5E"))
-                {
-                    supervisor = new UserResponse
                     {
                         Id = member.UserId,
                         Name = member.Users.Fullname,
@@ -413,7 +400,6 @@ public class ProjectService : IProjectService
                 CreateAt = project.CreateAt,
                 DeleteAt = project.DeleteAt,
                 Manager = manager,
-                Supervisor = supervisor,
                 Member = listMember,
                 ExpireAt = project.ExpireAt,
                 PrivacyStatus = project.PrivacyStatus,
