@@ -349,67 +349,6 @@ public class ProjectService : IProjectService
     {
         var projects = await _projectRepository.GetAllWithOdata(x => true,null);
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
-		//var listProjectResponse = new GetAllProjectAdminResponse();
-		//listProjectResponse.TotalProject = projects.Count();
-		//listProjectResponse.ActiveProject = projects.Where(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
-		//listProjectResponse.CloseProject = projects.Where(x => x.StatusId == Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7")).Count();
-		//listProjectResponse.OtherProject = listProjectResponse.TotalProject - (listProjectResponse.ActiveProject + listProjectResponse.CloseProject);
-		//listProjectResponse.PercentActive = (int)Math.Round((double)(100 * listProjectResponse.ActiveProject) / listProjectResponse.TotalProject);
-		//listProjectResponse.PercentClose = (int)Math.Round((double)(100 * listProjectResponse.CloseProject) / listProjectResponse.TotalProject);
-		//listProjectResponse.PercentClose = 100 - (listProjectResponse.PercentActive + listProjectResponse.PercentClose);
-
-		//var projectsList = new List<GetAllProjectResponse>();
-		//foreach (var project in projects)
-		//{
-		//    var members = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == project.ProjectId, x => x.Users.Status);
-		//    var manager = new UserResponse();
-		//    var listMember = new List<UserResponse>();
-		//    foreach (var member in members)
-		//    {
-		//        if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
-		//        {
-		//            manager = new UserResponse
-		//            {
-		//                Id = member.UserId,
-		//                Name = member.Users.Fullname,
-		//                Email = member.Users.Email,
-		//                IsAdmin = member.Users.IsAdmin,
-		//                StatusName = member.Users.Status.Title,
-		//            };
-		//        }
-		//        else {
-		//            listMember.Add(new UserResponse
-		//            {
-		//                Id = member.UserId,
-		//                Name = member.Users.Fullname,
-		//                Email = member.Users.Email,
-		//                IsAdmin = member.Users.IsAdmin,
-		//                StatusName = member.Users.Status.Title,
-		//            });
-		//        }
-		//    }
-
-		//    projectsList.Add(new GetAllProjectResponse
-		//    {
-		//        ProjectId = project.ProjectId,
-		//        ProjectName = project.ProjectName,
-		//        Description = project.Description,
-		//        ProjectStatus = project.Status.Title,
-		//        StartDate = project.StartDate,
-		//        EndDate = project.EndDate,
-		//        CreateAt = project.CreateAt,
-		//        DeleteAt = project.DeleteAt,
-		//        Manager = manager,
-		//        Member = listMember,
-		//        ExpireAt = project.ExpireAt,
-		//        PrivacyStatus = project.PrivacyStatus,
-		//    });
-
-		//}
-
-		//listProjectResponse.getAllProjectViewModels = projectsList;
-
-		//return listProjectResponse;
 	}
 
 	public async Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin()
