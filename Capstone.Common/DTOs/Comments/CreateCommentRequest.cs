@@ -11,6 +11,6 @@ namespace Capstone.Common.DTOs.Comments
     {
         public string? Content { get; set; }
         public Guid TaskId { get; set; }
-        public Guid CreateBy { get; set; }
+        public Guid ByUser { get; set; }
     }
 }

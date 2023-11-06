@@ -36,7 +36,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreateBy")
+                    b.Property<Guid>("ByUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeleteAt")
@@ -53,7 +53,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.HasIndex("CreateBy");
+                    b.HasIndex("ByUser");
 
                     b.HasIndex("TicketId");
 
@@ -198,7 +198,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreateBy")
+                    b.Property<Guid>("ByUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeleteAt")
@@ -351,7 +351,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<Guid>("AssignTo")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreateBy")
+                    b.Property<Guid>("ByUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreateTime")
@@ -418,7 +418,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreateBy")
+                    b.Property<Guid>("ByUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeleteAt")
@@ -588,7 +588,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasOne("Capstone.DataAccess.Entities.User", "User")
                         .WithMany("Attachments")
-                        .HasForeignKey("CreateBy")
+                        .HasForeignKey("ByUser")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
