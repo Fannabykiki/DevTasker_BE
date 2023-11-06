@@ -15,6 +15,6 @@ namespace Capstone.Common.DTOs.Project
         public int PercentClose { get; set; }
         public int OtherProject { get; set; }
         public int PercentOther { get; set; }
-        public List<GetAllProjectViewModel> getAllProjectViewModels { get; set; }
+        public List<GetAllProjectResponse> getAllProjectViewModels { get; set; }
     }
 }
