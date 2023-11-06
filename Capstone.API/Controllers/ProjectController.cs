@@ -53,9 +53,10 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+
         [EnableQuery]
         [HttpGet("admin/projects")]
-        public async Task<ActionResult<GetAllProjectAdminResponse>> GetProjectsAdmin()
+        public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectsAdmin()
         {
             var result = await _projectService.GetProjectsAdmin();
             if (result == null)
@@ -66,7 +67,20 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [EnableQuery]
+		[EnableQuery]
+		[HttpGet("admin/projects/analyzation")]
+		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectAnalyze()
+		{
+			var result = await _projectService.ProjectAnalyzeAdmin();
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
+
+		[EnableQuery]
         [HttpGet("projects/permission")]
         public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetPermisisionByUseriId(Guid projectId, Guid userId)
         {
