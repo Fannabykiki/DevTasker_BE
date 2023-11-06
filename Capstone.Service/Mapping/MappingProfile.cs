@@ -13,6 +13,7 @@ public class MappingProfile : Profile
     {
         CreateMap<User, UserViewModel>();
         CreateMap<Project, GetAllProjectViewModel>();
+        CreateMap<Project, GetAllProjectResponse>();
         CreateMap<ProjectMember, ViewMemberProject>();
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
         CreateMap<TicketComment, GetCommentResponse>()
