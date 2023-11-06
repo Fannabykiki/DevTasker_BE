@@ -14,13 +14,15 @@ namespace Capstone.Common.DTOs.User
         public int PercentActive { get; set; }
         public int InActiveUser { get; set; }
         public int PercentInActive { get; set; }
-        public List<AllUserResponse> users { get; set; }
+        public List<UserResponse> users { get; set; }
     }
-    public class AllUserResponse
+    public class UserResponse
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? StatusName { get; set; }
+        public bool IsAdmin { get; set; } //True: Admin , False : User
     }
 }
