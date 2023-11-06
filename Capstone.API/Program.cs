@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Authorization;
 using Capstone.API.Helper;
 using Capstone.Service.StatusService;
 using Capstone.Service.AttachmentServices;
+using Capstone.Service.TicketCommentService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -103,6 +104,9 @@ builder.Services.AddScoped<IStatusService, StatusService>();
 
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
+
+builder.Services.AddScoped<ITicketCommentRepository, TicketCommentRepository>();
+builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 

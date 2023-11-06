@@ -125,7 +125,7 @@ namespace NUnitTest.DevTasker.Service
                  DueDate = DateTime.Now.AddMinutes(-30),  
                  CreateTime = DateTime.Now,
                  AssignTo = Guid.NewGuid(),
-                 CreateBy = Guid.NewGuid(),
+                 ByUser = Guid.NewGuid(),
                  PriorityId = Guid.NewGuid()
              };
 
@@ -153,7 +153,7 @@ namespace NUnitTest.DevTasker.Service
                 DueDate = DateTime.Now.AddMinutes(30),
                 CreateTime = DateTime.Now,
                 AssignTo = Guid.NewGuid(),
-                CreateBy = Guid.NewGuid(),
+                ByUser = Guid.NewGuid(),
                 PriorityId = Guid.NewGuid()
             };
 

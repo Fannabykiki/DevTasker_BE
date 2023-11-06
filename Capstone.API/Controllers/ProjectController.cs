@@ -53,6 +53,18 @@ namespace Capstone.API.Controllers
 
 			return Ok(result);
 		}
+		[EnableQuery]
+		[HttpGet("admin/projects")]
+		public async Task<ActionResult<GetAllProjectAdminResponse>> GetProjectsAdmin()
+		{
+			var result = await _projectService.GetProjectsAdmin();
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
 
 		[EnableQuery]
 		[HttpGet("projects/permission")]
