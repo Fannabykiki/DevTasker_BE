@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
+using System.Numerics;
 
 namespace Capstone.Service.UserService
 {
@@ -488,17 +489,34 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<List<ViewPagedUsersResponse>> GetUsersAsync()
+		public async Task<GetAllUsersResponse> GetUsersAsync()
 		{
-			IQueryable<User> query = _userRepository.GetAllAsync(x => true, null);
-			var users = query.Select(x => new ViewPagedUsersResponse
+			var listUser = new GetAllUsersResponse();
+			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
+            listUser.TotalUser = users.Count();
+            listUser.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
+			listUser.InActiveUser = listUser.TotalUser - listUser.ActiveUsers;
+			listUser.PercentActive = (int)Math.Round((double)(100 * listUser.ActiveUsers) / listUser.TotalUser);
+            listUser.PercentInActive = 100 - listUser.PercentActive;
+
+			var listU = new List<UserResponse>();
+            foreach (var user in users)
 			{
-				Id = x.UserId,
-				Email = x.Email,
-				Name = x.UserName,
-				StatusId = x.StatusId, //Get status name instead of id
-			}).ToList();
-			return users;
+				var reponse = new UserResponse
+				{
+					Id = user.UserId,
+					Name = user.Fullname,
+					Email = user.Email,
+					PhoneNumber= user.PhoneNumber,
+					StatusName = user.Status.Title,
+                    IsAdmin = user.IsAdmin
+                };
+                listU.Add(reponse);
+
+			}
+            listUser.users = listU;
+
+            return listUser;
 
 		}
 
