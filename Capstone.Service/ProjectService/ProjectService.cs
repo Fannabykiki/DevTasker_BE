@@ -398,7 +398,7 @@ public class ProjectService : IProjectService
         return newPermisisonViewModel;
     }
 
-    public async Task<IEnumerable<GetAllProjectResponse>> GetProjectsAdmin()
+    public async Task<PagedResponse<GetAllProjectResponse>> GetProjectsAdmin(int limit, int page)
     {
         var projects = await _projectRepository.GetAllWithOdata(x => true,null);
         var projectsList = new List<GetAllProjectResponse>();
@@ -432,14 +432,16 @@ public class ProjectService : IProjectService
                     });
                 }
             }
+
             if (listMember.Count() == 0) listMember = null;
             if (manager == null) manager = null;
+
             projectsList.Add(new GetAllProjectResponse
             {
                 ProjectId = project.ProjectId,
                 ProjectName = project.ProjectName,
                 Description = project.Description,
-                ProjectStatus = project.Status.Title,
+				ProjectStatus = project.Status.Title,
                 StartDate = project.StartDate,
                 EndDate = project.EndDate,
                 CreateAt = project.CreateAt,
@@ -449,10 +451,19 @@ public class ProjectService : IProjectService
                 ExpireAt = project.ExpireAt,
                 PrivacyStatus = project.PrivacyStatus,
             });
-
         }
+        var response = new PagedResponse<GetAllProjectResponse>()
+        {
+            Data = projectsList,
+            Paginations = new Pagination
+            {
+                TotalRecords = projectsList.Count(),
+                PageNumber = limit,
+                PageSize = page,
+            }
+        };
 
-        return projectsList;
+		return response;
 	}
 
 
