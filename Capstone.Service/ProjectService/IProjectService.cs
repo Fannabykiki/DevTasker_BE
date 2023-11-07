@@ -7,6 +7,7 @@ namespace Capstone.Service.ProjectService;
 public interface IProjectService
 {
     Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin();
+	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);

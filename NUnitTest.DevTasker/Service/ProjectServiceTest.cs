@@ -47,18 +47,18 @@ namespace NUnitTest.DevTasker.Service
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
-            _projectService = new ProjectService(
-                _context,
-                _projectRepositoryMock.Object,
-                _roleRepositoryMock.Object,
-                _mapper,
-                _schemaRepository.Object,
-                _projectMemberRepositoryMock.Object,
-                _boardRepositoryMock.Object,
-                _permissionRepositoryMock.Object,
-                _interationRepositoryMock.Object,
-                _permissionScemaRepo.Object
-            );
+            //_projectService = new ProjectService(
+            //    _context,
+            //    _projectRepositoryMock.Object,
+            //    _roleRepositoryMock.Object,
+            //    _mapper,
+            //    _schemaRepository.Object,
+            //    _projectMemberRepositoryMock.Object,
+            //    _boardRepositoryMock.Object,
+            //    _permissionRepositoryMock.Object,
+            //    _interationRepositoryMock.Object,
+            //    _permissionScemaRepo.Object
+            //);
             
           
         }

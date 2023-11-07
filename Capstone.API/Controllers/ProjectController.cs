@@ -83,6 +83,25 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
+		[EnableQuery]
+		[HttpGet("projects/{userId:Guid}/analyzation")]
+		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
+		{
+            var UserId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You dont have permission to access this page");
+            }
+            var result = await _projectService.GetUserProjectAnalyze(userId);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(result);
+        }
+        
+        [EnableQuery]
 		[HttpGet("admin/projects/analyzation")]
 		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectAnalyze()
 		{

@@ -20,6 +20,7 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly IStatusRepository _statusRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly ISchemaRepository _schemaRepository;
     private readonly IBoardRepository _boardRepository;
@@ -27,7 +28,7 @@ public class ProjectService : IProjectService
     private readonly IPermissionRepository _permissionRepository;
     private readonly IPermissionSchemaRepository _permissionScemaRepo;
 
-    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo)
+    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository)
     {
         _context = context;
         _projectRepository = projectRepository;
@@ -39,6 +40,7 @@ public class ProjectService : IProjectService
         _permissionRepository = permissionRepository;
         _interationRepository = interationRepository;
         _permissionScemaRepo = permissionScemaRepo;
+        _statusRepository = statusRepository;
     }
 
     public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -144,6 +146,33 @@ public class ProjectService : IProjectService
     {
         var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
         return _mapper.Map<List<GetAllProjectViewModel>>(projects);
+    }
+    public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
+    {
+        int totalTicket = 0;
+        int ticketDone = 0;
+        var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
+        var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
+        foreach(var project in projects)
+        {
+            var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId,null);
+            var projectAnalyze = new GetUserProjectAnalyzeResponse();
+            projectAnalyze.ProjectId = project.ProjectId;
+            projectAnalyze.ProjectName = project.ProjectName;
+            projectAnalyze.ProjectStatus = projectStatus.Title;
+            var iteration = await _interationRepository.GetAllWithOdata(x => x.BoardId == project.Board.BoardId, x =>x.Tasks);
+            foreach(var i in iteration)
+            {
+                totalTicket += i.Tasks.Count();
+                ticketDone += i.Tasks.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
+            }
+            projectAnalyze.TotalTickets = ticketDone + "/" + totalTicket;
+            projectAnalyze.Process = (int)Math.Round((double)(100 * ticketDone) / ticketDone);
+            listProjectAnalyze.Add(projectAnalyze);
+            totalTicket = 0;
+            ticketDone= 0;
+        }
+        return listProjectAnalyze;
     }
 
     public async Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest)
