@@ -72,7 +72,7 @@ namespace Capstone.API.Controllers
 
         [EnableQuery]
         [HttpGet("admin/projects")]
-        public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectsAdmin()
+        public async Task<ActionResult<IQueryable<GetAllProjectResponse>>> GetProjectsAdmin()
         {
             var result = await _projectService.GetProjectsAdmin();
             if (result == null)
