@@ -1,8 +1,6 @@
 ﻿using Capstone.Common.DTOs.Role;
-using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 
