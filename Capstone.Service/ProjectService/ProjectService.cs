@@ -18,6 +18,7 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly IStatusRepository _statusRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly ISchemaRepository _schemaRepository;
     private readonly IBoardRepository _boardRepository;
@@ -25,7 +26,7 @@ public class ProjectService : IProjectService
     private readonly IPermissionRepository _permissionRepository;
     private readonly IPermissionSchemaRepository _permissionScemaRepo;
 
-    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo)
+    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository)
     {
         _context = context;
         _projectRepository = projectRepository;
@@ -37,6 +38,7 @@ public class ProjectService : IProjectService
         _permissionRepository = permissionRepository;
         _interationRepository = interationRepository;
         _permissionScemaRepo = permissionScemaRepo;
+        _statusRepository = statusRepository;
     }
 
     public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -142,6 +144,31 @@ public class ProjectService : IProjectService
     {
         var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
         return _mapper.Map<List<GetAllProjectViewModel>>(projects);
+    }
+    public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
+    {
+        var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
+        var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
+        foreach(var project in projects)
+        {
+            var manager = await _projectMemberRepository.GetAsync(x =>x.ProjectId == project.ProjectId&&x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"),null);
+            var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId,x => x.Users);
+            var projectAnalyze = new GetUserProjectAnalyzeResponse();
+            projectAnalyze.ProjectId = project.ProjectId;
+            projectAnalyze.ProjectName = project.ProjectName;
+            projectAnalyze.ProjectStatus = projectStatus.Title;
+            projectAnalyze.Manager = new UserResponse 
+            {
+                Id = manager.UserId,
+                Name = manager.Users.Fullname,
+                Email = manager.Users.Email,
+                PhoneNumber= manager.Users.PhoneNumber,
+                Dob= manager.Users.Dob,
+                IsAdmin= manager.Users.IsAdmin,
+            };
+            listProjectAnalyze.Add(projectAnalyze);
+        }
+        return listProjectAnalyze;
     }
 
     public async Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest)
@@ -291,14 +318,14 @@ public class ProjectService : IProjectService
         return _mapper.Map<GetAllProjectViewModel>(projects);
     }
 
-    public async Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId)
+    public async Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId)
     {
-        var projectInfoRequests = new List<ViewProjectInfoRequest>();
+        var projectInfoRequests = new ViewProjectInfoRequest();
         var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
         var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
         if (!members.Any()) return projectInfoRequests;
         {
-            var projectInfoRequest = new ViewProjectInfoRequest
+            projectInfoRequests = new ViewProjectInfoRequest
             {
                 ProjectId = project.ProjectId,
                 ProjectName = project.ProjectName,
@@ -321,7 +348,6 @@ public class ProjectService : IProjectService
                     })
                     .ToList()
             };
-            projectInfoRequests.Add(projectInfoRequest);
         }
         return projectInfoRequests;
     }
@@ -372,21 +398,63 @@ public class ProjectService : IProjectService
         return newPermisisonViewModel;
     }
 
-    public async Task<PagedResponse<GetAllProjectViewModel>> GetProjectsAdmin(int limit, int page)
+    public async Task<IEnumerable<GetAllProjectResponse>> GetProjectsAdmin()
     {
-        var projects = await _projectRepository.GetAllWithOdata(x => true, null);
-        var response = new PagedResponse<GetAllProjectViewModel>()
+        var projects = await _projectRepository.GetAllWithOdata(x => true,null);
+        var projectsList = new List<GetAllProjectResponse>();
+        foreach (var project in projects)
         {
-            Data = _mapper.Map<List<GetAllProjectViewModel>>(projects),
-			Paginations = new Pagination
+            var members = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == project.ProjectId, x => x.Users.Status);
+            UserResponse manager = new UserResponse();
+            List<UserResponse> listMember = new List<UserResponse>();
+            foreach (var member in members)
             {
-                PageNumber = page,
-                PageSize = limit,
-                TotalRecords = projects.Count()
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+                {
+                    manager = new UserResponse
+                    {
+                        Id = member.UserId,
+                        Name = member.Users.Fullname,
+                        Email = member.Users.Email,
+                        IsAdmin = member.Users.IsAdmin,
+                        StatusName = member.Users.Status.Title,
+                    };
+                }
+                else
+                {
+                    listMember.Add(new UserResponse
+                    {
+                        Id = member.UserId,
+                        Name = member.Users.Fullname,
+                        Email = member.Users.Email,
+                        IsAdmin = member.Users.IsAdmin,
+                        StatusName = member.Users.Status.Title,
+                    });
+                }
             }
-		};
-        return response;
+            if (listMember.Count() == 0) listMember = null;
+            if (manager == null) manager = null;
+            projectsList.Add(new GetAllProjectResponse
+            {
+                ProjectId = project.ProjectId,
+                ProjectName = project.ProjectName,
+                Description = project.Description,
+                ProjectStatus = project.Status.Title,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                CreateAt = project.CreateAt,
+                DeleteAt = project.DeleteAt,
+                Manager = manager,
+                Member = listMember,
+                ExpireAt = project.ExpireAt,
+                PrivacyStatus = project.PrivacyStatus,
+            });
+
         }
+
+        return projectsList;
+	}
+
 
 	public async Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin()
 {

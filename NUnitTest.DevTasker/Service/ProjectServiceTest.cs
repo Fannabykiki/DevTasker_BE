@@ -26,6 +26,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IPermissionRepository> _permissionRepositoryMock;
         private readonly IMapper _mapper;
         private Mock <ISchemaRepository> _schemaRepository;
+        private Mock <IStatusRepository> _statusRepository;
 
         private Mock<IInterationRepository> _interationRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
@@ -40,7 +41,7 @@ namespace NUnitTest.DevTasker.Service
             _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
             _permissionRepositoryMock = new Mock<IPermissionRepository>();
             _interationRepositoryMock = new Mock<IInterationRepository>();
-
+            _statusRepository = new Mock<IStatusRepository>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _schemaRepository = new Mock<ISchemaRepository>();
             _permissionScemaRepo = new Mock<IPermissionSchemaRepository>();
@@ -51,16 +52,16 @@ namespace NUnitTest.DevTasker.Service
                 _context,
                 _projectRepositoryMock.Object,
                 _roleRepositoryMock.Object,
-                _mapper,
+               _mapper,
                 _schemaRepository.Object,
-                _projectMemberRepositoryMock.Object,
-                _boardRepositoryMock.Object,
+               _projectMemberRepositoryMock.Object,
+               _boardRepositoryMock.Object,
                 _permissionRepositoryMock.Object,
                 _interationRepositoryMock.Object,
-                _permissionScemaRepo.Object
+                _permissionScemaRepo.Object,
+                _statusRepository.Object
             );
-            
-          
+
         }
 
         [Test]

@@ -504,12 +504,13 @@ namespace Capstone.Service.UserService
 					Email = user.Email,
 					PhoneNumber= user.PhoneNumber,
 					StatusName = user.Status.Title,
+					Address = user.Address,
+					Dob = user.Dob,
                     IsAdmin = user.IsAdmin
                 };
 				listU.Add(reponse);
 
 			}
-
             return listU;
 
 		}
@@ -541,9 +542,9 @@ namespace Capstone.Service.UserService
 			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
 			usersAnalyze.TotalUser = users.Count();
 			usersAnalyze.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
-			usersAnalyze.InActiveUser = usersAnalyze.TotalUser - usersAnalyze.ActiveUsers;
+			usersAnalyze.InactiveUser = usersAnalyze.TotalUser - usersAnalyze.ActiveUsers;
 			usersAnalyze.PercentActive = (int)Math.Round((double)(100 * usersAnalyze.ActiveUsers) / usersAnalyze.TotalUser);
-			usersAnalyze.PercentInActive = 100 - usersAnalyze.PercentActive;
+			usersAnalyze.PercentInactive = 100 - usersAnalyze.PercentActive;
 			return usersAnalyze;
 		}
 	}
