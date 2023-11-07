@@ -1,7 +1,5 @@
 ﻿using Capstone.Common.DTOs.Email;
-using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.User;
-using Capstone.Common.Enums;
 using Capstone.Common.Token;
 using Capstone.DataAccess.Entities;
 
@@ -11,7 +9,8 @@ namespace Capstone.Service.UserService
     {
         Task<UserViewModel> LoginUser(string username, string password);
         Task<UserViewModel> GetUserByEmailAsync(string email);
-        Task<GetAllUsersResponse> GetUsersAsync();
+        Task<List<UserResponse>> GetUsersAsync();
+        Task<GetUsersAnalyzeResponse> GetUsersAnalyze();
         Task<bool> DeleteAsync(Guid id);
         Task<CreateUserResponse> VerifyUser(string email);
         Task<CreateUserResponse> Register(CreateUserRequest createUserRequest);

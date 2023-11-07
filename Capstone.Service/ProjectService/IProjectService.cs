@@ -20,4 +20,5 @@ public interface IProjectService
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
 	Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId);
+	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest);
 }

@@ -14,7 +14,7 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<Attachment>().HasKey(sc => new { sc.AttachmentId });
 
             modelBuilder.Entity<Attachment>()
-                .HasOne(tc => tc.User)
+                .HasOne(tc => tc.ProjectMember)
                 .WithMany(wi => wi.Attachments)
                 .HasForeignKey(tc => tc.CreateBy)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -25,21 +25,21 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.CommentId);
 
             modelBuilder.Entity<Attachment>()
-                .HasOne(sc => sc.Ticket)
+                .HasOne(sc => sc.Task)
                 .WithMany(s => s.Attachments)
-                .HasForeignKey(sc => sc.TicketId);
+                .HasForeignKey(sc => sc.TaskId);
 
-            modelBuilder.Entity<TicketHistory>().HasKey(sc => new { sc.HistoryId });
+            modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
-            modelBuilder.Entity<TicketHistory>()
+            modelBuilder.Entity<TaskHistory>()
                 .HasOne(tc => tc.Ticket)
                 .WithMany(wi => wi.TaskHistories)
                 .HasForeignKey(tc => tc.TicketId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<TicketComment>().HasKey(sc => new { sc.CommentId });
+            modelBuilder.Entity<TaskComment>().HasKey(sc => new { sc.CommentId });
 
-            modelBuilder.Entity<TicketComment>()
+            modelBuilder.Entity<TaskComment>()
                 .HasOne(tc => tc.Ticket)
                 .WithMany(wi => wi.TaskComments)
                 .HasForeignKey(tc => tc.TaskId)
@@ -53,7 +53,13 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.ProjectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ProjectMember>()
+			// modelBuilder.Entity<ProjectMember>()
+			//    .HasOne(sc => sc.Status)
+			//    .WithMany(s => s.ProjectMembers)
+			//    .HasForeignKey(sc => sc.StatusId)
+			//    .OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<ProjectMember>()
                 .HasOne(sc => sc.Users)
                 .WithMany(s => s.ProjectMember)
                 .HasForeignKey(sc => sc.UserId)
@@ -65,38 +71,38 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<TicketType>().HasKey(sc => new { sc.TypeId });
+            modelBuilder.Entity<TaskType>().HasKey(sc => new { sc.TypeId });
 
-            modelBuilder.Entity<TicketType>()
+            modelBuilder.Entity<TaskType>()
                 .HasMany(sc => sc.Tickets)
                 .WithOne(s => s.TicketType)
                 .HasForeignKey(sc => sc.TypeId);
 
-            modelBuilder.Entity<Ticket>().HasKey(sc => new { sc.TicketId });
+            modelBuilder.Entity<Entities.Task>().HasKey(sc => new { sc.TaskId });
 
-            modelBuilder.Entity<Ticket>()
+            modelBuilder.Entity<Entities.Task>()
                 .HasOne(sc => sc.PriorityLevel)
-                .WithMany(s => s.Tickets)
+                .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.PriorityId);
 
-            modelBuilder.Entity<Ticket>()
+            modelBuilder.Entity<Entities.Task>()
                 .HasOne(sc => sc.Status)
                 .WithMany(s => s.Tickets)
-                .HasForeignKey(sc => sc.TicketId);
+                .HasForeignKey(sc => sc.TaskId);
             
-            modelBuilder.Entity<Ticket>()
+            modelBuilder.Entity<Entities.Task>()
                 .HasOne(sc => sc.ProjectMember)
-                .WithMany(s => s.Tickets)
+                .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.CreateBy);
             
-            modelBuilder.Entity<Ticket>()
+            modelBuilder.Entity<Entities.Task>()
                 .HasOne(sc => sc.ProjectMember)
-                .WithMany(s => s.Tickets)
+                .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.AssignTo);
 
-            modelBuilder.Entity<TicketHistory>().HasKey(sc => new { sc.HistoryId });
+            modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
-            modelBuilder.Entity<TicketHistory>()
+            modelBuilder.Entity<TaskHistory>()
                 .HasOne(sc => sc.Ticket)
                 .WithMany(s => s.TaskHistories)
                 .HasForeignKey(sc => sc.TicketId);
@@ -123,7 +129,7 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.BoardId);
 
             modelBuilder.Entity<Interation>()
-                .HasMany(sc => sc.Tickets)
+                .HasMany(sc => sc.Tasks)
                 .WithOne(s => s.Interation)
                 .HasForeignKey(sc => sc.InterationId);
 
@@ -188,12 +194,12 @@ namespace Capstone.DataAccess
         public DbSet<ProjectMember>? ProjectMembers { get; set; }
         public DbSet<SchemaPermission>? SchemaPermissions { get; set; }
         public DbSet<Role>? Roles { get; set; }
-        public DbSet<Ticket>? Tickets { get; set; }
+        public DbSet<Entities.Task>? Tasks { get; set; }
         public DbSet<Schema>? Schemas { get; set; }
-        public DbSet<TicketComment>? TicketComments { get; set; }
-        public DbSet<TicketHistory>? TicketHistories { get; set; }
+        public DbSet<TaskComment>? TaskComments { get; set; }
+        public DbSet<TaskHistory>? TaskHistories { get; set; }
         public DbSet<Status>? Status { get; set; }
-        public DbSet<TicketType>? TicketTypes { get; set; }
+        public DbSet<TaskType>? TaskTypes { get; set; }
         public DbSet<User>? Users { get; set; }
     }
 }

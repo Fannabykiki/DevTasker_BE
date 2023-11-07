@@ -91,13 +91,13 @@ namespace Capstone.Service.IterationService
                     ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
                     var item = new WorkItemResponse
                     {
-                        TicketId = ticket.TicketId,
+                        TicketId = ticket.TaskId,
                         Title = ticket.Title,
                         TicketType = "Work Item",
                         TicketStatus = ticket.Status.Title
                     };
 
-                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, Tickets);
+                    item.Tickets = await GetChildTicketsAsync(ticket.TaskId, Tickets);
 
                     workItems.Add(item);
                 }
@@ -106,7 +106,7 @@ namespace Capstone.Service.IterationService
             return workItems;
         }
 
-        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, IEnumerable<Ticket> allTickets)
+        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTickets)
         {
             foreach(var ticket in allTickets)
             {
@@ -117,7 +117,7 @@ namespace Capstone.Service.IterationService
               .Where(x => x.PrevId == parentId)
               .Select(x => new TicketResponse
               {
-                  TicketId = x.TicketId,
+                  TicketId = x.TaskId,
                   Title = x.Title,
                   TicketType = x.TicketType.Title,
                   TicketStatus = x.Status.Title

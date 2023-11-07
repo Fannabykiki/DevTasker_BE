@@ -1,8 +1,7 @@
-﻿namespace Capstone.Common.DTOs.Ticket
+﻿namespace Capstone.Common.DTOs.Task
 {
-    public class UpdateTicketRequest
+    public class UpdateTaskRequest
     {
-       
         public string Title { get; set; }
         public string? Decription { get; set; }
         public DateTime DueDate { get; set; }
