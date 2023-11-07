@@ -1,5 +1,5 @@
 using AutoMapper;
-using AutoMapper.Execution;
+using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -9,8 +9,6 @@ using Capstone.DataAccess.Repository.Interfaces;
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
-using System.Linq;
-using System.Xml.Linq;
 
 namespace Capstone.Service.ProjectService;
 
@@ -56,7 +54,7 @@ public class ProjectService : IProjectService
                 EndDate = DateTime.Parse(createProjectRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 StartDate = DateTime.Parse(createProjectRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 PrivacyStatus = createProjectRequest.PrivacyStatus,
-                StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
+                StatusId = Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"),
                 CreateBy = userId,
                 Description = createProjectRequest.Description,
                 SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
@@ -318,10 +316,8 @@ public class ProjectService : IProjectService
                         UserId = m.UserId,
                         RoleId = m.RoleId,
                         ProjectId = m.ProjectId,
-                        IsOwner = m.IsOwner
-                        ,
+                        IsOwner = m.IsOwner,
                         RoleName = m.Role.RoleName
-
                     })
                     .ToList()
             };
@@ -376,14 +372,24 @@ public class ProjectService : IProjectService
         return newPermisisonViewModel;
     }
 
-    public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin()
+    public async Task<PagedResponse<GetAllProjectViewModel>> GetProjectsAdmin(int limit, int page)
     {
-        var projects = await _projectRepository.GetAllWithOdata(x => true,null);
-		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
-	}
+        var projects = await _projectRepository.GetAllWithOdata(x => true, null);
+        var response = new PagedResponse<GetAllProjectViewModel>()
+        {
+            Data = _mapper.Map<List<GetAllProjectViewModel>>(projects),
+			Paginations = new Pagination
+            {
+                PageNumber = page,
+                PageSize = limit,
+                TotalRecords = projects.Count()
+            }
+		};
+        return response;
+        }
 
 	public async Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin()
-	{
+{
 		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
         var totalProject = projects.Count();
         var activeProject = projects.Where(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();

@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Permission;
+﻿using Capstone.Common.DTOs.Paging;
+using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 
@@ -6,7 +7,7 @@ namespace Capstone.Service.ProjectService;
 
 public interface IProjectService
 {
-    Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin();
+    Task<PagedResponse<GetAllProjectViewModel>> GetProjectsAdmin(int limit, int page);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);

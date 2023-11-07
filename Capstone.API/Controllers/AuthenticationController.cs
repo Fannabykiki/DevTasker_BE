@@ -92,8 +92,6 @@ namespace Capstone.API.Controllers
 				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
 				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
 				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
-                
-
             }
 			catch (Exception ex)
 			{
