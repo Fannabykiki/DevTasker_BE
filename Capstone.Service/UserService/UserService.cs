@@ -504,12 +504,13 @@ namespace Capstone.Service.UserService
 					Email = user.Email,
 					PhoneNumber= user.PhoneNumber,
 					StatusName = user.Status.Title,
+					Address = user.Address,
+					Dob = user.Dob,
                     IsAdmin = user.IsAdmin
                 };
 				listU.Add(reponse);
 
 			}
-
             return listU;
 
 		}
