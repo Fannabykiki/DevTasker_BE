@@ -2,7 +2,7 @@
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface ITicketCommentRepository : IBaseRepository<TicketComment>
+    public interface ITicketCommentRepository : IBaseRepository<TaskComment>
     {
     }
 }

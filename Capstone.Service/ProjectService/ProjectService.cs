@@ -6,6 +6,9 @@ using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using MailKit.Security;
+using MimeKit;
+using MimeKit.Text;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -356,7 +359,35 @@ public class ProjectService : IProjectService
         return projectInfoRequests;
     }
 
-    public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
+    public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest)
+    {
+        foreach (var user in inviteUserRequest.Email)
+        {
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
+			string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "email=" + user + "&projectId=" + inviteUserRequest.ProjectId;
+			var email = new MimeMessage();
+			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
+			email.To.Add(MailboxAddress.Parse("" + user));
+			email.Subject = "DevTakser verification step";
+			email.Body = new TextPart(TextFormat.Html)
+			{
+				Text = $"<h1>You've been invited to DevTasker</h1>" +
+				$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
+			};
+
+			using (var client = new MailKit.Net.Smtp.SmtpClient())
+			{
+				client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+				client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
+				client.Send(email);
+				client.Disconnect(true);
+			}
+		}
+		return true;
+
+	}
+
+	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
     {
         var newPermisisonViewModel = new List<PermissionViewModel>();
         var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;

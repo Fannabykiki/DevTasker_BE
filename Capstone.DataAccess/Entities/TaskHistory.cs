@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Capstone.DataAccess.Entities
 {
-    public class TicketHistory
+    public class TaskHistory
     {
         [Key]
         public Guid HistoryId { get; set; }
@@ -13,6 +13,6 @@ namespace Capstone.DataAccess.Entities
         public TaskStatusEnum CurrentStatus { get; set; } //to do => in progess FE 
         public List<Status> TaskStatus { get; set; }
         public Guid TicketId { get; set; }
-        public Ticket Ticket { get; set; } // 1 history just only 1 task
+        public Task Ticket { get; set; } // 1 history just only 1 task
     }
 }

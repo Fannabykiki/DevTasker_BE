@@ -35,8 +35,26 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+        
+        [HttpPost("projects/invitation")]
+        public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
+        {
+            var result = await _projectService.SendMailInviteUser(inviteUserRequest);
+            
+            return Ok(result);
+        }
 
-        [EnableQuery]
+
+		[HttpPost("projects/invitation/acception")]
+		public async Task<IActionResult> AddMemberToProject()
+		{
+            var userId = this.GetCurrentLoginUserId();
+			//var result = await _projectService.AddProjectMember(inviteUserRequest);
+
+			return Ok();
+		}
+
+		[EnableQuery]
         [HttpGet("projects")]
         public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectByUserId()
         {
@@ -124,7 +142,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [MiddlewareFilter(typeof(AuthorizationMiddleware))]
+        //[MiddlewareFilter(typeof(AuthorizationMiddleware))]
         [EnableQuery]
         [HttpGet("projects/info/{projectId:Guid}")]
         public async Task<ActionResult<List<ViewProjectInfoRequest>>> GetFullInfoProjectByProjectId(Guid projectId)
