@@ -1,13 +1,14 @@
 ﻿using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
-using Capstone.DataAccess.Entities;
 
 namespace Capstone.Service.ProjectService;
 
 public interface IProjectService
 {
-    Task<bool> CreateProject(CreateProjectRequest createProjectRequest);
+    Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin();
+    Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
+    Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);
 	Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId);
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);

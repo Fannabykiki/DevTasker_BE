@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Email;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Email;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
@@ -51,15 +52,17 @@ namespace Capstone.API.Controllers
 
 			return new GetUserProfileResponse
 			{
-				Fullname = user.Fullname,
-				UserName = user.UserName,
-				Email = user.Email,
-				PhoneNumber = user.PhoneNumber,
-				Address = user.Address,
-				DoB = user.Dob,
-				Gender = user.Gender,
-				IsAdmin = user.IsAdmin
-			};
+                Fullname = user.Fullname,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                DoB = user.Dob,
+                Gender = user.Gender,
+                IsAdmin = user.IsAdmin,
+                StatusId = user.StatusId,
+                IsFirstTime = user.IsFirstTime,
+            };
 
 		}
 
@@ -354,6 +357,5 @@ namespace Capstone.API.Controllers
 
 			return Ok(token);
 		}
-
 	}
 }

@@ -22,9 +22,13 @@ using Capstone.Service.PermissionSchemaService;
 using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
-using Capstone.Service.BoardService;
 using Capstone.API.Extentions.AuthorizeMiddleware;
 using Microsoft.AspNetCore.Authorization;
+using Capstone.API.Helper;
+using Capstone.Service.StatusService;
+using Capstone.Service.AttachmentServices;
+using Capstone.Service.TicketCommentService;
+using Capstone.Service.RoleService;
 
 static async Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -36,21 +40,21 @@ static async Task InitializeDatabase(IApplicationBuilder app)
 }
 static IEdmModel GetEdmModel()
 {
-	ODataConventionModelBuilder builder = new();
-	builder.EntitySet<Attachment>("Attachments");
-	builder.EntitySet<Board>("Boards");
-	builder.EntitySet<Notification>("Notifications");
-	builder.EntitySet<User>("Users");
-	builder.EntitySet<Permission>("Permissions");
-	builder.EntitySet<Project>("Projects");
-	builder.EntitySet<Role>("Roles");
-	builder.EntitySet<Ticket>("Tickets");
-	builder.EntitySet<TicketComment>("TicketComments");
-	builder.EntitySet<TicketHistory>("TicketHistorys");
-	builder.EntitySet<TicketType>("TicketTypes");
-	builder.EntitySet<Status>("TicketStatuss");
-	builder.EntitySet<PriorityLevel>("PriorityLevels");
-	builder.EntitySet<ProjectMember>("ProjectMembers");
+    ODataConventionModelBuilder builder = new();
+    builder.EntitySet<Attachment>("Attachments");
+    builder.EntitySet<Board>("Boards");
+    builder.EntitySet<Notification>("Notifications");
+    builder.EntitySet<User>("Users");
+    builder.EntitySet<Permission>("Permissions");
+    builder.EntitySet<Project>("Projects");
+    builder.EntitySet<Role>("Roles");
+    builder.EntitySet<Ticket>("Tickets");
+    builder.EntitySet<TicketComment>("TicketComments");
+    builder.EntitySet<TicketHistory>("TicketHistorys");
+    builder.EntitySet<TicketType>("TicketTypes");
+    builder.EntitySet<Status>("TicketStatuss");
+    builder.EntitySet<PriorityLevel>("PriorityLevels");
+    builder.EntitySet<ProjectMember>("ProjectMembers");
 
     return builder.GetEdmModel();
 }
@@ -92,12 +96,23 @@ builder.Services.AddScoped<IInterationRepository, InteratationRepository>();
 builder.Services.AddScoped<IIterationService, IterationService>();
 
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
-builder.Services.AddScoped<IBoardService, BoardService>();
 
 builder.Services.AddScoped<IPermissionSchemaRepository, PermissionSchemaRepository>();
 builder.Services.AddScoped<IPermissionSchemaService, PermissionSchemaService>();
 
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+builder.Services.AddScoped<IStatusService, StatusService>();
+
+builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
+
+builder.Services.AddScoped<ITicketCommentRepository, TicketCommentRepository>();
+builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
+
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+
+builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -107,7 +122,7 @@ builder.Services.AddControllers()
                 {
                     // Validate child properties and root collection elements
                     options.ImplicitlyValidateChildProperties = true;
-                    options.ImplicitlyValidateRootCollectionElements = true;
+					options.ImplicitlyValidateRootCollectionElements = true;
 
                     // Automatic registration of validators in assembly
                     options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -151,6 +166,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                };
            }
        );
+//// Add Google OAuth authentication
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.Authority = "https://accounts.google.com";
+//        options.Audience = configuration["Authentication:Google:ClientId"]; 
+//    });
+
+//// Add authorization policies if needed
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("GoogleDriveAccess", policy =>
+//    {
+//        policy.RequireAuthenticatedUser();
+//        policy.RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+//        // Add more requirements as needed
+//    });
+//});
+
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -176,6 +210,8 @@ app.UseRouting();
 app.UseCors("corspolicy");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

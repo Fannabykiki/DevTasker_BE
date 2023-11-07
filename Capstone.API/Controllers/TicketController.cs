@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Ticket;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Ticket;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
@@ -22,7 +23,7 @@ namespace Capstone.API.Controllers
 
         [HttpGet("ticket")]
         [EnableQuery()]
-        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicket()
+        public async Task<ActionResult<GetAllUsersResponse>> GetAllTicket()
         {
             var response = await _ticketService.GetAllTicketAsync();
             return Ok(response);
@@ -30,7 +31,7 @@ namespace Capstone.API.Controllers
         
         [HttpGet("ticket/{ticketId}")]
         [EnableQuery()]
-        public async Task<ActionResult<ViewPagedUsersResponse>> GetAllTicketByInterationId(Guid interationId)
+        public async Task<ActionResult<GetAllUsersResponse>> GetAllTicketByInterationId(Guid interationId)
         {
             var response = await _ticketService.GetAllTicketByInterationIdAsync(interationId);
             return Ok(response);
@@ -38,8 +39,9 @@ namespace Capstone.API.Controllers
         
         [HttpPost("ticket")]
         public async Task<IActionResult> CreateTicket(CreateTicketRequest createTicketRequest, Guid interationId)
-        {
-            var result = await _ticketService.CreateTicket(createTicketRequest, interationId);
+        {   
+            var userId = this.GetCurrentLoginUserId();
+            var result = await _ticketService.CreateTicket(createTicketRequest, interationId,userId);
 
             return Ok(result);
         }

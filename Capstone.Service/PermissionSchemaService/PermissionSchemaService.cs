@@ -39,7 +39,7 @@ namespace Capstone.Service.PermissionSchemaService
 		public async Task<IEnumerable<GetAllPermissionSchemaResponse>> GetAllSchema()
         {
 			var schemas = await _schemaRepository.GetAllWithOdata(x => true,null);
-            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas); ;
+            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas);
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
