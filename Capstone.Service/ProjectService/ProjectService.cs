@@ -322,14 +322,14 @@ public class ProjectService : IProjectService
         return _mapper.Map<GetAllProjectViewModel>(projects);
     }
 
-    public async Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId)
+    public async Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId)
     {
-        var projectInfoRequests = new List<ViewProjectInfoRequest>();
+        var projectInfoRequests = new ViewProjectInfoRequest();
         var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
         var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
         if (!members.Any()) return projectInfoRequests;
         {
-            var projectInfoRequest = new ViewProjectInfoRequest
+            projectInfoRequests = new ViewProjectInfoRequest
             {
                 ProjectId = project.ProjectId,
                 ProjectName = project.ProjectName,
@@ -354,7 +354,6 @@ public class ProjectService : IProjectService
                     })
                     .ToList()
             };
-            projectInfoRequests.Add(projectInfoRequest);
         }
         return projectInfoRequests;
     }
