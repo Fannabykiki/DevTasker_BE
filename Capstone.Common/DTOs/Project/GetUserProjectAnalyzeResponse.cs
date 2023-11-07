@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Capstone.Common.DTOs.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,9 @@ namespace Capstone.Common.DTOs.Project
         public Guid ProjectId { get; set; }
         public string ProjectName { get; set; }
         public string Description { get; set; }
-        public string TotalTickets { get; set; }
-        public int Process { get; set; }
         public string ProjectStatus { get; set; }
+        public UserResponse Manager { get; set; }
+        public DateTime StartDate { get; set; }
+
     }
 }
