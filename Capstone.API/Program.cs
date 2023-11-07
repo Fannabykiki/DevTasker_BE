@@ -29,8 +29,9 @@ using Capstone.Service.StatusService;
 using Capstone.Service.AttachmentServices;
 using Capstone.Service.TicketCommentService;
 using Capstone.Service.RoleService;
+using Capstone.Service.TaskService;
 
-static async Task InitializeDatabase(IApplicationBuilder app)
+static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
     using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope();
     if (scope != null)
@@ -48,11 +49,11 @@ static IEdmModel GetEdmModel()
     builder.EntitySet<Permission>("Permissions");
     builder.EntitySet<Project>("Projects");
     builder.EntitySet<Role>("Roles");
-    builder.EntitySet<Ticket>("Tickets");
-    builder.EntitySet<TicketComment>("TicketComments");
-    builder.EntitySet<TicketHistory>("TicketHistorys");
-    builder.EntitySet<TicketType>("TicketTypes");
-    builder.EntitySet<Status>("TicketStatuss");
+    builder.EntitySet<Capstone.DataAccess.Entities.Task>("Tasks");
+    builder.EntitySet<TaskComment>("TaskComments");
+    builder.EntitySet<TaskHistory>("TaskHistorys");
+    builder.EntitySet<TaskType>("TaskTypes");
+    builder.EntitySet<Status>("TaskStatus");
     builder.EntitySet<PriorityLevel>("PriorityLevels");
     builder.EntitySet<ProjectMember>("ProjectMembers");
 
@@ -85,7 +86,7 @@ builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
-builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();

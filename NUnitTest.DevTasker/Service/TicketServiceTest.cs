@@ -1,20 +1,21 @@
 ﻿using AutoMapper;
-using Capstone.Common.DTOs.Ticket;
+using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
-using Capstone.Service.TicketService;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
+using Capstone.Service.TaskService;
+using Task = Capstone.DataAccess.Entities.Task;
 
 namespace NUnitTest.DevTasker.Service
 {
     public class TicketServiceTest
     {
         private CapstoneContext _context;
-        private TicketService _ticketService;
+        private TaskService _taskService;
         private Mock<ITicketRepository> _ticketRepositoryMock;
         private Mock<ITicketStatusRepository> _ticketStatusRepositoryMock;
         private Mock<ITicketTypeRepository> _ticketTypeRepositoryMock;
@@ -48,7 +49,7 @@ namespace NUnitTest.DevTasker.Service
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            _ticketService = new TicketService(
+            _taskService = new TaskService(
                 _context,
                 _ticketRepositoryMock.Object,
                 _ticketStatusRepositoryMock.Object,
@@ -65,10 +66,10 @@ namespace NUnitTest.DevTasker.Service
         // Create Ticket
 
         [Test]
-        public async Task TestCreateTicket_Success()
+        public async System.Threading.Tasks.Task TestCreateTicket_Success()
         {
             // Arrange
-            var request = new CreateTicketRequest
+            var request = new CreateTaskRequest
             {
                 Title = "Test Ticket",
                 Decription = "Test Description",
@@ -83,7 +84,7 @@ namespace NUnitTest.DevTasker.Service
             // Act
             var userId = Guid.NewGuid();
             using var transaction = _transactionMock.Object;
-            var result = await _ticketService.CreateTicket(request, iterationId, userId);
+            var result = await _taskService.CreateTask(request, iterationId, userId);
 
             // Assert
             transaction.Commit();
@@ -91,10 +92,10 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestCreateTicket_FailEmptyTitle()
+        public async System.Threading.Tasks.Task TestCreateTicket_FailEmptyTitle()
         {
             // Arrange
-            var request = new CreateTicketRequest
+            var request = new CreateTaskRequest
             {
                 Title = "",
                 Decription = "Test Description",
@@ -106,7 +107,7 @@ namespace NUnitTest.DevTasker.Service
             var userId = Guid.NewGuid();
             var iterationId = Guid.NewGuid();
             // Act
-            var result = await _ticketService.CreateTicket(request, iterationId, userId);
+            var result = await _taskService.CreateTask(request, iterationId, userId);
 
             // Assert
 
@@ -114,7 +115,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestCreateTicket_FailDueDateBeforeStartDate()
+        public async System.Threading.Tasks.Task TestCreateTicket_FailDueDateBeforeStartDate()
         {
             /* // Arrange
              var request = new CreateTicketRequest
@@ -142,7 +143,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestCreateTicket_FailLongTitle()
+        public async System.Threading.Tasks.Task TestCreateTicket_FailLongTitle()
         {/*
             // Arrange
             var request = new CreateTicketRequest
@@ -170,11 +171,11 @@ namespace NUnitTest.DevTasker.Service
 
         //Update  ticket
         [Test]
-        public async Task TestUpdateTicket_Success()
+        public async System.Threading.Tasks.Task TestUpdateTicket_Success()
         {
             // Arrange
             var ticketId = Guid.NewGuid();
-            var updateTicketRequest = new UpdateTicketRequest
+            var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
                 Decription = "Updated Ticket Description",
@@ -185,12 +186,12 @@ namespace NUnitTest.DevTasker.Service
                 StatusId = Guid.NewGuid()
             };
 
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Ticket, bool>>>(), null))
-                .ReturnsAsync(new Ticket { TicketId = ticketId });
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Task, bool>>>(), null))
+                .ReturnsAsync(new Task { TaskId = ticketId });
 
             // Act
             using var transaction = _transactionMock.Object;
-            var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
+            var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);
 
 
 
@@ -199,11 +200,11 @@ namespace NUnitTest.DevTasker.Service
 
         }
         [Test]
-        public async Task TestUpdateTicket_Fail()
+        public async System.Threading.Tasks.Task TestUpdateTicket_Fail()
         {
             // Arrange
             var ticketId = Guid.NewGuid();
-            var updateTicketRequest = new UpdateTicketRequest
+            var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
                 Decription = "Updated Ticket Description",
@@ -214,12 +215,12 @@ namespace NUnitTest.DevTasker.Service
                 StatusId = Guid.NewGuid()
             };
 
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Ticket, bool>>>(), null))
-                .ReturnsAsync((Ticket)null);
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Task, bool>>>(), null))
+                .ReturnsAsync((Task)null);
 
             // Act
             using var transaction = _transactionMock.Object;
-            var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
+            var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);
 
             // Assert
             Assert.IsTrue(result);
@@ -227,11 +228,11 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestUpdateTicket_FailEmptyTitle()
+        public async System.Threading.Tasks.Task TestUpdateTicket_FailEmptyTitle()
         {
             // Arrange
             var ticketId = Guid.NewGuid();
-            var updateTicketRequest = new UpdateTicketRequest
+            var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "",
                 Decription = "Updated Ticket Description",
@@ -242,12 +243,12 @@ namespace NUnitTest.DevTasker.Service
                 StatusId = Guid.NewGuid()
             };
 
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Ticket, bool>>>(), null))
-                .ReturnsAsync(new Ticket { TicketId = ticketId });
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Task, bool>>>(), null))
+                .ReturnsAsync(new Task { TaskId = ticketId });
 
             // Act
             using var transaction = _transactionMock.Object;
-            var result = await _ticketService.UpdateTicket(updateTicketRequest, ticketId);
+            var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);
 
 
             // Assert
@@ -256,37 +257,37 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestDeleteTicket_Success()
+        public async System.Threading.Tasks.Task TestDeleteTicket_Success()
         {
             // Arrange
             var ticketIdToDelete = Guid.NewGuid();
 
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Ticket, bool>>>(), null))
-                .ReturnsAsync(new Ticket { TicketId = ticketIdToDelete });
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Task, bool>>>(), null))
+                .ReturnsAsync(new Task { TaskId = ticketIdToDelete });
 
-            _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Ticket>()))
+            _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Task>()))
                 .ReturnsAsync(true);
 
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
 
             // Act
-            var result = await _ticketService.DeleteTicket(ticketIdToDelete);
+            var result = await _taskService.DeleteTask(ticketIdToDelete);
 
             // Assert
             Assert.IsTrue(result);
         }
 
         [Test]
-        public async Task TestDeleteTicket_Failure_TicketNotFound()
+        public async System.Threading.Tasks.Task TestDeleteTicket_Failure_TicketNotFound()
         {
             // Arrange
             var ticketIdToDelete = Guid.NewGuid();
 
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Ticket, bool>>>(), null))
-                .ReturnsAsync((Ticket)null);
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Task, bool>>>(), null))
+                .ReturnsAsync((Task)null);
 
             // Act
-            var result = await _ticketService.DeleteTicket(ticketIdToDelete);
+            var result = await _taskService.DeleteTask(ticketIdToDelete);
 
             // Assert
             Assert.IsFalse(result);

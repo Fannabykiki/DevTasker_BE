@@ -1,10 +1,10 @@
 ﻿using Capstone.Common.DTOs.Email;
-using Capstone.Common.DTOs.Ticket;
+using Capstone.Common.DTOs.Task;
 using FluentValidation;
 
 namespace Capstone.API.Extentions.Validation.TicketValidator
 {
-	public class CreateTicketValidator : AbstractValidator<CreateTicketRequest>
+	public class CreateTicketValidator : AbstractValidator<CreateTaskRequest>
 	{
 		public CreateTicketValidator()
 		{

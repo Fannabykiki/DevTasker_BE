@@ -2,10 +2,10 @@
 
 namespace Capstone.DataAccess.Entities
 {
-    public class TicketType
+    public class TaskType
     {
         [Key] public Guid TypeId { get; set; }
         public string Title { get; set; }
-        public List<Ticket> Tickets { get; set; }
+        public List<Task> Tickets { get; set; }
     }
 }

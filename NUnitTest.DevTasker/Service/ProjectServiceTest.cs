@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {

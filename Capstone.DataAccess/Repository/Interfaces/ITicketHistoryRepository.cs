@@ -2,7 +2,7 @@
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface ITicketHistoryRepository : IBaseRepository<TicketHistory>
+    public interface ITicketHistoryRepository : IBaseRepository<TaskHistory>
     {
     }
 }
