@@ -98,7 +98,6 @@ namespace NUnitTest.DevTasker.Service
                 .Returns(transaction.Object);
             // Act
             var result = await _iticketService.CreateComment(createCommentRequest);
-
             // Assert
             Assert.IsNull(result); 
         }
@@ -117,7 +116,6 @@ namespace NUnitTest.DevTasker.Service
             {
                 CommentId = commentId,
                 Content = "Original Comment Content",
-                // Các thông tin khác của comment
             };
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
@@ -165,6 +163,72 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsNull(result); 
         }
 
+        [Test]
+        public async Task RemoveComment_Success()
+        {
+            // Arrange
+            var commentId = Guid.NewGuid();
 
+            var existingComment = new TicketComment
+            {
+                CommentId = commentId,
+                Content = "Test Comment Content",
+            };
+
+            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+                It.IsAny < Expression<Func<TicketComment, bool>>>(), null))
+                .ReturnsAsync(existingComment); 
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var ticketCommentService = new TicketCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
+
+            // Act
+            var result = await ticketCommentService.RemoveComment(commentId);
+            if (result != null)
+            {
+                Console.WriteLine("Delete comment Success");
+            }
+            else
+            {
+                Console.WriteLine("Delete comment Fail");
+            }
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public async Task RemoveComment_Failure()
+        {
+            // Arrange
+            var commentId = Guid.NewGuid();
+
+            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+                It.IsAny < Expression<Func<TicketComment, bool>>>(), null))
+                .ReturnsAsync((TicketComment)null); // Giả lập không tìm thấy comment
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var ticketCommentService = new TicketCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
+
+            // Act
+            var result = await ticketCommentService.RemoveComment(commentId);
+            if (result == null)
+            {
+                Console.WriteLine("Delete comment Success");
+            }
+            else
+            {
+                Console.WriteLine("Delete comment Fail");
+            }
+            // Assert
+            Assert.IsFalse(result);
+        }
     }
 }
