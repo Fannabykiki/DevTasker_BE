@@ -6,6 +6,9 @@ using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using MailKit.Security;
+using MimeKit;
+using MimeKit.Text;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -17,6 +20,7 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly IStatusRepository _statusRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly ISchemaRepository _schemaRepository;
     private readonly IBoardRepository _boardRepository;
@@ -24,7 +28,7 @@ public class ProjectService : IProjectService
     private readonly IPermissionRepository _permissionRepository;
     private readonly IPermissionSchemaRepository _permissionScemaRepo;
 
-    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo)
+    public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository)
     {
         _context = context;
         _projectRepository = projectRepository;
@@ -36,6 +40,7 @@ public class ProjectService : IProjectService
         _permissionRepository = permissionRepository;
         _interationRepository = interationRepository;
         _permissionScemaRepo = permissionScemaRepo;
+        _statusRepository = statusRepository;
     }
 
     public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -141,6 +146,33 @@ public class ProjectService : IProjectService
     {
         var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers.Where(m => m.UserId == userId));
         return _mapper.Map<List<GetAllProjectViewModel>>(projects);
+    }
+    public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
+    {
+        int totalTicket = 0;
+        int ticketDone = 0;
+        var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
+        var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
+        foreach(var project in projects)
+        {
+            var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId,null);
+            var projectAnalyze = new GetUserProjectAnalyzeResponse();
+            projectAnalyze.ProjectId = project.ProjectId;
+            projectAnalyze.ProjectName = project.ProjectName;
+            projectAnalyze.ProjectStatus = projectStatus.Title;
+            var iteration = await _interationRepository.GetAllWithOdata(x => x.BoardId == project.Board.BoardId, x =>x.Tasks);
+            foreach(var i in iteration)
+            {
+                totalTicket += i.Tasks.Count();
+                ticketDone += i.Tasks.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
+            }
+            projectAnalyze.TotalTickets = ticketDone + "/" + totalTicket;
+            projectAnalyze.Process = (int)Math.Round((double)(100 * ticketDone) / ticketDone);
+            listProjectAnalyze.Add(projectAnalyze);
+            totalTicket = 0;
+            ticketDone= 0;
+        }
+        return listProjectAnalyze;
     }
 
     public async Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest)
@@ -327,7 +359,35 @@ public class ProjectService : IProjectService
         return projectInfoRequests;
     }
 
-    public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
+    public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest)
+    {
+        foreach (var user in inviteUserRequest.Email)
+        {
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
+			string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "email=" + user + "&projectId=" + inviteUserRequest.ProjectId;
+			var email = new MimeMessage();
+			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
+			email.To.Add(MailboxAddress.Parse("" + user));
+			email.Subject = "DevTakser verification step";
+			email.Body = new TextPart(TextFormat.Html)
+			{
+				Text = $"<h1>You've been invited to DevTasker</h1>" +
+				$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
+			};
+
+			using (var client = new MailKit.Net.Smtp.SmtpClient())
+			{
+				client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+				client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
+				client.Send(email);
+				client.Disconnect(true);
+			}
+		}
+		return true;
+
+	}
+
+	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
     {
         var newPermisisonViewModel = new List<PermissionViewModel>();
         var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;

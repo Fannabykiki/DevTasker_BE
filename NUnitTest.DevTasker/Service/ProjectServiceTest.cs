@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -50,10 +51,10 @@ namespace NUnitTest.DevTasker.Service
                 _context,
                 _projectRepositoryMock.Object,
                 _roleRepositoryMock.Object,
-                _mapper,
+               _mapper,
                 _schemaRepository.Object,
-                _projectMemberRepositoryMock.Object,
-                _boardRepositoryMock.Object,
+               _projectMemberRepositoryMock.Object,
+               _boardRepositoryMock.Object,
                 _permissionRepositoryMock.Object,
                 _interationRepositoryMock.Object,
                 _permissionScemaRepo.Object

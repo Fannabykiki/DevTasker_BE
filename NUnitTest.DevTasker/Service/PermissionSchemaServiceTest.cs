@@ -8,6 +8,7 @@ using Capstone.Service.PermissionSchemaService;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {

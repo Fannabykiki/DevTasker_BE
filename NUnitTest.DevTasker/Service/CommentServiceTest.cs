@@ -6,6 +6,7 @@ using Capstone.Service.TicketCommentService;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -46,7 +47,7 @@ namespace NUnitTest.DevTasker.Service
                 ByUser = Guid.NewGuid()
             };
 
-            var expectedComment = new TicketComment
+            var expectedComment = new TaskComment
             {
                 CommentId = Guid.NewGuid(),
                 Content = createCommentRequest.Content,
@@ -56,7 +57,7 @@ namespace NUnitTest.DevTasker.Service
                 CreateBy = createCommentRequest.ByUser,
             };
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
-                It.IsAny<Expression<Func<TicketComment, bool>>>(), null))
+                It.IsAny<Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync(expectedComment);
 
             var transaction = new Mock<IDatabaseTransaction>();
@@ -90,7 +91,7 @@ namespace NUnitTest.DevTasker.Service
                 ByUser = Guid.NewGuid()
             };
 
-            _ticketCommentRepository.Setup(repo => repo.CreateAsync(It.IsAny<TicketComment>()))
+            _ticketCommentRepository.Setup(repo => repo.CreateAsync(It.IsAny<TaskComment>()))
                 .Throws(new Exception("Failed to create comment"));
             var transaction = new Mock<IDatabaseTransaction>();
             transaction.Setup(t => t.Commit()).Verifiable();
@@ -112,14 +113,14 @@ namespace NUnitTest.DevTasker.Service
                 Content = "Updated Comment Content"
             };
 
-            var existingComment = new TicketComment
+            var existingComment = new TaskComment
             {
                 CommentId = commentId,
                 Content = "Original Comment Content",
             };
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
-                It.IsAny < Expression<Func<TicketComment, bool>>>(), null))
+                It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync(existingComment);
 
             // Act
@@ -146,8 +147,8 @@ namespace NUnitTest.DevTasker.Service
             };
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
-                It.IsAny<Expression<Func<TicketComment, bool>>>(), null))
-                .ReturnsAsync((TicketComment)null); 
+                It.IsAny<Expression<Func<TaskComment, bool>>>(), null))
+                .ReturnsAsync((TaskComment)null); 
 
             // Act
             var result = await _iticketService.UpdateComment(commentId, updatedCommentRequest);
@@ -169,14 +170,14 @@ namespace NUnitTest.DevTasker.Service
             // Arrange
             var commentId = Guid.NewGuid();
 
-            var existingComment = new TicketComment
+            var existingComment = new TaskComment
             {
                 CommentId = commentId,
                 Content = "Test Comment Content",
             };
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
-                It.IsAny < Expression<Func<TicketComment, bool>>>(), null))
+                It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync(existingComment); 
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();

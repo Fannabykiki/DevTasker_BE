@@ -19,6 +19,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
 using System.Numerics;
+using Task = System.Threading.Tasks.Task;
 
 namespace Capstone.Service.UserService
 {

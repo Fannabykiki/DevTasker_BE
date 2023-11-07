@@ -1,7 +1,5 @@
 ﻿using Capstone.Common.DTOs.Email;
-using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.User;
-using Capstone.Common.Enums;
 using Capstone.Common.Token;
 using Capstone.DataAccess.Entities;
 

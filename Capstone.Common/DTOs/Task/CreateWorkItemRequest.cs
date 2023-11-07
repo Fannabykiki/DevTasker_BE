@@ -1,6 +1,6 @@
 ﻿using Capstone.Common.Enums;
 
-namespace Capstone.Common.DTOs.Ticket
+namespace Capstone.Common.DTOs.Task
 {
     public class CreateWorkItemRequest
     {

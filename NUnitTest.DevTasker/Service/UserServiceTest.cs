@@ -1,4 +1,3 @@
-using System;
 using System.Linq.Expressions;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
@@ -8,7 +7,6 @@ using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.UserService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System.Security.Claims;
@@ -16,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using AutoMapper;
 using System.Security.Cryptography;
 using System.Text;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {
