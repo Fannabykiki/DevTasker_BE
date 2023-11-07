@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
-using Capstone.Common.DTOs.Ticket;
+using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
-using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
+using Capstone.Service.TicketService;
+using Task = Capstone.DataAccess.Entities.Task;
 
-namespace Capstone.Service.TicketService
+namespace Capstone.Service.TaskService
 {
-	public class TicketService : ITicketService
+	public class TaskService : ITaskService
 	{
 		private readonly CapstoneContext _context;
 		private readonly ITicketRepository _ticketRepository;
@@ -22,7 +20,7 @@ namespace Capstone.Service.TicketService
 		private readonly IInterationRepository _iterationRepository;
 		private readonly IStatusRepository _statusRepository;
 
-		public TicketService(CapstoneContext context, ITicketRepository ticketRepository,
+		public TaskService(CapstoneContext context, ITicketRepository ticketRepository,
 			ITicketStatusRepository ticketStatusRepository, ITicketTypeRepository typeRepository,
 			ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository,
 			IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository,
@@ -40,16 +38,15 @@ namespace Capstone.Service.TicketService
 			_statusRepository = statusRepository;
 		}
 
-
-		public async Task<bool> CreateTicket(CreateTicketRequest request, Guid interationId, Guid userId)
+		public async Task<bool> CreateTask(CreateTaskRequest request, Guid interationId, Guid userId)
 		{
 			using var transaction = _iterationRepository.DatabaseTransaction();
 			var listStatus = _statusRepository.GetAllAsync(x => true, null);
 			try
 			{
-				var ticketEntity = new Ticket()
+				var ticketEntity = new DataAccess.Entities.Task()
 				{
-					TicketId = Guid.NewGuid(),
+					TaskId = Guid.NewGuid(),
 					Title = request.Title,
 					Decription = request.Decription,
 					StartDate = request.StartDate,
@@ -76,15 +73,15 @@ namespace Capstone.Service.TicketService
 			}
 		}
 
-		public async Task<bool> UpdateTicket(UpdateTicketRequest updateTicketRequest, Guid ticketId)
+		public async Task<bool> UpdateTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
 		{
             using var transaction = _iterationRepository.DatabaseTransaction();
             var listStatus = _statusRepository.GetAllAsync(x => true, null);
             try
             {
-                var ticketEntity = new Ticket()
+                var ticketEntity = new DataAccess.Entities.Task()
                 {
-                    TicketId = Guid.NewGuid(),
+                    TaskId = Guid.NewGuid(),
                     Title = updateTicketRequest.Title,
                     Decription = updateTicketRequest.Decription,
                     DueDate = updateTicketRequest.DueDate,
@@ -110,26 +107,26 @@ namespace Capstone.Service.TicketService
         }
 
 
-		public Task<IQueryable<Ticket>> GetAllTicketAsync()
+		public Task<IQueryable<Task>> GetAllTaskAsync()
 		{
 			var result = _ticketRepository.GetAllAsync(x => x.IsDelete != true, null);
 
-			return Task.FromResult(result);
+			return System.Threading.Tasks.Task.FromResult<IQueryable<Task>>(result);
 		}
 
-		public Task<IQueryable<Ticket>> GetAllTicketByInterationIdAsync(Guid interationId)
+		public Task<IQueryable<Task>> GetAllTaskByInterationIdAsync(Guid interationId)
 		{
 			var result = _ticketRepository.GetAllAsync(x => x.InterationId == interationId && x.IsDelete == false, null);
 
-			return Task.FromResult(result);
+			return System.Threading.Tasks.Task.FromResult<IQueryable<Task>>(result);
 		}
 
-		public async Task<bool> DeleteTicket(Guid ticketId)
+		public async Task<bool> DeleteTask(Guid ticketId)
 		{
 			using var transaction = _iterationRepository.DatabaseTransaction();
 			try
 			{
-				var selectedTicket = await _ticketRepository.GetAsync(x => x.TicketId == ticketId, null)!;
+				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == ticketId, null)!;
 				selectedTicket.DeleteAt = DateTime.UtcNow;
 				selectedTicket.IsDelete = true;
 				await _ticketRepository.UpdateAsync(selectedTicket);
