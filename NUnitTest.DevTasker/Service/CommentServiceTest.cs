@@ -208,8 +208,8 @@ namespace NUnitTest.DevTasker.Service
             var commentId = Guid.NewGuid();
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
-                It.IsAny < Expression<Func<TicketComment, bool>>>(), null))
-                .ReturnsAsync((TicketComment)null); 
+                It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
+                .ReturnsAsync((TaskComment)null); 
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();
 
