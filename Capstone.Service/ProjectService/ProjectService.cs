@@ -404,10 +404,61 @@ public class ProjectService : IProjectService
         return newPermisisonViewModel;
     }
 
-    public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin()
+    public async Task<IEnumerable<GetAllProjectResponse>> GetProjectsAdmin()
     {
         var projects = await _projectRepository.GetAllWithOdata(x => true,null);
-		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
+        var projectsList = new List<GetAllProjectResponse>();
+        foreach (var project in projects)
+        {
+            var members = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == project.ProjectId, x => x.Users.Status);
+            UserResponse manager = new UserResponse();
+            List<UserResponse> listMember = new List<UserResponse>();
+            foreach (var member in members)
+            {
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+                {
+                    manager = new UserResponse
+                    {
+                        Id = member.UserId,
+                        Name = member.Users.Fullname,
+                        Email = member.Users.Email,
+                        IsAdmin = member.Users.IsAdmin,
+                        StatusName = member.Users.Status.Title,
+                    };
+                }
+                else
+                {
+                    listMember.Add(new UserResponse
+                    {
+                        Id = member.UserId,
+                        Name = member.Users.Fullname,
+                        Email = member.Users.Email,
+                        IsAdmin = member.Users.IsAdmin,
+                        StatusName = member.Users.Status.Title,
+                    });
+                }
+            }
+            if (listMember.Count() == 0) listMember = null;
+            if (manager == null) manager = null;
+            projectsList.Add(new GetAllProjectResponse
+            {
+                ProjectId = project.ProjectId,
+                ProjectName = project.ProjectName,
+                Description = project.Description,
+                ProjectStatus = project.Status.Title,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                CreateAt = project.CreateAt,
+                DeleteAt = project.DeleteAt,
+                Manager = manager,
+                Member = listMember,
+                ExpireAt = project.ExpireAt,
+                PrivacyStatus = project.PrivacyStatus,
+            });
+
+        }
+
+        return projectsList;
 	}
 
 	public async Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin()

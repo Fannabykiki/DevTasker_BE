@@ -12,8 +12,8 @@ namespace Capstone.Common.DTOs.User
         public int TotalUser { get; set; }
         public int ActiveUsers { get; set; }
         public int PercentActive { get; set; }
-        public int InActiveUser { get; set; }
-        public int PercentInActive { get; set; }
+        public int InactiveUser { get; set; }
+        public int PercentInactive { get; set; }
     }
     public class UserResponse
     {
