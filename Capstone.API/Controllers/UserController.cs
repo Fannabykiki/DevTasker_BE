@@ -42,11 +42,22 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
-		[HttpGet("users")]
+		[HttpGet("admin/users")]
 		[EnableQuery()]
-		public async Task<ActionResult<GetAllUsersResponse>> GetUsers()
+		public async Task<ActionResult<List<UserResponse>>> GetUsers()
 		{
 			var response = await _usersService.GetUsersAsync();
+			if (response == null)
+			{
+				return BadRequest("Three are no User!");
+			}
+			return Ok(response);
+		}
+		
+		[HttpGet("admin/users/analyzation")]
+		public async Task<ActionResult<GetUsersAnalyzeResponse>> GetUsersAnalyze()
+		{
+			var response = await _usersService.GetUsersAnalyze();
 			if (response == null)
 			{
 				return BadRequest("Three are no User!");

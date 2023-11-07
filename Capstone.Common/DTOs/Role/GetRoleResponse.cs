@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Role
 {
-    public class GetAllRoleResponse
+    public class GetRoleResponse
     {
+        public Guid RoleId { get; set; }
+        public string RoleName { get; set; }
+        public string? Description { get; set; }
     }
 }
