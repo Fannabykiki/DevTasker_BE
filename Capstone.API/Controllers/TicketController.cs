@@ -23,7 +23,7 @@ namespace Capstone.API.Controllers
 
         [HttpGet("ticket")]
         [EnableQuery()]
-        public async Task<ActionResult<GetAllUsersResponse>> GetAllTicket()
+        public async Task<ActionResult<UserResponse>> GetAllTicket()
         {
             var response = await _ticketService.GetAllTicketAsync();
             return Ok(response);
@@ -31,7 +31,7 @@ namespace Capstone.API.Controllers
         
         [HttpGet("ticket/{ticketId}")]
         [EnableQuery()]
-        public async Task<ActionResult<GetAllUsersResponse>> GetAllTicketByInterationId(Guid interationId)
+        public async Task<ActionResult<UserResponse>> GetAllTicketByInterationId(Guid interationId)
         {
             var response = await _ticketService.GetAllTicketByInterationIdAsync(interationId);
             return Ok(response);
