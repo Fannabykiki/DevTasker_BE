@@ -1,9 +1,7 @@
 using Capstone.API.Extentions;
-using Capstone.API.Extentions.AuthorizeMiddleware;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
-using Capstone.DataAccess.Entities;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;

@@ -1,17 +1,16 @@
 ﻿using Capstone.Common.DTOs.Comments;
 using Capstone.Service.TicketCommentService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/comment-management")]
     [ApiController]
-    public class TicketCommentController : ControllerBase
+    public class TaskCommentController : ControllerBase
     {
         private readonly ITicketCommentService _commentService;
 
-        public TicketCommentController(ITicketCommentService commentService)
+        public TaskCommentController(ITicketCommentService commentService)
         {
             _commentService = commentService;
         }
