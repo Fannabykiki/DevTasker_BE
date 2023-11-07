@@ -160,11 +160,11 @@ public class ProjectService : IProjectService
             projectAnalyze.ProjectId = project.ProjectId;
             projectAnalyze.ProjectName = project.ProjectName;
             projectAnalyze.ProjectStatus = projectStatus.Title;
-            var iteration = await _interationRepository.GetAllWithOdata(x => x.BoardId == project.Board.BoardId, x =>x.Tickets);
+            var iteration = await _interationRepository.GetAllWithOdata(x => x.BoardId == project.Board.BoardId, x =>x.Tasks);
             foreach(var i in iteration)
             {
-                totalTicket += i.Tickets.Count();
-                ticketDone += i.Tickets.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
+                totalTicket += i.Tasks.Count();
+                ticketDone += i.Tasks.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
             }
             projectAnalyze.TotalTickets = ticketDone + "/" + totalTicket;
             projectAnalyze.Process = (int)Math.Round((double)(100 * ticketDone) / ticketDone);
