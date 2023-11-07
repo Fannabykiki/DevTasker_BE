@@ -7,6 +7,7 @@ namespace Capstone.Service.ProjectService;
 public interface IProjectService
 {
     Task<IEnumerable<GetAllProjectViewModel>> GetProjectsAdmin();
+	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);
@@ -19,6 +20,6 @@ public interface IProjectService
 	Task<bool> RestoreProject(Guid projectId);
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
-	Task<List<ViewProjectInfoRequest>> GetInfoProjectByProjectId(Guid projectId);
+	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest);
 }

@@ -209,7 +209,7 @@ namespace NUnitTest.DevTasker.Service
 
             _ticketCommentRepository.Setup(repo => repo.GetAsync(
                 It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
-                .ReturnsAsync((TaskComment)null); // Giả lập không tìm thấy comment
+                .ReturnsAsync((TaskComment)null); 
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();
 

@@ -83,6 +83,25 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
+		[EnableQuery]
+		[HttpGet("projects/{userId:Guid}/analyzation")]
+		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
+		{
+            var UserId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You dont have permission to access this page");
+            }
+            var result = await _projectService.GetUserProjectAnalyze(userId);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(result);
+        }
+        
+        [EnableQuery]
 		[HttpGet("admin/projects/analyzation")]
 		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectAnalyze()
 		{
@@ -124,7 +143,7 @@ namespace Capstone.API.Controllers
         //[MiddlewareFilter(typeof(AuthorizationMiddleware))]
         [EnableQuery]
         [HttpGet("projects/info/{projectId:Guid}")]
-        public async Task<ActionResult<List<ViewProjectInfoRequest>>> GetFullInfoProjectByProjectId(Guid projectId)
+        public async Task<ActionResult<ViewProjectInfoRequest>> GetFullInfoProjectByProjectId(Guid projectId)
         {
             var claims = new[] {
             new Claim("projectId", projectId.ToString())

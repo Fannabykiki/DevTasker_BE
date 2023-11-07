@@ -22,6 +22,9 @@ namespace Capstone.Common.DTOs.User
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? StatusName { get; set; }
-        public bool IsAdmin { get; set; } //True: Admin , False : User
+        public bool IsAdmin { get; set; }
+        public string? Address { get; set; }
+        public DateTime? Dob { get; set; }
+        //True: Admin , False : User
     }
 }
