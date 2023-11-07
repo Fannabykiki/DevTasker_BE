@@ -143,7 +143,7 @@ namespace Capstone.API.Controllers
         //[MiddlewareFilter(typeof(AuthorizationMiddleware))]
         [EnableQuery]
         [HttpGet("projects/info/{projectId:Guid}")]
-        public async Task<ActionResult<List<ViewProjectInfoRequest>>> GetFullInfoProjectByProjectId(Guid projectId)
+        public async Task<ActionResult<ViewProjectInfoRequest>> GetFullInfoProjectByProjectId(Guid projectId)
         {
             var claims = new[] {
             new Claim("projectId", projectId.ToString())
