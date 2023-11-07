@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Permission;
+﻿using Capstone.Common.DTOs.Paging;
+using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 
