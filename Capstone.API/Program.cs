@@ -127,13 +127,6 @@ builder.Services.AddControllers()
                     // Automatic registration of validators in assembly
                     options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
-// Add Google OAuth authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "https://accounts.google.com";
-        options.Audience = "Your-Google-API-Client-ID";
-    });
 
 // Add authorization policies if needed
 builder.Services.AddAuthorization(options =>
