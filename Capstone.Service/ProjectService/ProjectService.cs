@@ -149,28 +149,26 @@ public class ProjectService : IProjectService
     }
     public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
     {
-        int totalTicket = 0;
-        int ticketDone = 0;
         var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
         var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
         foreach(var project in projects)
         {
-            var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId,null);
+            var manager = await _projectMemberRepository.GetAsync(x =>x.ProjectId == project.ProjectId&&x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"),null);
+            var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId,x => x.Users);
             var projectAnalyze = new GetUserProjectAnalyzeResponse();
             projectAnalyze.ProjectId = project.ProjectId;
             projectAnalyze.ProjectName = project.ProjectName;
             projectAnalyze.ProjectStatus = projectStatus.Title;
-            var iteration = await _interationRepository.GetAllWithOdata(x => x.BoardId == project.Board.BoardId, x =>x.Tasks);
-            foreach(var i in iteration)
+            projectAnalyze.Manager = new UserResponse 
             {
-                totalTicket += i.Tasks.Count();
-                ticketDone += i.Tasks.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
-            }
-            projectAnalyze.TotalTickets = ticketDone + "/" + totalTicket;
-            projectAnalyze.Process = (int)Math.Round((double)(100 * ticketDone) / ticketDone);
+                Id = manager.UserId,
+                Name = manager.Users.Fullname,
+                Email = manager.Users.Email,
+                PhoneNumber= manager.Users.PhoneNumber,
+                Dob= manager.Users.Dob,
+                IsAdmin= manager.Users.IsAdmin,
+            };
             listProjectAnalyze.Add(projectAnalyze);
-            totalTicket = 0;
-            ticketDone= 0;
         }
         return listProjectAnalyze;
     }
