@@ -489,15 +489,9 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<GetAllUsersResponse> GetUsersAsync()
+		public async Task<List<UserResponse>> GetUsersAsync()
 		{
-			var listUser = new GetAllUsersResponse();
 			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
-            listUser.TotalUser = users.Count();
-            listUser.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
-			listUser.InActiveUser = listUser.TotalUser - listUser.ActiveUsers;
-			listUser.PercentActive = (int)Math.Round((double)(100 * listUser.ActiveUsers) / listUser.TotalUser);
-            listUser.PercentInActive = 100 - listUser.PercentActive;
 
 			var listU = new List<UserResponse>();
             foreach (var user in users)
@@ -511,12 +505,11 @@ namespace Capstone.Service.UserService
 					StatusName = user.Status.Title,
                     IsAdmin = user.IsAdmin
                 };
-                listU.Add(reponse);
+				listU.Add(reponse);
 
 			}
-            listUser.users = listU;
 
-            return listUser;
+            return listU;
 
 		}
 
@@ -539,6 +532,18 @@ namespace Capstone.Service.UserService
 				client.Disconnect(true);
 			}
 			return true;
+		}
+
+        public async Task<GetUsersAnalyzeResponse> GetUsersAnalyze()
+        {
+			var usersAnalyze = new GetUsersAnalyzeResponse();
+			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
+			usersAnalyze.TotalUser = users.Count();
+			usersAnalyze.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
+			usersAnalyze.InActiveUser = usersAnalyze.TotalUser - usersAnalyze.ActiveUsers;
+			usersAnalyze.PercentActive = (int)Math.Round((double)(100 * usersAnalyze.ActiveUsers) / usersAnalyze.TotalUser);
+			usersAnalyze.PercentInActive = 100 - usersAnalyze.PercentActive;
+			return usersAnalyze;
 		}
 	}
 }
