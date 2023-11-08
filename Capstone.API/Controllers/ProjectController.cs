@@ -1,4 +1,5 @@
 using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -6,6 +7,7 @@ using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.OData.UriParser;
 using System.Security.Claims;
 
 namespace Capstone.API.Controllers
@@ -72,9 +74,9 @@ namespace Capstone.API.Controllers
 
         [EnableQuery]
         [HttpGet("admin/projects")]
-        public async Task<ActionResult<IQueryable<GetAllProjectResponse>>> GetProjectsAdmin()
+        public async Task<ActionResult<PagedResponse<GetAllProjectViewModel>>> GetProjectsAdmin(int limit, int page)
         {
-            var result = await _projectService.GetProjectsAdmin();
+            var result = await _projectService.GetProjectsAdmin(limit,page);
             if (result == null)
             {
                 return StatusCode(500);
