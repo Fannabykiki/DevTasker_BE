@@ -7,6 +7,7 @@ using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using System.Security.Claims;
+using Capstone.Common.DTOs.Paging;
 
 namespace Capstone.API.Controllers
 {
@@ -44,9 +45,9 @@ namespace Capstone.API.Controllers
 
 		[HttpGet("admin/users")]
 		[EnableQuery()]
-		public async Task<ActionResult<List<UserResponse>>> GetUsers()
+		public async Task<ActionResult<PagedResponse<UserResponse>>> GetUsers(int limit, int page)
 		{
-			var response = await _usersService.GetUsersAsync();
+			var response = await _usersService.GetUsersAsync(limit,page);
 			if (response == null)
 			{
 				return BadRequest("Three are no User!");

@@ -2,8 +2,10 @@ using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.ProjectMember;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
+using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -18,16 +20,18 @@ namespace Capstone.API.Controllers
     {
         private readonly ILoggerManager _logger;
         private readonly IProjectService _projectService;
+        private readonly IProjectMemberService _projectMemberService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProjectController(ILoggerManager logger, IProjectService projectService, IHttpContextAccessor httpContextAccessor)
-        {
-            _logger = logger;
-            _projectService = projectService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+		public ProjectController(ILoggerManager logger, IProjectService projectService, IHttpContextAccessor httpContextAccessor, IProjectMemberService projectMemberService)
+		{
+			_logger = logger;
+			_projectService = projectService;
+			_httpContextAccessor = httpContextAccessor;
+			_projectMemberService = projectMemberService;
+		}
 
-        [HttpPost("projects")]
+		[HttpPost("projects")]
         public async Task<ActionResult<CreateProjectRespone>> CreateProject(CreateProjectRequest createProjectRequest)
         {
             var userId = this.GetCurrentLoginUserId();
@@ -39,20 +43,13 @@ namespace Capstone.API.Controllers
         [HttpPost("projects/invitation")]
         public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
         {
-            var result = await _projectService.SendMailInviteUser(inviteUserRequest);
-            
-            return Ok(result);
+			var projectMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
+			await _projectService.SendMailInviteUser(inviteUserRequest);
+
+			return Ok(projectMember);
         }
 
-
-		[HttpPost("projects/invitation/acception")]
-		public async Task<IActionResult> AddMemberToProject()
-		{
-            var userId = this.GetCurrentLoginUserId();
-			//var result = await _projectService.AddProjectMember(inviteUserRequest);
-
-			return Ok();
-		}
+		
 
 		[EnableQuery]
         [HttpGet("projects")]
