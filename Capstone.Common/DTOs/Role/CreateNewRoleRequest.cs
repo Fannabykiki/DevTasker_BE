@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Role
 {
-    public class CreateRoleRequest
+    public class CreateNewRoleRequest
     {
         public string RoleName { get; set; }
         public string? Description { get; set; }

@@ -9,8 +9,12 @@ namespace Capstone.Service.RoleService
 {
     public interface IRoleService
     {
-        Task<IEnumerable<GetRoleResponse>> GetAllSystemRole();
-        Task<GetRoleResponse> CreateProjectRole(CreateRoleRequest createRoleRequest);
+
+        Task<GetAllRoleReponse> GetAllSystemRole(int limit, int page,bool mode);
+        Task<GetRoleResponse> GetSystemRoleByName(string roleName);
+        Task<GetRoleResponse> GetSystemRoleById(Guid roleId);
+        Task<GetRoleResponse> CreateProjectRole(CreateNewRoleRequest createRoleRequest);
         Task<GetRoleResponse> UpdateSystemRole(Guid roleId, UpdateRoleRequest request);
+        Task<bool> RemoveSystemRoleAsync(Guid roleId);
     }
 }

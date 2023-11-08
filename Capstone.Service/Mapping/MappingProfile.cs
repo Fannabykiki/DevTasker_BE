@@ -15,10 +15,12 @@ public class MappingProfile : Profile
         CreateMap<User, UserViewModel>();
         CreateMap<Project, GetAllProjectViewModel>();
         CreateMap<Project, GetAllProjectResponse>();
+        CreateMap<Project, GetProjectUseRoleResponse>()
+            .ForMember(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Status.Title)); ;
         CreateMap<ProjectMember, ViewMemberProject>();
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
         CreateMap<Role, GetRoleResponse>();
         CreateMap<TaskComment, GetCommentResponse>()
-            .ForMember(dest => dest.CreateByUser, opt => opt.MapFrom(src => src.User)); ;
+            .ForMember(dest => dest.CreateByUser, opt => opt.MapFrom(src => src.User));
     }
 }
