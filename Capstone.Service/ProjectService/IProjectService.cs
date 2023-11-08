@@ -7,7 +7,7 @@ namespace Capstone.Service.ProjectService;
 
 public interface IProjectService
 {
-	Task<PagedResponse<GetAllProjectResponse>> GetProjectsAdmin(int limit, int page);
+	Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin();
 	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
