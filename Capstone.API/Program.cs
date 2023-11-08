@@ -30,6 +30,7 @@ using Capstone.Service.AttachmentServices;
 using Capstone.Service.TicketCommentService;
 using Capstone.Service.RoleService;
 using Capstone.Service.TaskService;
+using Capstone.Service.ProjectMemberService;
 
 static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -112,6 +113,9 @@ builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
+builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 

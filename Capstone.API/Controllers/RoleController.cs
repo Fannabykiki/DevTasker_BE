@@ -1,8 +1,11 @@
-﻿using Capstone.Common.DTOs.Role;
+﻿using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Role;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.OData.Query;
+using System.Collections.Generic;
 
 namespace Capstone.API.Controllers
 {
@@ -20,10 +23,22 @@ namespace Capstone.API.Controllers
 		}
 
 		[EnableQuery]
-        [HttpGet("roles")]
-        public async Task<ActionResult<IEnumerable<GetRoleResponse>>> GetRoles()
+        [HttpGet("system/roles")]
+        public async Task<ActionResult<GetAllRoleReponse>> GetRoles(int limit, int page)
         {
-            var roles = await _roleService.GetAllSystemRole();
+            var roles = await _roleService.GetAllSystemRole(limit,page,true);
+            if (roles == null)
+            {
+                return BadRequest("Data null");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
+        [HttpGet("system/roles/deleted")]
+        public async Task<ActionResult<GetAllRoleReponse>> GetRolesDeleted(int limit, int page)
+        {
+            var roles = await _roleService.GetAllSystemRole(limit, page,false);
             if (roles == null)
             {
                 return BadRequest("Data null");
@@ -31,36 +46,53 @@ namespace Capstone.API.Controllers
             return Ok(roles);
         }
 
-        //[HttpPost("roles")]
-        //public async Task<ActionResult<GetRoleResponse>> CreateRole(Common.DTOs.Role.CreateRoleRequest createRoleRequest)
-        //{
-        //    var role = _roleRepository.GetAsync(x => x.RoleName.Trim().ToLower().Equals(createRoleRequest.RoleName.Trim().ToLower()), null);
-        //    if (role != null) {
-        //        return BadRequest("Role name existed!");
-        //    }
-        //    var result = await _roleService.CreateProjectRole(createRoleRequest);
-        //    if (result == null)
-        //    {
-        //        return StatusCode(500);
-        //    }
+        [HttpPost("system/roles")]
+        public async Task<ActionResult<GetRoleResponse>> CreateRole(CreateNewRoleRequest createRoleRequest)
+        {
+            var role = await _roleService.GetSystemRoleByName(createRoleRequest.RoleName);
+            if (role != null)
+            {
+                return BadRequest("Role name existed!");
+            }
+            var result = await _roleService.CreateProjectRole(createRoleRequest);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //[HttpPut("roles/{id}")]
-        //public async Task<ActionResult<GetRoleResponse>> UpdateRole(Guid id, UpdateRoleRequest request)
-        //{
-        //    var role = _roleRepository.GetAsync(x => x.RoleName.Trim().ToLower().Equals(request.RoleName.Trim().ToLower()), null);
-        //    if (role != null)
-        //    {
-        //        return BadRequest("Role name existed!");
-        //    }
-        //    var updatedRole = await _roleService.UpdateSystemRole(id, request);
-        //    if (updatedRole == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok(updatedRole);
-        //}
+        [HttpPut("system/roles/{id}")]
+        public async Task<ActionResult<GetRoleResponse>> UpdateRole(Guid id, UpdateRoleRequest request)
+        {
+            var role = await _roleService.GetSystemRoleByName(request.RoleName);
+            if (role != null)
+            {
+                return BadRequest("Role name existed!");
+            }
+            var updatedRole = await _roleService.UpdateSystemRole(id, request);
+            if (updatedRole == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedRole);
+        }
+        
+        [HttpDelete("system/roles/{roleId}")]
+        public async Task<ActionResult<GetRoleResponse>> RemoveeRole(Guid roleId)
+        {
+            var role = await _roleService.GetSystemRoleById(roleId);
+            if (role == null)
+            {
+                return BadRequest("Role not existed!");
+            }
+            var isRemoved = await _roleService.RemoveSystemRoleAsync(roleId);
+            if (isRemoved == null)
+            {
+                return NotFound();
+            }
+            return Ok(isRemoved);
+        }
     }
 }
