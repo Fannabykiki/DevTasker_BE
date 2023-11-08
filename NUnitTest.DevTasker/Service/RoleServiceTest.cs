@@ -19,15 +19,27 @@ namespace NUnitTest.DevTasker.Service
     [TestFixture]
     public class RoleServiceTest
     {
+        private RoleService _roleService;
         private Mock <IRoleRepository> _roleRepository;
         private Mock <IMapper> _mapper;
+        private Mock<IProjectRepository> _projectRepository;
 
         [SetUp]
         public void Setup()
         {
             _roleRepository = new Mock<IRoleRepository>();
             _mapper = new Mock<IMapper>();
+            _projectRepository = new Mock<IProjectRepository>();
+
+            _roleService = new RoleService
+            (
+                    _roleRepository.Object,
+                    _mapper.Object,
+                    _projectRepository.Object
+            );
         }
+        
+
 
         [Test]
         public async Task CreateProjectRole_Success()
@@ -59,20 +71,20 @@ namespace NUnitTest.DevTasker.Service
                     Description = role.Description
                 });
 
-            //var roleService = new RoleService(_roleRepository.Object, _mapper.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
 
-            // Act
-            //var result = await roleService.CreateProjectRole(createRoleRequest);
-            //if (result != null)
-            //{
-            //    Console.WriteLine("CreateProjectRole Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("CreateProjectRole Fail");
-            //}
-            //// Assert
-            //Assert.IsNotNull(result);
+            //Act
+           var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
+            // Assert
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -90,22 +102,22 @@ namespace NUnitTest.DevTasker.Service
             _roleRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            //var roleService = new RoleService(_roleRepository.Object, _mapper.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
 
-            //// Act
-            //var result = await roleService.CreateProjectRole(createRoleRequest);
-            //if (result != null)
-            //{
-            //    Console.WriteLine("CreateProjectRole Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("CreateProjectRole Fail");
-            //}
+            // Act
+            var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
 
-            //// Assert
-            //Assert.IsNull(result); 
-           
+            // Assert
+            Assert.IsNull(result);
+
         }
 
         [Test]
@@ -139,13 +151,11 @@ namespace NUnitTest.DevTasker.Service
                    Description = role.Description
                });
 
-            //var roleService = new RoleService(_roleRepository.Object, _mapper.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
 
-            // Act
-            //var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
-
-            // Assert
-           // Assert.IsNotNull(result, "UpdateSystemRole should succeed and return a non-null result");
+            //Act
+           var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
+            Assert.IsNull(result, "UpdateSystemRole should succeed and return a non-null result");
         }
 
 
@@ -162,23 +172,23 @@ namespace NUnitTest.DevTasker.Service
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();
             _roleRepository.Setup(repo => repo.DatabaseTransaction())
-                .Returns(databaseTransaction.Object); 
+                .Returns(databaseTransaction.Object);
 
-            //var roleService = new RoleService(_roleRepository.Object, _mapper.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
 
-            //// Act
-            //var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
-            //if (result != null)
-            //{
-            //    Console.WriteLine("UpdateSystemRole Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("UpdateSystemRole Fail");
-            //}
-            //// Assert
-            //Assert.IsNull(result); 
-            //databaseTransaction.Verify(t => t.RollBack(), Times.Once);
+            // Act
+            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("UpdateSystemRole Success");
+            }
+            else
+            {
+                Console.WriteLine("UpdateSystemRole Fail");
+            }
+            // Assert
+            Assert.IsNull(result);
+            databaseTransaction.Verify(t => t.RollBack(), Times.Once);
         }
 
 
