@@ -14,8 +14,7 @@ namespace Capstone.API.Extensions.Validation.UserValidator
             
             RuleFor(x => x.UserName)
                 .MaximumLength(32).WithMessage("User name must be less than 32 characters")
-                .Matches(@"^[\p{L}\p{N}]+$").WithMessage("Invalid UserName")
-                .NotEmpty().WithMessage("User name is required");
+                .Matches(@"^[\p{L}\p{N}]+$").WithMessage("Invalid UserName");
 
             RuleFor(x => x.PhoneNumber)
                 .Matches(@"^\d{9,12}$").WithMessage("Phone number must be 9-12 digits")
