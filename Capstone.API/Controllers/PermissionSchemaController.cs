@@ -1,6 +1,7 @@
 ﻿using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
+using Capstone.Common.DTOs.Schema;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
@@ -52,13 +53,50 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-
+        
         [HttpPut("schemas/{schemaId:Guid}")]
-        public async Task<IActionResult> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest request)
+        public async Task<IActionResult> UpdateSchema(Guid schemaId, UpdateSchemaRequest request)
         {
-            var result = await _permissionSchemaService.UpdateSchemaPermissionRoles(schemaId, request);
+            var result = await _permissionSchemaService.UpdateSchema(schemaId, request);
+            if(result == true)
+            {
+                var schema = await _permissionSchemaService.GetSchemaById(schemaId);
+                return Ok(schema);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
+        }
 
-            return Ok(result);
+        [HttpPut("schemas/grant-permission/{schemaId:Guid}")]
+        public async Task<IActionResult> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest request)
+        {
+            var result = await _permissionSchemaService.GrantSchemaPermissionRoles(schemaId, request);
+            if(result == true)
+            {
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
+                return Ok(schemaDetails);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
+        }
+        
+        [HttpPut("schemas/revoke-permission/{schemaId:Guid}")]
+        public async Task<IActionResult> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest request)
+        {
+            var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(schemaId, request);
+            if(result == true)
+            {
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
+                return Ok(schemaDetails);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
         }
 
     }

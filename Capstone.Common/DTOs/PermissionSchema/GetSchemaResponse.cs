@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.PermissionSchema
 {
-    public class UpdatePermissionSchemaRequest
+    public class GetSchemaResponse
     {
-        public List<RolePermissionDTO> rolePermissions { get; set; }
+        public Guid SchemaId { get; set; }
+        public string SchemaName { get; set; }
+        public string Description { get; set; }
     }
 }
