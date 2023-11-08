@@ -162,8 +162,8 @@ public class ProjectService : IProjectService
             projectAnalyze.ProjectStatus = projectStatus.Title;
             projectAnalyze.Manager = new UserResponse 
             {
-                Id = manager.UserId,
-                Name = manager.Users.Fullname,
+                UserId = manager.UserId,
+                UserName = manager.Users.Fullname,
                 Email = manager.Users.Email,
                 PhoneNumber= manager.Users.PhoneNumber,
                 Dob= manager.Users.Dob,
@@ -401,7 +401,7 @@ public class ProjectService : IProjectService
         return newPermisisonViewModel;
     }
 
-    public async Task<PagedResponse<GetAllProjectResponse>> GetProjectsAdmin(int limit, int page)
+    public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
     {
         var projects = await _projectRepository.GetAllWithOdata(x => true,null);
         var projectsList = new List<GetAllProjectResponse>();
@@ -416,8 +416,8 @@ public class ProjectService : IProjectService
                 {
                     manager = new UserResponse
                     {
-                        Id = member.UserId,
-                        Name = member.Users.Fullname,
+                        UserId = member.UserId,
+                        UserName = member.Users.Fullname,
                         Email = member.Users.Email,
                         IsAdmin = member.Users.IsAdmin,
                         StatusName = member.Users.Status.Title,
@@ -427,8 +427,8 @@ public class ProjectService : IProjectService
                 {
                     listMember.Add(new UserResponse
                     {
-                        Id = member.UserId,
-                        Name = member.Users.Fullname,
+						UserId = member.UserId,
+						UserName = member.Users.Fullname,
                         Email = member.Users.Email,
                         IsAdmin = member.Users.IsAdmin,
                         StatusName = member.Users.Status.Title,
@@ -455,18 +455,8 @@ public class ProjectService : IProjectService
                 PrivacyStatus = project.PrivacyStatus,
             });
         }
-        var response = new PagedResponse<GetAllProjectResponse>()
-        {
-            Data = projectsList,
-            Paginations = new Pagination
-            {
-                TotalRecords = projectsList.Count(),
-                PageNumber = limit,
-                PageSize = page,
-            }
-        };
-
-		return response;
+        var respone = projectsList.AsQueryable();
+		return respone;
 	}
 
 

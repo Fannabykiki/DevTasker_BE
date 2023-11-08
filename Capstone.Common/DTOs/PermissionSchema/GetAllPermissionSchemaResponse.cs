@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Capstone.Common.DTOs.Paging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,8 @@ namespace Capstone.Common.DTOs.PermissionSchema
 {
     public class GetAllPermissionSchemaResponse
     {
-		public Guid SchemaId { get; set; }
-		public string SchemaName { get; set; }
-		public string Description { get; set; }
+		public List<GetSchemaResponse> Schemas { get; set; }
+		public Pagination Pagination { get; set; }
+		
 	}
 }

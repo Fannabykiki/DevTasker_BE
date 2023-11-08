@@ -9,6 +9,7 @@ using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -36,10 +37,15 @@ namespace Capstone.Service.PermissionSchemaService
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<GetAllPermissionSchemaResponse>> GetAllSchema()
+        public async Task<GetAllPermissionSchemaResponse> GetAllSchema()
         {
+            var result = new GetAllPermissionSchemaResponse();
             var schemas = await _schemaRepository.GetAllWithOdata(x => true, null);
-            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas);
+            result.Schemas = _mapper.Map<List<GetSchemaResponse>>(schemas);
+            result.Pagination = new Common.DTOs.Paging.Pagination {
+                TotalRecords = schemas.Count()
+            };
+            return result;
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
@@ -95,7 +101,7 @@ namespace Capstone.Service.PermissionSchemaService
                     Description = request.Description
                 };
                 var newSchema = await _schemaRepository.CreateAsync(schema);
-                var permissions = _permissionRepository.GetAllAsync(x => x.PermissionId != null, null);
+                var permissions = _permissionRepository.GetAllAsync(x => true, null);
                 foreach (var permission in permissions)
                 {
                     await _permissionSchemaRepository.CreateAsync(new SchemaPermission
@@ -136,8 +142,8 @@ namespace Capstone.Service.PermissionSchemaService
                 schema.SchemaName = request.SchemaName ?? schema.SchemaName;
                 schema.Description = request.Description ?? schema.Description;
 
-                _schemaRepository.UpdateAsync(schema);
-                _schemaRepository.SaveChanges();
+                await _schemaRepository.UpdateAsync(schema);
+                await _schemaRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
@@ -149,49 +155,62 @@ namespace Capstone.Service.PermissionSchemaService
                 return false;
             }
         }
-        public async Task<bool> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest request)
+        public async Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest request)
         {
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
-                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
-                if (schema == null) return false;
-
-                foreach (var permission in request.rolePermissions)
+                var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
+                foreach (var permission in request.PermissionIds)
                 {
-                    var per = _permissionRepository.GetAllAsync(x => x.PermissionId == permission.PermissionId, null);
-                    if (per == null) return false;
-
-                    var listCurentRole = _permissionSchemaRepository.GetAllAsync(x => x.PermissionId == permission.PermissionId && x.SchemaId == schemaId, null).Select(x => x.RoleId);
-
-                    foreach (var curentRole in listCurentRole)
+                    var permissionRole = schemaPermission.Where(x => x.PermissionId == permission && x.RoleId == request.RoleId);
+                    if(permissionRole.Any() == false)
                     {
-                        if (!permission.RoleIds.Contains((Guid)curentRole))
+                        var newPermissionRole = new SchemaPermission
                         {
-                            var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
-                            await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
-                        }
-                    }
-
-                    foreach (var role in permission.RoleIds)
-                    {
-                        var rol = _roleRepository.GetAllAsync(x => x.RoleId == role, null);
-                        if (rol == null) return false;
-
-                        var permissionSchema = await _permissionSchemaRepository.GetAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == role, null);
-                        if (permissionSchema == null)
-                        {
-                            await _permissionSchemaRepository.CreateAsync(new SchemaPermission
-                            {
-                                SchemaId = schemaId,
-                                PermissionId = permission.PermissionId,
-                                RoleId = role
-                            });
-                        }
+                            SchemaId = schemaId,
+                            PermissionId = permission,
+                            RoleId = request.RoleId
+                        };
+                        await _permissionSchemaRepository.CreateAsync(newPermissionRole);
                     }
                 }
-                _permissionSchemaRepository.SaveChanges();
+                await _permissionSchemaRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return false;
+            }
+        }
 
+        public async Task<GetSchemaResponse> GetSchemaById(Guid SchemaId)
+        {
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId, null);
+            return _mapper.Map<GetSchemaResponse>(schema);
+        }
+
+        public async Task<bool> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest request)
+        {
+            using var transaction = _permissionSchemaRepository.DatabaseTransaction();
+            try
+            {
+                var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
+                foreach (var role in request.RoleIds)
+                {
+                    if(role == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") || 
+                        role == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
+
+                    var permissionRole = schemaPermission.First(x => x.RoleId == role && x.PermissionId == request.PermissionId);
+                    if (permissionRole != null)
+                    {
+                        await _permissionSchemaRepository.DeleteAsync(permissionRole);
+                    }
+                }
+                await _permissionSchemaRepository.SaveChanges();
                 transaction.Commit();
                 return true;
             }
