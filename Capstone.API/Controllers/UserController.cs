@@ -45,9 +45,9 @@ namespace Capstone.API.Controllers
 
 		[HttpGet("admin/users")]
 		[EnableQuery()]
-		public async Task<ActionResult<PagedResponse<UserResponse>>> GetUsers(int limit, int page)
+		public async Task<ActionResult<List<UserResponse>>> GetUsers()
 		{
-			var response = await _usersService.GetUsersAsync(limit,page);
+			var response = await _usersService.GetUsersAsync();
 			if (response == null)
 			{
 				return BadRequest("Three are no User!");

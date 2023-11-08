@@ -491,38 +491,11 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<PagedResponse<UserResponse>> GetUsersAsync(int limt, int page)
+		public async Task<List<UserResponse>> GetUsersAsync()
 		{
 			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
-
-			var listU = new List<UserResponse>();
-            foreach (var user in users)
-			{
-				var reponse = new UserResponse
-				{
-					Id = user.UserId,
-					Name = user.Fullname,
-					Email = user.Email,
-					PhoneNumber= user.PhoneNumber,
-					StatusName = user.Status.Title,
-					Address = user.Address,
-					Dob = user.Dob,
-                    IsAdmin = user.IsAdmin
-                };
-				listU.Add(reponse);
-			}
-
-			return new PagedResponse<UserResponse>
-			{
-				Data = listU,
-				Paginations = new Pagination
-				{
-					PageNumber = page,
-					PageSize = limt,
-					TotalRecords = listU.Count()
-				},
-				
-			};
+			
+			return _mapper.Map<List<UserResponse>>(users);
 		}
 
 		public async Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest)

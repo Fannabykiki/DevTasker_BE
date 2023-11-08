@@ -48,7 +48,6 @@ namespace Capstone.API.Controllers
 
 			return Ok(projectMember);
         }
-
 		
 
 		[EnableQuery]
@@ -71,9 +70,9 @@ namespace Capstone.API.Controllers
 
         [EnableQuery]
         [HttpGet("admin/projects")]
-        public async Task<ActionResult<PagedResponse<GetAllProjectViewModel>>> GetProjectsAdmin(int limit, int page)
+        public async Task<ActionResult<List<GetAllProjectResponse>>> GetProjectsAdmin()
         {
-            var result = await _projectService.GetProjectsAdmin(limit,page);
+            var result = await _projectService.GetProjectsAdmin();
             if (result == null)
             {
                 return StatusCode(500);
