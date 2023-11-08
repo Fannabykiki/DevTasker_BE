@@ -33,7 +33,7 @@ namespace NUnitTest.DevTasker.Service
         public async Task CreateProjectRole_Success()
         {
             // Arrange
-            var createRoleRequest = new CreateRoleRequest
+            var createRoleRequest = new CreateNewRoleRequest
             {
                 RoleName = "Test Role",
                 Description = "Test Role Description"
@@ -79,7 +79,7 @@ namespace NUnitTest.DevTasker.Service
         public async Task CreateProjectRole_Failure()
         {
             // Arrange
-            var createRoleRequest = new CreateRoleRequest
+            var createRoleRequest = new CreateNewRoleRequest
             {
                 RoleName = "Test Role",
                 Description = "Test Role Description"

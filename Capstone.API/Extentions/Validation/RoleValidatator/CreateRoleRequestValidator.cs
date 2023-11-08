@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Capstone.API.Extentions.Validation.RoleValidator
 {
-    public class CreateRoleRequestValidator : AbstractValidator<CreateRoleRequest>
+    public class CreateRoleRequestValidator : AbstractValidator<CreateNewRoleRequest>
     {
         public CreateRoleRequestValidator()
         {
