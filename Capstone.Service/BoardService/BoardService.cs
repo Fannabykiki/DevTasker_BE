@@ -10,6 +10,7 @@ using Capstone.Common.DTOs.User;
 
 namespace Capstone.Service.BoardService
 {
+    //
     public class BoardService : IBoardService
     {
         private readonly CapstoneContext _context;
