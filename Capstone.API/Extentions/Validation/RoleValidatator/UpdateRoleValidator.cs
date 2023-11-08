@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Capstone.API.Extentions.Validation.RoleValidator
 {
-    public class UpdateRoleValidatator : AbstractValidator<UpdateRoleRequest>
+    public class UpdateRoleValidator : AbstractValidator<UpdateRoleRequest>
     {
-        public UpdateRoleValidatator()
+        public UpdateRoleValidator()
         {
             RuleFor(x => x.RoleName)
                 .MaximumLength(64).WithMessage("User name must be less than 64 characters")
