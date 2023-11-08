@@ -10,7 +10,6 @@
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.63.0.3155" />
     <PackageReference Include="MailKit" Version="4.2.0" />
-    <PackageReference Include="Microsoft.AspNet.OData" Version="7.7.2" />
     <PackageReference Include="MimeKit" Version="4.2.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.4" />
   </ItemGroup>

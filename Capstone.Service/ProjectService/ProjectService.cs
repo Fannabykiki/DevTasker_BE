@@ -95,8 +95,9 @@ public class ProjectService : IProjectService
                 MemberId = Guid.NewGuid(),
                 ProjectId = newProject.ProjectId,
                 UserId = newProject.CreateBy,
-                RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B")
-            };
+                RoleId = Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"),
+				StatusId = Guid.Parse("ba888147-c90a-4578-8ba6-63ba1756fac1")
+			};
 
             var newAdmin = new ProjectMember
             {
@@ -104,7 +105,8 @@ public class ProjectService : IProjectService
                 MemberId = Guid.NewGuid(),
                 ProjectId = newProject.ProjectId,
                 UserId = Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"),
-                RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")
+                RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"),
+                StatusId = Guid.Parse("ba888147-c90a-4578-8ba6-63ba1756fac1")
             };
 
             await _projectMemberRepository.CreateAsync(newPo);
