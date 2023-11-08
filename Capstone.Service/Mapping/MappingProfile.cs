@@ -19,6 +19,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Status.Title)); ;
         CreateMap<ProjectMember, ViewMemberProject>();
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
+        CreateMap<Schema, GetSchemaResponse>();
         CreateMap<Role, GetRoleResponse>();
         CreateMap<TaskComment, GetCommentResponse>()
             .ForMember(dest => dest.CreateByUser, opt => opt.MapFrom(src => src.User));
