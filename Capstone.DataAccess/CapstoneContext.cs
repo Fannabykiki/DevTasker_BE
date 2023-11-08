@@ -53,11 +53,11 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.ProjectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-			// modelBuilder.Entity<ProjectMember>()
-			//    .HasOne(sc => sc.Status)
-			//    .WithMany(s => s.ProjectMembers)
-			//    .HasForeignKey(sc => sc.StatusId)
-			//    .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<ProjectMember>()
+			   .HasOne(sc => sc.Status)
+			   .WithMany(s => s.ProjectMembers)
+			   .HasForeignKey(sc => sc.StatusId)
+			   .OnDelete(DeleteBehavior.Restrict);
 
 			modelBuilder.Entity<ProjectMember>()
                 .HasOne(sc => sc.Users)

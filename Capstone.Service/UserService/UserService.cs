@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
 using System.Numerics;
 using Task = System.Threading.Tasks.Task;
+using Capstone.Common.DTOs.Paging;
 
 namespace Capstone.Service.UserService
 {
@@ -490,7 +491,7 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<List<UserResponse>> GetUsersAsync()
+		public async Task<PagedResponse<UserResponse>> GetUsersAsync(int limt, int page)
 		{
 			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
 
@@ -509,10 +510,19 @@ namespace Capstone.Service.UserService
                     IsAdmin = user.IsAdmin
                 };
 				listU.Add(reponse);
-
 			}
-            return listU;
 
+			return new PagedResponse<UserResponse>
+			{
+				Data = listU,
+				Paginations = new Pagination
+				{
+					PageNumber = page,
+					PageSize = limt,
+					TotalRecords = listU.Count()
+				},
+				
+			};
 		}
 
 		public async Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest)
