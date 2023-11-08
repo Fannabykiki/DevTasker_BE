@@ -31,7 +31,7 @@ namespace Capstone.Service.RoleService
             _projectRepository = projectRepository;
         }
 
-        public async Task<GetAllRoleReponse> GetAllSystemRole(bool mode)
+        public async Task<GetAllRoleReponse> GetAllSystemRole(int limit, int page,bool mode)
         {
             using var transaction = _projectRepository.DatabaseTransaction();
             try
@@ -69,7 +69,12 @@ namespace Capstone.Service.RoleService
                 }
 
                 if (roles == null) throw new Exception();
-
+                result.pagination = new Common.DTOs.Paging.Pagination
+                {
+                    TotalRecords = roleRecords.Count(),
+                    PageNumber = page,
+                    PageSize = limit
+                };
                 result.roleRecords = roleRecords;
                 return result;
             }

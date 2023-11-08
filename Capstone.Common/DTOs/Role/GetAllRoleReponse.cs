@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.Paging;
+using Capstone.Common.DTOs.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Capstone.Common.DTOs.Role
     public class GetAllRoleReponse
     {
         public List<GetRoleRecord> roleRecords { get; set; }
+        public Pagination pagination { get; set; }
     }
     public class GetRoleRecord
     {

@@ -3,7 +3,9 @@ using Capstone.Common.DTOs.Role;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.OData.Query;
+using System.Collections.Generic;
 
 namespace Capstone.API.Controllers
 {
@@ -22,9 +24,9 @@ namespace Capstone.API.Controllers
 
 		[EnableQuery]
         [HttpGet("system/roles")]
-        public async Task<ActionResult<GetAllRoleReponse>> GetRoles()
+        public async Task<ActionResult<GetAllRoleReponse>> GetRoles(int limit, int page)
         {
-            var roles = await _roleService.GetAllSystemRole(true);
+            var roles = await _roleService.GetAllSystemRole(limit,page,true);
             if (roles == null)
             {
                 return BadRequest("Data null");
@@ -34,9 +36,9 @@ namespace Capstone.API.Controllers
         
         [EnableQuery]
         [HttpGet("system/roles/deleted")]
-        public async Task<ActionResult<GetAllRoleReponse>> GetRolesDeleted()
+        public async Task<ActionResult<GetAllRoleReponse>> GetRolesDeleted(int limit, int page)
         {
-            var roles = await _roleService.GetAllSystemRole(false);
+            var roles = await _roleService.GetAllSystemRole(limit, page,false);
             if (roles == null)
             {
                 return BadRequest("Data null");
