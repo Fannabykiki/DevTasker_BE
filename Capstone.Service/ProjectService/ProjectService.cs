@@ -145,12 +145,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projectList = new List<GetAllProjectViewModel>();
-		var projects = await _projectRepository.GetAllWithOdata(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"), x => x.ProjectMembers);
-		foreach (var pro in projects)
-		{
-
-		}
+		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 	public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
