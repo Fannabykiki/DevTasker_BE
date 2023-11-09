@@ -89,7 +89,7 @@ namespace Capstone.API.Controllers
             var userId = this.GetCurrentLoginUserId();
             if (userId == Guid.Empty)
             {
-                return Unauthorized("You dont have permission to access this page");
+                return Unauthorized("You need to login first");
             }
             var result = await _projectService.GetProjectByUserId(userId);
             if (result == null)
