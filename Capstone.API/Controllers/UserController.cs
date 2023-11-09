@@ -1,5 +1,4 @@
-﻿using Capstone.Common.DTOs.Email;
-using Capstone.API.Helper;
+﻿using Capstone.API.Helper;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.StatusService;
@@ -7,7 +6,6 @@ using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using System.Security.Claims;
-using Capstone.Common.DTOs.Paging;
 
 namespace Capstone.API.Controllers
 {
