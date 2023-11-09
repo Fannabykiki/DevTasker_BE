@@ -110,7 +110,7 @@ namespace Capstone.API.Controllers
 			{
 				return Unauthorized();
 			}
-            if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.AccessToken  != changeUserStatusRequest.VerifyToken)
+            if (user == null /*|| user.ResetTokenExpires < DateTime.UtcNow */|| user.AccessToken  != changeUserStatusRequest.AccessToken)
             {
                 return NotFound("Invalid token");
             }
@@ -118,12 +118,10 @@ namespace Capstone.API.Controllers
             var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
 			if (result == true)
 			{
-				var status = await _statusService.GetStatusByIdAsync(id);
                 var userBeChange = await _usersService.GetUserByIdAsync(id);
-				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {status.Title}", changeUserStatusRequest.reason);
+				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {userBeChange.Status.Title}", changeUserStatusRequest.reason);
             }
             
-
             return Ok(result);
 
 		}
