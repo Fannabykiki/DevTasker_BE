@@ -349,7 +349,13 @@ public class ProjectService : IProjectService
 				})
 				.ToList()
 		};
-		return projectInfoRequests;
+        foreach (var mem in projectInfoRequests.ProjectMembers)
+        {
+            var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId, x => x.Users);
+            mem.Fullname = member.Users.Fullname;
+            mem.Email = member.Users.Email;
+        }
+        return projectInfoRequests;
 	}
 
 	public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest)
