@@ -24,7 +24,7 @@ namespace Capstone.API.Controllers
 
 		[EnableQuery]
         [HttpGet("system/roles")]
-        public async Task<ActionResult<GetAllRoleReponse>> GetRoles()
+        public async Task<ActionResult<List<GetRoleRecord>>> GetRoles()
         {
             var roles = await _roleService.GetAllSystemRole(true);
             if (roles == null)
@@ -36,7 +36,7 @@ namespace Capstone.API.Controllers
         
         [EnableQuery]
         [HttpGet("system/roles/deleted")]
-        public async Task<ActionResult<GetAllRoleReponse>> GetRolesDeleted()
+        public async Task<ActionResult<List<GetRoleRecord>>> GetRolesDeleted()
         {
             var roles = await _roleService.GetAllSystemRole(false);
             if (roles == null)

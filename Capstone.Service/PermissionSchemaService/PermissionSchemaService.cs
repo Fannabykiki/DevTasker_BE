@@ -37,15 +37,10 @@ namespace Capstone.Service.PermissionSchemaService
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<GetAllPermissionSchemaResponse> GetAllSchema()
+        public async Task<List<GetSchemaResponse>> GetAllSchema()
         {
-            var result = new GetAllPermissionSchemaResponse();
             var schemas = await _schemaRepository.GetAllWithOdata(x => true, null);
-            result.Schemas = _mapper.Map<List<GetSchemaResponse>>(schemas);
-            result.Pagination = new Common.DTOs.Paging.Pagination {
-                TotalRecords = schemas.Count()
-            };
-            return result;
+            return _mapper.Map<List<GetSchemaResponse>>(schemas);
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
