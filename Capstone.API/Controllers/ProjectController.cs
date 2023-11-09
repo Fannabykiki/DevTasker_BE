@@ -7,6 +7,7 @@ using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
+using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.UriParser;
@@ -21,14 +22,16 @@ namespace Capstone.API.Controllers
         private readonly ILoggerManager _logger;
         private readonly IProjectService _projectService;
         private readonly IProjectMemberService _projectMemberService;
+        private readonly IUserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public ProjectController(ILoggerManager logger, IProjectService projectService, IHttpContextAccessor httpContextAccessor, IProjectMemberService projectMemberService)
+		public ProjectController(ILoggerManager logger, IProjectService projectService, IHttpContextAccessor httpContextAccessor, IProjectMemberService projectMemberService, IUserService userService)
 		{
 			_logger = logger;
 			_projectService = projectService;
 			_httpContextAccessor = httpContextAccessor;
 			_projectMemberService = projectMemberService;
+			_userService = userService;
 		}
 
 		[HttpPost("projects")]
@@ -43,12 +46,41 @@ namespace Capstone.API.Controllers
         [HttpPost("projects/invitation")]
         public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
         {
+            foreach (var email in inviteUserRequest.Email)
+            {
+				var user = await _userService.GetUserByEmailAsync(email);
+                if (user == null)
+                {
+                    return BadRequest(email + "not exist in system");
+                }
+			}
 			var projectMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
 			await _projectService.SendMailInviteUser(inviteUserRequest);
 
 			return Ok(projectMember);
         }
-		
+
+		[HttpPost("projects/accept-invitation")]
+		public async Task<IActionResult> InviteMemberAcception(string email,Guid projectId)
+		{
+            var user = await _userService.GetUserByEmailAsync(email);
+            var uId = this.GetCurrentLoginUserId();
+            if(user == null)
+            {
+                return NotFound("User account dont exist in system");
+            }
+            if(uId == Guid.Empty)
+            {
+                return BadRequest("You need to login first");
+            }
+            if(user.UserId != uId)
+            {
+                return BadRequest("Account dont match with invitation");
+            }
+			var projectMember = await _projectMemberService.AcceptInvitation(user.UserId, projectId);
+
+			return Ok(projectMember);
+		}
 
 		[EnableQuery]
         [HttpGet("projects")]
