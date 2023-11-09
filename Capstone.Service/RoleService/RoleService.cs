@@ -31,12 +31,12 @@ namespace Capstone.Service.RoleService
             _projectRepository = projectRepository;
         }
 
-        public async Task<GetAllRoleReponse> GetAllSystemRole(bool mode)
+        public async Task<List<GetRoleRecord>> GetAllSystemRole(bool mode)
         {
             using var transaction = _projectRepository.DatabaseTransaction();
             try
             {
-                var result = new GetAllRoleReponse();
+                var result = new List<GetRoleRecord>();
                 IEnumerable<Role>? roles;
                 if(mode == true)
                  roles = await _roleRepository.GetAllWithOdata(x => x.IsDelete != true, x => x.SchemaPermissions);
@@ -69,11 +69,8 @@ namespace Capstone.Service.RoleService
                 }
 
                 if (roles == null) throw new Exception();
-                result.pagination = new Common.DTOs.Paging.Pagination
-                {
-                    TotalRecords = roleRecords.Count()
-                };
-                result.roleRecords = roleRecords;
+
+                result = roleRecords;
                 return result;
             }
             catch (Exception ex)

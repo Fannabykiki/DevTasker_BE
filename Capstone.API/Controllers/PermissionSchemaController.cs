@@ -31,7 +31,7 @@ namespace Capstone.API.Controllers
 
 		[EnableQuery]
         [HttpGet("schemas")]
-        public async Task<ActionResult<IQueryable<GetAllPermissionSchemaResponse>>> GetAllSchema()
+        public async Task<ActionResult<List<GetSchemaResponse>>> GetAllSchema()
         {
             var result = await _permissionSchemaService.GetAllSchema();
 
