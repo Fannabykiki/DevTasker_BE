@@ -205,7 +205,7 @@ namespace Capstone.Service.UserService
 
 		public async Task<User> GetUserByIdAsync(Guid id)
 		{
-			var user = await _userRepository.GetAsync(x => x.UserId == id, null)!;
+			var user = await _userRepository.GetAsync(x => x.UserId == id, x => x.Status)!;
 			return user;
 		}
 
