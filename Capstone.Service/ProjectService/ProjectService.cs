@@ -324,7 +324,7 @@ public class ProjectService : IProjectService
 	public async Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId)
 	{
 		var projectInfoRequests = new ViewProjectInfoRequest();
-		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.ProjectMembers)!;
+		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.Status)!;
 		var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
 		projectInfoRequests = new ViewProjectInfoRequest
 		{
@@ -336,8 +336,9 @@ public class ProjectService : IProjectService
 			EndDate = project.EndDate,
 			CreateBy = project.CreateBy,
 			CreateAt = project.CreateAt,
+			ProjectStatus = project.Status.Title,
 			PrivacyStatus = project.PrivacyStatus,
-			ProjectMembers = project.ProjectMembers
+			ProjectMembers = members
 				.Select(m => new ViewMemberProject
 				{
 					MemberId = m.MemberId,
@@ -349,7 +350,13 @@ public class ProjectService : IProjectService
 				})
 				.ToList()
 		};
-		return projectInfoRequests;
+        foreach (var mem in projectInfoRequests.ProjectMembers)
+        {
+            var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId, x => x.Users);
+            mem.Fullname = member.Users.Fullname;
+            mem.Email = member.Users.Email;
+        }
+        return projectInfoRequests;
 	}
 
 	public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest)

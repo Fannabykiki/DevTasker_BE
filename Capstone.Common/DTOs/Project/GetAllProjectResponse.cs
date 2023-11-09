@@ -11,12 +11,11 @@ namespace Capstone.Common.DTOs.Project
 		public string ProjectStatus { get; set; }
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
-		public UserResponse Manager { get; set; }
+		public UserResponse? Manager { get; set; }
 		public List<UserResponse>? Member { get; set; }
 		public DateTime CreateAt { get; set; }
 		public DateTime? DeleteAt { get; set; }
 		public DateTime? ExpireAt { get; set; }
 		public bool PrivacyStatus { get; set; } // false: Private , true: Pu
-		public PagedResponse<GetAllProjectViewModel> pagination { get; set; }
     }
 }
