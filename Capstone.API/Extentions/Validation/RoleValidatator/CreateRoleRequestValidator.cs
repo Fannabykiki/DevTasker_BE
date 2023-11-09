@@ -14,8 +14,7 @@ namespace Capstone.API.Extentions.Validation.RoleValidator
               .MaximumLength(100).WithMessage("RoleName must not exceed 100 characters");
 
             RuleFor(x => x.Description)
-              .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
-              .When(x => !string.IsNullOrWhiteSpace(x.Description));
+              .MaximumLength(500).WithMessage("Description must not exceed 500 characters");
         }
     }
 }

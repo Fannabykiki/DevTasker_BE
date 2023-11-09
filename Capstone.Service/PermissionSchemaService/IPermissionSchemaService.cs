@@ -11,7 +11,7 @@ namespace Capstone.Service.PermissionSchemaService
 {
     public interface IPermissionSchemaService
     {
-        Task<GetAllPermissionSchemaResponse> GetAllSchema();
+        Task<List<GetSchemaResponse>> GetAllSchema();
         Task<GetSchemaResponse> GetSchemaById(Guid SchemaId);
         Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId);
         Task<bool> CreateNewPermissionSchema(CreateNewSchemaRequest createNewSchemaRequest);

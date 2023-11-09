@@ -39,10 +39,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extentions\Validation\PermissionSchemaValidator\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="credentials\client_secret.json" />
   </ItemGroup>
 
