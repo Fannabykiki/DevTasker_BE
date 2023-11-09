@@ -407,7 +407,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
 	{
-		var projects = await _projectRepository.GetAllWithOdata(x => true, null);
+		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
 		var projectsList = new List<GetAllProjectResponse>();
 		foreach (var project in projects)
 		{
