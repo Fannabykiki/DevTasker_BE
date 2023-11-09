@@ -36,7 +36,8 @@ public class MappingProfile : Profile
 				  .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.Project.CreateAt))
 				   .ForMember(dest => dest.DeleteAt, opt => opt.MapFrom(src => src.Project.DeleteAt))
 					.ForMember(dest => dest.ExpireAt, opt => opt.MapFrom(src => src.Project.ExpireAt))
-					.ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project.ProjectName));
+					 .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project.ProjectName))
+					  .ForMember(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Project.Status.Title));
 
 	}
 }
