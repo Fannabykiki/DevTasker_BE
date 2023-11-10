@@ -25,10 +25,11 @@ namespace Capstone.Service.PermissionSchemaService
         private readonly ISchemaRepository _schemaRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IPermissionRepository _permissionRepository;
+        private readonly IProjectRepository _projectRepository;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
 
-        public PermissionSchemaService(ILoggerManager logger, IPermissionSchemaRepository permissionSchemaRepository, ISchemaRepository schemaRepository, IRoleRepository roleRepository, IPermissionRepository permissionRepository, IMapper mapper)
+        public PermissionSchemaService(ILoggerManager logger, IPermissionSchemaRepository permissionSchemaRepository, ISchemaRepository schemaRepository, IRoleRepository roleRepository, IPermissionRepository permissionRepository, IMapper mapper,IProjectRepository projectRepository)
         {
             _permissionSchemaRepository = permissionSchemaRepository;
             _schemaRepository = schemaRepository;
@@ -36,11 +37,29 @@ namespace Capstone.Service.PermissionSchemaService
             _permissionRepository = permissionRepository;
             _logger = logger;
             _mapper = mapper;
+            _projectRepository = projectRepository;
         }
         public async Task<List<GetSchemaResponse>> GetAllSchema()
         {
             var schemas = await _schemaRepository.GetAllWithOdata(x => true, null);
-            return _mapper.Map<List<GetSchemaResponse>>(schemas);
+            var results = _mapper.Map<List<GetSchemaResponse>>(schemas);
+            foreach(var schema in results)
+            {
+                var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schema.SchemaId, x => x.Status);
+                if (projects != null)
+                {
+                    var projectUsed = projects.Select(p => new GetProjectUsedResponse
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName,
+                        Description = p.Description,
+                        ProjectStatus = p.Status.Title
+                    }).ToList();
+                    schema.ProjectsUsed = (List<GetProjectUsedResponse>?)projectUsed;
+                }
+                
+            }
+            return results;
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)

@@ -15,7 +15,7 @@ public class MappingProfile : Profile
         CreateMap<User, UserViewModel>();
         CreateMap<Project, GetAllProjectViewModel>();
         CreateMap<Project, GetAllProjectResponse>();
-        CreateMap<Project, GetProjectUseRoleResponse>()
+        CreateMap<Project, GetProjectUsedResponse>()
             .ForMember(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Status.Title)); ;
         CreateMap<ProjectMember, ViewMemberProject>();
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
