@@ -1,4 +1,5 @@
-﻿using Capstone.API.Helper;
+﻿using Capstone.API.Extentions;
+using Capstone.API.Helper;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.StatusService;
@@ -105,15 +106,16 @@ namespace Capstone.API.Controllers
 		[HttpPut("users/change-status/{id}")]
 		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest,Guid id)
 		{
-            var user = await _usersService.GetUserByIdAsync(changeUserStatusRequest.ChangeBy);
+            var userId = this.GetCurrentLoginUserId();
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
+            var user = await _usersService.GetUserByIdAsync(userId);
 			if (user.IsAdmin == null || user.IsAdmin == false)
 			{
 				return Unauthorized();
 			}
-            if (user == null /*|| user.ResetTokenExpires < DateTime.UtcNow */|| user.AccessToken  != changeUserStatusRequest.AccessToken)
-            {
-                return NotFound("Invalid token");
-            }
 
             var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
 			if (result == true)
