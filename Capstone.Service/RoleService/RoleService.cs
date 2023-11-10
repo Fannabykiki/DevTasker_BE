@@ -21,14 +21,26 @@ namespace Capstone.Service.RoleService
     {
         private readonly IRoleRepository _roleRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly IMapper _mapper;
 
+        public IRoleRepository Object1 { get; }
+        public IMapper Object2 { get; }
+        public IProjectRepository Object3 { get; }
 
-        public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository)
+        public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository, IPermissionSchemaRepository permissionSchemaRepository)
         {
             _roleRepository = roleRepository;
             _mapper = mapper;
             _projectRepository = projectRepository;
+            _permissionSchemaRepository = permissionSchemaRepository;
+        }
+
+        public RoleService(IRoleRepository object1, IMapper object2, IProjectRepository object3)
+        {
+            Object1 = object1;
+            Object2 = object2;
+            Object3 = object3;
         }
 
         public async Task<List<GetRoleRecord>> GetAllSystemRole(bool mode)
@@ -47,7 +59,7 @@ namespace Capstone.Service.RoleService
                 {
                     var newRoleRecord = new GetRoleRecord();
                     newRoleRecord.Role = _mapper.Map<GetRoleResponse>(role);
-                    HashSet<GetProjectUseRoleResponse> projectUseds = new HashSet<GetProjectUseRoleResponse>();
+                    HashSet<GetProjectUsedResponse> projectUseds = new HashSet<GetProjectUsedResponse>();
 
                     var listSchemaPermissions = role.SchemaPermissions.Select(x => x.SchemaId);
                     HashSet<Guid> roleSchemasId = new HashSet<Guid>();
@@ -58,7 +70,7 @@ namespace Capstone.Service.RoleService
                     foreach (var schemaId in roleSchemasId)
                     {
                         var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schemaId, x => x.Status);
-                        var projectUsed = _mapper.Map<List<GetProjectUseRoleResponse>>(projects);
+                        var projectUsed = _mapper.Map<List<GetProjectUsedResponse>>(projects);
                         foreach (var project in projectUsed)
                         {
                             projectUseds.Add(project);
@@ -159,6 +171,30 @@ namespace Capstone.Service.RoleService
                 transaction.RollBack();
                 return false;
             }
+        }
+
+        public async Task<List<GetRoleResponse>> GetRolesByProjectId(Guid projectId)
+        {
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+            if (project == null) return null;
+            var schemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId,x => x.Role);
+            var roles = new List<GetRoleResponse>();
+            HashSet<Role> Role = new HashSet<Role>();
+            foreach (var schema in schemas)
+            {
+                if (schema.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||schema.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
+                Role.Add(schema.Role);
+            }
+            foreach (var role in Role)
+            {
+                roles.Add(new GetRoleResponse
+                {
+                    RoleId = role.RoleId,
+                    RoleName = role.RoleName,
+                    Description = role.Description,
+                });
+            }
+            return roles;
         }
     }
 }

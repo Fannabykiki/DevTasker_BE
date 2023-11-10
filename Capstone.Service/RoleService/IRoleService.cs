@@ -16,5 +16,6 @@ namespace Capstone.Service.RoleService
         Task<GetRoleResponse> CreateProjectRole(CreateNewRoleRequest createRoleRequest);
         Task<GetRoleResponse> UpdateSystemRole(Guid roleId, UpdateRoleRequest request);
         Task<bool> RemoveSystemRoleAsync(Guid roleId);
+        Task<List<GetRoleResponse>> GetRolesByProjectId(Guid projectId);
     }
 }

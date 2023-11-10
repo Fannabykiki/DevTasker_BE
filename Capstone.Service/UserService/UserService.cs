@@ -437,8 +437,9 @@ namespace Capstone.Service.UserService
 				try
 				{
 					var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
+					var status = changeUserStatusRequest.StatusIdChangeTo == true ? "BB93DD2D-B9E7-401F-83AA-174C588AB9DE" : "093416CB-1A26-43A4-9E11-DBDF5166DFFB";
 
-					updateRequest.StatusId = changeUserStatusRequest.StatusIdChangeTo;
+                    updateRequest.StatusId = Guid.Parse(status);
 
 					await _userRepository.UpdateAsync(updateRequest);
 					await _userRepository.SaveChanges();
