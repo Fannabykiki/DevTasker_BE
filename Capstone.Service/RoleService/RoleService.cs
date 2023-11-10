@@ -24,6 +24,9 @@ namespace Capstone.Service.RoleService
         private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly IMapper _mapper;
 
+        public IRoleRepository Object1 { get; }
+        public IMapper Object2 { get; }
+        public IProjectRepository Object3 { get; }
 
         public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository, IPermissionSchemaRepository permissionSchemaRepository)
         {
@@ -31,6 +34,13 @@ namespace Capstone.Service.RoleService
             _mapper = mapper;
             _projectRepository = projectRepository;
             _permissionSchemaRepository = permissionSchemaRepository;
+        }
+
+        public RoleService(IRoleRepository object1, IMapper object2, IProjectRepository object3)
+        {
+            Object1 = object1;
+            Object2 = object2;
+            Object3 = object3;
         }
 
         public async Task<List<GetRoleRecord>> GetAllSystemRole(bool mode)
