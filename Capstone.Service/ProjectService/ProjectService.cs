@@ -154,7 +154,7 @@ public class ProjectService : IProjectService
 		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
 		foreach (var project in projects)
 		{
-			var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == project.ProjectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), null);
+			var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == project.ProjectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
 			var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId, x => x.Users);
 			var projectAnalyze = new GetUserProjectAnalyzeResponse();
 			projectAnalyze.ProjectId = project.ProjectId;

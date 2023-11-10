@@ -114,7 +114,7 @@ namespace Capstone.API.Controllers
         }
 
 		[EnableQuery]
-		[HttpGet("projects/{userId:Guid}/analyzation")]
+		[HttpGet("projects/analyzation/{userId:Guid}")]
 		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
 		{
             var UserId = this.GetCurrentLoginUserId();

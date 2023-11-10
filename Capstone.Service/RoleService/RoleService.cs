@@ -49,7 +49,7 @@ namespace Capstone.Service.RoleService
                 {
                     var newRoleRecord = new GetRoleRecord();
                     newRoleRecord.Role = _mapper.Map<GetRoleResponse>(role);
-                    HashSet<GetProjectUseRoleResponse> projectUseds = new HashSet<GetProjectUseRoleResponse>();
+                    HashSet<GetProjectUsedResponse> projectUseds = new HashSet<GetProjectUsedResponse>();
 
                     var listSchemaPermissions = role.SchemaPermissions.Select(x => x.SchemaId);
                     HashSet<Guid> roleSchemasId = new HashSet<Guid>();
@@ -60,7 +60,7 @@ namespace Capstone.Service.RoleService
                     foreach (var schemaId in roleSchemasId)
                     {
                         var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schemaId, x => x.Status);
-                        var projectUsed = _mapper.Map<List<GetProjectUseRoleResponse>>(projects);
+                        var projectUsed = _mapper.Map<List<GetProjectUsedResponse>>(projects);
                         foreach (var project in projectUsed)
                         {
                             projectUseds.Add(project);
