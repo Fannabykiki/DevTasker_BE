@@ -21,14 +21,16 @@ namespace Capstone.Service.RoleService
     {
         private readonly IRoleRepository _roleRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly IMapper _mapper;
 
 
-        public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository)
+        public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository, IPermissionSchemaRepository permissionSchemaRepository)
         {
             _roleRepository = roleRepository;
             _mapper = mapper;
             _projectRepository = projectRepository;
+            _permissionSchemaRepository = permissionSchemaRepository;
         }
 
         public async Task<List<GetRoleRecord>> GetAllSystemRole(bool mode)
@@ -159,6 +161,30 @@ namespace Capstone.Service.RoleService
                 transaction.RollBack();
                 return false;
             }
+        }
+
+        public async Task<List<GetRoleResponse>> GetRolesByProjectId(Guid projectId)
+        {
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+            if (project == null) return null;
+            var schemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId,x => x.Role);
+            var roles = new List<GetRoleResponse>();
+            HashSet<Role> Role = new HashSet<Role>();
+            foreach (var schema in schemas)
+            {
+                if (schema.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||schema.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
+                Role.Add(schema.Role);
+            }
+            foreach (var role in Role)
+            {
+                roles.Add(new GetRoleResponse
+                {
+                    RoleId = role.RoleId,
+                    RoleName = role.RoleName,
+                    Description = role.Description,
+                });
+            }
+            return roles;
         }
     }
 }

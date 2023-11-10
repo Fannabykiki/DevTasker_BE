@@ -35,6 +35,18 @@ namespace Capstone.API.Controllers
         }
         
         [EnableQuery]
+        [HttpGet("project/roles/{projectId}")]
+        public async Task<ActionResult<List<GetRoleRecord>>> GetRolesByProjectId(Guid projectId)
+        {
+            var roles = await _roleService.GetRolesByProjectId(projectId);
+            if (roles == null)
+            {
+                return BadRequest("Please check Permission schema of your Project!");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
         [HttpGet("system/roles/deleted")]
         public async Task<ActionResult<List<GetRoleRecord>>> GetRolesDeleted()
         {

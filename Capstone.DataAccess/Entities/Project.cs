@@ -18,6 +18,7 @@ namespace Capstone.DataAccess.Entities
         public Guid SchemasId { get; set; }
         public Guid StatusId { get; set; }
         public DateTime? DeleteAt { get; set; }
+        public bool? IsDelete { get; set; }
         public DateTime? ExpireAt { get; set; }
         public bool PrivacyStatus { get; set; } // false: Private , true: Public
         public List<ProjectMember> ProjectMembers { get; set; } // 1 project has many member

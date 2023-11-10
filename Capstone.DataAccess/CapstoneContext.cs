@@ -32,9 +32,9 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
             modelBuilder.Entity<TaskHistory>()
-                .HasOne(tc => tc.Ticket)
+                .HasOne(tc => tc.Task)
                 .WithMany(wi => wi.TaskHistories)
-                .HasForeignKey(tc => tc.TicketId)
+                .HasForeignKey(tc => tc.TaskId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TaskComment>().HasKey(sc => new { sc.CommentId });
@@ -100,12 +100,12 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.AssignTo);
 
-            modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
-
-            modelBuilder.Entity<TaskHistory>()
-                .HasOne(sc => sc.Ticket)
-                .WithMany(s => s.TaskHistories)
-                .HasForeignKey(sc => sc.TicketId);
+            // modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
+            //
+            // modelBuilder.Entity<TaskHistory>()
+            //     .HasOne(sc => sc.Task)
+            //     .WithMany(s => s.TaskHistories)
+            //     .HasForeignKey(sc => sc.TaskId);
 
             modelBuilder.Entity<Notification>().HasKey(sc => new { sc.NotificationId });
 
@@ -180,6 +180,26 @@ namespace Capstone.DataAccess
                 .HasMany(sc => sc.Tickets)
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId});
+            
+            modelBuilder.Entity<TaskHistory>()
+                .HasOne<Status>(sc => sc.TaskStatus)
+                .WithMany(s => s.TaskHistories)
+                .HasForeignKey(sc => sc.PreviousStatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<TaskHistory>()
+                .HasOne<Status>(sc => sc.TaskStatus)
+                .WithMany(s => s.TaskHistories)
+                .HasForeignKey(sc => sc.CurrentStatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<TaskHistory>()
+                .HasOne<ProjectMember>(sc => sc.ProjectMember)
+                .WithMany(s => s.TaskHistories)
+                .HasForeignKey(sc => sc.ChangeBy)
                 .OnDelete(DeleteBehavior.NoAction);
 		}
 
