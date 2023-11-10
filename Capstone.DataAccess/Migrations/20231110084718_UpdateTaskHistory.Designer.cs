@@ -4,6 +4,7 @@ using Capstone.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.DataAccess.Migrations
 {
     [DbContext(typeof(CapstoneContext))]
-    partial class CapstoneContextModelSnapshot : ModelSnapshot
+    [Migration("20231110084718_UpdateTaskHistory")]
+    partial class UpdateTaskHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -472,7 +474,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Property<Guid>("PreviousStatusId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TaskId")
+                    b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -485,7 +487,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasIndex("CurrentStatusId");
 
-                    b.HasIndex("TaskId");
+                    b.HasIndex("TicketId");
 
                     b.ToTable("TaskHistories");
                 });
@@ -813,17 +815,17 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Task", "Task")
+                    b.HasOne("Capstone.DataAccess.Entities.Task", "Ticket")
                         .WithMany("TaskHistories")
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ProjectMember");
 
-                    b.Navigation("Task");
-
                     b.Navigation("TaskStatus");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.User", b =>
