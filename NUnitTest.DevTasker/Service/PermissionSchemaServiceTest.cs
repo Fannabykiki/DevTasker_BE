@@ -2,6 +2,7 @@
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Schema;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.PermissionSchemaService;
@@ -21,6 +22,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IRoleRepository> _roleRepositoryMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
         private Mock<IMapper> _mapperMock;
+        private Mock<IProjectRepository> _projectRepository;
         private readonly ILoggerManager _logger;
 
         [SetUp]
@@ -32,6 +34,7 @@ namespace NUnitTest.DevTasker.Service
             _roleRepositoryMock = new Mock<IRoleRepository>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _mapperMock = new Mock<IMapper>();
+            _projectRepository = new Mock<IProjectRepository>();
 
             _permissionSchemaRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
             
@@ -41,7 +44,9 @@ namespace NUnitTest.DevTasker.Service
                 _schemaRepositoryMock.Object,
                 _roleRepositoryMock.Object,
                 _permissionRepositoryMock.Object,
-                _mapperMock.Object);
+                _mapperMock.Object,
+                _projectRepository.Object
+                );
         }
 
         [Test]
