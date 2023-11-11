@@ -16,7 +16,7 @@ public class CreateTaskResponse : BaseResponse
     public Guid CreateBy { get; set; }
     public Guid TypeId { get; set; } // 1 task has many type 
     public Guid? PrevId { get; set; }
-    public List<TaskStatus> TaskStatus { get; set; } // just only 1 status 
+    public string? Status { get; set; }
     public Guid PriorityId { get; set; }
     public Guid InterationId { get; set; }
 }
