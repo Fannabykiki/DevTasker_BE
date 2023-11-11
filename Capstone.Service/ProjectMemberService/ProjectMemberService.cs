@@ -77,7 +77,7 @@ namespace Capstone.Service.ProjectMemberService
 						transaction.Commit();
 						return new AddNewProjectMemberResponse
 						{
-							IsSucced = true
+							IsSucceed = true
 						};
 					}
 					catch (Exception ex)
