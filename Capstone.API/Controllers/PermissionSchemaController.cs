@@ -49,6 +49,11 @@ namespace Capstone.API.Controllers
         [HttpPost("schemas")]
         public async Task<IActionResult> CreateSchema(CreateNewSchemaRequest request)
         {
+            var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
+            if (role != null)
+            {
+                return BadRequest("Schema name existed!");
+            }
             var result = await _permissionSchemaService.CreateNewPermissionSchema(request);
 
             return Ok(result);
@@ -57,6 +62,11 @@ namespace Capstone.API.Controllers
         [HttpPut("schemas/{schemaId:Guid}")]
         public async Task<IActionResult> UpdateSchema(Guid schemaId, UpdateSchemaRequest request)
         {
+            var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
+            if (role != null)
+            {
+                return BadRequest("Schema name existed!");
+            }
             var result = await _permissionSchemaService.UpdateSchema(schemaId, request);
             if(result == true)
             {

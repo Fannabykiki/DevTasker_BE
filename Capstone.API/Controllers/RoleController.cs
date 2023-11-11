@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.PermissionSchema;
+using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
@@ -54,6 +55,18 @@ namespace Capstone.API.Controllers
             if (roles == null)
             {
                 return BadRequest("Data null");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
+        [HttpGet("permission/roles/{schemaId}")]
+        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest request)
+        {
+            var roles = await _roleService.GetRoleToEdit(schemaId, request);
+            if (roles == null)
+            {
+                return BadRequest("You can not edit default role!");
             }
             return Ok(roles);
         }

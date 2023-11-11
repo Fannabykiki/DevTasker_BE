@@ -24,10 +24,6 @@ namespace Capstone.Service.RoleService
         private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly IMapper _mapper;
 
-        public IRoleRepository Object1 { get; }
-        public IMapper Object2 { get; }
-        public IProjectRepository Object3 { get; }
-
         public RoleService(IRoleRepository roleRepository, IMapper mapper, IProjectRepository projectRepository, IPermissionSchemaRepository permissionSchemaRepository)
         {
             _roleRepository = roleRepository;
@@ -35,14 +31,6 @@ namespace Capstone.Service.RoleService
             _projectRepository = projectRepository;
             _permissionSchemaRepository = permissionSchemaRepository;
         }
-
-        public RoleService(IRoleRepository object1, IMapper object2, IProjectRepository object3)
-        {
-            Object1 = object1;
-            Object2 = object2;
-            Object3 = object3;
-        }
-
         public async Task<List<GetRoleRecord>> GetAllSystemRole(bool mode)
         {
             using var transaction = _projectRepository.DatabaseTransaction();
@@ -193,6 +181,26 @@ namespace Capstone.Service.RoleService
                     RoleName = role.RoleName,
                     Description = role.Description,
                 });
+            }
+            return roles;
+        }
+
+        public async Task<List<GetRoleResponse>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest editSchemaRoleRequest)
+        {
+            var roles = new List<GetRoleResponse>();
+            HashSet<Role> Roles = new HashSet<Role>();
+            foreach (var permission in editSchemaRoleRequest.PermissionIds)
+            {
+                var permissonSchema = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId && x.PermissionId == permission,x => x.Role);
+                foreach(var role in permissonSchema)
+                {
+                    if (role.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") || role.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
+                    Roles.Add(role.Role);
+                }
+            }
+            foreach (var role in Roles)
+            {
+                roles.Add(_mapper.Map<GetRoleResponse>(role));
             }
             return roles;
         }
