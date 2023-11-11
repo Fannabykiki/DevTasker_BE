@@ -26,8 +26,9 @@ public class ProjectService : IProjectService
 	private readonly IInterationRepository _interationRepository;
 	private readonly IPermissionRepository _permissionRepository;
 	private readonly IPermissionSchemaRepository _permissionScemaRepo;
+	private readonly IBoardStatusRepository _boardStatusRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -40,6 +41,7 @@ public class ProjectService : IProjectService
 		_interationRepository = interationRepository;
 		_permissionScemaRepo = permissionScemaRepo;
 		_statusRepository = statusRepository;
+		_boardStatusRepository = boardStatusRepository;
 	}
 
 	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -76,11 +78,37 @@ public class ProjectService : IProjectService
 			var newProject = await _projectRepository.CreateAsync(newProjectRequest);
 			await _projectRepository.SaveChanges();
 
+			var todo = new BoardStatus
+			{
+				BoardId = newProject.Board.BoardId,
+				Title = "To do",
+				BoardStatusId = new Guid()
+			};
+
+			var inProgress = new BoardStatus
+			{
+				BoardId = newProject.Board.BoardId,
+				Title = "In Progress",
+				BoardStatusId = new Guid()
+			};
+			
+			var done = new BoardStatus
+			{
+				BoardId = newProject.Board.BoardId,
+				Title = "Done",
+				BoardStatusId = new Guid()
+			};
+
+			await _boardStatusRepository.CreateAsync(done);
+			await _boardStatusRepository.CreateAsync(todo);
+			await _boardStatusRepository.CreateAsync(inProgress);
+			await _boardStatusRepository.SaveChanges();
+			
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
-				BoardId = newProjectRequest.Board.BoardId,
+				BoardId = newProject.Board.BoardId,
 				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				InterationName = "Interation 1",
 				InterationId = Guid.NewGuid(),

@@ -1,0 +1,15 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Capstone.DataAccess.Entities
+{
+	public class BoardStatus
+	{
+		[Key]
+		public Guid BoardStatusId { get; set; }
+		public string Title { get; set; }
+		public Guid BoardId { get; set; }
+		public Board Board { get; set; }
+		public List<Task> Tasks { get; set; }
+		public List<TaskHistory> TaskHistory { get; set; }
+	}
+}

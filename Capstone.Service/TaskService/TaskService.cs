@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
+using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
@@ -19,12 +21,13 @@ namespace Capstone.Service.TaskService
 		private readonly IUserRepository _userRepository;
 		private readonly IInterationRepository _iterationRepository;
 		private readonly IStatusRepository _statusRepository;
+		private readonly IBoardStatusRepository _boardStatusRepository;
 
 		public TaskService(CapstoneContext context, ITicketRepository ticketRepository,
 			ITicketStatusRepository ticketStatusRepository, ITicketTypeRepository typeRepository,
 			ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository,
 			IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository,
-			IStatusRepository statusRepository)
+			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository)
 		{
 			_context = context;
 			_ticketRepository = ticketRepository;
@@ -36,32 +39,59 @@ namespace Capstone.Service.TaskService
 			_userRepository = userRepository;
 			_iterationRepository = iterationRepository;
 			_statusRepository = statusRepository;
+			_boardStatusRepository = boardStatusRepository;
 		}
 
-		public async Task<bool> CreateTask(CreateTaskRequest request, Guid interationId, Guid userId)
+		public async Task<bool> CreateTask(CreateTaskRequest request, Guid interationId, Guid userId, Guid projectId)
 		{
-			using var transaction = _iterationRepository.DatabaseTransaction();
-			var listStatus = _statusRepository.GetAllAsync(x => true, null);
+			using var transaction = _ticketRepository.DatabaseTransaction();
+			var interation = _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId , null);
+			//var status = _boardStatusRepository.GetAsync(x=>x.);
 			try
 			{
-				var ticketEntity = new DataAccess.Entities.Task()
+				if (interationId != Guid.Empty)
 				{
-					TaskId = Guid.NewGuid(),
-					Title = request.Title,
-					Decription = request.Decription,
-					StartDate = request.StartDate,
-					DueDate = request.DueDate,
-					CreateTime = DateTime.Now,
-					CreateBy = userId,
-					TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
-					PriorityId = request.PriorityId,
-					PrevId = null,
-					// StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
-					InterationId = interationId,
-					AssignTo = request.AssignTo
-				};
-				await _ticketRepository.CreateAsync(ticketEntity);
-				await _ticketRepository.SaveChanges();
+					var ticketEntity = new DataAccess.Entities.Task()
+					{
+						TaskId = Guid.NewGuid(),
+						Title = request.Title,
+						Decription = request.Decription,
+						StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateBy = userId,
+						TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+						PriorityId = request.PriorityId,
+						PrevId = null,
+						InterationId = interationId,
+						AssignTo = request.AssignTo,
+						StatusId = Guid.Parse("655A98D1-1C07-4AF9-94CA-4A24A82AA901")
+					};
+					await _ticketRepository.CreateAsync(ticketEntity);
+					await _ticketRepository.SaveChanges();
+				}
+				else
+				{
+					var ticketEntity = new DataAccess.Entities.Task()
+					{
+						TaskId = Guid.NewGuid(),
+						Title = request.Title,
+						Decription = request.Decription,
+						StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateBy = userId,
+						TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+						PriorityId = request.PriorityId,
+						PrevId = null,
+						//InterationId = interation.InterationId,
+						AssignTo = request.AssignTo,
+						StatusId = Guid.Parse("655A98D1-1C07-4AF9-94CA-4A24A82AA901")
+					};
+					await _ticketRepository.CreateAsync(ticketEntity);
+					await _ticketRepository.SaveChanges();
+				}
+
 				transaction.Commit();
 				return true;
 			}
@@ -75,36 +105,36 @@ namespace Capstone.Service.TaskService
 
 		public async Task<bool> UpdateTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
 		{
-            using var transaction = _iterationRepository.DatabaseTransaction();
-            var listStatus = _statusRepository.GetAllAsync(x => true, null);
-            try
-            {
-                var ticketEntity = new DataAccess.Entities.Task()
-                {
-                    TaskId = Guid.NewGuid(),
-                    Title = updateTicketRequest.Title,
-                    Decription = updateTicketRequest.Decription,
-                    DueDate = updateTicketRequest.DueDate,
-                    CreateTime = DateTime.Now,
-                    TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
-                    PriorityId = updateTicketRequest.PriorityId,
-                    PrevId = null,
-                    // StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
-                    AssignTo = updateTicketRequest.AssignTo
-                };
+			using var transaction = _iterationRepository.DatabaseTransaction();
+			var listStatus = _statusRepository.GetAllAsync(x => true, null);
+			try
+			{
+				var ticketEntity = new DataAccess.Entities.Task()
+				{
+					TaskId = Guid.NewGuid(),
+					Title = updateTicketRequest.Title,
+					Decription = updateTicketRequest.Decription,
+					DueDate = updateTicketRequest.DueDate,
+					CreateTime = DateTime.Now,
+					TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+					PriorityId = updateTicketRequest.PriorityId,
+					PrevId = null,
+					// StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
+					AssignTo = updateTicketRequest.AssignTo
+				};
 
-                await _ticketRepository.CreateAsync(ticketEntity);
-                await _ticketRepository.SaveChanges();
-                transaction.Commit();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error occurred: " + ex.Message);
-                transaction.RollBack();
-                return false;
-            }
-        }
+				await _ticketRepository.CreateAsync(ticketEntity);
+				await _ticketRepository.SaveChanges();
+				transaction.Commit();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error occurred: " + ex.Message);
+				transaction.RollBack();
+				return false;
+			}
+		}
 
 
 		public Task<IQueryable<Task>> GetAllTaskAsync()

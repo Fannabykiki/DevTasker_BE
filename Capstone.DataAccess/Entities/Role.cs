@@ -7,8 +7,8 @@ namespace Capstone.DataAccess.Entities
 		[Key]
 		public Guid RoleId { get; set; }
 		public string RoleName { get; set; }
-		public string Description { get; set; }
-		public bool IsDelete { get; set; }
+		public string? Description { get; set; }
+		public bool? IsDelete { get; set; }
 		public List<SchemaPermission>? SchemaPermissions { get; set; }
 		public List<ProjectMember>? ProjectMember { get; set; }
 	}
