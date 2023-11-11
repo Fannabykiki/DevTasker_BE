@@ -3,6 +3,7 @@ using Capstone.Common.DTOs.Comments;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
 
@@ -37,5 +38,7 @@ public class MappingProfile : Profile
 			.ForMember(dest => dest.DeleteAt, opt => opt.MapFrom(src => src.Project.DeleteAt))
 			.ForMember(dest => dest.ExpireAt, opt => opt.MapFrom(src => src.Project.ExpireAt))
 			.ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project.ProjectName));
-    }
+		CreateMap<BoardStatus, StatusTaskViewModel>();
+		CreateMap<TaskType, TaskTypeViewModel>();
+	}
 }

@@ -78,7 +78,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true
 					};
 				}
 				else
@@ -90,7 +90,7 @@ namespace Capstone.Service.UserService
 			{
 				return new CreateUserResponse
 				{
-					IsSucced = false,
+					IsSucceed = false
 				};
 			}
 		}
@@ -124,7 +124,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true,
 						VerifyToken = newUser.VerificationToken
 					};
 				}
@@ -137,7 +137,7 @@ namespace Capstone.Service.UserService
 			{
 				return new CreateUserResponse
 				{
-					IsSucced = false,
+					IsSucceed = false
 				};
 			}
 		}
@@ -167,7 +167,7 @@ namespace Capstone.Service.UserService
 					if (user == null)
 						return new UpdateProfileResponse
 						{
-							IsSucced = false,
+							IsSucceed = true,
 						};
 
 					// Update user properties from request
@@ -187,7 +187,7 @@ namespace Capstone.Service.UserService
 					transaction.Commit();
 					return new UpdateProfileResponse
 					{
-						IsSucced = true,
+						IsSucceed = true,
 						VerifyToken = result.VerificationToken
 					};
 				}
@@ -197,7 +197,7 @@ namespace Capstone.Service.UserService
 
 					return new UpdateProfileResponse
 					{
-						IsSucced = false,
+						IsSucceed = false,
 					};
 				}
 			}
@@ -308,7 +308,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true
 					};
 				}
 				catch (Exception)
@@ -317,7 +317,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = false,
+						IsSucceed =false
 					};
 				}
 			}

@@ -2,7 +2,7 @@
 
 namespace Capstone.Common.DTOs.Task;
 
-public class CreateTaskResponse : BaseResponse
+public class CreateTaskResponse
 {
     public Guid TaskId { get; set; }
     public string Title  { get; set; }
@@ -19,4 +19,5 @@ public class CreateTaskResponse : BaseResponse
     public string? Status { get; set; }
     public Guid PriorityId { get; set; }
     public Guid InterationId { get; set; }
+    public BaseResponse BaseResponse { get; set; }
 }
