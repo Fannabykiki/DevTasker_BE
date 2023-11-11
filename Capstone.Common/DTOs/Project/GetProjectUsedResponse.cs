@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Project
 {
-    public class GetProjectUseRoleResponse
+    public class GetProjectUsedResponse
     {
         public Guid ProjectId { get; set; }
         public string ProjectName { get; set; }

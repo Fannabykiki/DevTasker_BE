@@ -114,7 +114,7 @@ namespace Capstone.API.Controllers
         }
 
 		[EnableQuery]
-		[HttpGet("projects/{userId:Guid}/analyzation")]
+		[HttpGet("projects/analyzation/{userId:Guid}")]
 		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
 		{
             var UserId = this.GetCurrentLoginUserId();
@@ -204,6 +204,8 @@ namespace Capstone.API.Controllers
         [HttpPut("roles/{memberId}")]
         public async Task<IActionResult> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
         {
+            if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+                return BadRequest("You can not change to this role !");
             var result = await _projectService.UpdateMemberRole(memberId, updateMemberRoleRequest);
             if (result == null)
             {

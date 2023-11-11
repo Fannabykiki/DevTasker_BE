@@ -16,7 +16,7 @@ namespace Capstone.Common.DTOs.Role
     public class GetRoleRecord
     {
         public GetRoleResponse Role { get; set; }
-        public List<GetProjectUseRoleResponse> ProjectsUsed { get; set; }
+        public List<GetProjectUsedResponse>? ProjectsUsed { get; set; }
 
     }
 }
