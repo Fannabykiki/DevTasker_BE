@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Schema;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
@@ -29,12 +30,6 @@ namespace Capstone.Service.PermissionSchemaService
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
 
-        public object Value { get; }
-        public IPermissionSchemaRepository Object1 { get; }
-        public ISchemaRepository Object2 { get; }
-        public IRoleRepository Object3 { get; }
-        public IPermissionRepository Object4 { get; }
-        public IMapper Object5 { get; }
 
         public PermissionSchemaService(ILoggerManager logger, IPermissionSchemaRepository permissionSchemaRepository, ISchemaRepository schemaRepository, IRoleRepository roleRepository, IPermissionRepository permissionRepository, IMapper mapper,IProjectRepository projectRepository)
         {
@@ -45,16 +40,6 @@ namespace Capstone.Service.PermissionSchemaService
             _logger = logger;
             _mapper = mapper;
             _projectRepository = projectRepository;
-        }
-
-        public PermissionSchemaService(object value, IPermissionSchemaRepository object1, ISchemaRepository object2, IRoleRepository object3, IPermissionRepository object4, IMapper object5)
-        {
-            Value = value;
-            Object1 = object1;
-            Object2 = object2;
-            Object3 = object3;
-            Object4 = object4;
-            Object5 = object5;
         }
 
         public async Task<List<GetSchemaResponse>> GetAllSchema()
@@ -252,6 +237,12 @@ namespace Capstone.Service.PermissionSchemaService
                 transaction.RollBack();
                 return false;
             }
+        }
+
+        public async Task<GetSchemaResponse> GetSchemaByName(string schemaName)
+        {
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaName.Trim().ToLower().Equals(schemaName.Trim().ToLower()), null);
+            return _mapper.Map<GetSchemaResponse>(schema);
         }
     }
 }
