@@ -56,7 +56,7 @@ namespace Capstone.Service.TaskService
 					TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
 					PriorityId = request.PriorityId,
 					PrevId = null,
-					StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
+					// StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
 					InterationId = interationId,
 					AssignTo = request.AssignTo
 				};
@@ -89,7 +89,7 @@ namespace Capstone.Service.TaskService
                     TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
                     PriorityId = updateTicketRequest.PriorityId,
                     PrevId = null,
-                    StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
+                    // StatusId = Guid.Parse("8891827D-AFAC-4A3B-8C0B-F01582B43719"),
                     AssignTo = updateTicketRequest.AssignTo
                 };
 

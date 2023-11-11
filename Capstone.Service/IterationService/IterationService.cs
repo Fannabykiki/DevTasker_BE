@@ -88,18 +88,18 @@ namespace Capstone.Service.IterationService
             {
                 if (ticket.PrevId == null)
                 {
-                    ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-                    var item = new WorkItemResponse
-                    {
-                        TicketId = ticket.TaskId,
-                        Title = ticket.Title,
-                        TicketType = "Work Item",
-                        TicketStatus = ticket.Status.Title
-                    };
+                    // ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
+                    // var item = new WorkItemResponse
+                    // {
+                    //     TicketId = ticket.TaskId,
+                    //     Title = ticket.Title,
+                    //     TicketType = "Work Item",
+                    //     TicketStatus = ticket.Status.Title
+                    // };
 
-                    item.Tickets = await GetChildTicketsAsync(ticket.TaskId, Tickets);
-
-                    workItems.Add(item);
+                    // item.Tickets = await GetChildTicketsAsync(ticket.TaskId, Tickets);
+                    //
+                    // workItems.Add(item);
                 }
             }
 
@@ -108,21 +108,21 @@ namespace Capstone.Service.IterationService
 
         private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTickets)
         {
-            foreach(var ticket in allTickets)
-            {
-                ticket.TicketType = await _ticketTypeRepository.GetAsync(x => x.TypeId == ticket.TypeId, null);
-                ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-            }
-            return allTickets
-              .Where(x => x.PrevId == parentId)
-              .Select(x => new TicketResponse
-              {
-                  TicketId = x.TaskId,
-                  Title = x.Title,
-                  TicketType = x.TicketType.Title,
-                  TicketStatus = x.Status.Title
-              })
-              .ToList();
+            // foreach(var ticket in allTickets)
+            // {
+            //     ticket.TicketType = await _ticketTypeRepository.GetAsync(x => x.TypeId == ticket.TypeId, null);
+            //     ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
+            // }
+            // return allTickets
+            //   .Where(x => x.PrevId == parentId)
+            //   .Select(x => new TicketResponse
+            //   {
+            //       TicketId = x.TaskId,
+            //       Title = x.Title,
+            //       TicketType = x.TicketType.Title,
+            //       TicketStatus = x.Status.Title
+            //   })
+            //   .ToList();
             return null;
         }
 
