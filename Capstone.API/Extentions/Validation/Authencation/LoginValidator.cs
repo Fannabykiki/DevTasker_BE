@@ -16,7 +16,7 @@ namespace Capstone.API.Extentions.Validation.Authencation
 				.WithMessage("Password is required")
 				.MinimumLength(6)
 				.MaximumLength(16)
-				.WithMessage("Password must have at least 6 characters")
+				.WithMessage("Password must have at least 6 characters and maximum 16 characters")
 				.Matches(@"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%!]).+$")
 				.WithMessage("Password must include uppercase letter, lowercase letter, number and special character");
 		}
