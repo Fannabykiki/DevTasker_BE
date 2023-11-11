@@ -24,7 +24,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock <IMapper> _mapper;
         private Mock<IProjectRepository> _projectRepository;
         private Mock<IPermissionSchemaRepository> _permissionSchemaRepository;
-       
+
         [SetUp]
         public void Setup()
         {
@@ -32,6 +32,7 @@ namespace NUnitTest.DevTasker.Service
             _mapper = new Mock<IMapper>();
             _projectRepository = new Mock<IProjectRepository>();
             _permissionSchemaRepository = new Mock<IPermissionSchemaRepository>();
+
             _roleService = new RoleService
             (
                     _roleRepository.Object,
@@ -73,7 +74,7 @@ namespace NUnitTest.DevTasker.Service
                     Description = role.Description
                 });
 
-            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
 
             //Act
            var result = await roleService.CreateProjectRole(createRoleRequest);
@@ -104,7 +105,7 @@ namespace NUnitTest.DevTasker.Service
             _roleRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
 
             // Act
             var result = await roleService.CreateProjectRole(createRoleRequest);
@@ -153,7 +154,7 @@ namespace NUnitTest.DevTasker.Service
                    Description = role.Description
                });
 
-            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
 
             //Act
            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
@@ -176,7 +177,7 @@ namespace NUnitTest.DevTasker.Service
             _roleRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object);
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
 
             // Act
             var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
