@@ -85,11 +85,7 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.PriorityId);
 
-            modelBuilder.Entity<Entities.Task>()
-                .HasOne(sc => sc.Status)
-                .WithMany(s => s.Tickets)
-                .HasForeignKey(sc => sc.TaskId);
-            
+
             modelBuilder.Entity<Entities.Task>()
                 .HasOne(sc => sc.ProjectMember)
                 .WithMany(s => s.Tasks)
@@ -99,13 +95,6 @@ namespace Capstone.DataAccess
                 .HasOne(sc => sc.ProjectMember)
                 .WithMany(s => s.Tasks)
                 .HasForeignKey(sc => sc.AssignTo);
-
-            // modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
-            //
-            // modelBuilder.Entity<TaskHistory>()
-            //     .HasOne(sc => sc.Task)
-            //     .WithMany(s => s.TaskHistories)
-            //     .HasForeignKey(sc => sc.TaskId);
 
             modelBuilder.Entity<Notification>().HasKey(sc => new { sc.NotificationId });
 
@@ -152,22 +141,10 @@ namespace Capstone.DataAccess
             
             modelBuilder.Entity<Status>().HasKey(sc => new { sc.StatusId});
             
-            modelBuilder.Entity<Status>()
-                .HasMany(sc => sc.Boards)
-                .WithOne(s => s.Status)
-                .HasForeignKey(sc => sc.StatusId)
-                .OnDelete(DeleteBehavior.NoAction);
-
 			modelBuilder.Entity<Status>()
                 .HasMany(sc => sc.Interations)
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
-				.OnDelete(DeleteBehavior.NoAction);
-
-			modelBuilder.Entity<Status>()
-				.HasMany(sc => sc.Projects)
-				.WithOne(s => s.Status)
-				.HasForeignKey(sc => sc.StatusId)
 				.OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<Status>()
@@ -177,7 +154,7 @@ namespace Capstone.DataAccess
                 .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<Status>()
-                .HasMany(sc => sc.Tickets)
+                .HasMany(sc => sc.Project)
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
@@ -185,14 +162,14 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId});
             
             modelBuilder.Entity<TaskHistory>()
-                .HasOne<Status>(sc => sc.TaskStatus)
-                .WithMany(s => s.TaskHistories)
+                .HasOne<BoardStatus>(sc => sc.BoardStatus)
+                .WithMany(s => s.TaskHistory)
                 .HasForeignKey(sc => sc.PreviousStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<TaskHistory>()
-                .HasOne<Status>(sc => sc.TaskStatus)
-                .WithMany(s => s.TaskHistories)
+                .HasOne<BoardStatus>(sc => sc.BoardStatus)
+                .WithMany(s => s.TaskHistory)
                 .HasForeignKey(sc => sc.CurrentStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
             
@@ -201,7 +178,23 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.TaskHistories)
                 .HasForeignKey(sc => sc.ChangeBy)
                 .OnDelete(DeleteBehavior.NoAction);
-		}
+            
+            modelBuilder.Entity<BoardStatus>().HasKey(sc => new { sc.BoardStatusId});
+            
+            modelBuilder.Entity<BoardStatus>()
+                .HasOne(sc => sc.Board)
+                .WithMany(s => s.Status)
+                .HasForeignKey(sc => sc.BoardId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<BoardStatus>()
+                .HasMany(sc => sc.Tasks)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+        }
 
 		public DbSet<Attachment>? Attachments { get; set; }
         public DbSet<Board>? Boards { get; set; }
@@ -219,6 +212,7 @@ namespace Capstone.DataAccess
         public DbSet<TaskComment>? TaskComments { get; set; }
         public DbSet<TaskHistory>? TaskHistories { get; set; }
         public DbSet<Status>? Status { get; set; }
+        public DbSet<BoardStatus>? BoardStatus { get; set; }
         public DbSet<TaskType>? TaskTypes { get; set; }
         public DbSet<User>? Users { get; set; }
     }

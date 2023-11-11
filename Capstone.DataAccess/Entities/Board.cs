@@ -12,7 +12,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime? UpdateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
         public Guid StatusId { get; set; }
-        public Status? Status { get; set; }
+        public List<BoardStatus?> Status { get; set; }
         public Guid? ProjectId { get; set; }
         public List<Interation> Interations { get; set; }
         public Project Project { get; set; }
