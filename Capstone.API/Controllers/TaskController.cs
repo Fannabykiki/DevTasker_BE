@@ -38,10 +38,10 @@ namespace Capstone.API.Controllers
         }
         
         [HttpPost("task")]
-        public async Task<IActionResult> CreateTask(CreateTaskRequest createTaskRequest, Guid interationId, Guid projectId)
+        public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest createTaskRequest, Guid interationId, Guid projectId,Guid statusId)
         {   
             var userId = this.GetCurrentLoginUserId();
-            var result = await _taskService.CreateTask(createTaskRequest, interationId,userId, projectId);
+            var result = await _taskService.CreateTask(createTaskRequest, interationId,userId, projectId,statusId);
 
             return Ok(result);
         }
