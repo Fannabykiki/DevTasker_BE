@@ -157,7 +157,11 @@ public class ProjectService : IProjectService
 				ProjectName = newProject.ProjectName,
 				SchemasId = newProject.SchemasId,
 				StatusId = newProject.StatusId,
-				IsSucced = true
+				BaseResponse = new Common.DTOs.Base.BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Create successfully"
+				}
 			};
 		}
 		catch (Exception ex)
@@ -166,7 +170,11 @@ public class ProjectService : IProjectService
 			transaction.RollBack();
 			return new CreateProjectRespone
 			{
-				IsSucced = false,
+				BaseResponse = new Common.DTOs.Base.BaseResponse
+				{
+					IsSucceed = false,
+					Message = "Create successfully"
+				}
 			};
 		}
 	}
