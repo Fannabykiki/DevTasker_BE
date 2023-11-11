@@ -5,6 +5,7 @@ namespace Capstone.Common.DTOs.Project
 	public class CreateProjectRespone : BaseResponse
 	{
 		public Guid ProjectId { get; set; }
+		public Guid BoardId { get; set; }
 		public string ProjectName { get; set; }
 		public string Description { get; set; }
 		public string StartDate { get; set; }

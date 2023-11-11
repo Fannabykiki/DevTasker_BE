@@ -1,6 +1,5 @@
 ﻿using Capstone.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
-using TaskStatus = Capstone.DataAccess.Entities.TaskStatus;
 
 namespace Capstone.DataAccess
 {
@@ -142,12 +141,6 @@ namespace Capstone.DataAccess
             
             modelBuilder.Entity<Status>().HasKey(sc => new { sc.StatusId});
             
-            modelBuilder.Entity<Status>()
-                .HasMany(sc => sc.Boards)
-                .WithOne(s => s.Status)
-                .HasForeignKey(sc => sc.StatusId)
-                .OnDelete(DeleteBehavior.NoAction);
-
 			modelBuilder.Entity<Status>()
                 .HasMany(sc => sc.Interations)
                 .WithOne(s => s.Status)
@@ -169,14 +162,14 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId});
             
             modelBuilder.Entity<TaskHistory>()
-                .HasOne<Status>(sc => sc.TaskStatus)
-                .WithMany(s => s.TaskHistories)
+                .HasOne<BoardStatus>(sc => sc.BoardStatus)
+                .WithMany(s => s.TaskHistory)
                 .HasForeignKey(sc => sc.PreviousStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<TaskHistory>()
-                .HasOne<Status>(sc => sc.TaskStatus)
-                .WithMany(s => s.TaskHistories)
+                .HasOne<BoardStatus>(sc => sc.BoardStatus)
+                .WithMany(s => s.TaskHistory)
                 .HasForeignKey(sc => sc.CurrentStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
             
@@ -186,19 +179,21 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.ChangeBy)
                 .OnDelete(DeleteBehavior.NoAction);
             
-            modelBuilder.Entity<TaskStatus>().HasKey(sc => new { sc.TaskId,sc.StatusId});
+            modelBuilder.Entity<BoardStatus>().HasKey(sc => new { sc.BoardStatusId});
             
-            modelBuilder.Entity<TaskStatus>()
-                .HasOne(sc => sc.Task)
-                .WithMany(s => s.TaskStatus)
-                .HasForeignKey(sc => sc.TaskId)
+            modelBuilder.Entity<BoardStatus>()
+                .HasOne(sc => sc.Board)
+                .WithMany(s => s.Status)
+                .HasForeignKey(sc => sc.BoardId)
                 .OnDelete(DeleteBehavior.NoAction);
-                
-            modelBuilder.Entity<TaskStatus>()
-                .HasOne(sc => sc.Status)
-                .WithMany(s => s.TaskStatus)
+            
+            modelBuilder.Entity<BoardStatus>()
+                .HasMany(sc => sc.Tasks)
+                .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+
         }
 
 		public DbSet<Attachment>? Attachments { get; set; }
@@ -217,8 +212,8 @@ namespace Capstone.DataAccess
         public DbSet<TaskComment>? TaskComments { get; set; }
         public DbSet<TaskHistory>? TaskHistories { get; set; }
         public DbSet<Status>? Status { get; set; }
+        public DbSet<BoardStatus>? BoardStatus { get; set; }
         public DbSet<TaskType>? TaskTypes { get; set; }
-        public DbSet<TaskStatus>? TaskStatus { get; set; }
         public DbSet<User>? Users { get; set; }
     }
 }

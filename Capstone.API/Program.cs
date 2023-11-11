@@ -19,11 +19,9 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using Capstone.Service.PermissionSchemaService;
-using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
 using Capstone.API.Extentions.AuthorizeMiddleware;
-using Microsoft.AspNetCore.Authorization;
 using Capstone.API.Helper;
 using Capstone.Service.StatusService;
 using Capstone.Service.AttachmentServices;
@@ -116,6 +114,8 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
+
+builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
