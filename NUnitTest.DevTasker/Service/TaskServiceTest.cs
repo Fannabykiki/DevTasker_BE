@@ -9,6 +9,7 @@ using NUnit.Framework;
 using System.Linq.Expressions;
 using Capstone.Service.TaskService;
 using Task = Capstone.DataAccess.Entities.Task;
+using Capstone.DataAccess.Repository.Implements;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -26,6 +27,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IStatusRepository> _statusRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
+        private Mock<IBoardStatusRepository> _boardStatusRepository;
 
         [SetUp]
         public void Setup()
@@ -46,20 +48,22 @@ namespace NUnitTest.DevTasker.Service
             _statusRepositoryMock = new Mock<IStatusRepository>();
             _transactionMock = new Mock<IDatabaseTransaction>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
+            _boardStatusRepository = new Mock<IBoardStatusRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            //_taskService = new TaskService(
-            //    _context,
-            //    _ticketRepositoryMock.Object,
-            //    _ticketStatusRepositoryMock.Object,
-            //    _ticketTypeRepositoryMock.Object,
-            //    _ticketHistoryRepositoryMock.Object,
-            //    _ticketTypeRepositoryMock.Object,
-            //    _mapperMock.Object,
-            //    _userRepositoryMock.Object,
-            //    _iterationRepositoryMock.Object,
-            //    _statusRepositoryMock.Object);
+            _taskService = new TaskService(
+                _context,
+                _ticketRepositoryMock.Object,
+                _ticketStatusRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _ticketHistoryRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _mapperMock.Object,
+                _userRepositoryMock.Object,
+                _iterationRepositoryMock.Object,
+                _statusRepositoryMock.Object,
+                _boardStatusRepository.Object);
 
         }
 

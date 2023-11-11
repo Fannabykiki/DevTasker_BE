@@ -31,6 +31,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IInterationRepository> _interationRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IPermissionSchemaRepository> _permissionScemaRepo;
+        private Mock<IBoardStatusRepository>  _boardStatusRepository;
 
         [SetUp]
         public void Setup()
@@ -45,22 +46,24 @@ namespace NUnitTest.DevTasker.Service
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _schemaRepository = new Mock<ISchemaRepository>();
             _permissionScemaRepo = new Mock<IPermissionSchemaRepository>();
+            _boardStatusRepository = new Mock<IBoardStatusRepository>();
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
-            //_projectService = new ProjectService(
-            //    _context,
-            //    _projectRepositoryMock.Object,
-            //    _roleRepositoryMock.Object,
-            //   _mapper,
-            //    _schemaRepository.Object,
-            //   _projectMemberRepositoryMock.Object,
-            //   _boardRepositoryMock.Object,
-            //    _permissionRepositoryMock.Object,
-            //    _interationRepositoryMock.Object,
-            //    _permissionScemaRepo.Object,
-            //    _statusRepository.Object
-            //);
+            _projectService = new ProjectService(
+                _context,
+                _projectRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+               _mapper,
+                _schemaRepository.Object,
+               _projectMemberRepositoryMock.Object,
+               _boardRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                _interationRepositoryMock.Object,
+                _permissionScemaRepo.Object,
+                _statusRepository.Object,
+                _boardStatusRepository.Object
+            );
 
         }
 
