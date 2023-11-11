@@ -12,7 +12,7 @@ namespace Capstone.DataAccess.Entities
         public Guid? ChangeBy { get; set; }
         public Guid PreviousStatusId { get; set; } //to do
         public Guid CurrentStatusId { get; set; } //to do => in progess FE 
-        public Status TaskStatus { get; set; }
+        public BoardStatus BoardStatus { get; set; }
         public Guid TaskId { get; set; }
         public Task Task { get; set; } // 1 history just only 1 task
         public ProjectMember ProjectMember { get; set; } // 1 history just only 1 task

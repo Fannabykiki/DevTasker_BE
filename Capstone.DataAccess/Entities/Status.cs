@@ -8,7 +8,6 @@ namespace Capstone.DataAccess.Entities
         public Guid StatusId { get; set; }
         public string Title { get; set; }
         public List<Project> Project { get; set; }
-        public List<TaskStatus> TaskStatus { get; set; }
 
         public List<ProjectMember> ProjectMembers { get; set; }
         public List<User> Users { get; set; }
