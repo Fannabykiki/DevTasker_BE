@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Capstone.DataAccess.Migrations
 {
-    public partial class CreateFirstMigration : Migration
+    public partial class CreateMyDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -55,7 +55,7 @@ namespace Capstone.DataAccess.Migrations
                 {
                     SchemaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -210,16 +210,17 @@ namespace Capstone.DataAccess.Migrations
                 {
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SchemasId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: true),
                     ExpireAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PrivacyStatus = table.Column<bool>(type: "bit", nullable: false)
+                    PrivacyStatus = table.Column<bool>(type: "bit", nullable: false),
+                    ProjectStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -236,11 +237,6 @@ namespace Capstone.DataAccess.Migrations
                         principalTable: "Schema",
                         principalColumn: "SchemaId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Projects_Status_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "Status",
-                        principalColumn: "StatusId");
                 });
 
             migrationBuilder.CreateTable(
@@ -275,7 +271,7 @@ namespace Capstone.DataAccess.Migrations
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsOwner = table.Column<bool>(type: "bit", nullable: false),
-                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -304,6 +300,28 @@ namespace Capstone.DataAccess.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectStatus",
+                columns: table => new
+                {
+                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectStatus", x => new { x.ProjectId, x.StatusId });
+                    table.ForeignKey(
+                        name: "FK_ProjectStatus_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "ProjectId");
+                    table.ForeignKey(
+                        name: "FK_ProjectStatus_Status_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Status",
+                        principalColumn: "StatusId");
                 });
 
             migrationBuilder.CreateTable(
@@ -398,16 +416,27 @@ namespace Capstone.DataAccess.Migrations
                     HistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChangeAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PreviousStatus = table.Column<int>(type: "int", nullable: true),
-                    CurrentStatus = table.Column<int>(type: "int", nullable: false),
-                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ChangeBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PreviousStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CurrentStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TaskHistories", x => x.HistoryId);
                     table.ForeignKey(
-                        name: "FK_TaskHistories_Tasks_TicketId",
-                        column: x => x.TicketId,
+                        name: "FK_TaskHistories_ProjectMembers_ChangeBy",
+                        column: x => x.ChangeBy,
+                        principalTable: "ProjectMembers",
+                        principalColumn: "MemberId");
+                    table.ForeignKey(
+                        name: "FK_TaskHistories_Status_CurrentStatusId",
+                        column: x => x.CurrentStatusId,
+                        principalTable: "Status",
+                        principalColumn: "StatusId");
+                    table.ForeignKey(
+                        name: "FK_TaskHistories_Tasks_TaskId",
+                        column: x => x.TaskId,
                         principalTable: "Tasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Restrict);
@@ -444,30 +473,6 @@ namespace Capstone.DataAccess.Migrations
                         column: x => x.TaskId,
                         principalTable: "Tasks",
                         principalColumn: "TaskId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "StatusTaskHistory",
-                columns: table => new
-                {
-                    TaskHistoriesHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaskStatusStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StatusTaskHistory", x => new { x.TaskHistoriesHistoryId, x.TaskStatusStatusId });
-                    table.ForeignKey(
-                        name: "FK_StatusTaskHistory_Status_TaskStatusStatusId",
-                        column: x => x.TaskStatusStatusId,
-                        principalTable: "Status",
-                        principalColumn: "StatusId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_StatusTaskHistory_TaskHistories_TaskHistoriesHistoryId",
-                        column: x => x.TaskHistoriesHistoryId,
-                        principalTable: "TaskHistories",
-                        principalColumn: "HistoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -532,8 +537,8 @@ namespace Capstone.DataAccess.Migrations
                 column: "SchemasId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_StatusId",
-                table: "Projects",
+                name: "IX_ProjectStatus_StatusId",
+                table: "ProjectStatus",
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
@@ -547,11 +552,6 @@ namespace Capstone.DataAccess.Migrations
                 column: "SchemaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StatusTaskHistory_TaskStatusStatusId",
-                table: "StatusTaskHistory",
-                column: "TaskStatusStatusId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TaskComments_TaskId",
                 table: "TaskComments",
                 column: "TaskId");
@@ -562,9 +562,19 @@ namespace Capstone.DataAccess.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskHistories_TicketId",
+                name: "IX_TaskHistories_ChangeBy",
                 table: "TaskHistories",
-                column: "TicketId");
+                column: "ChangeBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskHistories_CurrentStatusId",
+                table: "TaskHistories",
+                column: "CurrentStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskHistories_TaskId",
+                table: "TaskHistories",
+                column: "TaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_AssignTo",
@@ -606,19 +616,19 @@ namespace Capstone.DataAccess.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
+                name: "ProjectStatus");
+
+            migrationBuilder.DropTable(
                 name: "SchemaPermissions");
 
             migrationBuilder.DropTable(
-                name: "StatusTaskHistory");
+                name: "TaskHistories");
 
             migrationBuilder.DropTable(
                 name: "TaskComments");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
-
-            migrationBuilder.DropTable(
-                name: "TaskHistories");
 
             migrationBuilder.DropTable(
                 name: "Tasks");
