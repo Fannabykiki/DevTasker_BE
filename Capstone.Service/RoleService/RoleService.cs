@@ -185,9 +185,8 @@ namespace Capstone.Service.RoleService
             return roles;
         }
 
-        public async Task<List<GetRoleResponse>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest editSchemaRoleRequest)
+        public async Task<List<GetRoleResponse>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest editSchemaRoleRequest, bool mode)
         {
-            var roles = new List<GetRoleResponse>();
             HashSet<Role> Roles = new HashSet<Role>();
             foreach (var permission in editSchemaRoleRequest.PermissionIds)
             {
@@ -198,11 +197,24 @@ namespace Capstone.Service.RoleService
                     Roles.Add(role.Role);
                 }
             }
-            foreach (var role in Roles)
+            if (mode == false)
             {
-                roles.Add(_mapper.Map<GetRoleResponse>(role));
+                var roles = new List<GetRoleResponse>();
+                foreach (var role in Roles)
+                {
+                    if (role.IsDelete != true)
+                        roles.Add(_mapper.Map<GetRoleResponse>(role));
+                    else continue;
+                }
+                return roles;
             }
-            return roles;
+            else
+            {
+                var rolegrant = await _roleRepository.GetAllWithOdata(x => x.IsDelete != true, null);
+                rolegrant = rolegrant.Except(Roles);
+                return _mapper.Map<List<GetRoleResponse>>(rolegrant.Where(x => x.RoleId != Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && x.RoleId != Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")));
+            }
+            
         }
     }
 }

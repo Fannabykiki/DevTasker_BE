@@ -60,13 +60,25 @@ namespace Capstone.API.Controllers
         }
         
         [EnableQuery]
-        [HttpGet("permission/roles/{schemaId}")]
-        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest request)
+        [HttpPost("permission/roles/grant/{schemaId}")]
+        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToGrant(Guid schemaId, EditSchemaRoleRequest request)
         {
-            var roles = await _roleService.GetRoleToEdit(schemaId, request);
-            if (roles == null)
+            var roles = await _roleService.GetRoleToEdit(schemaId, request, true);
+            if (roles.Count() == 0)
             {
-                return BadRequest("You can not edit default role!");
+                return BadRequest("System not have role to grant!");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
+        [HttpPost("permission/roles/revoke/{schemaId}")]
+        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToRevoke(Guid schemaId, EditSchemaRoleRequest request)
+        {
+            var roles = await _roleService.GetRoleToEdit(schemaId, request, false);
+            if (roles.Count() == 0)
+            {
+                return BadRequest("You can not revoke default role!");
             }
             return Ok(roles);
         }

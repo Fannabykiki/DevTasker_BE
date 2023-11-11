@@ -12,7 +12,7 @@ namespace Capstone.Service.RoleService
     {
 
         Task<List<GetRoleRecord>> GetAllSystemRole(bool mode);
-        Task<List<GetRoleResponse>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest editSchemaRoleRequest);
+        Task<List<GetRoleResponse>> GetRoleToEdit(Guid schemaId, EditSchemaRoleRequest editSchemaRoleRequest, bool mode);
         Task<GetRoleResponse> GetSystemRoleByName(string roleName);
         Task<GetRoleResponse> GetSystemRoleById(Guid roleId);
         Task<GetRoleResponse> CreateProjectRole(CreateNewRoleRequest createRoleRequest);
