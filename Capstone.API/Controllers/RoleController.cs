@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Project;
+﻿using Capstone.Common.DTOs.PermissionSchema;
+using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
@@ -54,6 +55,30 @@ namespace Capstone.API.Controllers
             if (roles == null)
             {
                 return BadRequest("Data null");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
+        [HttpPost("permission/roles/grant/{schemaId}")]
+        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToGrant(Guid schemaId, EditSchemaRoleRequest request)
+        {
+            var roles = await _roleService.GetRoleToEdit(schemaId, request, true);
+            if (roles.Count() == 0)
+            {
+                return BadRequest("System not have role to grant!");
+            }
+            return Ok(roles);
+        }
+        
+        [EnableQuery]
+        [HttpPost("permission/roles/revoke/{schemaId}")]
+        public async Task<ActionResult<List<GetRoleResponse>>> GetRoleToRevoke(Guid schemaId, EditSchemaRoleRequest request)
+        {
+            var roles = await _roleService.GetRoleToEdit(schemaId, request, false);
+            if (roles.Count() == 0)
+            {
+                return BadRequest("You can not revoke default role!");
             }
             return Ok(roles);
         }
