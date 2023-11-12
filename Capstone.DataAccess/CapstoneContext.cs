@@ -27,7 +27,9 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<Attachment>()
                 .HasOne(sc => sc.Task)
                 .WithMany(s => s.Attachments)
-                .HasForeignKey(sc => sc.TaskId);
+                .HasForeignKey(sc => sc.TaskId)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
@@ -244,7 +246,9 @@ namespace Capstone.DataAccess
             modelBuilder.Entity<Entities.SubTask>()
                 .HasOne(sc => sc.Task)
                 .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.TaskId);
+                .HasForeignKey(sc => sc.TaskId)
+                .OnDelete(DeleteBehavior.NoAction);
+
         }
 
 		public DbSet<Attachment>? Attachments { get; set; }

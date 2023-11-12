@@ -720,7 +720,7 @@ namespace Capstone.DataAccess.Migrations
                     b.HasOne("Capstone.DataAccess.Entities.Task", "Task")
                         .WithMany("Attachments")
                         .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ProjectMember");
@@ -899,7 +899,7 @@ namespace Capstone.DataAccess.Migrations
                     b.HasOne("Capstone.DataAccess.Entities.Task", "Task")
                         .WithMany("SubTasks")
                         .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Capstone.DataAccess.Entities.TaskType", "TaskType")
