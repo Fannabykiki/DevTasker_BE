@@ -18,9 +18,9 @@ namespace Capstone.API.Extentions.Validation.UserValidator
 
             RuleFor(x => x.NewPassword)
               .NotEmpty().WithMessage("New password is required")
-              .MinimumLength(6)
+              .MinimumLength(8)
               .MaximumLength(16)
-              .WithMessage("Password must have at least 6 characters")
+              .WithMessage("Password must have at least 8 characters")
               .Matches(@"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%!]).+$")
               .WithMessage("Password must include uppercase letter, lowercase letter, number and special character");
 

@@ -31,6 +31,11 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IInterationRepository> _interationRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IPermissionSchemaRepository> _permissionScemaRepo;
+        private Mock<IBoardStatusRepository>  _boardStatusRepository;
+        private Mock <ITicketRepository> _ticketRepository;
+        private Mock <IUserRepository> _userRepository;
+        private Mock <ITicketTypeRepository> _ticketTypeRepository;
+        private Mock <IPriorityRepository> _priorityRepository;
 
         [SetUp]
         public void Setup()
@@ -45,22 +50,35 @@ namespace NUnitTest.DevTasker.Service
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _schemaRepository = new Mock<ISchemaRepository>();
             _permissionScemaRepo = new Mock<IPermissionSchemaRepository>();
+            _boardStatusRepository = new Mock<IBoardStatusRepository>();
+            _ticketRepository = new Mock<ITicketRepository>();
+            _userRepository = new Mock<IUserRepository>();
+            _ticketTypeRepository = new Mock<ITicketTypeRepository>();
+            _priorityRepository = new Mock<IPriorityRepository>();
+
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
-            //_projectService = new ProjectService(
-            //    _context,
-            //    _projectRepositoryMock.Object,
-            //    _roleRepositoryMock.Object,
-            //   _mapper,
-            //    _schemaRepository.Object,
-            //   _projectMemberRepositoryMock.Object,
-            //   _boardRepositoryMock.Object,
-            //    _permissionRepositoryMock.Object,
-            //    _interationRepositoryMock.Object,
-            //    _permissionScemaRepo.Object,
-            //    _statusRepository.Object
-            //);
+            _projectService = new ProjectService(
+                _context,
+                _projectRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+               _mapper,
+                _schemaRepository.Object,
+               _projectMemberRepositoryMock.Object,
+               _boardRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                _interationRepositoryMock.Object,
+                _permissionScemaRepo.Object,
+                _statusRepository.Object,
+                _boardStatusRepository.Object,
+                _userRepository.Object,
+                _ticketTypeRepository.Object,
+                 _priorityRepository.Object,
+                _ticketRepository.Object
+            );
+          
+           
 
         }
 
