@@ -16,9 +16,9 @@ namespace NUnitTest.DevTasker.Service
     {
         private CapstoneContext _context;
         private TaskService _taskService;
-        private Mock<ITicketRepository> _ticketRepositoryMock;
+        private Mock<ITaskRepository> _ticketRepositoryMock;
         private Mock<ITicketStatusRepository> _ticketStatusRepositoryMock;
-        private Mock<ITicketTypeRepository> _ticketTypeRepositoryMock;
+        private Mock<ITaskTypeRepository> _ticketTypeRepositoryMock;
         private Mock<ITicketHistoryRepository> _ticketHistoryRepositoryMock;
         private Mock<IMapper> _mapperMock;
         private Mock<IUserRepository> _userRepositoryMock;
@@ -36,9 +36,9 @@ namespace NUnitTest.DevTasker.Service
 
             _context = new CapstoneContext(options);
 
-            _ticketRepositoryMock = new Mock<ITicketRepository>();
+            _ticketRepositoryMock = new Mock<ITaskRepository>();
             _ticketStatusRepositoryMock = new Mock<ITicketStatusRepository>();
-            _ticketTypeRepositoryMock = new Mock<ITicketTypeRepository>();
+            _ticketTypeRepositoryMock = new Mock<ITaskTypeRepository>();
             _ticketHistoryRepositoryMock = new Mock<ITicketHistoryRepository>();
             _mapperMock = new Mock<IMapper>();
             _userRepositoryMock = new Mock<IUserRepository>();

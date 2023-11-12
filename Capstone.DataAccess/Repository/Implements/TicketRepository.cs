@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
-    public class TicketRepository : BaseRepository<Entities.Task>, ITicketRepository
+    public class TicketRepository : BaseRepository<Entities.Task>, ITaskRepository
     {
         public TicketRepository(CapstoneContext context) : base(context)
         {
