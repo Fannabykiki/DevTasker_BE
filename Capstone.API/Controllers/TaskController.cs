@@ -36,17 +36,39 @@ namespace Capstone.API.Controllers
             var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
             return Ok(response);
         }
-        
-        [HttpPost("task")]
-        public async Task<IActionResult> CreateTask(CreateTaskRequest createTaskRequest, Guid interationId, Guid projectId)
+
+		[HttpGet("task-status")]
+		[EnableQuery()]
+		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
+		{
+			var response = await _taskService.GetAllTaskStatus(projectId);
+			return Ok(response);
+		}
+
+		[HttpPost("task-status")]
+		public async Task<ActionResult<StatusTaskViewModel>> CreateNewStatus(CreateNewTaskStatus createNewTaskStatus)
+		{
+			var response = await _taskService.CreateTaskStatus(createNewTaskStatus);
+			return Ok(response);
+		}
+
+		[HttpGet("task-type")]
+		public async Task<ActionResult<StatusTaskViewModel>> GetAllTypeTaskByProjectId()
+		{
+			var response = await _taskService.GetAllTaskType();
+			return Ok(response);
+		}
+
+		[HttpPost("task")]
+        public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
-            var result = await _taskService.CreateTask(createTaskRequest, interationId,userId, projectId);
+            var result = await _taskService.CreateTask(request, userId);
 
             return Ok(result);
         }
 
-        [HttpPut("task/{tasktId}")]
+        [HttpPut("task/{taskId}")]
         public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
         {
             var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);

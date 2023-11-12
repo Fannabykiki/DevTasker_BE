@@ -173,7 +173,7 @@ namespace NUnitTest.DevTasker.Service
             }
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.IsSucced);
+            Assert.IsTrue(result.IsSucceed);
         }
         
         [Test]
@@ -202,7 +202,7 @@ namespace NUnitTest.DevTasker.Service
                 Console.WriteLine("CreateAsync_MissingPassword: User registration was unsuccessful.");
             }
             Assert.IsNotNull(result);
-            Assert.IsFalse(result.IsSucced);
+            Assert.IsFalse(result.IsSucceed);
         }
 
         
@@ -231,7 +231,7 @@ namespace NUnitTest.DevTasker.Service
             _userRepositoryMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never);
             _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
 
-            if (result.IsSucced)
+            if (result.IsSucceed)
             {
                 Console.WriteLine("Success: Profile updated successfully.");
             }
@@ -241,7 +241,7 @@ namespace NUnitTest.DevTasker.Service
             }
 
             Assert.IsNotNull(result);
-            Assert.IsFalse(result.IsSucced);
+            Assert.IsFalse(result.IsSucceed);
         }
 
 
@@ -272,7 +272,7 @@ namespace NUnitTest.DevTasker.Service
             databaseTransactionMock.Verify(dt => dt.Commit(), Times.Once); // Kiểm tra giao dịch đã được commit
             databaseTransactionMock.Verify(dt => dt.RollBack(), Times.Never); // Kiểm tra giao dịch không bị rollback
 
-            if (result.IsSucced)
+            if (result.IsSucceed)
             {
                 Console.WriteLine("VerifyUser_Success: Verification was successful.");
             }
@@ -280,7 +280,7 @@ namespace NUnitTest.DevTasker.Service
             {
                 Console.WriteLine("VerifyUser_Success: Verification was unsuccessful.");
             }
-            Assert.IsTrue(result.IsSucced);
+            Assert.IsTrue(result.IsSucceed);
         }
 
 
@@ -304,7 +304,7 @@ namespace NUnitTest.DevTasker.Service
             _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never);
             
 
-            if (result.IsSucced)
+            if (result.IsSucceed)
             {
                 Console.WriteLine("VerifyUser_UserNotFound: Verification was successful.");
             }
@@ -312,7 +312,7 @@ namespace NUnitTest.DevTasker.Service
             {
                 Console.WriteLine("VerifyUser_UserNotFound: Verification was unsuccessful.");
             }
-            Assert.IsFalse(result.IsSucced);
+            Assert.IsFalse(result.IsSucceed);
         }
 
 
