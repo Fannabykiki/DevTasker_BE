@@ -14,6 +14,7 @@ namespace Capstone.Common.DTOs.Project
 		public string CreateAt { get; set; }
 		public Guid SchemasId { get; set; }
 		public Guid StatusId { get; set; }
+		public Guid InterationId { get; set; }
 		public DateTime? DeleteAt { get; set; }
 		public DateTime? ExpireAt { get; set; }
 		public bool PrivacyStatus { get; set; } // false: Private , true: Public

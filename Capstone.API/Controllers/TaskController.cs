@@ -69,7 +69,7 @@ namespace Capstone.API.Controllers
         }
 
 		[HttpPost("subtask")]
-		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateTaskRequest request)
+		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _taskService.CreateSubTask(request, userId);

@@ -16,7 +16,6 @@ namespace Capstone.Common.DTOs.Task
 		public string AssignTo { get; set; }
 		public string CreateBy { get; set; }
 		public string TypeName { get; set; }
-		public Guid? PrevId { get; set; }
 		public string? StatusName { get; set; }
 		public string PriorityName { get; set; }
 		public string InterationName { get; set; }

@@ -20,7 +20,6 @@ namespace Capstone.DataAccess.Entities
 		public ProjectMember ProjectMember { get; set; } // 1 task just create by 1 user, assign to 1 user 
 		public Guid TypeId { get; set; } // 1 task has many type 
 		public TaskType TaskType { get; set; }
-		public Guid? PrevId { get; set; }
 		public Guid? StatusId { get; set; }
 		public List<TaskComment> TaskComments { get; set; } // 1 task has many type 
 		public BoardStatus Status { get; set; } // just only 1 status 

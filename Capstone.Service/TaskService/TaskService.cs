@@ -24,12 +24,14 @@ namespace Capstone.Service.TaskService
 		private readonly IStatusRepository _statusRepository;
 		private readonly IBoardStatusRepository _boardStatusRepository;
 		private readonly ITicketTypeRepository _taskType;
+		private readonly ISubTaskRepository _subTaskRepository;
+
 
 		public TaskService(CapstoneContext context, ITicketRepository ticketRepository,
 			ITicketStatusRepository ticketStatusRepository, ITicketTypeRepository typeRepository,
 			ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository,
 			IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository,
-			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITicketTypeRepository taskType)
+			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITicketTypeRepository taskType, ISubTaskRepository subTaskRepository)
 		{
 			_context = context;
 			_ticketRepository = ticketRepository;
@@ -43,6 +45,7 @@ namespace Capstone.Service.TaskService
 			_statusRepository = statusRepository;
 			_boardStatusRepository = boardStatusRepository;
 			_taskType = taskType;
+			_subTaskRepository = subTaskRepository;
 		}
 
 		public async Task<CreateTaskResponse> CreateTask(CreateTaskRequest request,Guid userId)
@@ -69,31 +72,33 @@ namespace Capstone.Service.TaskService
 						AssignTo = request.AssignTo,
 						StatusId = request.StatusId
 					};
+
 					var newTask =await _ticketRepository.CreateAsync(ticketEntity);
 					await _ticketRepository.SaveChanges();
+					transaction.Commit();
+
 					var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == newTask.StatusId, null);
 					return new CreateTaskResponse
 					{
 						AssignTo = newTask.AssignTo,
 						CreateBy = userId,
-						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 						Decription = newTask.Decription,
-						DeleteAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-						DueDate = DateTime.Parse(newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+						DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 						TaskId = newTask.TaskId,
 						InterationId = newTask.InterationId,
 						IsDelete = newTask.IsDelete,
+						PriorityId = newTask.PriorityId,
+						TypeId = newTask.TypeId,
+						StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+						Title = newTask.Title,
+						Status = status.Title,
 						BaseResponse = new BaseResponse
 						{
 							IsSucceed = true,
 							Message = "Create Successfully"
 						},
-						PrevId = newTask.PrevId,
-						PriorityId = newTask.PriorityId,
-						TypeId = newTask.TypeId,
-						StartDate = DateTime.Parse(newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-						Title = newTask.Title,
-						Status = status.Title
 					};
 				}
 				else
@@ -118,36 +123,37 @@ namespace Capstone.Service.TaskService
 								AssignTo = request.AssignTo,
 								StatusId = request.StatusId
 							};
+
 							var newTask = await _ticketRepository.CreateAsync(ticketEntity);
 							await _ticketRepository.SaveChanges();
+							transaction.Commit();
+
 							var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == newTask.StatusId, null);
 							return new CreateTaskResponse
 							{
 								AssignTo = newTask.AssignTo,
 								CreateBy = userId,
-								CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+								CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								Decription = newTask.Decription,
-								DeleteAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								DueDate = DateTime.Parse(newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+								DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+								DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								TaskId = newTask.TaskId,
-								InterationId= newTask.InterationId,
+								InterationId = newTask.InterationId,
 								IsDelete = newTask.IsDelete,
-								PrevId = newTask.PrevId,
 								PriorityId = newTask.PriorityId,
 								TypeId = newTask.TypeId,
-								StartDate = DateTime.Parse(newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+								StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								Title = newTask.Title,
 								Status = status.Title,
 								BaseResponse = new BaseResponse
 								{
 									IsSucceed = true,
 									Message = "Create Successfully"
-								}
+								},
 							};
 						}
 					}
 				}
-				transaction.Commit();
 
 				return new CreateTaskResponse
 				{
@@ -167,7 +173,7 @@ namespace Capstone.Service.TaskService
 					BaseResponse = new BaseResponse
 					{
 						IsSucceed = false,
-						Message = "Create fail"
+						Message = "Create fail : " + ex.Message
 					}
 				};
 			}
@@ -208,7 +214,7 @@ namespace Capstone.Service.TaskService
 
 
 		public async Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId)
-		{
+		{	
 			var result = await _ticketRepository.GetAllTask(projectId);
 			return result;
 		}
@@ -293,121 +299,57 @@ namespace Capstone.Service.TaskService
 			}
 		}
 
-		public async Task<CreateTaskResponse> CreateSubTask(CreateTaskRequest request, Guid userId)
+		public async Task<CreateTaskResponse> CreateSubTask(CreateSubTaskRequest request, Guid userId)
 		{
-			using var transaction = _ticketRepository.DatabaseTransaction();
-			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == request.ProjectId, null);
+			using var transaction = _subTaskRepository.DatabaseTransaction();
+			var task = await _ticketRepository.GetAsync(x => x.TaskId == request.TaskId, null);
 			try
 			{
-				if (request.InterationId != Guid.Empty)
-				{
-					var ticketEntity = new DataAccess.Entities.Task()
+					var ticketEntity = new SubTask()
 					{
-						TaskId = Guid.NewGuid(),
+						TaskId = request.TaskId,
 						Title = request.Title,
 						Decription = request.Decription,
 						StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateBy = userId,
-						TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
+						TypeId = request.TypeId,
 						PriorityId = request.PriorityId,
-						PrevId = request.PrevId,
-						InterationId = request.InterationId,
+						InterationId = task.InterationId,
 						AssignTo = request.AssignTo,
-						StatusId = request.StatusId
+						StatusId = request.StatusId,
+						SubTaskId = Guid.NewGuid()
 					};
-					var newTask = await _ticketRepository.CreateAsync(ticketEntity);
-					await _ticketRepository.SaveChanges();
+
+					var newTask = await _subTaskRepository.CreateAsync(ticketEntity);
+					await _subTaskRepository.SaveChanges();
 					transaction.Commit();
+
 					var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == newTask.StatusId, null);
 					return new CreateTaskResponse
 					{
+						TaskId = newTask.TaskId,
+						SubTaskId = newTask.SubTaskId,
 						AssignTo = newTask.AssignTo,
 						CreateBy = userId,
-						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 						Decription = newTask.Decription,
-						DeleteAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-						DueDate = DateTime.Parse(newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-						TaskId = newTask.TaskId,
+						DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+						DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 						InterationId = newTask.InterationId,
 						IsDelete = newTask.IsDelete,
-						PrevId = newTask.PrevId,
 						PriorityId = newTask.PriorityId,
 						TypeId = newTask.TypeId,
-						StartDate = DateTime.Parse(newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 						Title = newTask.Title,
 						Status = status.Title,
 						BaseResponse = new BaseResponse
 						{
 							IsSucceed = true,
 							Message = "Create Successfully"
-						}
+						},
 					};
-				}
-				else
-				{
-					foreach (var interation in interations)
-					{
-						if (interation.StartDate <= DateTime.Now && DateTime.Now <= interation.EndDate)
-						{
-							var ticketEntity = new DataAccess.Entities.Task()
-							{
-								TaskId = Guid.NewGuid(),
-								Title = request.Title,
-								Decription = request.Decription,
-								StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								CreateBy = userId,
-								TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
-								PriorityId = request.PriorityId,
-								PrevId = request.PrevId,
-								InterationId = interation.InterationId,
-								AssignTo = request.AssignTo,
-								StatusId = request.StatusId
-							};
-							var newTask = await _ticketRepository.CreateAsync(ticketEntity);
-							await _ticketRepository.SaveChanges();
-							transaction.Commit();
-							var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == newTask.StatusId, null);
-							return new CreateTaskResponse
-							{
-								AssignTo = newTask.AssignTo,
-								CreateBy = userId,
-								CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								Decription = newTask.Decription,
-								DeleteAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								DueDate = DateTime.Parse(newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								TaskId = newTask.TaskId,
-								InterationId = newTask.InterationId,
-								IsDelete = newTask.IsDelete,
-								PrevId = newTask.PrevId,
-								PriorityId = newTask.PriorityId,
-								TypeId = newTask.TypeId,
-								StartDate = DateTime.Parse(newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-								Title = newTask.Title,
-								Status = status.Title,
-								BaseResponse = new BaseResponse
-								{
-									IsSucceed = true,
-									Message = "Create Successfully"
-								}
-							};
-							
-						}
-					}
-				}
-			
-
-				return new CreateTaskResponse
-				{
-					BaseResponse = new BaseResponse
-					{
-						IsSucceed = true,
-						Message = "Create fail"
-					}
-				};
 			}
 			catch (Exception ex)
 			{

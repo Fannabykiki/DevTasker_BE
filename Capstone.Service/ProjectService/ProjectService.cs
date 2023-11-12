@@ -114,7 +114,7 @@ public class ProjectService : IProjectService
 				InterationId = Guid.NewGuid(),
 			};
 
-			await _interationRepository.CreateAsync(newInteration);
+			 var inter = await _interationRepository.CreateAsync(newInteration);
 			await _interationRepository.SaveChanges();
 
 			var newPo = new ProjectMember
@@ -157,6 +157,8 @@ public class ProjectService : IProjectService
 				ProjectName = newProject.ProjectName,
 				SchemasId = newProject.SchemasId,
 				StatusId = newProject.StatusId,
+				BoardId = newProject.Board.BoardId,
+				InterationId = inter.InterationId,
 				BaseResponse = new Common.DTOs.Base.BaseResponse
 				{
 					IsSucceed = true,
