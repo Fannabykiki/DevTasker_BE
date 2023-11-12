@@ -37,8 +37,8 @@ namespace Capstone.Service.TicketCommentService
                     User = await _userRepository.GetAsync(x => x.UserId == comment.ByUser,null),
                 };
 
-                _ticketCommentRepository.CreateAsync(newComment);
-                _ticketCommentRepository.SaveChanges();
+                await _ticketCommentRepository.CreateAsync(newComment);
+                await _ticketCommentRepository.SaveChanges();
 
                 transaction.Commit();
                 return _mapper.Map<GetCommentResponse>(newComment);
