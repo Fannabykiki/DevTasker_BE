@@ -24,9 +24,9 @@ namespace Capstone.UnitTests.Service
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IMapper> _mapperMock;
         private Mock<IBoardRepository> _boardRepositoryMock;
-        private Mock<ITicketRepository> _ticketRepositoryMock;
+        private Mock<ITaskRepository> _ticketRepositoryMock;
         private Mock <IStatusRepository> _statusRepositoryMock;
-        private Mock <ITicketTypeRepository> _ticketTypeRepository;
+        private Mock <ITaskTypeRepository> _ticketTypeRepository;
         [SetUp]
         public void Setup()
         {
@@ -35,9 +35,9 @@ namespace Capstone.UnitTests.Service
             _transactionMock = new Mock<IDatabaseTransaction>();
             _mapperMock = new Mock<IMapper>();
             _boardRepositoryMock = new Mock<IBoardRepository>();
-            _ticketRepositoryMock = new Mock<ITicketRepository>();
+            _ticketRepositoryMock = new Mock<ITaskRepository>();
             _statusRepositoryMock = new Mock<IStatusRepository>();
-            _ticketTypeRepository = new Mock<ITicketTypeRepository>();
+            _ticketTypeRepository = new Mock<ITaskTypeRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 

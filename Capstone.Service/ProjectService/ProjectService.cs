@@ -28,11 +28,11 @@ public class ProjectService : IProjectService
 	private readonly IPermissionSchemaRepository _permissionScemaRepo;
 	private readonly IBoardStatusRepository _boardStatusRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly ITicketTypeRepository _ticketTypeRepository;
+	private readonly ITaskTypeRepository _ticketTypeRepository;
 	private readonly IPriorityRepository _priorityRepository;
-	private readonly ITicketRepository _ticketRepository;
+	private readonly ITaskRepository _ticketRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITicketTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITicketRepository ticketRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
