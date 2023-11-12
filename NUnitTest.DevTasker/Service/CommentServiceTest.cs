@@ -15,7 +15,7 @@ namespace NUnitTest.DevTasker.Service
     {
         private ITicketCommentService _iticketService; 
         private Mock <ITicketCommentRepository> _ticketCommentRepository;
-        private Mock <ITicketRepository> _ticketRepository;
+        private Mock <ITaskRepository> _ticketRepository;
         private Mock <IUserRepository> _userRepository;
         private Mock<IMapper> _mapper;
         private Mock<IDatabaseTransaction> _transactionMock;
@@ -23,7 +23,7 @@ namespace NUnitTest.DevTasker.Service
         public void Setup()
         {
             _ticketCommentRepository = new Mock<ITicketCommentRepository>();
-            _ticketRepository = new Mock<ITicketRepository>();
+            _ticketRepository = new Mock<ITaskRepository>();
             _mapper = new Mock<IMapper>();
             _userRepository = new Mock<IUserRepository>();
 
