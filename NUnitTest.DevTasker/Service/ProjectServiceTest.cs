@@ -29,9 +29,9 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IPermissionSchemaRepository> _permissionScemaRepo;
         private Mock<IBoardStatusRepository>  _boardStatusRepository;
-        //private Mock <ITicketRepository> _ticketRepository;
+        private Mock <ITaskRepository> _ticketRepository;
         private Mock <IUserRepository> _userRepository;
-       // private Mock <ITicketTypeRepository> _ticketTypeRepository;
+        private Mock <ITaskTypeRepository> _ticketTypeRepository;
         private Mock <IPriorityRepository> _priorityRepository;
 
         [SetUp]
@@ -48,9 +48,9 @@ namespace NUnitTest.DevTasker.Service
             _schemaRepository = new Mock<ISchemaRepository>();
             _permissionScemaRepo = new Mock<IPermissionSchemaRepository>();
             _boardStatusRepository = new Mock<IBoardStatusRepository>();
-           // _ticketRepository = new Mock<ITicketRepository>();
+            _ticketRepository = new Mock<ITaskRepository>();
             _userRepository = new Mock<IUserRepository>();
-           // _ticketTypeRepository = new Mock<ITicketTypeRepository>();
+            _ticketTypeRepository = new Mock<ITaskTypeRepository>();
             _priorityRepository = new Mock<IPriorityRepository>();
 
 
