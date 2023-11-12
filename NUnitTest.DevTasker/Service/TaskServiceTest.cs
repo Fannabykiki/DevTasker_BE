@@ -28,8 +28,8 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
         private Mock<IBoardStatusRepository> _boardStatusRepository;
-        private Mock <ITaskTypeRepository> _taskType;
-        private Mock <ISubTaskRepository> _subTaskRepository;
+        private Mock<ITaskTypeRepository> _taskType;
+        private Mock<ISubTaskRepository> _subTaskRepository;
 
         [SetUp]
         public void Setup()
@@ -56,21 +56,21 @@ namespace NUnitTest.DevTasker.Service
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            //_taskService = new TaskService(
-            //    _context,
-            //    _ticketRepositoryMock.Object,
-            //    _ticketStatusRepositoryMock.Object,
-            //    _ticketTypeRepositoryMock.Object,
-            //    _ticketHistoryRepositoryMock.Object,
-            //    _ticketTypeRepositoryMock.Object,
-            //    _mapperMock.Object,
-            //    _userRepositoryMock.Object,
-            //    _iterationRepositoryMock.Object,
-            //    _statusRepositoryMock.Object,
-            //    _boardStatusRepository.Object,
-            //   // _taskType.Object,
-            //    _subTaskRepository.Object
-            //    );
+            _taskService = new TaskService(
+                _context,
+                _ticketRepositoryMock.Object,
+                _ticketStatusRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _ticketHistoryRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _mapperMock.Object,
+                _userRepositoryMock.Object,
+                _iterationRepositoryMock.Object,
+                _statusRepositoryMock.Object,
+                _boardStatusRepository.Object,
+                _taskType.Object,
+                _subTaskRepository.Object
+                );
 
         }
         // Create Ticket
