@@ -28,6 +28,8 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
         private Mock<IBoardStatusRepository> _boardStatusRepository;
+        private Mock <ITicketTypeRepository> _taskType;
+        private Mock <ISubTaskRepository> _subTaskRepository;
 
         [SetUp]
         public void Setup()
@@ -49,6 +51,8 @@ namespace NUnitTest.DevTasker.Service
             _transactionMock = new Mock<IDatabaseTransaction>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _boardStatusRepository = new Mock<IBoardStatusRepository>();
+            _subTaskRepository = new Mock<ISubTaskRepository>();
+            _taskType = new Mock<ITicketTypeRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
@@ -63,9 +67,20 @@ namespace NUnitTest.DevTasker.Service
                 _userRepositoryMock.Object,
                 _iterationRepositoryMock.Object,
                 _statusRepositoryMock.Object,
-                _boardStatusRepository.Object);
+                _boardStatusRepository.Object,
+                _taskType.Object,
+                _subTaskRepository.Object
+                );
 
         }
+       
+			
+			
+			
+		
+			
+		
+		
 
         // Create Ticket
 
