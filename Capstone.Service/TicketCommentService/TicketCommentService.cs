@@ -8,11 +8,11 @@ namespace Capstone.Service.TicketCommentService
     public class TicketCommentService : ITicketCommentService
     {
         private readonly ITicketCommentRepository _ticketCommentRepository;
-        private readonly ITicketRepository _ticketRepository;
+        private readonly ITaskRepository _ticketRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public TicketCommentService(ITicketCommentRepository ticketCommentRepository, IMapper mapper, ITicketRepository ticketRepository, IUserRepository userRepository)
+        public TicketCommentService(ITicketCommentRepository ticketCommentRepository, IMapper mapper, ITaskRepository ticketRepository, IUserRepository userRepository)
         {
             _ticketCommentRepository = ticketCommentRepository;
             _mapper = mapper;

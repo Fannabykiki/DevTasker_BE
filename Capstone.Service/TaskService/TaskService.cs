@@ -13,25 +13,25 @@ namespace Capstone.Service.TaskService
 	public class TaskService : ITaskService
 	{
 		private readonly CapstoneContext _context;
-		private readonly ITicketRepository _ticketRepository;
+		private readonly ITaskRepository _ticketRepository;
 		private readonly ITicketStatusRepository _ticketStatusRepository;
-		private readonly ITicketTypeRepository _typeRepository;
+		private readonly ITaskTypeRepository _typeRepository;
 		private readonly ITicketHistoryRepository _ticketHistoryRepository;
-		private readonly ITicketTypeRepository _ticketTypeRepository;
+		private readonly ITaskTypeRepository _ticketTypeRepository;
 		private readonly IMapper _mapper;
 		private readonly IUserRepository _userRepository;
 		private readonly IInterationRepository _iterationRepository;
 		private readonly IStatusRepository _statusRepository;
 		private readonly IBoardStatusRepository _boardStatusRepository;
-		private readonly ITicketTypeRepository _taskType;
+		private readonly ITaskTypeRepository _taskType;
 		private readonly ISubTaskRepository _subTaskRepository;
 
 
-		public TaskService(CapstoneContext context, ITicketRepository ticketRepository,
-			ITicketStatusRepository ticketStatusRepository, ITicketTypeRepository typeRepository,
-			ITicketHistoryRepository ticketHistoryRepository, ITicketTypeRepository ticketTypeRepository,
+		public TaskService(CapstoneContext context, ITaskRepository ticketRepository,
+			ITicketStatusRepository ticketStatusRepository, ITaskTypeRepository typeRepository,
+			ITicketHistoryRepository ticketHistoryRepository, ITaskTypeRepository ticketTypeRepository,
 			IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository,
-			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITicketTypeRepository taskType, ISubTaskRepository subTaskRepository)
+			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITaskTypeRepository taskType, ISubTaskRepository subTaskRepository)
 		{
 			_context = context;
 			_ticketRepository = ticketRepository;
@@ -263,10 +263,12 @@ namespace Capstone.Service.TaskService
 			using var transaction = _boardStatusRepository.DatabaseTransaction();
 			try
 			{
+				var statusCount = await _boardStatusRepository.GetAllWithOdata(x=>x.BoardId==createNewTaskStatus.ProjectId, null);
 				var newStatus = new BoardStatus
 				{
 					BoardId = createNewTaskStatus.ProjectId,
 					BoardStatusId = Guid.NewGuid(),
+					Order = statusCount.Count() +1 ,
 					Title = createNewTaskStatus.Title
 				};
 				var status = await _boardStatusRepository.CreateAsync(newStatus);
@@ -278,6 +280,7 @@ namespace Capstone.Service.TaskService
 					BoardId = status.BoardId,
 					BoardStatusId = status.BoardStatusId,
 					Title= status.Title,
+					Order = status.Order,
 					BaseResponse = new BaseResponse
 					{	
 						IsSucceed = true,

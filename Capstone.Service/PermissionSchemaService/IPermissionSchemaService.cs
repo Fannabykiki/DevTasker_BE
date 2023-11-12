@@ -12,10 +12,10 @@ namespace Capstone.Service.PermissionSchemaService
 {
     public interface IPermissionSchemaService
     {
-        Task<List<GetSchemaResponse>> GetAllSchema();
+        Task<List<GetSchemaResponse>> GetAllSchema(bool mode);
         Task<GetSchemaResponse> GetSchemaById(Guid SchemaId);
         Task<GetSchemaResponse> GetSchemaByName(string schemaName);
-
+        Task<bool> RemoveSchemaAsync(Guid SchemaId);
         Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId);
         Task<bool> CreateNewPermissionSchema(CreateNewSchemaRequest createNewSchemaRequest);
         Task<bool> UpdateSchema(Guid schemaId, UpdateSchemaRequest updateSchemaRequest);

@@ -21,19 +21,21 @@ namespace Capstone.Common.DTOs.Iteration
 
     public class WorkItemResponse
     {
-        public Guid TicketId { get; set; }
+        public Guid TaskId { get; set; }
         public string Title { get; set; }
-        public string TicketType { get; set; }
-        public string TicketStatus { get; set; }
-        public List<TicketResponse> Tickets { get; set; }
+        public string TaskType { get; set; }
+        public Guid? StatusId { get; set; }
+        public string TaskStatus { get; set; }
+        public List<TaskResponse> Tasks { get; set; }
     }
 
-    public class TicketResponse
+    public class TaskResponse
     {
-        public Guid TicketId { get; set; }
+        public Guid TaskId { get; set; }
         public string Title { get; set; }
-        public string TicketType { get; set; }
-        public string TicketStatus { get; set; }
+        public string TaskType { get; set; }
+        public Guid? StatusId { get; set; }
+        public string TaskStatus { get; set; }
     }
 
    
