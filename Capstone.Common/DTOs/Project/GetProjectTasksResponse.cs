@@ -18,6 +18,7 @@ namespace Capstone.Common.DTOs.Project
         public UserResponse CreateBy { get; set; }
         public string TaskType { get; set; } 
         public Guid? PrevId { get; set; }
+        public Guid? StatusId { get; set; }
         public string TaskStatus { get; set; }
         public string Priority { get; set; }
         public string Interation { get; set; }

@@ -53,9 +53,7 @@ namespace Capstone.Service.IterationService
 
         public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationTasksByProjectId(Guid projectId)
         {
-            var board = await _boardRepository.GetAsync(x => x.ProjectId == projectId, null);
-            if (board == null) return null;
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == board.BoardId, null);
+            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
 
             var result = new List<GetInterrationByBoardIdResonse>();
 
