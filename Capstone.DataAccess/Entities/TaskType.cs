@@ -7,6 +7,7 @@ namespace Capstone.DataAccess.Entities
         [Key] 
         public Guid TypeId { get; set; }
         public string Title { get; set; }
-        public List<Task> Tickets { get; set; }
+        public List<Task> Tasks { get; set; }
+        public List<SubTask> SubTasks { get; set; }
     }
 }

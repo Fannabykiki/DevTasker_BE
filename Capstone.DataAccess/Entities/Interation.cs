@@ -13,5 +13,6 @@ namespace Capstone.DataAccess.Entities
         public Status Status { get; set; }
         public Board Board { get; set; }
         public List<Task> Tasks { get; set; }
+        public List<SubTask> SubTasks { get; set; }
     }
 }
