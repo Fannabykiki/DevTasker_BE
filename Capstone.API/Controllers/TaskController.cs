@@ -21,11 +21,11 @@ namespace Capstone.API.Controllers
             _taskService = taskService;
         }
 
-        [HttpGet("task")]
+        [HttpGet("kanban-task")]
         [EnableQuery()]
-        public async Task<ActionResult<UserResponse>> GetAllTask()
+        public async Task<ActionResult<UserResponse>> GetAllTask(Guid projetcId)
         {
-            var response = await _taskService.GetAllTaskAsync();
+            var response = await _taskService.GetAllTaskAsync(projetcId);
             return Ok(response);
         }
         
@@ -36,17 +36,48 @@ namespace Capstone.API.Controllers
             var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
             return Ok(response);
         }
-        
-        [HttpPost("task")]
-        public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest createTaskRequest, Guid interationId, Guid projectId,Guid statusId)
+
+		[HttpGet("task-status")]
+		[EnableQuery()]
+		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
+		{
+			var response = await _taskService.GetAllTaskStatus(projectId);
+			return Ok(response);
+		}
+
+		[HttpPost("task-status")]
+		public async Task<ActionResult<StatusTaskViewModel>> CreateNewStatus(CreateNewTaskStatus createNewTaskStatus)
+		{
+			var response = await _taskService.CreateTaskStatus(createNewTaskStatus);
+			return Ok(response);
+		}
+
+		[HttpGet("task-type")]
+		public async Task<ActionResult<StatusTaskViewModel>> GetAllTypeTaskByProjectId()
+		{
+			var response = await _taskService.GetAllTaskType();
+			return Ok(response);
+		}
+
+		[HttpPost("task")]
+        public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
-            var result = await _taskService.CreateTask(createTaskRequest, interationId,userId, projectId,statusId);
+            var result = await _taskService.CreateTask(request, userId);
 
             return Ok(result);
         }
 
-        [HttpPut("task/{tasktId}")]
+		[HttpPost("subtask")]
+		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
+		{
+			var userId = this.GetCurrentLoginUserId();
+			var result = await _taskService.CreateSubTask(request, userId);
+
+			return Ok(result);
+		}
+
+		[HttpPut("task/{taskId}")]
         public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
         {
             var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);

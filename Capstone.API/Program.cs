@@ -112,10 +112,15 @@ builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
+builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<IPriorityRepository, PriorityRepository>();
+
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
+
+builder.Services.AddScoped<ISubTaskRepository, SubTaskRepository>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
