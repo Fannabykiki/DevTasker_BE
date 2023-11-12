@@ -21,7 +21,8 @@ namespace Capstone.DataAccess.Entities
         public TaskType TicketType { get; set; }
         public Guid? PrevId { get; set; }
         public Guid? StatusId { get; set; }
-        public List<TaskComment> TaskComments { get; set; } // 1 task has many type 
+		public List<SubTask> SubTasks { get; set; } // 1 task has many type 
+		public List<TaskComment> TaskComments { get; set; } // 1 task has many type 
         public BoardStatus Status { get; set; } // just only 1 status 
         public List<TaskHistory> TaskHistories { get; set; } // many history of change
         public Guid PriorityId { get; set; }

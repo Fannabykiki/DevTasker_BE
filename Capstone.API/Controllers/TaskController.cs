@@ -21,11 +21,11 @@ namespace Capstone.API.Controllers
             _taskService = taskService;
         }
 
-        [HttpGet("task")]
+        [HttpGet("kanban-task")]
         [EnableQuery()]
-        public async Task<ActionResult<UserResponse>> GetAllTask()
+        public async Task<ActionResult<UserResponse>> GetAllTask(Guid projetcId)
         {
-            var response = await _taskService.GetAllTaskAsync();
+            var response = await _taskService.GetAllTaskAsync(projetcId);
             return Ok(response);
         }
         
@@ -68,7 +68,16 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("task/{taskId}")]
+		[HttpPost("subtask")]
+		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateTaskRequest request)
+		{
+			var userId = this.GetCurrentLoginUserId();
+			var result = await _taskService.CreateSubTask(request, userId);
+
+			return Ok(result);
+		}
+
+		[HttpPut("task/{taskId}")]
         public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
         {
             var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);

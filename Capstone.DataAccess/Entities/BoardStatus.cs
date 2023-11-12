@@ -10,6 +10,7 @@ namespace Capstone.DataAccess.Entities
 		public Guid BoardId { get; set; }
 		public Board Board { get; set; }
 		public List<Task> Tasks { get; set; }
+		public List<SubTask> SubTasks { get; set; }
 		public List<TaskHistory> TaskHistory { get; set; }
 	}
 }
