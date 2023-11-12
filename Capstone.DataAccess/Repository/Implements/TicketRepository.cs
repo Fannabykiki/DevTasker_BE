@@ -47,6 +47,7 @@ namespace Capstone.DataAccess.Repository.Implements
 						PriorityName = item.PriorityLevel.Title,
 						StartDate = item.StartDate,
 						StatusName = item.Status.Title,
+						StatusId = item.StatusId,
 						Title = item.Title,
 						TaskId = item.TaskId,
 						TypeName = item.TicketType.Title,
@@ -54,6 +55,7 @@ namespace Capstone.DataAccess.Repository.Implements
 						{
 							TaskId = m.TaskId,
 							StatusName = m.Status.Title,
+							StatusId = item.StatusId,
 							StartDate = m.StartDate,
 							TypeName = m.TaskType.Title,
 							Title = m.Title,
