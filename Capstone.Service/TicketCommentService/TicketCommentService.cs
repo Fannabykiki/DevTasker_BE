@@ -32,7 +32,7 @@ namespace Capstone.Service.TicketCommentService
                     CreateAt= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     UpdateAt= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     TaskId = comment.TaskId,
-                    Ticket = await _ticketRepository.GetAsync(x =>x.TaskId == comment.TaskId,null),
+                    Task = await _ticketRepository.GetAsync(x =>x.TaskId == comment.TaskId,null),
                     CreateBy = comment.ByUser,
                     User = await _userRepository.GetAsync(x => x.UserId == comment.ByUser,null),
                 };

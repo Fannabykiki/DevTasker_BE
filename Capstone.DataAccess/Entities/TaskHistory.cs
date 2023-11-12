@@ -14,7 +14,9 @@ namespace Capstone.DataAccess.Entities
         public Guid CurrentStatusId { get; set; } //to do => in progess FE 
         public BoardStatus BoardStatus { get; set; }
         public Guid TaskId { get; set; }
+        public Guid SubTaskId { get; set; }
         public Task Task { get; set; } // 1 history just only 1 task
+        public SubTask SubTask { get; set; } // 1 history just only 1 task
         public ProjectMember ProjectMember { get; set; } // 1 history just only 1 task
     }
 }

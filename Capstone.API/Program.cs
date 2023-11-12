@@ -120,6 +120,8 @@ builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
 
+builder.Services.AddScoped<ISubTaskRepository, SubTaskRepository>();
+
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
