@@ -82,6 +82,7 @@ public class ProjectService : IProjectService
 			{
 				BoardId = newProject.Board.BoardId,
 				Title = "To do",
+				Order = 1,
 				BoardStatusId = new Guid()
 			};
 
@@ -89,6 +90,7 @@ public class ProjectService : IProjectService
 			{
 				BoardId = newProject.Board.BoardId,
 				Title = "In Progress",
+				Order = 2,
 				BoardStatusId = new Guid()
 			};
 			
@@ -96,6 +98,7 @@ public class ProjectService : IProjectService
 			{
 				BoardId = newProject.Board.BoardId,
 				Title = "Done",
+				Order = 3,
 				BoardStatusId = new Guid()
 			};
 
