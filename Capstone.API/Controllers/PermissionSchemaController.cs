@@ -33,7 +33,16 @@ namespace Capstone.API.Controllers
         [HttpGet("schemas")]
         public async Task<ActionResult<List<GetSchemaResponse>>> GetAllSchema()
         {
-            var result = await _permissionSchemaService.GetAllSchema();
+            var result = await _permissionSchemaService.GetAllSchema(true);
+
+            return Ok(result);
+        }
+        
+        [EnableQuery]
+        [HttpGet("schemas/deleted")]
+        public async Task<ActionResult<List<GetSchemaResponse>>> GetAllSchemaDeleted()
+        {
+            var result = await _permissionSchemaService.GetAllSchema(false);
 
             return Ok(result);
         }
@@ -42,7 +51,10 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> GetSchemaById(Guid schemaId)
         {
             var result = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
-
+            if(result == null)
+            {
+                return BadRequest("Schema not existed!");
+            }
             return Ok(result);
         }
 
@@ -90,7 +102,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                return StatusCode(500);
+                return BadRequest("Schema not existed!");
             }
         }
         
@@ -105,8 +117,24 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                return StatusCode(500);
+                return BadRequest("Schema not existed!");
             }
+        }
+
+        [HttpDelete("system/schema/{schemaId}")]
+        public async Task<ActionResult<GetRoleResponse>> RemoveeRole(Guid schemaId)
+        {
+            var role = await _permissionSchemaService.GetSchemaById(schemaId);
+            if (role == null)
+            {
+                return BadRequest("Schema not existed!");
+            }
+            var isRemoved = await _permissionSchemaService.RemoveSchemaAsync(schemaId);
+            if (isRemoved == false)
+            {
+                return BadRequest("CAN NOT Removed schema!");
+            }
+            return Ok(isRemoved);
         }
 
     }
