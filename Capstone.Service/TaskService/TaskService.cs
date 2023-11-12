@@ -263,10 +263,12 @@ namespace Capstone.Service.TaskService
 			using var transaction = _boardStatusRepository.DatabaseTransaction();
 			try
 			{
+				var statusCount = await _boardStatusRepository.GetAllWithOdata(x=>x.BoardId==createNewTaskStatus.ProjectId, null);
 				var newStatus = new BoardStatus
 				{
 					BoardId = createNewTaskStatus.ProjectId,
 					BoardStatusId = Guid.NewGuid(),
+					Order = statusCount.Count() +1 ,
 					Title = createNewTaskStatus.Title
 				};
 				var status = await _boardStatusRepository.CreateAsync(newStatus);
@@ -278,6 +280,7 @@ namespace Capstone.Service.TaskService
 					BoardId = status.BoardId,
 					BoardStatusId = status.BoardStatusId,
 					Title= status.Title,
+					Order = status.Order,
 					BaseResponse = new BaseResponse
 					{	
 						IsSucceed = true,

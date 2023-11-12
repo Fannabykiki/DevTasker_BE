@@ -12,10 +12,10 @@ namespace Capstone.DataAccess.Entities
         public DateTime? UpdateAt { get; set; }
         public Guid? TaskId { get; set; }
         public Guid? SubTaskId { get; set; }
-        public Guid AttachmentId { get; set; }
-        public List<Attachment> Attachments { get; set; }
-        public Task Task  { get; set; } // 1 comment just only in 1 task
-        public SubTask SubTask  { get; set; } // 1 comment just only in 1 task
+        public Guid? AttachmentId { get; set; }
+        public List<Attachment>? Attachments { get; set; }
+        public Task? Task  { get; set; } // 1 comment just only in 1 task
+        public SubTask? SubTask  { get; set; } // 1 comment just only in 1 task
         public Guid CreateBy { get; set; }
         public User User { get; set; } // 1 comment just create by 1 user
     }
