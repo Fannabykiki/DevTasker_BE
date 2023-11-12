@@ -14,8 +14,8 @@ namespace Capstone.DataAccess.Entities
         public Guid? CommentId { get; set; }
         public Guid CreateBy { get; set; }
         public ProjectMember ProjectMember { get; set; }
-        public Task Task { get; set; } //1 Attachment just only in 1 task
-        public SubTask SubTask { get; set; } //1 Attachment just only in 1 task
-        public TaskComment TaskComment { get; set; } // 1 Attachment has 1 comment
+        public Task? Task { get; set; } //1 Attachment just only in 1 task
+        public SubTask? SubTask { get; set; } //1 Attachment just only in 1 task
+        public TaskComment? TaskComment { get; set; } // 1 Attachment has 1 comment
     }
 }
