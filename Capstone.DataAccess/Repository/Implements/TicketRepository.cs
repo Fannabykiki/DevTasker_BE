@@ -15,7 +15,6 @@ namespace Capstone.DataAccess.Repository.Implements
 
 		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
 		{
-			var interationList = await _context.Interations.Where(x => x.BoardId == projectId).ToListAsync();
 			var taskList = await _context.Tasks
 								.Where(x => x.Interation.BoardId == projectId)
 								.Select(x => new TaskViewModel
