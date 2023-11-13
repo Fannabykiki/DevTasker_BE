@@ -329,7 +329,7 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tasks",
+                name: "SubTasks",
                 columns: table => new
                 {
                     TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -432,7 +432,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_SubTask_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "Tasks",
+                        principalTable: "SubTasks",
                         principalColumn: "TaskId");
                     table.ForeignKey(
                         name: "FK_SubTask_TaskTypes_TypeId",
@@ -469,7 +469,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_TaskComments_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "Tasks",
+                        principalTable: "SubTasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -521,7 +521,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_TaskHistories_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "Tasks",
+                        principalTable: "SubTasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -562,7 +562,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Attachments_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "Tasks",
+                        principalTable: "SubTasks",
                         principalColumn: "TaskId");
                 });
 
@@ -718,27 +718,27 @@ namespace Capstone.DataAccess.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_AssignTo",
-                table: "Tasks",
+                table: "SubTasks",
                 column: "AssignTo");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_InterationId",
-                table: "Tasks",
+                table: "SubTasks",
                 column: "InterationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_PriorityId",
-                table: "Tasks",
+                table: "SubTasks",
                 column: "PriorityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_StatusId",
-                table: "Tasks",
+                table: "SubTasks",
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_TypeId",
-                table: "Tasks",
+                table: "SubTasks",
                 column: "TypeId");
 
             migrationBuilder.CreateIndex(
@@ -771,7 +771,7 @@ namespace Capstone.DataAccess.Migrations
                 name: "SubTask");
 
             migrationBuilder.DropTable(
-                name: "Tasks");
+                name: "SubTasks");
 
             migrationBuilder.DropTable(
                 name: "BoardStatus");

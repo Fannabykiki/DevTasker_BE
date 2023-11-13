@@ -11,7 +11,7 @@ namespace Capstone.DataAccess.Migrations
         {
             migrationBuilder.AddColumn<DateTime>(
                 name: "ExprireTime",
-                table: "Tasks",
+                table: "SubTasks",
                 type: "datetime2",
                 nullable: true);
 
@@ -44,7 +44,7 @@ namespace Capstone.DataAccess.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "ExprireTime",
-                table: "Tasks");
+                table: "SubTasks");
 
             migrationBuilder.DropColumn(
                 name: "ExprireTime",
