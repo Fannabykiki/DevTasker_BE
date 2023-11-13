@@ -48,7 +48,7 @@ static IEdmModel GetEdmModel()
     builder.EntitySet<Permission>("Permissions");
     builder.EntitySet<Project>("Projects");
     builder.EntitySet<Role>("Roles");
-    builder.EntitySet<Capstone.DataAccess.Entities.Task>("Tasks");
+    builder.EntitySet<Capstone.DataAccess.Entities.Task>("SubTasks");
     builder.EntitySet<TaskComment>("TaskComments");
     builder.EntitySet<TaskHistory>("TaskHistorys");
     builder.EntitySet<TaskType>("TaskTypes");
