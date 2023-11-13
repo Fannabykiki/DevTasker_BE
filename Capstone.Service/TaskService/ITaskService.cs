@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.TaskPriority;
 using Capstone.DataAccess.Entities;
 using Task = Capstone.DataAccess.Entities.Task;
 
@@ -15,5 +16,6 @@ namespace Capstone.Service.TicketService
 		Task<StatusTaskViewModel>  CreateTaskStatus(CreateNewTaskStatus createNewTaskStatus);
 		Task<List<StatusTaskViewModel>> GetAllTaskStatus(Guid projectId);
 		Task<List<TaskTypeViewModel>> GetAllTaskType();
+		Task<List<GetAllTaskPriority>> GetAllTaskPriotiry();
 	}
 }
