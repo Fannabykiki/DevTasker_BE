@@ -16,7 +16,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false)
+								.Where(x => x.Interation.BoardId == projectId)
 								.Select(x => new TaskViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
@@ -35,7 +35,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
-														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false)
+														.Where(m => m.PrevId == x.TaskId)
 														.Select(m => new TaskViewModel
 															{
 															TaskId = m.TaskId,

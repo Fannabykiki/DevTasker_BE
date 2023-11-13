@@ -70,6 +70,7 @@ public class ProjectService : IProjectService
 				PrivacyStatus = createProjectRequest.PrivacyStatus,
 				StatusId = Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"),
 				CreateBy = userId,
+				IsDelete = false,
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
 				Board = new Board

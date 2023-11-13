@@ -124,7 +124,8 @@ namespace Capstone.Service.PermissionSchemaService
                 var schema = new Schema
                 {
                     SchemaName = request.SchemaName,
-                    Description = request.Description
+                    Description = request.Description,
+                    IsDelete = false
                 };
                 var newSchema = await _schemaRepository.CreateAsync(schema);
                 var permissions = _permissionRepository.GetAllAsync(x => true, null);
