@@ -115,7 +115,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_SubTask_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "Tasks",
+                        principalTable: "SubTasks",
                         principalColumn: "TaskId");
                     table.ForeignKey(
                         name: "FK_SubTask_TaskTypes_TypeId",

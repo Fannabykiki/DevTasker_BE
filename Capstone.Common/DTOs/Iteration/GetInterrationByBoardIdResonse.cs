@@ -1,4 +1,6 @@
-﻿using Capstone.Common.Enums;
+﻿using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.User;
+using Capstone.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,27 +18,49 @@ namespace Capstone.Common.DTOs.Iteration
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid BoardId { get; set; }
-        public List<WorkItemResponse>? workItemResponses { get; set; }
+        public List<TaskViewModel>? Tasks { get; set; }
     }
 
-    public class WorkItemResponse
-    {
-        public Guid TaskId { get; set; }
-        public string Title { get; set; }
-        public string TaskType { get; set; }
-        public Guid? StatusId { get; set; }
-        public string TaskStatus { get; set; }
-        public List<TaskResponse> Tasks { get; set; }
-    }
+    //public class Tasks
+    //{
+    //    public Guid TaskId { get; set; }
+    //    public string Title { get; set; }
+    //    public string? Decription { get; set; }
+    //    public DateTime StartDate { get; set; }
+    //    public DateTime DueDate { get; set; }
+    //    public DateTime CreateTime { get; set; }
+    //    public DateTime? DeleteAt { get; set; }
+    //    public bool? IsDelete { get; set; }
+    //    public UserResponse AssignTo { get; set; }
+    //    public UserResponse CreateBy { get; set; }
+    //    public string TypeName { get; set; }
+    //    public string? StatusName { get; set; }
+    //    public Guid? StatusId { get; set; }
+    //    public Guid? TypeId { get; set; }
+    //    public string PriorityName { get; set; }
+    //    public string InterationName { get; set; }
+    //    public List<TaskResponse> SubTasks { get; set; }
+    //}
 
-    public class TaskResponse
-    {
-        public Guid TaskId { get; set; }
-        public string Title { get; set; }
-        public string TaskType { get; set; }
-        public Guid? StatusId { get; set; }
-        public string TaskStatus { get; set; }
-    }
+    //public class TaskResponse
+    //{
+    //    public Guid TaskId { get; set; }
+    //    public string Title { get; set; }
+    //    public string? Decription { get; set; }
+    //    public DateTime StartDate { get; set; }
+    //    public DateTime DueDate { get; set; }
+    //    public DateTime CreateTime { get; set; }
+    //    public DateTime? DeleteAt { get; set; }
+    //    public bool? IsDelete { get; set; }
+    //    public UserResponse AssignTo { get; set; }
+    //    public UserResponse CreateBy { get; set; }
+    //    public string TypeName { get; set; }
+    //    public string? StatusName { get; set; }
+    //    public Guid? StatusId { get; set; }
+    //    public Guid? TypeId { get; set; }
+    //    public string PriorityName { get; set; }
+    //    public string InterationName { get; set; }
+    //}
 
    
 }
