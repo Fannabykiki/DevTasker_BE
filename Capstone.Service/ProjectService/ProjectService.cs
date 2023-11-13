@@ -1,7 +1,7 @@
 
 using AutoMapper;
 using Capstone.Common.DTOs.Base;
-using Capstone.Common.DTOs.Paging;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -582,4 +582,10 @@ public class ProjectService : IProjectService
 		}
 		return results;
     }
+
+	public async Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId)
+	{
+		var results = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, x => x.Status);
+		return _mapper.Map<List<InterationViewModel>>(results);
+	}
 }

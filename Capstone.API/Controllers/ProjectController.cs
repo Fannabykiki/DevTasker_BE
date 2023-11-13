@@ -1,4 +1,5 @@
 using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
@@ -196,8 +197,21 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        //[MiddlewareFilter(typeof(AuthorizationMiddleware))]
-        [EnableQuery]
+		[EnableQuery]
+		[HttpGet("projects/interation/{projectId:Guid}")]
+		public async Task<ActionResult<IQueryable<InterationViewModel>>> GetInterationByProjectId(Guid projectId)
+		{
+			var result = await _projectService.GetInterationByProjectId(projectId);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+
+			return Ok(result);
+		}
+
+		//[MiddlewareFilter(typeof(AuthorizationMiddleware))]
+		[EnableQuery]
         [HttpGet("projects/info/{projectId:Guid}")]
         public async Task<ActionResult<ViewProjectInfoRequest>> GetFullInfoProjectByProjectId(Guid projectId)
         {
