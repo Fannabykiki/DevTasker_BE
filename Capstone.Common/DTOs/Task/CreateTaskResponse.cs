@@ -4,7 +4,6 @@ namespace Capstone.Common.DTOs.Task;
 
 public class CreateTaskResponse
 {
-	public Guid? SubTaskId { get; set; }
 	public Guid TaskId { get; set; }
     public string Title  { get; set; }
     public string? Decription { get; set; }
@@ -17,6 +16,7 @@ public class CreateTaskResponse
     public Guid CreateBy { get; set; }
     public Guid TypeId { get; set; } // 1 task has many type 
     public string? Status { get; set; }
+    public Guid? StatusId { get; set; }
     public Guid PriorityId { get; set; }
     public Guid InterationId { get; set; }
     public BaseResponse BaseResponse { get; set; }

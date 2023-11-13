@@ -63,6 +63,10 @@ namespace Capstone.API.Controllers
         public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
+            if(userId == null)
+            {
+                return BadRequest("You need login first");
+            }
             var result = await _taskService.CreateTask(request, userId);
 
             return Ok(result);
@@ -72,6 +76,10 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
 			var userId = this.GetCurrentLoginUserId();
+			if (userId == null)
+			{
+				return BadRequest("You need login first");
+			}
 			var result = await _taskService.CreateSubTask(request, userId);
 
 			return Ok(result);
