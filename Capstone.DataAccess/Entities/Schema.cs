@@ -9,6 +9,7 @@ namespace Capstone.DataAccess.Entities
         public string? Description { get; set; }
         public bool? IsDelete { get; set; }
         public DateTime? DeleteAt { get; set; }
+        public DateTime? ExprireTime { get; set; }
         public List<SchemaPermission> SchemaPermissions { get; set; }
     }
 }

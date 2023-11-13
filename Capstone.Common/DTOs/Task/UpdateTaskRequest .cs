@@ -2,6 +2,7 @@
 {
     public class UpdateTaskRequest
     {
+        public Guid TaskId { get; set; }
         public string Title { get; set; }
         public string? Decription { get; set; }
         public DateTime DueDate { get; set; }

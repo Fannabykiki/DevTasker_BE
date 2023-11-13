@@ -9,6 +9,7 @@ namespace Capstone.DataAccess.Entities
         public string Title { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
+        public DateTime? ExprireTime { get; set; }
         public Guid? TaskId { get; set; } //2
         public Guid? CommentId { get; set; }
         public Guid CreateBy { get; set; }
