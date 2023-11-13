@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Paging;
+﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
@@ -12,14 +13,14 @@ public interface IProjectService
 	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
-    Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest);
+    Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest);
 	Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId);
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);
-	Task<bool> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
-	Task<bool> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);
-	Task<bool> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest);
-	Task<bool> DeleteProject(Guid projectId);
-	Task<bool> RestoreProject(Guid projectId);
+	Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
+	Task<BaseResponse> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);
+	Task<BaseResponse> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest);
+	Task<BaseResponse> DeleteProject(Guid projectId);
+	Task<BaseResponse> RestoreProject(Guid projectId);
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
 	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);

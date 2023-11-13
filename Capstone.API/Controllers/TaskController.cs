@@ -1,4 +1,5 @@
 ﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
@@ -22,15 +23,23 @@ namespace Capstone.API.Controllers
             _taskService = taskService;
         }
 
-        [HttpGet("kanban-task")]
+        [HttpGet("tasks/kanban")]
         [EnableQuery()]
-        public async Task<ActionResult<UserResponse>> GetAllTask(Guid projetcId)
+        public async Task<ActionResult<List<TaskViewModel>>> GetAllTask(Guid projetcId)
         {
             var response = await _taskService.GetAllTaskAsync(projetcId);
             return Ok(response);
         }
-        
-        [HttpGet("task/{task}")]
+
+		[HttpGet("tasks/bin")]
+		[EnableQuery()]
+		public async Task<ActionResult<TaskViewModel>> GetAllTaskDelete(Guid projetcId)
+		{
+			var response = await _taskService.GetAllTaskDeleteAsync(projetcId);
+			return Ok(response);
+		}
+
+		[HttpGet("task/{task}")]
         [EnableQuery()]
         public async Task<ActionResult<UserResponse>> GetAllTaskByInterationId(Guid interationId)
         {
@@ -38,7 +47,7 @@ namespace Capstone.API.Controllers
             return Ok(response);
         }
 
-		[HttpGet("task-status")]
+		[HttpGet("tasks/status")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
 		{
@@ -46,7 +55,7 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
-		[HttpGet("task-priority")]
+		[HttpGet("tasks/priority")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<GetAllTaskPriority>>> GetAllTaskPriotiry()
 		{
@@ -54,21 +63,29 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
-		[HttpPost("task-status")]
+		[HttpPost("tasks/status")]
 		public async Task<ActionResult<StatusTaskViewModel>> CreateNewStatus(CreateNewTaskStatus createNewTaskStatus)
 		{
 			var response = await _taskService.CreateTaskStatus(createNewTaskStatus);
 			return Ok(response);
 		}
 
-		[HttpGet("task-type")]
+		[HttpPost("tasks/restoration")]
+		public async Task<ActionResult<BaseResponse>> RestoreTask(Guid taskId)
+		{
+			var response = await _taskService.RestoreTask(taskId);
+			return Ok(response);
+		}
+
+
+		[HttpGet("tasks/type")]
 		public async Task<ActionResult<StatusTaskViewModel>> GetAllTypeTaskByProjectId()
 		{
 			var response = await _taskService.GetAllTaskType();
 			return Ok(response);
 		}
 
-		[HttpPost("task")]
+		[HttpPost("tasks")]
         public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
@@ -81,7 +98,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-		[HttpPost("subtask")]
+		[HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
 			var userId = this.GetCurrentLoginUserId();
@@ -94,15 +111,15 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpPut("task/{taskId}")]
-        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest, Guid ticketId)
+		[HttpPut("tasks/{taskId}")]
+        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
         {
-            var result = await _taskService.UpdateTask(updateTicketRequest, ticketId);
+            var result = await _taskService.UpdateTask(updateTicketRequest);
 
             return Ok(result);
         }
         
-        [HttpPut("task/delete/{taskId}")]
+        [HttpPut("task/deletion/{taskId}")]
         public async Task<IActionResult> DeleteTicket(Guid ticketId)
         {
             var result = await _taskService.DeleteTask( ticketId);
