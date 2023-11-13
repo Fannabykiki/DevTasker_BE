@@ -128,7 +128,7 @@ namespace NUnitTest.DevTasker.Service
              var request = new CreateTicketRequest
              {
                  Title = "Test Ticket",
-                 Decription = "Test Description",
+                 Description = "Test Description",
                  StartDate = DateTime.Now,
                  DueDate = DateTime.Now.AddMinutes(-30),  
                  CreateTime = DateTime.Now,
@@ -156,7 +156,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTicketRequest
             {
                 Title = new string('A', 256), 
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddMinutes(30),
                 CreateTime = DateTime.Now,

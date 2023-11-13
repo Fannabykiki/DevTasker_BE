@@ -95,7 +95,7 @@ namespace Capstone.Service.IterationService
         //            {
         //                TaskId = Task.TaskId,
         //                Title = Task.Title,
-        //                Decription = Task.Decription,
+        //                Description = Task.Description,
         //                StartDate = Task.StartDate,
         //                DueDate = Task.DueDate,
         //                CreateTime = Task.CreateTime,
