@@ -10,6 +10,6 @@ namespace Capstone.Common.DTOs.Comments
         public DateTime? DeleteAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public Guid TaskId { get; set; }
-        public GetUserCommentResponse CreateByUser { get; set; } // 1 comment just create by 1 user
+        public GetUserCommentResponse User { get; set; } // 1 comment just create by 1 user
     }
 }

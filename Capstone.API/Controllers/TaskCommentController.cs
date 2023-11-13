@@ -1,6 +1,7 @@
 ﻿using Capstone.Common.DTOs.Comments;
 using Capstone.Service.TicketCommentService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
@@ -8,9 +9,9 @@ namespace Capstone.API.Controllers
     [ApiController]
     public class TaskCommentController : ControllerBase
     {
-        private readonly ITicketCommentService _commentService;
+        private readonly ITaskCommentService _commentService;
 
-        public TaskCommentController(ITicketCommentService commentService)
+        public TaskCommentController(ITaskCommentService commentService)
         {
             _commentService = commentService;
         }
@@ -33,16 +34,17 @@ namespace Capstone.API.Controllers
             var success = await _commentService.RemoveComment(commentId);
             if (!success)
             {
-                return NotFound("Comment not found or unable to delete.");
+                return NotFound("Comment not found or Unable to delete.");
             }
 
             return Ok("Comment deleted.");
         }
 
-        [HttpGet("/comment/{ticketId}")]
-        public async Task<IActionResult> GetAllCommentByTaskID(Guid ticketId)
+        [EnableQuery]
+        [HttpGet("/comment/{taskId}")]
+        public async Task<IActionResult> GetAllCommentByTaskID(Guid taskId)
         {
-            var comments = await _commentService.GetAllCommentByTaskID(ticketId);
+            var comments = await _commentService.GetAllCommentByTaskID(taskId);
             return Ok(comments);
         }
 
@@ -52,7 +54,7 @@ namespace Capstone.API.Controllers
             var updated = await _commentService.UpdateComment(id, updatedComment);
             if (updated == null)
             {
-                return NotFound("Comment not found or unable to update.");
+                return NotFound("Comment not found or Unable to update.");
             }
 
             return Ok(updated);
