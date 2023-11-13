@@ -16,7 +16,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.Interation.BoardId == projectId)
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false)
 								.Select(x => new TaskViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
@@ -35,7 +35,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
-														.Where(m => m.PrevId == x.TaskId)
+														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false)
 														.Select(m => new TaskViewModel
 															{
 															TaskId = m.TaskId,
@@ -54,6 +54,31 @@ namespace Capstone.DataAccess.Repository.Implements
 															IsDelete = m.IsDelete,
 															DeleteAt = m.DeleteAt,
 															}).ToList(),
+								}).ToListAsync();
+			return taskList;
+		}
+
+		public async Task<List<TaskViewModel>> GetAllTaskDelete(Guid projectId)
+		{
+			var taskList = await _context.Tasks
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == true)
+								.Select(x => new TaskViewModel
+								{
+									AssignTo = x.ProjectMember.Users.UserName,
+									CreateBy = x.ProjectMember.Users.UserName,
+									CreateTime = x.CreateTime,
+									Decription = x.Decription,
+									DeleteAt = x.DeleteAt,
+									DueDate = x.DueDate,
+									InterationName = x.Interation.InterationName,
+									IsDelete = x.IsDelete,
+									PriorityName = x.PriorityLevel.Title,
+									StartDate = x.StartDate,
+									StatusName = x.Status.Title,
+									StatusId = x.StatusId,
+									Title = x.Title,
+									TaskId = x.TaskId,
+									TypeName = x.TicketType.Title,
 								}).ToListAsync();
 			return taskList;
 		}

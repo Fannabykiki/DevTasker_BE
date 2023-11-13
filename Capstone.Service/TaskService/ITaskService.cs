@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Task;
+﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.DataAccess.Entities;
 using Task = Capstone.DataAccess.Entities.Task;
@@ -9,13 +10,15 @@ namespace Capstone.Service.TicketService
     {
         Task<CreateTaskResponse> CreateTask(CreateTaskRequest request, Guid userId);
         Task<CreateTaskResponse> CreateSubTask(CreateSubTaskRequest request, Guid userId);
-        Task<bool> UpdateTask(UpdateTaskRequest updateTicketRequest, Guid ticketId);
+        Task<CreateTaskResponse> UpdateTask(UpdateTaskRequest updateTicketRequest);
         Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId);
         Task<IQueryable<Task>> GetAllTaskByInterationIdAsync(Guid interationId);
-        Task<bool> DeleteTask(Guid ticketId);
+        Task<BaseResponse> DeleteTask(Guid ticketId);
 		Task<StatusTaskViewModel>  CreateTaskStatus(CreateNewTaskStatus createNewTaskStatus);
 		Task<List<StatusTaskViewModel>> GetAllTaskStatus(Guid projectId);
 		Task<List<TaskTypeViewModel>> GetAllTaskType();
 		Task<List<GetAllTaskPriority>> GetAllTaskPriotiry();
+		Task<BaseResponse> RestoreTask(Guid taskId);
+		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
 	}
 }

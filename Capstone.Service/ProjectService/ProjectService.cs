@@ -1,5 +1,6 @@
 
 using AutoMapper;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
@@ -223,7 +224,7 @@ public class ProjectService : IProjectService
 		return listProjectAnalyze;
 	}
 
-	public async Task<bool> CreateProjectRole(CreateRoleRequest createRoleRequest)
+	public async Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -239,12 +240,12 @@ public class ProjectService : IProjectService
 			await _roleRepository.SaveChanges();
 
 			transaction.Commit();
-			return true;
+			return new BaseResponse { IsSucceed = true, Message = "Create Project Role successfully" };
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse { IsSucceed = false, Message = "Create Project Role fail" };
 		}
 	}
 
@@ -255,7 +256,7 @@ public class ProjectService : IProjectService
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
-	public async Task<bool> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -265,7 +266,7 @@ public class ProjectService : IProjectService
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
 			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true)
 			{
-				return false;
+				return new BaseResponse { IsSucceed = false, Message = "Update Member Role successfully" };
 			}
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
@@ -274,16 +275,16 @@ public class ProjectService : IProjectService
 
 			transaction.Commit();
 
-			return true;
+			return new BaseResponse { IsSucceed = true, Message = "Update Member Role successfully" };
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse { IsSucceed = false, Message = "Update Member Role fail" };
 		}
 	}
 
-	public async Task<bool> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo)
+	public async Task<BaseResponse> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -294,16 +295,16 @@ public class ProjectService : IProjectService
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
-			return true;
+			return new BaseResponse { IsSucceed = true, Message = "Update Project Info successfully" };
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse { IsSucceed = false, Message = "Update Project Privacy fail" };
 		}
 	}
 
-	public async Task<bool> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
+	public async Task<BaseResponse> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -313,16 +314,16 @@ public class ProjectService : IProjectService
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
-			return true;
+			return new BaseResponse { IsSucceed = true, Message = "Update Project Privacy successfully" };
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse { IsSucceed = false, Message = "Update Project Privacy fail" };
 		}
 	}
 
-	public async Task<bool> DeleteProject(Guid projectId)
+	public async Task<BaseResponse> DeleteProject(Guid projectId)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -334,16 +335,16 @@ public class ProjectService : IProjectService
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
-			return true;
+			return new BaseResponse { IsSucceed = true, Message = "Delete successfully" };
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse { IsSucceed = false, Message = "Delete fail" };
 		}
 	}
 
-	public async Task<bool> RestoreProject(Guid projectId)
+	public async Task<BaseResponse> RestoreProject(Guid projectId)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -355,12 +356,20 @@ public class ProjectService : IProjectService
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
-			return true;
+			return new BaseResponse
+			{
+				IsSucceed = true,
+				Message = "Restore successfully"
+			};
 		}
 		catch (Exception)
 		{
 			transaction.RollBack();
-			return false;
+			return new BaseResponse
+			{
+				IsSucceed = false,
+				Message = "Restore fail"
+			};
 		}
 	}
 

@@ -13,6 +13,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime DueDate { get; set; }
         public DateTime CreateTime{ get; set; }
         public DateTime? DeleteAt { get; set; }
+        public DateTime? ExprireTime { get; set; }
         public bool? IsDelete { get; set; }
         public Guid AssignTo { get; set; }
         public Guid CreateBy { get; set; }

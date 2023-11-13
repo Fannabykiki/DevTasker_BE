@@ -140,7 +140,7 @@ namespace Capstone.Service.IterationService
                     StartDate = DateTime.Parse(createIterationRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     EndDate = DateTime.Parse(createIterationRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     BoardId = createIterationRequest.ProjectId,
-                   StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A")
+                    StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A")
                 };
 
                 var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
@@ -159,6 +159,7 @@ namespace Capstone.Service.IterationService
                     StartDate = newIteration.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     InterationId = newIteration.InterationId,
                     InterationName = newIteration.InterationName,
+                    StatusId = newIteration.StatusId,
                     Response = new Common.DTOs.Base.BaseResponse
                     {
                         IsSucceed = true,

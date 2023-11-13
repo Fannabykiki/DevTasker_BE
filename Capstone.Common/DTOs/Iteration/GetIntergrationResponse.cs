@@ -10,6 +10,7 @@ namespace Capstone.Common.DTOs.Iteration
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public Guid BoardId { get; set; }
+        public Guid StatusId { get; set; }
         public BaseResponse Response { get; set; }
     }
 }
