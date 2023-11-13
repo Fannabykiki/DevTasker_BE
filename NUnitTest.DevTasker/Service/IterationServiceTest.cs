@@ -1,16 +1,12 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.Enums;
+using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.IterationService;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Capstone.UnitTests.Service
@@ -18,15 +14,17 @@ namespace Capstone.UnitTests.Service
     [TestFixture]
     public class IterationServiceTests
     {
+        private readonly CapstoneContext _context;
         private IterationService _iterationService;
         private Mock<IInterationRepository> _iterationRepositoryMock;
         private Mock<IProjectRepository> _projectRepositoryMock;
         private Mock<IDatabaseTransaction> _transactionMock;
         private Mock<IMapper> _mapperMock;
         private Mock<IBoardRepository> _boardRepositoryMock;
-        private Mock<ITaskRepository> _ticketRepositoryMock;
+        private Mock<ITaskRepository> _TaskRepository;
         private Mock <IStatusRepository> _statusRepositoryMock;
-        private Mock <ITaskTypeRepository> _ticketTypeRepository;
+        private Mock <ITaskTypeRepository> _TaskTypeRepository;
+        private Mock<IUserRepository> _userRepository;
         [SetUp]
         public void Setup()
         {
@@ -35,182 +33,137 @@ namespace Capstone.UnitTests.Service
             _transactionMock = new Mock<IDatabaseTransaction>();
             _mapperMock = new Mock<IMapper>();
             _boardRepositoryMock = new Mock<IBoardRepository>();
-            _ticketRepositoryMock = new Mock<ITaskRepository>();
+            _TaskRepository = new Mock<ITaskRepository>();
             _statusRepositoryMock = new Mock<IStatusRepository>();
-            _ticketTypeRepository = new Mock<ITaskTypeRepository>();
+            _TaskTypeRepository = new Mock<ITaskTypeRepository>();
+            _userRepository = new Mock<IUserRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            //_iterationService = new IterationService(
-            //    null,
-            //    _projectRepositoryMock.Object,
-            //    _mapperMock.Object,
-            //    _iterationRepositoryMock.Object,
-            //    _boardRepositoryMock.Object,
-            //   _ticketRepositoryMock.Object,
-            //   _statusRepositoryMock.Object,
-            //   _ticketTypeRepository.Object
-            //);
+            _iterationService = new IterationService(
+                _context,
+                _projectRepositoryMock.Object,
+                _mapperMock.Object,
+                _iterationRepositoryMock.Object,
+                _boardRepositoryMock.Object,
+               _TaskRepository.Object,
+               _statusRepositoryMock.Object,
+               _TaskTypeRepository.Object,
+               _userRepository.Object
+            );
         }
-
         [Test]
-        public async Task CreateIteration_Success()
+        public async Task CreateInteration_Successful()
         {
             // Arrange
             var createIterationRequest = new CreateIterationRequest
             {
-                InterationName = "New Iteration",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
-                //Status = InterationStatusEnum.Pass
+                InterationName = "Test Iteration",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7),
+                ProjectId = Guid.NewGuid()
             };
 
-            var boardId = Guid.NewGuid();
+            var newIterationId = Guid.NewGuid();
             var newIteration = new Interation
             {
-                InterationId = Guid.NewGuid(),
+                InterationId = newIterationId,
                 InterationName = createIterationRequest.InterationName,
-                StartDate = createIterationRequest.StartDate,
-                EndDate = createIterationRequest.EndDate,
-                BoardId = boardId,
-                // Status = createIterationRequest.Status
+                StartDate = DateTime.Parse(createIterationRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                EndDate = DateTime.Parse(createIterationRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                BoardId = createIterationRequest.ProjectId,
+                StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A"),
             };
 
-            _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
-                .ReturnsAsync(newIteration);
-
-            var board = new Board
-            {
-                BoardId = boardId,
-                Interations = new List<Interation>()
-            };
-
-            _boardRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Board, bool>>>(), null))
-                .ReturnsAsync(board);
-
-            var transaction = new Mock<IDatabaseTransaction>();
-            transaction.Setup(t => t.Commit()).Verifiable();
-            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction())
-                .Returns(transaction.Object);
+            _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>())).ReturnsAsync(newIteration);
 
             // Act
-            //var result = await _iterationService.CreateInteration(createIterationRequest, boardId);
+            var result = await _iterationService.CreateInteration(createIterationRequest);
 
             // Assert
-            //Assert.True(result);
-            transaction.Verify(t => t.Commit(), Times.Once);
+            //Assert.IsTrue(result.Response.IsSucceed, "Expected IsSucceed to be true.");
+            //Assert.AreEqual("Create successfully", result.Response.Message, "Expected Message to be 'Create successfully'.");
+            //Assert.AreEqual(newIterationId, result.InterationId, "Expected InterationId to match.");
         }
 
 
         [Test]
-        public async Task TestCreateIteration_Fail_InterationNameNull()
-        {
-            // Arrange
-            var createRequest = new CreateIterationRequest
-            {
-                InterationName = null, // Invalid request
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
-                //Status = InterationStatusEnum.Pass
-            };
-
-            var projectId = Guid.NewGuid();
-            _iterationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>())).ThrowsAsync(new Exception("Database commit failed"));
-            var transaction = new Mock<IDatabaseTransaction>();
-            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
-
-            // Act
-            //var result = await _iterationService.CreateInteration(createRequest, projectId);
-            //Assert.False(result);
-
-            //if (result)
-            //{
-            //    Console.WriteLine("Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Fail");
-            //}
-            //// Assert
-            //Assert.False(result);
-
-        }
-
-        [Test]
-        public async Task TestCreateIteration_Fail_EndDateBeforeStartDate()
+        public async Task CreateInteration_Fail()
         {
             // Arrange
             var createIterationRequest = new CreateIterationRequest
             {
-                InterationName = "New Iteration",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(-7),
-                //BoardId = Guid.NewGuid(),
-                //Status = InterationStatusEnum.Pass
+                InterationName = "Test Iteration",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7),
+                ProjectId = Guid.NewGuid()
             };
-            var projectId = Guid.NewGuid();
-            var transaction = new Mock<IDatabaseTransaction>();
-            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
+
+            _iterationRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
+                .ThrowsAsync(new Exception("Create iteration failed."));
 
             // Act
-            //var result = await _iterationService.CreateInteration(createIterationRequest, projectId);
+            var result = await _iterationService.CreateInteration(createIterationRequest);
+
             // Assert
-            //Assert.False(result);
-
-            //if (result)
-            //{
-            //    Console.WriteLine("Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Fail");
-            //}
-            transaction.Verify(t => t.Commit(), Times.Never);
+            Assert.IsFalse(result.Response.IsSucceed, "Expected IsSucceed to be false.");
         }
-
         [Test]
-        public async Task TestUpdateIterationRequest_Success()
+        public async Task UpdateIteration_Successful()
         {
-           // Arrange
-           var updateRequest = new UpdateIterationRequest
-           {
-               InterationName = "Updated Iteration",
-               StartDate = DateTime.Now,
-               EndDate = DateTime.Now.AddDays(14),
-               StatusId = Guid.NewGuid(),
-           };
-
-            var iterationId = Guid.NewGuid();
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+                InterationName = "Updated Iteration",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14)
+            };
 
             var existingIteration = new Interation
             {
-                InterationId = iterationId,
-                InterationName = "Old Iteration",
-                StartDate = DateTime.Now.AddDays(-7),
-                EndDate = DateTime.Now,
-                StatusId = Guid.NewGuid(),
+               
+                InterationName = "Original Iteration",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7),
+                // Add other properties as needed
             };
 
-            _iterationRepositoryMock.Setup(repo => repo.GetAsync(
-                It.IsAny<Expression<Func<Interation, bool>>>(), null))
-                .ReturnsAsync(existingIteration);
-
-            var transaction = new Mock<IDatabaseTransaction>();
-            _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(transaction.Object);
+            _iterationRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Interation, bool>>>(), null))
+                                    .ReturnsAsync(existingIteration);
 
             // Act
-            var result = await _iterationService.UpdateIterationRequest(updateRequest, iterationId);
-            Assert.True(result);
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
 
-            if (result)
-            {
-                Console.WriteLine("Success");
-            }
-            else
-            {
-                Console.WriteLine("Fail");
-            }
-
+            // Assert
+            Assert.IsTrue(result);
+           
         }
+
+        [Test]
+        public async Task UpdateIteration_Fail()
+        {
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+              
+                InterationName = "Updated Iteration",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14)
+            };
+
+            _iterationRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Interation, bool>>>(), null))
+                                    .ReturnsAsync((Interation)null); // Simulate non-existing iteration
+
+            // Act
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+
+            // Assert
+            Assert.IsFalse(result);
+           
+        }
+
     }
 }

@@ -2,7 +2,6 @@
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Schema;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
 using Capstone.Service.PermissionSchemaService;
