@@ -4,6 +4,7 @@ using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
 
@@ -40,5 +41,6 @@ public class MappingProfile : Profile
 			.ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project.ProjectName));
 		CreateMap<BoardStatus, StatusTaskViewModel>();
 		CreateMap<TaskType, TaskTypeViewModel>();
+		CreateMap<PriorityLevel, GetAllTaskPriority>();
 	}
 }

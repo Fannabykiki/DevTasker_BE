@@ -195,60 +195,6 @@ namespace Capstone.DataAccess
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
             
-            modelBuilder.Entity<BoardStatus>()
-                .HasMany(sc => sc.SubTasks)
-                .WithOne(s => s.Status)
-                .HasForeignKey(sc => sc.StatusId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<SubTask>().HasKey(sc => new { sc.SubTaskId});
-            
-            modelBuilder.Entity<SubTask>()
-                .HasOne(sc => sc.ProjectMember)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.CreateBy);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasOne(sc => sc.ProjectMember)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.AssignTo);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasMany(sc => sc.TaskHistories)
-                .WithOne(s => s.SubTask)
-                .HasForeignKey(sc => sc.SubTaskId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasMany(sc => sc.Attachments)
-                .WithOne(s => s.SubTask)
-                .HasForeignKey(sc => sc.SubTaskId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasOne(sc => sc.Interation)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.InterationId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasOne(sc => sc.PriorityLevel)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.PriorityId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasMany(sc => sc.TaskComments)
-                .WithOne(s => s.SubTask)
-                .HasForeignKey(sc => sc.CommentId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasOne(sc => sc.TaskType)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.TypeId);
-            
-            modelBuilder.Entity<Entities.SubTask>()
-                .HasOne(sc => sc.Task)
-                .WithMany(s => s.SubTasks)
-                .HasForeignKey(sc => sc.TaskId)
-                .OnDelete(DeleteBehavior.NoAction);
-
         }
 
 		public DbSet<Attachment>? Attachments { get; set; }
@@ -264,7 +210,6 @@ namespace Capstone.DataAccess
         public DbSet<Role>? Roles { get; set; }
         public DbSet<Entities.Task>? Tasks { get; set; }
         public DbSet<Schema>? Schemas { get; set; }
-        public DbSet<SubTask>? SubTask { get; set; }
         public DbSet<TaskComment>? TaskComments { get; set; }
         public DbSet<TaskHistory>? TaskHistories { get; set; }
         public DbSet<Status>? Status { get; set; }

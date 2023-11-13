@@ -8,6 +8,5 @@ namespace Capstone.DataAccess.Entities
         public Guid TypeId { get; set; }
         public string Title { get; set; }
         public List<Task> Tasks { get; set; }
-        public List<SubTask> SubTasks { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.IterationService
 {
@@ -127,7 +128,7 @@ namespace Capstone.Service.IterationService
             
         }
 
-        public async Task<bool> CreateInteration(CreateIterationRequest createIterationRequest, Guid boarId)
+        public async Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
 
@@ -135,30 +136,48 @@ namespace Capstone.Service.IterationService
             {
                 var newIterationRequest = new Interation
                 {
-                    InterationName = createIterationRequest.InterationName,
-                    StartDate = createIterationRequest.StartDate,
-                    EndDate = createIterationRequest.EndDate,
-                    BoardId = boarId,
+					InterationName = createIterationRequest.InterationName,
+                    StartDate = DateTime.Parse(createIterationRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                    EndDate = DateTime.Parse(createIterationRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                    BoardId = createIterationRequest.ProjectId,
                    StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A")
                 };
 
-
                 var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
+                var board = await _boardRepository.GetAsync(x => x.BoardId == createIterationRequest.ProjectId, null);
                 board.Interations.Add(newIteration);
-                await _boardRepository.UpdateAsync(board);
 
-                _iterationRepository.SaveChanges();
-                _boardRepository.SaveChanges();
+                await _boardRepository.UpdateAsync(board);
+                await _iterationRepository.SaveChanges();
+                await _boardRepository.SaveChanges();
 
                 transaction.Commit();
-                return true;
+                return new GetIntergrationResponse
+                {
+                    BoardId = newIteration.BoardId,
+                    EndDate = newIteration.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    StartDate = newIteration.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    InterationId = newIteration.InterationId,
+                    InterationName = newIteration.InterationName,
+                    Response = new Common.DTOs.Base.BaseResponse
+                    {
+                        IsSucceed = true,
+                        Message = "Create scucessfully"
+                    },
+				};
             }
             catch (Exception)
             {
                 transaction.RollBack();
-                return false;
-            }
+				return new GetIntergrationResponse
+				{
+					Response = new Common.DTOs.Base.BaseResponse
+					{
+						IsSucceed = false,
+						Message = "Create fail"
+					},
+				};
+			}
         }
         public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
         {

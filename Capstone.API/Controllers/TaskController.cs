@@ -1,5 +1,6 @@
 ﻿using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
@@ -45,6 +46,14 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
+		[HttpGet("task-priority")]
+		[EnableQuery()]
+		public async Task<ActionResult<List<GetAllTaskPriority>>> GetAllTaskPriotiry()
+		{
+			var response = await _taskService.GetAllTaskPriotiry();
+			return Ok(response);
+		}
+
 		[HttpPost("task-status")]
 		public async Task<ActionResult<StatusTaskViewModel>> CreateNewStatus(CreateNewTaskStatus createNewTaskStatus)
 		{
@@ -63,6 +72,10 @@ namespace Capstone.API.Controllers
         public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
+            if(userId == null)
+            {
+                return BadRequest("You need login first");
+            }
             var result = await _taskService.CreateTask(request, userId);
 
             return Ok(result);
@@ -72,6 +85,10 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
 			var userId = this.GetCurrentLoginUserId();
+			if (userId == null)
+			{
+				return BadRequest("You need login first");
+			}
 			var result = await _taskService.CreateSubTask(request, userId);
 
 			return Ok(result);
