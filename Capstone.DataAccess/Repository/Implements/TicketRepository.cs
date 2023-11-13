@@ -33,6 +33,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									StatusId = x.StatusId,
 									Title = x.Title,
 									TaskId = x.TaskId,
+									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
 														.Where(m => m.PrevId == x.TaskId)
@@ -42,6 +43,7 @@ namespace Capstone.DataAccess.Repository.Implements
 															StatusName = m.Status.Title,
 															StatusId = x.StatusId,
 															StartDate = m.StartDate,
+															TypeId = x.TypeId,
 															TypeName = m.TicketType.Title,
 															Title = m.Title,
 															Decription = m.Decription,
