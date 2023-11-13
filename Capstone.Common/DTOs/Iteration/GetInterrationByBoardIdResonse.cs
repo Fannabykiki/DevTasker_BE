@@ -25,7 +25,7 @@ namespace Capstone.Common.DTOs.Iteration
     //{
     //    public Guid TaskId { get; set; }
     //    public string Title { get; set; }
-    //    public string? Decription { get; set; }
+    //    public string? Description { get; set; }
     //    public DateTime StartDate { get; set; }
     //    public DateTime DueDate { get; set; }
     //    public DateTime CreateTime { get; set; }
@@ -46,7 +46,7 @@ namespace Capstone.Common.DTOs.Iteration
     //{
     //    public Guid TaskId { get; set; }
     //    public string Title { get; set; }
-    //    public string? Decription { get; set; }
+    //    public string? Description { get; set; }
     //    public DateTime StartDate { get; set; }
     //    public DateTime DueDate { get; set; }
     //    public DateTime CreateTime { get; set; }
