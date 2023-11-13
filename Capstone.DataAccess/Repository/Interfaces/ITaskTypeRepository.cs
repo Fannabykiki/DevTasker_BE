@@ -2,7 +2,7 @@
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
-    public interface ITicketTypeRepository : IBaseRepository<TaskType>
+    public interface ITaskTypeRepository : IBaseRepository<TaskType>
     {
     }
 }

@@ -42,9 +42,16 @@ namespace Capstone.Service.PermissionSchemaService
             _projectRepository = projectRepository;
         }
 
-        public async Task<List<GetSchemaResponse>> GetAllSchema()
+        public async Task<List<GetSchemaResponse>> GetAllSchema(bool mode)
         {
-            var schemas = await _schemaRepository.GetAllWithOdata(x => true, null);
+            IEnumerable<Schema>? schemas;
+            if (mode) {
+                schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete != true, null);
+            }
+            else
+            {
+                schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete == true, null);
+            }
             var results = _mapper.Map<List<GetSchemaResponse>>(schemas);
             foreach(var schema in results)
             {
@@ -67,7 +74,9 @@ namespace Capstone.Service.PermissionSchemaService
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
         {
-            var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+            var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
+            if (schemas == null) return null;
+            
             var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, x => x.Permission);
             var permissions = await _permissionRepository.GetAllWithOdata(x => true, null);
             var permissionRoles = new List<PermissionRolesDTO>();
@@ -153,7 +162,7 @@ namespace Capstone.Service.PermissionSchemaService
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
-                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
                 if (schema == null) { return false; }
 
                 schema.SchemaName = request.SchemaName ?? schema.SchemaName;
@@ -206,7 +215,7 @@ namespace Capstone.Service.PermissionSchemaService
 
         public async Task<GetSchemaResponse> GetSchemaById(Guid SchemaId)
         {
-            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId, null);
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId && x.IsDelete != true, null);
             return _mapper.Map<GetSchemaResponse>(schema);
         }
 
@@ -241,8 +250,31 @@ namespace Capstone.Service.PermissionSchemaService
 
         public async Task<GetSchemaResponse> GetSchemaByName(string schemaName)
         {
-            var schema = await _schemaRepository.GetAsync(x => x.SchemaName.Trim().ToLower().Equals(schemaName.Trim().ToLower()), null);
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaName.Trim().ToLower().Equals(schemaName.Trim().ToLower()) && x.IsDelete != true, null);
             return _mapper.Map<GetSchemaResponse>(schema);
+        }
+
+        public async Task<bool> RemoveSchemaAsync(Guid SchemaId)
+        {
+            using var transaction = _projectRepository.DatabaseTransaction();
+            try
+            {
+                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId, null);
+                schema.SchemaName = schema.SchemaName.Trim() + " (Deleted)";
+                schema.IsDelete = true;
+                schema.DeleteAt= DateTime.Now;
+
+                await _schemaRepository.UpdateAsync(schema);
+                await _schemaRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return false;
+            }
         }
     }
 }

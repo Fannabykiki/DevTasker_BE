@@ -86,9 +86,9 @@ builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITaskRepository, TicketRepository>();
 
-builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITaskTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
 builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
 
@@ -111,6 +111,9 @@ builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
+builder.Services.AddScoped<ITaskTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<IPriorityRepository, PriorityRepository>();
 
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();

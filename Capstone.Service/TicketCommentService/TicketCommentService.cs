@@ -8,11 +8,11 @@ namespace Capstone.Service.TicketCommentService
     public class TicketCommentService : ITicketCommentService
     {
         private readonly ITicketCommentRepository _ticketCommentRepository;
-        private readonly ITicketRepository _ticketRepository;
+        private readonly ITaskRepository _ticketRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public TicketCommentService(ITicketCommentRepository ticketCommentRepository, IMapper mapper, ITicketRepository ticketRepository, IUserRepository userRepository)
+        public TicketCommentService(ITicketCommentRepository ticketCommentRepository, IMapper mapper, ITaskRepository ticketRepository, IUserRepository userRepository)
         {
             _ticketCommentRepository = ticketCommentRepository;
             _mapper = mapper;
@@ -37,8 +37,8 @@ namespace Capstone.Service.TicketCommentService
                     User = await _userRepository.GetAsync(x => x.UserId == comment.ByUser,null),
                 };
 
-                _ticketCommentRepository.CreateAsync(newComment);
-                _ticketCommentRepository.SaveChanges();
+                await _ticketCommentRepository.CreateAsync(newComment);
+                await _ticketCommentRepository.SaveChanges();
 
                 transaction.Commit();
                 return _mapper.Map<GetCommentResponse>(newComment);

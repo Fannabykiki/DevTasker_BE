@@ -16,21 +16,21 @@ namespace Capstone.Service.IterationService
         private readonly IMapper _mapper;
         private readonly IInterationRepository _iterationRepository;
         private readonly IBoardRepository _boardRepository;
-        private readonly ITicketRepository _ticketRepository;
+        private readonly ITaskRepository _TaskRepository;
         private readonly IStatusRepository _statusRepository;
-        private readonly ITicketTypeRepository _ticketTypeRepository;
+        private readonly ITaskTypeRepository _TaskTypeRepository;
 
 
-        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITicketRepository ticketRepository, IStatusRepository statusRepository, ITicketTypeRepository ticketTypeRepository)
+        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITaskRepository TaskRepository, IStatusRepository statusRepository, ITaskTypeRepository TaskTypeRepository)
         {
             _context = context;
             _projectRepository = projectRepository;
             _mapper = mapper;
             _iterationRepository = iterationRepository;
             _boardRepository = boardRepository;
-            _ticketRepository = ticketRepository;
+            _TaskRepository = TaskRepository;
             _statusRepository = statusRepository;
-            _ticketTypeRepository = ticketTypeRepository;
+            _TaskTypeRepository = TaskTypeRepository;
         }
         public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsById(Guid iterationId)
         {
@@ -51,9 +51,9 @@ namespace Capstone.Service.IterationService
             return new List<GetInterrationByBoardIdResonse> { response };
         }
 
-        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
+        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationTasksByProjectId(Guid projectId)
         {
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
+            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
 
             var result = new List<GetInterrationByBoardIdResonse>();
 
@@ -80,50 +80,51 @@ namespace Capstone.Service.IterationService
         private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
         {
             var workItems = new List<WorkItemResponse>();
-            var Tickets = await _ticketRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, null);
+            var Tasks = await _TaskRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, x => x.Status);
 
-            if (Tickets == null) return null;
+            if (Tasks == null) return null;
 
-            foreach (var ticket in Tickets)
+            foreach (var Task in Tasks)
             {
-                if (ticket.PrevId == null)
+                if (Task.PrevId == null)
                 {
-                    // ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-                    // var item = new WorkItemResponse
-                    // {
-                    //     TicketId = ticket.TaskId,
-                    //     Title = ticket.Title,
-                    //     TicketType = "Work Item",
-                    //     TicketStatus = ticket.Status.Title
-                    // };
+                    var item = new WorkItemResponse
+                    {
+                        TaskId = Task.TaskId,
+                        Title = Task.Title,
+                        TaskType = "Work Item",
+                        StatusId= Task.StatusId,
+                        TaskStatus = Task.Status.Title
+                    };
 
-                    // item.Tickets = await GetChildTicketsAsync(ticket.TaskId, Tickets);
-                    //
-                    // workItems.Add(item);
+                    item.Tasks = await GetChildTasksAsync(Task.TaskId, Tasks);
+
+                    workItems.Add(item);
                 }
             }
 
             return workItems;
         }
 
-        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTickets)
+        private async Task<List<TaskResponse>> GetChildTasksAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTasks)
         {
-            // foreach(var ticket in allTickets)
-            // {
-            //     ticket.TicketType = await _ticketTypeRepository.GetAsync(x => x.TypeId == ticket.TypeId, null);
-            //     ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-            // }
-            // return allTickets
-            //   .Where(x => x.PrevId == parentId)
-            //   .Select(x => new TicketResponse
-            //   {
-            //       TicketId = x.TaskId,
-            //       Title = x.Title,
-            //       TicketType = x.TicketType.Title,
-            //       TicketStatus = x.Status.Title
-            //   })
-            //   .ToList();
-            return null;
+
+            foreach (var Task in allTasks)
+            {
+                Task.TicketType = await _TaskTypeRepository.GetAsync(x => x.TypeId == Task.TypeId, null);
+            }
+            return allTasks
+              .Where(x => x.PrevId == parentId)
+              .Select(x => new TaskResponse
+              {
+                  TaskId = x.TaskId,
+                  Title = x.Title,
+                  StatusId = x.StatusId,
+                  TaskType = x.TicketType.Title,
+                  TaskStatus = x.Status.Title
+              })
+              .ToList();
+            
         }
 
         public async Task<bool> CreateInteration(CreateIterationRequest createIterationRequest, Guid boarId)

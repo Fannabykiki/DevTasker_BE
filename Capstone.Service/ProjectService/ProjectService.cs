@@ -27,8 +27,12 @@ public class ProjectService : IProjectService
 	private readonly IPermissionRepository _permissionRepository;
 	private readonly IPermissionSchemaRepository _permissionScemaRepo;
 	private readonly IBoardStatusRepository _boardStatusRepository;
+	private readonly IUserRepository _userRepository;
+	private readonly ITaskTypeRepository _ticketTypeRepository;
+	private readonly IPriorityRepository _priorityRepository;
+	private readonly ITaskRepository _ticketRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -42,7 +46,11 @@ public class ProjectService : IProjectService
 		_permissionScemaRepo = permissionScemaRepo;
 		_statusRepository = statusRepository;
 		_boardStatusRepository = boardStatusRepository;
-	}
+		_userRepository = userRepository;
+		_ticketTypeRepository= ticketTypeRepository;
+		_priorityRepository = priorityRepository;
+		_ticketRepository= ticketRepository;
+    }
 
 	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
 	{
@@ -528,4 +536,40 @@ public class ProjectService : IProjectService
 		};
 	}
 
+    public async Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId)
+    {
+        var results = new List<GetProjectTasksResponse>();
+        var iterations = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
+        if (iterations == null) return null;
+		foreach ( var interation in iterations)
+		{
+			var tasks = await _ticketRepository.GetAllWithOdata(x => x.InterationId == interation.InterationId,x => x.Status);
+			foreach ( var task in tasks)
+			{
+				var assignTo = await _userRepository.GetAsync(x => x.UserId == task.AssignTo,null);
+				var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
+				var taskType = await _ticketTypeRepository.GetAsync(x => x.TypeId == task.TypeId,null);
+				var priority = await _priorityRepository.GetAsync(x => x.LevelId == task.PriorityId,null);
+
+                var newTask = new GetProjectTasksResponse();
+				newTask.TaskId = task.TaskId;
+				newTask.Title = task.Title;
+				newTask.Decription = task.Decription;
+				newTask.StartDate= task.StartDate;
+				newTask.DueDate = task.DueDate;
+				newTask.CreateTime= task.CreateTime;
+				newTask.DeleteAt = task.DeleteAt;
+				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo); 
+				newTask.CreateBy = _mapper.Map<UserResponse>(createBy);
+				newTask.TaskType = taskType.Title;
+				newTask.PrevId= task.PrevId;
+				newTask.StatusId= task.StatusId;
+				newTask.TaskStatus = task.Status.Title;
+				newTask.Priority = priority.Title;
+				newTask.Interation = interation.InterationName;
+                results.Add(newTask);
+            }
+		}
+		return results;
+    }
 }

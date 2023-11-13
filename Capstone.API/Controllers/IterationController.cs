@@ -45,11 +45,14 @@ namespace Capstone.API.Controllers
         }
 
 
-        [HttpGet("Iteration/{boardId}")]
-        public async Task<ActionResult<IQueryable<GetInterrationByBoardIdResonse>>> GetAllIteration(Guid boardId)
+        [HttpGet("Iteration/{projectId}")]
+        public async Task<ActionResult<IQueryable<GetInterrationByBoardIdResonse>>> GetAllIteration(Guid projectId)
         {
-            var result = await _iterationService.GetIterationsByBoardId(boardId);
-
+            var result = await _iterationService.GetIterationTasksByProjectId(projectId);
+            if(result == null)
+            {
+                return BadRequest("Project not have any task!");
+            }
             return Ok(result);
         }
 

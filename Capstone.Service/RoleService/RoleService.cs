@@ -46,7 +46,10 @@ namespace Capstone.Service.RoleService
                 foreach (var role in roles)
                 {
                     var newRoleRecord = new GetRoleRecord();
-                    newRoleRecord.Role = _mapper.Map<GetRoleResponse>(role);
+                    newRoleRecord.RoleId = role.RoleId;
+                    newRoleRecord.RoleName = role.RoleName;
+                    newRoleRecord.Description = role.Description;
+
                     HashSet<GetProjectUsedResponse> projectUseds = new HashSet<GetProjectUsedResponse>();
 
                     var listSchemaPermissions = role.SchemaPermissions.Select(x => x.SchemaId);
