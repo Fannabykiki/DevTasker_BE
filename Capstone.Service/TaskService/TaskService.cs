@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.TaskPriority;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -24,13 +25,14 @@ namespace Capstone.Service.TaskService
 		private readonly IStatusRepository _statusRepository;
 		private readonly IBoardStatusRepository _boardStatusRepository;
 		private readonly ITaskTypeRepository _taskType;
+		private readonly IPriorityRepository _priorityRepository;
 
 
 		public TaskService(CapstoneContext context, ITaskRepository ticketRepository,
 			ITicketStatusRepository ticketStatusRepository, ITaskTypeRepository typeRepository,
 			ITicketHistoryRepository ticketHistoryRepository, ITaskTypeRepository ticketTypeRepository,
 			IMapper mapper, IUserRepository userRepository, IInterationRepository iterationRepository,
-			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITaskTypeRepository taskType)
+			IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, ITaskTypeRepository taskType, IPriorityRepository priorityRepository)
 		{
 			_context = context;
 			_ticketRepository = ticketRepository;
@@ -44,6 +46,7 @@ namespace Capstone.Service.TaskService
 			_statusRepository = statusRepository;
 			_boardStatusRepository = boardStatusRepository;
 			_taskType = taskType;
+			_priorityRepository = priorityRepository;
 		}
 
 		public async Task<CreateTaskResponse> CreateTask(CreateTaskRequest request, Guid userId)
@@ -367,6 +370,12 @@ namespace Capstone.Service.TaskService
 					}
 				};
 			}
+		}
+
+		public async Task<List<GetAllTaskPriority>> GetAllTaskPriotiry()
+		{
+			var result = await _priorityRepository.GetAllWithOdata(x=> true, null);
+			return _mapper.Map<List<GetAllTaskPriority>>(result.OrderBy(x=>x.Level));
 		}
 	}
 }

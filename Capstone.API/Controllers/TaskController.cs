@@ -1,5 +1,6 @@
 ﻿using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Task;
+using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
@@ -42,6 +43,14 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
 		{
 			var response = await _taskService.GetAllTaskStatus(projectId);
+			return Ok(response);
+		}
+
+		[HttpGet("task-priority")]
+		[EnableQuery()]
+		public async Task<ActionResult<List<GetAllTaskPriority>>> GetAllTaskPriotiry()
+		{
+			var response = await _taskService.GetAllTaskPriotiry();
 			return Ok(response);
 		}
 
