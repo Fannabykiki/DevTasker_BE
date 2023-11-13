@@ -114,7 +114,8 @@ namespace Capstone.Service.RoleService
                 {
                     RoleId = Guid.NewGuid(),
                     RoleName = createRoleRequest.RoleName,
-                    Description = createRoleRequest.Description
+                    Description = createRoleRequest.Description,
+                    IsDelete = false
                 };
 
                 await _roleRepository.CreateAsync(newRoleRequest);

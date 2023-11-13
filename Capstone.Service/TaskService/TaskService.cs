@@ -71,6 +71,8 @@ namespace Capstone.Service.TaskService
 						TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
 						PriorityId = request.PriorityId,
 						PrevId = null,
+						IsDelete = false,
+						DeleteAt = null,
 						InterationId = request.InterationId,
 						AssignTo = request.AssignTo,
 						StatusId = request.StatusId
@@ -358,6 +360,7 @@ namespace Capstone.Service.TaskService
 						DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateBy = userId,
+						IsDelete = false,
 						TypeId = request.TypeId,
 						PriorityId = request.PriorityId,
 						InterationId = task.InterationId,
