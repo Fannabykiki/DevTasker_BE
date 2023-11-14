@@ -124,7 +124,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = "Test Ticket",
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddMinutes(-30),
                 AssignTo = Guid.NewGuid(),
@@ -153,7 +153,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = new string('A', 256),
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddMinutes(30),
                 AssignTo = Guid.NewGuid(),
@@ -187,7 +187,8 @@ namespace NUnitTest.DevTasker.Service
      .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
             // Act
             using var transaction = _transactionMock.Object;
-            var result = await _taskService.UpdateTask(updateTicketRequest);
+            var taskId = Guid.NewGuid();
+            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
             // Assert
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
@@ -209,7 +210,8 @@ namespace NUnitTest.DevTasker.Service
      .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
             // Act
             using var transaction = _transactionMock.Object;
-            var result = await _taskService.UpdateTask(updateTicketRequest);
+            var taskId = Guid.NewGuid();
+            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
             // Assert
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
@@ -231,8 +233,9 @@ namespace NUnitTest.DevTasker.Service
                 .ReturnsAsync(new Capstone.DataAccess.Entities.Task { Title = "" });
 
             // Act
+            var taskId = Guid.NewGuid();
             using var transaction = _transactionMock.Object;
-            var result = await _taskService.UpdateTask(updateTicketRequest);
+            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
 
             // Assert
             Assert.IsTrue(result.BaseResponse.IsSucceed);
