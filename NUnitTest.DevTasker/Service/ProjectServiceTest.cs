@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.ProjectService;
-using Google.Apis.Drive.v3.Data;
+using Capstone.Service.RoleService;
 using Moq;
 using NUnit.Framework;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq.Expressions;
 using Task = System.Threading.Tasks.Task;
 
@@ -59,6 +59,7 @@ namespace NUnitTest.DevTasker.Service
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
+
             _projectService = new ProjectService(
                 _context,
                 _projectRepositoryMock.Object,
@@ -77,15 +78,12 @@ namespace NUnitTest.DevTasker.Service
                  _priorityRepository.Object,
                 _ticketRepository.Object
             );
-
-
-
         }
 
+        //Create Project 
         [Test]
-        public async Task TestCreateProject_Success()
-        {
-            // Arrange
+        public async Task CreateProject_HappyPath_ReturnsValidResponse()
+        { // Arrange
             var createProjectRequest = new CreateProjectRequest
             {
                 ProjectName = "Test Project",
@@ -95,47 +93,21 @@ namespace NUnitTest.DevTasker.Service
                 Description = "Test Project Description",
             };
 
-
             _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
                 .ReturnsAsync(new Project { ProjectId = Guid.NewGuid() });
-
             _boardRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Board>()))
                 .ReturnsAsync(new Board { BoardId = Guid.NewGuid() });
-
             _interationRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
                 .ReturnsAsync(new Interation { InterationId = Guid.NewGuid() });
-
             _projectMemberRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<ProjectMember>()))
                 .ReturnsAsync(new ProjectMember { MemberId = Guid.NewGuid() });
-
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
-
             // Act
             var userId = new Guid();
             var result = await _projectService.CreateProject(createProjectRequest, userId);
-
             // Assert
-            //Assert.IsTrue(result);
-        }
+            Assert.IsFalse(result.BaseResponse.IsSucceed);
 
-        [Test]
-        public async Task TestCreateProject_Failure()
-        {
-            // Arrange
-            var createProjectRequest = new CreateProjectRequest
-            {
-
-            };
-
-            _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
-                .ThrowsAsync(new Exception("Simulated failure"));
-
-            // Act
-            var userId = new Guid();
-            var result = await _projectService.CreateProject(createProjectRequest, userId);
-
-            // Assert
-            //Assert.IsFalse(result);
         }
 
         [Test]
@@ -144,20 +116,20 @@ namespace NUnitTest.DevTasker.Service
             // Arrange
             var createProjectRequest = new CreateProjectRequest
             {
-                // Omitting ProjectName, which should cause a failure.
                 ProjectName = "",
                 EndDate = DateTime.Now.AddMonths(1),
                 StartDate = DateTime.Now,
                 PrivacyStatus = true,
                 Description = "Test Project Description",
-            };
 
+            };
+            _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
+                .ThrowsAsync(new Exception("Create Project fail"));
             // Act
             var userId = new Guid();
             var result = await _projectService.CreateProject(createProjectRequest, userId);
-
             // Assert
-            //Assert.IsFalse(result);
+            Assert.IsFalse(result.BaseResponse.IsSucceed);
         }
 
         [Test]
@@ -172,15 +144,17 @@ namespace NUnitTest.DevTasker.Service
                 PrivacyStatus = true,
                 Description = "Test Project Description",
             };
-
+            // Act
+            _projectRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Project>()))
+               .ThrowsAsync(new Exception("Create Project fail"));
             // Act
             var userId = new Guid();
             var result = await _projectService.CreateProject(createProjectRequest, userId);
-
             // Assert
-            //Assert.IsFalse(result);
+            Assert.IsFalse(result.BaseResponse.IsSucceed);
         }
 
+        //Update Project 
         [Test]
         public async Task TestUpdateProjectInfo_Success()
         {
@@ -191,16 +165,14 @@ namespace NUnitTest.DevTasker.Service
                 ProjectName = "Updated Project Name",
                 Description = "Updated Description"
             };
-
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
                 .ReturnsAsync(new Project { ProjectId = projectId });
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
-
             // Act
             var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
-
             // Assert
-            // Assert.IsTrue(result);
+            Assert.IsTrue(result.IsSucceed);
+            Console.WriteLine("Update Succes");
         }
 
         [Test]
@@ -213,15 +185,13 @@ namespace NUnitTest.DevTasker.Service
                 ProjectName = "Updated Project Name",
                 Description = "Updated Description"
             };
-
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
                 .ReturnsAsync((Project)null);
-
             // Act
             var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
-
             // Assert
-            // Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
+            Console.WriteLine("Update Fail");
         }
 
         [Test]
@@ -231,36 +201,31 @@ namespace NUnitTest.DevTasker.Service
             var projectId = Guid.NewGuid();
             var updateProjectNameInfo = new UpdateProjectNameInfo
             {
-                ProjectName = "", // Trống ProjectName, một trường hợp thất bại.
+                ProjectName = "", 
                 Description = "Updated Description"
             };
-
             // Act
             var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
-
             // Assert
-            // Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
         }
+
+        // Delete Project 
 
         [Test]
         public async Task TestDeleteProject_Success()
         {
             // Arrange
             var projectIdToDelete = Guid.NewGuid();
-
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
                 .ReturnsAsync(new Project { ProjectId = projectIdToDelete });
-
             _projectRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Project>()))
                 .ReturnsAsync(true);
-
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
-
             // Act
             var result = await _projectService.DeleteProject(projectIdToDelete);
-
             // Assert
-            // Assert.IsTrue(result);
+            Assert.IsTrue(result.IsSucceed);
         }
 
         [Test]
@@ -268,15 +233,12 @@ namespace NUnitTest.DevTasker.Service
         {
             // Arrange
             var projectIdToDelete = Guid.NewGuid();
-
             _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
                 .ReturnsAsync((Project)null);
-
             // Act
             var result = await _projectService.DeleteProject(projectIdToDelete);
-
             // Assert
-            // Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
         }
     }
 }

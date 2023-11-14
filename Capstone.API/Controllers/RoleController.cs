@@ -103,11 +103,6 @@ namespace Capstone.API.Controllers
         [HttpPut("system/roles/{id}")]
         public async Task<ActionResult<GetRoleResponse>> UpdateRole(Guid id, UpdateRoleRequest request)
         {
-            var role = await _roleService.GetSystemRoleByName(request.RoleName);
-            if (role != null)
-            {
-                return BadRequest("Role name existed!");
-            }
             var updatedRole = await _roleService.UpdateSystemRole(id, request);
             if (updatedRole == null)
             {
@@ -128,7 +123,7 @@ namespace Capstone.API.Controllers
             if (isRemoved == null)
             {
                 return NotFound();
-            }
+            } 
             return Ok(isRemoved);
         }
     }
