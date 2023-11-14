@@ -13,8 +13,8 @@ namespace NUnitTest.DevTasker.Service
     [TestFixture]
     public class CommentServiceTest
     {
-        private ITicketCommentService _iticketService; 
-        private Mock <ITicketCommentRepository> _ticketCommentRepository;
+        private ITaskCommentService _iticketService; 
+        private Mock <ITaskCommentRepository> _ticketCommentRepository;
         private Mock <ITaskRepository> _ticketRepository;
         private Mock <IUserRepository> _userRepository;
         private Mock<IMapper> _mapper;
@@ -22,12 +22,12 @@ namespace NUnitTest.DevTasker.Service
         [SetUp]
         public void Setup()
         {
-            _ticketCommentRepository = new Mock<ITicketCommentRepository>();
+            _ticketCommentRepository = new Mock<ITaskCommentRepository>();
             _ticketRepository = new Mock<ITaskRepository>();
             _mapper = new Mock<IMapper>();
             _userRepository = new Mock<IUserRepository>();
 
-            _iticketService = new TicketCommentService
+            _iticketService = new TaskCommentService
                 (
                 _ticketCommentRepository.Object,
                 _mapper.Object,
@@ -185,7 +185,7 @@ namespace NUnitTest.DevTasker.Service
             _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var ticketCommentService = new TicketCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
+            var ticketCommentService = new TaskCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
 
             // Act
             var result = await ticketCommentService.RemoveComment(commentId);
@@ -216,7 +216,7 @@ namespace NUnitTest.DevTasker.Service
             _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var ticketCommentService = new TicketCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
+            var ticketCommentService = new TaskCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object);
 
             // Act
             var result = await ticketCommentService.RemoveComment(commentId);

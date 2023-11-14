@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Org.BouncyCastle.Asn1.Ocsp;
 
@@ -22,7 +24,7 @@ namespace Capstone.Service.IterationService
         private readonly ITaskTypeRepository _TaskTypeRepository;
 
 
-        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITaskRepository TaskRepository, IStatusRepository statusRepository, ITaskTypeRepository TaskTypeRepository)
+        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITaskRepository TaskRepository, IStatusRepository statusRepository, ITaskTypeRepository TaskTypeRepository, IUserRepository userRepository)
         {
             _context = context;
             _projectRepository = projectRepository;
@@ -35,7 +37,7 @@ namespace Capstone.Service.IterationService
         }
         public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsById(Guid iterationId)
         {
-            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
+            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, x => x.Board)!;
 
             iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
             var response = new GetInterrationByBoardIdResonse
@@ -47,7 +49,7 @@ namespace Capstone.Service.IterationService
                 BoardId = iteration.BoardId,
                 Status = iteration.Status.Title
             };
-            response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
+            response.Tasks = await _TaskRepository.GetAllTask(iteration.BoardId);
 
             return new List<GetInterrationByBoardIdResonse> { response };
         }
@@ -71,62 +73,70 @@ namespace Capstone.Service.IterationService
                     BoardId = iteration.BoardId,
                 };
 
-                response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
+                response.Tasks = await _TaskRepository.GetAllTask(projectId);
                 result.Add(response);
             }
 
             return result;
         }
 
-        private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
-        {
-            var workItems = new List<WorkItemResponse>();
-            var Tasks = await _TaskRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, x => x.Status);
+        //private async Task<List<Tasks>> GetWorkItemsForIterationAsync(Interation iteration)
+        //{
+        //    var workItems = new List<Tasks>();
+        //    var Tasks = await _TaskRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, x => x.Status);
 
-            if (Tasks == null) return null;
+        //    if (Tasks == null) return null;
 
-            foreach (var Task in Tasks)
-            {
-                if (Task.PrevId == null)
-                {
-                    var item = new WorkItemResponse
-                    {
-                        TaskId = Task.TaskId,
-                        Title = Task.Title,
-                        TaskType = "Work Item",
-                        StatusId= Task.StatusId,
-                        TaskStatus = Task.Status.Title
-                    };
+        //    foreach (var Task in Tasks)
+        //    {
+        //        if (Task.PrevId == null)
+        //        {
+        //            var item = new Tasks
+        //            {
+        //                TaskId = Task.TaskId,
+        //                Title = Task.Title,
+        //                Description = Task.Description,
+        //                StartDate = Task.StartDate,
+        //                DueDate = Task.DueDate,
+        //                CreateTime = Task.CreateTime,
+        //                DeleteAt = Task.DeleteAt,
+        //                IsDelete = Task.IsDelete,
+        //                AssignTo = _mapper.Map<UserResponse>(await _userRepository.GetAsync(x =>x.UserId == Task.AssignTo,null)),
 
-                    item.Tasks = await GetChildTasksAsync(Task.TaskId, Tasks);
+        //                TaskType = "Work Item",
+        //                StatusId= Task.StatusId,
+        //                TaskStatus = Task.Status.Title
+        //            };
 
-                    workItems.Add(item);
-                }
-            }
+        //            item.SubTasks = await GetChildTasksAsync(Task.TaskId, Tasks);
 
-            return workItems;
-        }
+        //            workItems.Add(item);
+        //        }
+        //    }
 
-        private async Task<List<TaskResponse>> GetChildTasksAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTasks)
-        {
+        //    return workItems;
+        //}
 
-            foreach (var Task in allTasks)
-            {
-                Task.TicketType = await _TaskTypeRepository.GetAsync(x => x.TypeId == Task.TypeId, null);
-            }
-            return allTasks
-              .Where(x => x.PrevId == parentId)
-              .Select(x => new TaskResponse
-              {
-                  TaskId = x.TaskId,
-                  Title = x.Title,
-                  StatusId = x.StatusId,
-                  TaskType = x.TicketType.Title,
-                  TaskStatus = x.Status.Title
-              })
-              .ToList();
+        //private async Task<List<TaskResponse>> GetChildTasksAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTasks)
+        //{
+
+        //    foreach (var Task in allTasks)
+        //    {
+        //        Task.TicketType = await _TaskTypeRepository.GetAsync(x => x.TypeId == Task.TypeId, null);
+        //    }
+        //    return allTasks
+        //      .Where(x => x.PrevId == parentId)
+        //      .Select(x => new TaskResponse
+        //      {
+        //          TaskId = x.TaskId,
+        //          Title = x.Title,
+        //          StatusId = x.StatusId,
+        //          TaskType = x.TicketType.Title,
+        //          TaskStatus = x.Status.Title
+        //      })
+        //      .ToList();
             
-        }
+        //}
 
         public async Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest)
         {

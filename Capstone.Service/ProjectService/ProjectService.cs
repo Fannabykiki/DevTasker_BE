@@ -556,7 +556,7 @@ public class ProjectService : IProjectService
 			var tasks = await _ticketRepository.GetAllWithOdata(x => x.InterationId == interation.InterationId,x => x.Status);
 			foreach ( var task in tasks)
 			{
-				var assignTo = await _userRepository.GetAsync(x => x.UserId == task.AssignTo,null);
+				var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo,x =>x.Users);
 				var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
 				var taskType = await _ticketTypeRepository.GetAsync(x => x.TypeId == task.TypeId,null);
 				var priority = await _priorityRepository.GetAsync(x => x.LevelId == task.PriorityId,null);
@@ -569,7 +569,7 @@ public class ProjectService : IProjectService
 				newTask.DueDate = task.DueDate;
 				newTask.CreateTime= task.CreateTime;
 				newTask.DeleteAt = task.DeleteAt;
-				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo); 
+				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo.Users); 
 				newTask.CreateBy = _mapper.Map<UserResponse>(createBy);
 				newTask.TaskType = taskType.Title;
 				newTask.PrevId= task.PrevId;
