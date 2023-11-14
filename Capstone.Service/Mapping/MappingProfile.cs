@@ -48,6 +48,7 @@ public class MappingProfile : Profile
 		CreateMap<BoardStatus, StatusTaskViewModel>();
 		CreateMap<TaskType, TaskTypeViewModel>();
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
-		CreateMap<Interation, InterationViewModel>().ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
+		CreateMap<Interation, InterationViewModel>()
+			.ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 	}
 }
