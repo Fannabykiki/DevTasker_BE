@@ -22,7 +22,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									AssignTo = x.ProjectMember.Users.UserName,
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									Decription = x.Decription,
+									Decription = x.Description,
 									DeleteAt = x.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -51,7 +51,7 @@ namespace Capstone.DataAccess.Repository.Implements
 															TypeId = x.TypeId,
 															TypeName = m.TicketType.Title,
 															Title = m.Title,
-															Decription = m.Decription,
+															Decription = m.Description,
 															PriorityName = m.PriorityLevel.Title,
 															CreateBy = m.ProjectMember.Users.UserName,
 															AssignTo = m.ProjectMember.Users.UserName,
@@ -76,7 +76,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									AssignTo = x.ProjectMember.Users.UserName,
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									Decription = x.Decription,
+									Decription = x.Description,
 									DeleteAt = x.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
