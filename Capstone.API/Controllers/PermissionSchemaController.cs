@@ -102,7 +102,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                return BadRequest("Schema not existed!");
+                return BadRequest("Can not grant this role!");
             }
         }
         

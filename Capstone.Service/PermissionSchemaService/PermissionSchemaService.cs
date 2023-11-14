@@ -187,6 +187,8 @@ namespace Capstone.Service.PermissionSchemaService
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
+                if (request.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||
+                        request.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) return false;
                 var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
                 foreach (var permission in request.PermissionIds)
                 {
