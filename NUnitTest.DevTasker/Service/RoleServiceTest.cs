@@ -1,17 +1,10 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Role;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.RoleService;
-using Capstone.Service.TicketCommentService;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
