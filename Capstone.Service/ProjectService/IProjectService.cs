@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
@@ -25,4 +26,5 @@ public interface IProjectService
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
 	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest);
+	Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId);
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
@@ -24,8 +25,13 @@ public class MappingProfile : Profile
         CreateMap<Schema, GetSchemaResponse>();
         CreateMap<Role, GetRoleResponse>();
         CreateMap<TaskComment, GetCommentResponse>()
-            .ForMember(dest => dest.CreateByUser, opt => opt.MapFrom(src => src.User));
-		CreateMap<User, UserResponse>()
+            .ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.User.UserId))
+            .ForPath(dest => dest.User.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
+            .ForPath(dest => dest.User.Email, opt => opt.MapFrom(src => src.User.Email))
+            .ForPath(dest => dest.User.IsFirstTime, opt => opt.MapFrom(src => src.User.IsFirstTime))
+            .ForPath(dest => dest.User.IsAdmin, opt => opt.MapFrom(src => src.User.IsAdmin))
+            .ForPath(dest => dest.User.Status, opt => opt.MapFrom(src => src.User.Status.Title));
+        CreateMap<User, UserResponse>()
 		   .ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 		CreateMap<ProjectMember, GetAllProjectViewModel>()
 			.ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Project.EndDate))
@@ -42,5 +48,6 @@ public class MappingProfile : Profile
 		CreateMap<BoardStatus, StatusTaskViewModel>();
 		CreateMap<TaskType, TaskTypeViewModel>();
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
+		CreateMap<Interation, InterationViewModel>().ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 	}
 }

@@ -12,7 +12,8 @@ namespace Capstone.Common.DTOs.Task
         public Guid AssignTo { get; set; }
         public Guid PriorityId { get; set; }
         public Guid InterationId { get; set; }
-        public Guid ProjectId { get; set; }
+		public Guid TypeId { get; set; }
+		public Guid ProjectId { get; set; }
         public Guid? PrevId { get; set; }
         public Guid StatusId { get; set; }
     }
