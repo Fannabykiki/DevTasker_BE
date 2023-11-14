@@ -1,10 +1,8 @@
 using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.ProjectMember;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectMemberService;
@@ -12,7 +10,6 @@ using Capstone.Service.ProjectService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.OData.UriParser;
 using System.Security.Claims;
 
 namespace Capstone.API.Controllers
