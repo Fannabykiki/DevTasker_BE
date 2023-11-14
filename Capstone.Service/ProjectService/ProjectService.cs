@@ -581,7 +581,7 @@ public class ProjectService : IProjectService
                 var newTask = new GetProjectTasksResponse();
 				newTask.TaskId = task.TaskId;
 				newTask.Title = task.Title;
-				newTask.Description = task.Decription;
+				newTask.Description = task.Description;
 				newTask.StartDate= task.StartDate;
 				newTask.DueDate = task.DueDate;
 				newTask.CreateTime= task.CreateTime;
