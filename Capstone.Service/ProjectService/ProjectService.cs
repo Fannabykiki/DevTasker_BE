@@ -4,6 +4,7 @@ using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
@@ -385,6 +386,16 @@ public class ProjectService : IProjectService
 		var projectInfoRequests = new ViewProjectInfoRequest();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.Status)!;
 		var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
+		var boardStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == project.ProjectId, null);
+		var totaltaskCompleted = 10;
+		foreach (var item in boardStatus)
+		{
+			if (item.Title.Equals("Done"))
+			{
+				 totaltaskCompleted = (await _ticketRepository.GetAllTaskCompleted(projectId,item.BoardStatusId)).Count();
+			}
+		}
+		var totaltask = await _ticketRepository.GetAllTask(projectId);
 		projectInfoRequests = new ViewProjectInfoRequest
 		{
 			ProjectId = project.ProjectId,
@@ -395,8 +406,11 @@ public class ProjectService : IProjectService
 			EndDate = project.EndDate,
 			CreateBy = project.CreateBy,
 			CreateAt = project.CreateAt,
+			BoardId = project.ProjectId,
 			ProjectStatus = project.Status.Title,
 			PrivacyStatus = project.PrivacyStatus,
+			TotalTaskCreated = totaltask.Count(),
+			TotalTaskCompleted = totaltaskCompleted,
 			ProjectMembers = members
 				.Select(m => new ViewMemberProject
 				{
@@ -557,7 +571,10 @@ public class ProjectService : IProjectService
 			foreach ( var task in tasks)
 			{
 				var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo,x =>x.Users);
-				var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
+					assignTo.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == assignTo.Users.StatusId, null);
+
+                var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
+
 				var taskType = await _ticketTypeRepository.GetAsync(x => x.TypeId == task.TypeId,null);
 				var priority = await _priorityRepository.GetAsync(x => x.LevelId == task.PriorityId,null);
 

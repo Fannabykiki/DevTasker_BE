@@ -32,7 +32,7 @@ public class MappingProfile : Profile
             .ForPath(dest => dest.User.IsAdmin, opt => opt.MapFrom(src => src.User.IsAdmin))
             .ForPath(dest => dest.User.Status, opt => opt.MapFrom(src => src.User.Status.Title));
         CreateMap<User, UserResponse>()
-		   .ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
+		   .ForPath(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 		CreateMap<ProjectMember, GetAllProjectViewModel>()
 			.ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Project.EndDate))
 			.ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Project.StartDate))
@@ -48,6 +48,7 @@ public class MappingProfile : Profile
 		CreateMap<BoardStatus, StatusTaskViewModel>();
 		CreateMap<TaskType, TaskTypeViewModel>();
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
-		CreateMap<Interation, InterationViewModel>().ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
+		CreateMap<Interation, InterationViewModel>()
+			.ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 	}
 }

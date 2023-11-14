@@ -185,7 +185,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -214,7 +214,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -242,7 +242,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
