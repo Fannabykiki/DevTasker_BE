@@ -112,9 +112,9 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPut("tasks/{taskId}")]
-        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
+        public async Task<IActionResult> UpdateaTask(Guid taskId, UpdateTaskRequest updateTicketRequest)
         {
-            var result = await _taskService.UpdateTask(updateTicketRequest);
+            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
 
             return Ok(result);
         }
