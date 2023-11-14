@@ -81,7 +81,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = "Test Ticket",
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(7),
                 AssignTo = Guid.NewGuid(),
@@ -104,7 +104,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = "",
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(7),
                 AssignTo = Guid.NewGuid(),
@@ -176,7 +176,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -198,7 +198,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -220,7 +220,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
