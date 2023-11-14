@@ -144,8 +144,8 @@ namespace Capstone.Service.PermissionSchemaService
                         RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430") //Admin of system
                     });
                 }
-                _permissionSchemaRepository.SaveChanges();
-                _schemaRepository.SaveChanges();
+                await _permissionSchemaRepository.SaveChanges();
+                await _schemaRepository.SaveChanges();
 
 
                 transaction.Commit();
