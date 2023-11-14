@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Service.TicketCommentService
 {
-    public interface ITicketCommentService
+    public interface ITaskCommentService
     {
         Task<IEnumerable<GetCommentResponse>> GetAllCommentByTaskID(Guid ticketId);
         Task<GetCommentResponse> CreateComment(CreateCommentRequest comment);

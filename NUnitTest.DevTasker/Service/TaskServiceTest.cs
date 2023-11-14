@@ -128,7 +128,7 @@ namespace NUnitTest.DevTasker.Service
              var request = new CreateTicketRequest
              {
                  Title = "Test Ticket",
-                 Decription = "Test Description",
+                 Description = "Test Description",
                  StartDate = DateTime.Now,
                  DueDate = DateTime.Now.AddMinutes(-30),  
                  CreateTime = DateTime.Now,
@@ -156,7 +156,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTicketRequest
             {
                 Title = new string('A', 256), 
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddMinutes(30),
                 CreateTime = DateTime.Now,
@@ -185,7 +185,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -214,7 +214,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "Updated Ticket Title",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),
@@ -242,7 +242,7 @@ namespace NUnitTest.DevTasker.Service
             var updateTicketRequest = new UpdateTaskRequest
             {
                 Title = "",
-                Decription = "Updated Ticket Description",
+                Description = "Updated Ticket Description",
                 DueDate = DateTime.Now.AddDays(14),
                 AssignTo = Guid.NewGuid(),
                 TypeId = Guid.NewGuid(),

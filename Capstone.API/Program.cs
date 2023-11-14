@@ -48,7 +48,7 @@ static IEdmModel GetEdmModel()
     builder.EntitySet<Permission>("Permissions");
     builder.EntitySet<Project>("Projects");
     builder.EntitySet<Role>("Roles");
-    builder.EntitySet<Capstone.DataAccess.Entities.Task>("Tasks");
+    builder.EntitySet<Capstone.DataAccess.Entities.Task>("SubTasks");
     builder.EntitySet<TaskComment>("TaskComments");
     builder.EntitySet<TaskHistory>("TaskHistorys");
     builder.EntitySet<TaskType>("TaskTypes");
@@ -106,8 +106,8 @@ builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
 
-builder.Services.AddScoped<ITicketCommentRepository, TicketCommentRepository>();
-builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
+builder.Services.AddScoped<ITaskCommentRepository, TicketCommentRepository>();
+builder.Services.AddScoped<ITaskCommentService, TaskCommentService>();
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
