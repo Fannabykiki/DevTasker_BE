@@ -216,7 +216,7 @@ namespace Capstone.Service.RoleService
             {
                 var rolegrant = await _roleRepository.GetAllWithOdata(x => x.IsDelete != true, null);
                 rolegrant = rolegrant.Except(Roles);
-                return _mapper.Map<List<GetRoleResponse>>(rolegrant.Where(x => x.RoleId != Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && x.RoleId != Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")));
+                return _mapper.Map<List<GetRoleResponse>>(rolegrant);
             }
             
         }
