@@ -4,16 +4,13 @@ using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
-using Google.Apis.Drive.v3.Data;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
 {
-	public class TaskService : ITaskService
+    public class TaskService : ITaskService
 	{
 		private readonly CapstoneContext _context;
 		private readonly ITaskRepository _ticketRepository;

@@ -85,8 +85,50 @@ namespace Capstone.UnitTests.Service
             //Assert.AreEqual("Create successfully", result.Response.Message, "Expected Message to be 'Create successfully'.");
             //Assert.AreEqual(newIterationId, result.InterationId, "Expected InterationId to match.");
         }
+        [Test]
+        public async Task CreateInteration_FailIterationNameEmpty()
+        {
+            // Arrange
+            var createIterationRequest = new CreateIterationRequest
+            {
+                InterationName = "",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7),
+                ProjectId = Guid.NewGuid()
+            };
 
+            _iterationRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
+                .ThrowsAsync(new Exception("Create iteration failed."));
 
+            // Act
+            var result = await _iterationService.CreateInteration(createIterationRequest);
+
+            // Assert
+            Assert.IsFalse(result.Response.IsSucceed, "Expected IsSucceed to be false.");
+        }
+        [Test]
+        public async Task CreateInteration_FailStartDateBeforEndDate()
+        {
+            // Arrange
+            var createIterationRequest = new CreateIterationRequest
+            {
+                InterationName = "hihi",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(-7),
+                ProjectId = Guid.NewGuid()
+            };
+
+            _iterationRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<Interation>()))
+                .ThrowsAsync(new Exception("Create iteration failed."));
+
+            // Act
+            var result = await _iterationService.CreateInteration(createIterationRequest);
+
+            // Assert
+            Assert.IsFalse(result.Response.IsSucceed, "Expected IsSucceed to be false.");
+        }
         [Test]
         public async Task CreateInteration_Fail()
         {
@@ -154,7 +196,7 @@ namespace Capstone.UnitTests.Service
             };
 
             _iterationRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Interation, bool>>>(), null))
-                                    .ReturnsAsync((Interation)null); // Simulate non-existing iteration
+                                    .ReturnsAsync((Interation)null); 
 
             // Act
             var iterationId = Guid.NewGuid();
@@ -163,6 +205,49 @@ namespace Capstone.UnitTests.Service
             // Assert
             Assert.IsFalse(result);
            
+        }
+        [Test]
+        public async Task UpdateIteration_Fail_InvalidIterationName()
+        {
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+                
+                InterationName = "",  // IterationName is empty
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14)
+            };
+
+            // Act
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+
+            // Assert
+            Assert.IsFalse(result);
+            Console.WriteLine("Update iteration Fail");
+
+        }
+
+        [Test]
+        public async Task UpdateIteration_Fail_InvalidDateRange()
+        {
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+               
+                InterationName = "Updated Iteration",
+                StartDate = DateTime.UtcNow.AddDays(14), // StartDate is greater than EndDate
+                EndDate = DateTime.UtcNow
+            };
+
+            // Act
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+
+            // Assert
+            Assert.IsFalse(result);
+            Console.WriteLine("Update iteration Fail");
+
         }
 
     }
