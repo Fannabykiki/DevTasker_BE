@@ -6,7 +6,7 @@ namespace Capstone.Common.DTOs.Task
     {
        
         public string Title { get; set; }
-        public string? Decription { get; set; }
+        public string? Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime DueDate { get; set; }
         public Guid AssignTo { get; set; }

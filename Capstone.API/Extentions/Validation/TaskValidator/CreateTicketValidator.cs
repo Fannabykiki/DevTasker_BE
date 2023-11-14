@@ -12,7 +12,7 @@ namespace Capstone.API.Extentions.Validation.TicketValidator
 			  .NotEmpty()
 			  .WithMessage("Title is required");
 
-			RuleFor(x => x.Decription)
+			RuleFor(x => x.Description)
 			  .MaximumLength(500)
 			  .WithMessage("Description must be less than 500 characters");
 

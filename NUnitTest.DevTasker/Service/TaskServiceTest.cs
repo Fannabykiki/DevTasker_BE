@@ -79,7 +79,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = "Test Ticket",
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(7),
                 AssignTo = Guid.NewGuid(),
@@ -105,7 +105,7 @@ namespace NUnitTest.DevTasker.Service
             var request = new CreateTaskRequest
             {
                 Title = "",
-                Decription = "Test Description",
+                Description = "Test Description",
                 StartDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(7),
                 AssignTo = Guid.NewGuid(),
