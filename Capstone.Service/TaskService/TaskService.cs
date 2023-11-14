@@ -7,27 +7,25 @@ using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
-using Google.Apis.Drive.v3.Data;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
 {
     public class TaskService : ITaskService
-    {
-        private readonly CapstoneContext _context;
-        private readonly ITaskRepository _ticketRepository;
-        private readonly ITicketStatusRepository _ticketStatusRepository;
-        private readonly ITaskTypeRepository _typeRepository;
-        private readonly ITicketHistoryRepository _ticketHistoryRepository;
-        private readonly ITaskTypeRepository _ticketTypeRepository;
-        private readonly IMapper _mapper;
-        private readonly IUserRepository _userRepository;
-        private readonly IInterationRepository _iterationRepository;
-        private readonly IStatusRepository _statusRepository;
-        private readonly IBoardStatusRepository _boardStatusRepository;
-        private readonly ITaskTypeRepository _taskType;
-        private readonly IPriorityRepository _priorityRepository;
+	{
+		private readonly CapstoneContext _context;
+		private readonly ITaskRepository _ticketRepository;
+		private readonly ITicketStatusRepository _ticketStatusRepository;
+		private readonly ITaskTypeRepository _typeRepository;
+		private readonly ITicketHistoryRepository _ticketHistoryRepository;
+		private readonly ITaskTypeRepository _ticketTypeRepository;
+		private readonly IMapper _mapper;
+		private readonly IUserRepository _userRepository;
+		private readonly IInterationRepository _iterationRepository;
+		private readonly IStatusRepository _statusRepository;
+		private readonly IBoardStatusRepository _boardStatusRepository;
+		private readonly ITaskTypeRepository _taskType;
+		private readonly IPriorityRepository _priorityRepository;
 
 
         public TaskService(CapstoneContext context, ITaskRepository ticketRepository,
@@ -65,7 +63,7 @@ namespace Capstone.Service.TaskService
                         {
                             TaskId = Guid.NewGuid(),
                             Title = request.Title,
-                            Description = request.Decription,
+                            Description = request.Description,
                             StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -118,7 +116,7 @@ namespace Capstone.Service.TaskService
                                 {
                                     TaskId = Guid.NewGuid(),
                                     Title = request.Title,
-                                    Description = request.Decription,
+                                    Description = request.Description,
                                     StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -171,7 +169,7 @@ namespace Capstone.Service.TaskService
                         {
                             TaskId = Guid.NewGuid(),
                             Title = request.Title,
-                            Description = request.Decription,
+                            Description = request.Description,
                             StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -224,7 +222,7 @@ namespace Capstone.Service.TaskService
                                 {
                                     TaskId = Guid.NewGuid(),
                                     Title = request.Title,
-                                    Description = request.Decription,
+                                    Description = request.Description,
                                     StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -352,8 +350,6 @@ namespace Capstone.Service.TaskService
                 };
             }
         }
-
-
 
 
         public async Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId)

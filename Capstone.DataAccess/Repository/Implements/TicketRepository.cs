@@ -22,7 +22,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									AssignTo = x.ProjectMember.Users.UserName,
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									Decription = x.Description,
+									Description = x.Description,
 									DeleteAt = x.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -51,7 +51,7 @@ namespace Capstone.DataAccess.Repository.Implements
 															TypeId = x.TypeId,
 															TypeName = m.TicketType.Title,
 															Title = m.Title,
-															Decription = m.Description,
+															Description = m.Description,
 															PriorityName = m.PriorityLevel.Title,
 															CreateBy = m.ProjectMember.Users.UserName,
 															AssignTo = m.ProjectMember.Users.UserName,
@@ -67,6 +67,33 @@ namespace Capstone.DataAccess.Repository.Implements
 			return taskList;
 		}
 
+		public async Task<List<TaskViewModel>> GetAllTaskCompleted(Guid projectId,Guid statusId)
+		{
+			var taskList = await _context.Tasks
+							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId)
+							.Select(x => new TaskViewModel
+							{
+								AssignTo = x.ProjectMember.Users.UserName,
+								CreateBy = x.ProjectMember.Users.UserName,
+								CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+								Description = x.Description,
+								DeleteAt = x.DeleteAt == null
+? null
+: x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+								DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+								InterationName = x.Interation.InterationName,
+								IsDelete = x.IsDelete,
+								PriorityName = x.PriorityLevel.Title,
+								StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+								StatusName = x.Status.Title,
+								StatusId = x.StatusId,
+								Title = x.Title,
+								TaskId = x.TaskId,
+								TypeName = x.TicketType.Title,
+							}).ToListAsync();
+			return taskList;
+		}
+
 		public async Task<List<TaskViewModel>> GetAllTaskDelete(Guid projectId)
 		{
 			var taskList = await _context.Tasks
@@ -76,7 +103,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									AssignTo = x.ProjectMember.Users.UserName,
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									Decription = x.Description,
+									Description = x.Description,
 									DeleteAt = x.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
