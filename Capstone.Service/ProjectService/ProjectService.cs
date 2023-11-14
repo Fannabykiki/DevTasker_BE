@@ -605,4 +605,34 @@ public class ProjectService : IProjectService
 		var results = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, x => x.Status);
 		return _mapper.Map<List<InterationViewModel>>(results);
 	}
+
+	public async Task<BaseResponse> RemoveProjectMember(Guid memberId)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
+
+			project.StatusId = Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274");
+
+			await _projectMemberRepository.UpdateAsync(project);
+			await _projectMemberRepository.SaveChanges();
+
+			transaction.Commit();
+
+			return new BaseResponse
+			{
+				IsSucceed = true,
+				Message = "Delete successfully"
+			};
+		}
+		catch (Exception ex)
+		{
+			transaction.RollBack();
+			return new BaseResponse
+			{
+				IsSucceed = false,
+				Message = "Delete fail",
+			};
+		}
 }
