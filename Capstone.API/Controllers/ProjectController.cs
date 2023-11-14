@@ -1,4 +1,5 @@
 using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
@@ -43,8 +44,16 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-        
-        [HttpPost("projects/invitation")]
+
+		[HttpPost("projects/remove-member")]
+		public async Task<ActionResult<BaseResponse>> RemoveProjectMember(Guid memberId)
+		{
+			var result = await _projectService.RemoveProjectMember(memberId);
+
+			return Ok(result);
+		}
+
+		[HttpPost("projects/invitation")]
         public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
         {
             foreach (var email in inviteUserRequest.Email)
