@@ -1,10 +1,15 @@
 ﻿using AutoMapper;
+using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
+
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -68,7 +73,207 @@ namespace NUnitTest.DevTasker.Service
                 _priorityRepository.Object
                 );
         }
-       
+
+        [Test] 
+        public async Task TestCreateTicket_Success()
+        {
+            // Arrange
+            var request = new CreateTaskRequest
+            {
+                Title = "Test Ticket",
+                Decription = "Test Description",
+                StartDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(7),
+                AssignTo = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid()
+            };
+           
+            // Act
+            var userId = Guid.NewGuid();
+            using var transaction = _transactionMock.Object;
+            var result = await _taskService.CreateTask(request, userId);
+            // Assert
+            transaction.Commit();
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+
+        [Test]
+        public async Task TestCreateTicket_FailEmptyTitle()
+        {
+            // Arrange
+            var request = new CreateTaskRequest
+            {
+                Title = "",
+                Decription = "Test Description",
+                StartDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(7),
+                AssignTo = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid()
+            };
+            var userId = Guid.NewGuid();
+           
+            // Act
+            var result = await _taskService.CreateTask(request, userId);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+        [Test]
+        public async Task TestCreateTicket_FailDueDateBeforeStartDate()
+        {
+            // Arrange
+            var request = new CreateTaskRequest
+            {
+                Title = "Test Ticket",
+                Decription = "Test Description",
+                StartDate = DateTime.Now,
+                DueDate = DateTime.Now.AddMinutes(-30),
+                AssignTo = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid()
+            };
+            var userId = Guid.NewGuid();
+
+            // Act
+            using var transaction = _transactionMock.Object;
+
+            // Set up repo.GetAsync to return null to simulate a non-existing task
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+                .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
+
+            var result = await _taskService.CreateTask(request, userId);
+
+            // Assert
+            transaction.Commit();
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+
+        [Test]
+        public async Task TestCreateTicket_FailLongTitle()
+        {
+            // Arrange
+            var request = new CreateTaskRequest
+            {
+                Title = new string('A', 256),
+                Decription = "Test Description",
+                StartDate = DateTime.Now,
+                DueDate = DateTime.Now.AddMinutes(30),
+                AssignTo = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid()
+            };
+            var userId = Guid.NewGuid();
+
+            // Act
+            using var transaction = _transactionMock.Object;
+            var result = await _taskService.CreateTask(request, userId);
+
+            // Assert
+            transaction.Commit();
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+        [Test]
+        public async Task TestUpdateTicket_Success()
+        {
+            // Arrange
+            var updateTicketRequest = new UpdateTaskRequest
+            {
+                Title = "Updated Ticket Title",
+                Decription = "Updated Ticket Description",
+                DueDate = DateTime.Now.AddDays(14),
+                AssignTo = Guid.NewGuid(),
+                TypeId = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid(),
+                StatusId = Guid.NewGuid()
+            };
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+     .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
+            // Act
+            using var transaction = _transactionMock.Object;
+            var result = await _taskService.UpdateTask(updateTicketRequest);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+        [Test]
+        public async System.Threading.Tasks.Task TestUpdateTicket_Fail()
+        {
+            // Arrange
+            var updateTicketRequest = new UpdateTaskRequest
+            {
+                Title = "Updated Ticket Title",
+                Decription = "Updated Ticket Description",
+                DueDate = DateTime.Now.AddDays(14),
+                AssignTo = Guid.NewGuid(),
+                TypeId = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid(),
+                StatusId = Guid.NewGuid()
+            };
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+     .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
+            // Act
+            using var transaction = _transactionMock.Object;
+            var result = await _taskService.UpdateTask(updateTicketRequest);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+        [Test]
+        public async Task TestUpdateTicket_FailEmptyTitle()
+        {
+            // Arrange
+            var updateTicketRequest = new UpdateTaskRequest
+            {
+                Title = "",
+                Decription = "Updated Ticket Description",
+                DueDate = DateTime.Now.AddDays(14),
+                AssignTo = Guid.NewGuid(),
+                TypeId = Guid.NewGuid(),
+                PriorityId = Guid.NewGuid(),
+                StatusId = Guid.NewGuid()
+            };
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+                .ReturnsAsync(new Capstone.DataAccess.Entities.Task { Title = "" });
+
+            // Act
+            using var transaction = _transactionMock.Object;
+            var result = await _taskService.UpdateTask(updateTicketRequest);
+
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
+        }
+
+        [Test]
+        public async Task TestDeleteTicket_Success()
+        {
+            // Arrange
+            var ticketIdToDelete = Guid.NewGuid();
+
+            // Setup repo.GetAsync to return a task (not null)
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+                .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
+
+            // Setup repo.DeleteAsync to return true for successful deletion
+            _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Capstone.DataAccess.Entities.Task>()))
+                .ReturnsAsync(true);
+
+            _databaseTransactionMock.Setup(transaction => transaction.Commit());
+
+            // Act
+            var result = await _taskService.DeleteTask(ticketIdToDelete);
+
+            // Assert
+            Assert.IsTrue(result.IsSucceed);
+        }
+
+
+        [Test]
+        public async Task TestDeleteTicket_Failure_TicketNotFound()
+        {
+            // Arrange
+            var ticketId = Guid.NewGuid();
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+     .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
+            // Act
+            var result = await _taskService.DeleteTask(ticketId);
+            // Assert
+            Assert.IsFalse(result.IsSucceed);
+        }
 
     }
 }
