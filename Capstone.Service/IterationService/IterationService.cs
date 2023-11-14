@@ -35,12 +35,12 @@ namespace Capstone.Service.IterationService
             _statusRepository = statusRepository;
             _TaskTypeRepository = TaskTypeRepository;
         }
-        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsById(Guid iterationId)
+        public async Task<GetInterrationByIdResonse> GetIterationsById(Guid iterationId)
         {
             var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, x => x.Board)!;
 
             iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
-            var response = new GetInterrationByBoardIdResonse
+            var response = new GetInterrationByIdResonse
             {
                 InterationId = iteration.InterationId,
                 InterationName = iteration.InterationName,
@@ -51,19 +51,19 @@ namespace Capstone.Service.IterationService
             };
             response.Tasks = await _TaskRepository.GetAllTask(iteration.BoardId);
 
-            return new List<GetInterrationByBoardIdResonse> { response };
+            return response;
         }
 
-        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationTasksByProjectId(Guid projectId)
+        public async Task<IEnumerable<GetInterrationByIdResonse>> GetIterationTasksByProjectId(Guid projectId)
         {
             var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
 
-            var result = new List<GetInterrationByBoardIdResonse>();
+            var result = new List<GetInterrationByIdResonse>();
 
             foreach (var iteration in iterations)
             {
                 iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
-                var response = new GetInterrationByBoardIdResonse
+                var response = new GetInterrationByIdResonse
                 {
                     InterationId = iteration.InterationId,
                     InterationName = iteration.InterationName,

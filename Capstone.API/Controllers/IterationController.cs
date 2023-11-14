@@ -46,7 +46,7 @@ namespace Capstone.API.Controllers
 
 
         [HttpGet("Iteration/{projectId}")]
-        public async Task<ActionResult<IQueryable<GetInterrationByBoardIdResonse>>> GetAllIteration(Guid projectId)
+        public async Task<ActionResult<IQueryable<GetInterrationByIdResonse>>> GetAllIteration(Guid projectId)
         {
             var result = await _iterationService.GetIterationTasksByProjectId(projectId);
             if(result == null)
@@ -56,12 +56,12 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("Iteration")]
-        public async Task<ActionResult<IEnumerable<GetInterrationByIdResonse>>> GetIterationById(Guid iterationId)
+        [HttpGet("Iteration/tasks/{iterationId}")]
+        public async Task<ActionResult<GetInterrationByIdResonse>> GetIterationById(Guid iterationId)
         {
             var result = await _iterationService.GetIterationsById(iterationId);
 
-            if (result == null || !result.Any())
+            if (result == null)
             {
                 return NotFound();
             }
