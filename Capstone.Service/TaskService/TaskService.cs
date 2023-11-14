@@ -65,7 +65,7 @@ namespace Capstone.Service.TaskService
                         {
                             TaskId = Guid.NewGuid(),
                             Title = request.Title,
-                            Decription = request.Decription,
+                            Description = request.Description,
                             StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -90,7 +90,7 @@ namespace Capstone.Service.TaskService
                             AssignTo = newTask.AssignTo,
                             CreateBy = userId,
                             CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                            Description = newTask.Decription,
+                            Description = newTask.Description,
                             DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             TaskId = newTask.TaskId,
@@ -118,7 +118,7 @@ namespace Capstone.Service.TaskService
                                 {
                                     TaskId = Guid.NewGuid(),
                                     Title = request.Title,
-                                    Decription = request.Decription,
+                                    Description = request.Description,
                                     StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -141,7 +141,7 @@ namespace Capstone.Service.TaskService
                                     AssignTo = newTask.AssignTo,
                                     CreateBy = userId,
                                     CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    Description = newTask.Decription,
+                                    Description = newTask.Description,
                                     DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     TaskId = newTask.TaskId,
@@ -171,7 +171,7 @@ namespace Capstone.Service.TaskService
                         {
                             TaskId = Guid.NewGuid(),
                             Title = request.Title,
-                            Decription = request.Decription,
+                            Description = request.Description,
                             StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -196,7 +196,7 @@ namespace Capstone.Service.TaskService
                             AssignTo = newTask.AssignTo,
                             CreateBy = userId,
                             CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                            Description = newTask.Decription,
+                            Description = newTask.Description,
                             DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             TaskId = newTask.TaskId,
@@ -224,7 +224,7 @@ namespace Capstone.Service.TaskService
                                 {
                                     TaskId = Guid.NewGuid(),
                                     Title = request.Title,
-                                    Decription = request.Decription,
+                                    Description = request.Description,
                                     StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                     CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -247,7 +247,7 @@ namespace Capstone.Service.TaskService
                                     AssignTo = newTask.AssignTo,
                                     CreateBy = userId,
                                     CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    Description = newTask.Decription,
+                                    Description = newTask.Description,
                                     DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     TaskId = newTask.TaskId,
@@ -304,7 +304,7 @@ namespace Capstone.Service.TaskService
                 if (task == null) throw new Exception("Can not found task!");
 
                 task.Title= updateTicketRequest.Title;
-                task.Decription = updateTicketRequest.Description;
+                task.Description = updateTicketRequest.Description;
                 task.DueDate = DateTime.Parse(updateTicketRequest.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
                 task.AssignTo= updateTicketRequest.AssignTo;
                 task.TypeId= updateTicketRequest.TypeId;
@@ -320,7 +320,7 @@ namespace Capstone.Service.TaskService
                     AssignTo = task.AssignTo,
                     CreateBy = task.CreateBy,
                     CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    Description = task.Decription,
+                    Description = task.Description,
                     DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     DueDate = task.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     TaskId = task.TaskId,
@@ -465,7 +465,7 @@ namespace Capstone.Service.TaskService
                 {
                     TaskId = Guid.NewGuid(),
                     Title = request.Title,
-                    Decription = request.Decription,
+                    Description = request.Decription,
                     StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -491,7 +491,7 @@ namespace Capstone.Service.TaskService
                     AssignTo = newTask.AssignTo,
                     CreateBy = userId,
                     CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    Description = newTask.Decription,
+                    Description = newTask.Description,
                     DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     InterationId = newTask.InterationId,
