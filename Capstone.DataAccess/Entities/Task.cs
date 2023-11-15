@@ -27,7 +27,6 @@ namespace Capstone.DataAccess.Entities
         public List<TaskHistory> TaskHistories { get; set; } // many history of change
         public Guid PriorityId { get; set; }
         public PriorityLevel PriorityLevel { get; set; } // has 1 priority level 
-        public List<Attachment> Attachments { get; set; } // has many attachments
         public Guid InterationId { get; set; }
         public Interation Interation  { get; set; } // has many attachments
     }
