@@ -11,6 +11,7 @@ namespace Capstone.Service.TicketService
         Task<CreateTaskResponse> CreateTask(CreateTaskRequest request, Guid userId);
         Task<CreateTaskResponse> CreateSubTask(CreateSubTaskRequest request, Guid userId);
         Task<CreateTaskResponse> UpdateTask(Guid taskId, UpdateTaskRequest updateTicketRequest);
+        Task<CreateTaskResponse> UpdateTaskStatus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest);
         Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId);
         Task<IQueryable<Task>> GetAllTaskByInterationIdAsync(Guid interationId);
         Task<BaseResponse> DeleteTask(Guid ticketId);

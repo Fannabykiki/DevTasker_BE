@@ -350,6 +350,58 @@ namespace Capstone.Service.TaskService
                 };
             }
         }
+        
+        public async Task<CreateTaskResponse> UpdateTaskStatus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest)
+        {
+            using var transaction = _iterationRepository.DatabaseTransaction();
+            try
+            {
+                var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, null);
+                if (task == null) throw new Exception("Can not found task!");
+
+                task.StatusId= updateTaskStatusRequest.StatusId;
+
+                await _ticketRepository.UpdateAsync(task);
+                await _ticketRepository.SaveChanges();
+                transaction.Commit();
+
+                return new CreateTaskResponse
+                {
+                    AssignTo = task.AssignTo,
+                    CreateBy = task.CreateBy,
+                    CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    Description = task.Description,
+                    DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    DueDate = task.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    TaskId = task.TaskId,
+                    InterationId = task.InterationId,
+                    IsDelete = task.IsDelete,
+                    PriorityId = task.PriorityId,
+                    TypeId = task.TypeId,
+                    StartDate = task.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    Title = task.Title,
+                    StatusId = task.StatusId,
+                    BaseResponse = new BaseResponse
+                    {
+                        IsSucceed = true,
+                        Message = "Update Successfully"
+                    },
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return new CreateTaskResponse
+                {
+                    BaseResponse = new BaseResponse
+                    {
+                        IsSucceed = true,
+                        Message = "Update fail"
+                    }
+                };
+            }
+        }
 
 
         public async Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId)
