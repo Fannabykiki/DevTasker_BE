@@ -29,6 +29,7 @@ using Capstone.Service.TicketCommentService;
 using Capstone.Service.RoleService;
 using Capstone.Service.TaskService;
 using Capstone.Service.ProjectMemberService;
+using Capstone.Service.BlobStorage;
 
 static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -119,6 +120,7 @@ builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
+builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
