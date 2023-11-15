@@ -75,7 +75,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test] 
-        public async Task TestCreateTicket_Success()
+        public async Task TestCreateTask_Success()
         {
             // Arrange
             var request = new CreateTaskRequest
@@ -98,7 +98,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestCreateTicket_FailEmptyTitle()
+        public async Task TestCreateTask_FailEmptyTitle()
         {
             // Arrange
             var request = new CreateTaskRequest
@@ -118,7 +118,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
-        public async Task TestCreateTicket_FailDueDateBeforeStartDate()
+        public async Task TestCreateTask_FailDueDateBeforeStartDate()
         {
             // Arrange
             var request = new CreateTaskRequest
@@ -147,7 +147,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestCreateTicket_FailLongTitle()
+        public async Task TestCreateTask_FailLongTitle()
         {
             // Arrange
             var request = new CreateTaskRequest
@@ -170,7 +170,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
-        public async Task TestUpdateTicket_Success()
+        public async Task TestUpdateTask_Success()
         {
             // Arrange
             var updateTicketRequest = new UpdateTaskRequest
@@ -193,7 +193,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
-        public async System.Threading.Tasks.Task TestUpdateTicket_Fail()
+        public async System.Threading.Tasks.Task TestUpdateTask_Fail()
         {
             // Arrange
             var updateTicketRequest = new UpdateTaskRequest
@@ -216,7 +216,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
-        public async Task TestUpdateTicket_FailEmptyTitle()
+        public async Task TestUpdateTask_FailEmptyTitle()
         {
             // Arrange
             var updateTicketRequest = new UpdateTaskRequest
@@ -242,7 +242,7 @@ namespace NUnitTest.DevTasker.Service
         }
 
         [Test]
-        public async Task TestDeleteTicket_Success()
+        public async Task TestDeleteTask_Success()
         {
             // Arrange
             var ticketIdToDelete = Guid.NewGuid();
@@ -266,7 +266,7 @@ namespace NUnitTest.DevTasker.Service
 
 
         [Test]
-        public async Task TestDeleteTicket_Failure_TicketNotFound()
+        public async Task TestDeleteTask_Failure_TaskNotFound()
         {
             // Arrange
             var ticketId = Guid.NewGuid();

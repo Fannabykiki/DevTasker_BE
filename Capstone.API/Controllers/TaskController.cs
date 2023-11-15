@@ -118,6 +118,14 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+		
+		[HttpPut("tasks/change-status/{taskId}")]
+        public async Task<IActionResult> UpdateaTaskStastus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest)
+        {
+            var result = await _taskService.UpdateTaskStatus(taskId, updateTaskStatusRequest);
+
+            return Ok(result);
+        }
         
         [HttpPut("task/deletion/{taskId}")]
         public async Task<IActionResult> DeleteTicket(Guid ticketId)
