@@ -335,11 +335,13 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.StatusId = Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7");
+			project.StatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31");
 			project.DeleteAt = DateTime.UtcNow;
 			project.ExpireAt = DateTime.UtcNow.AddDays(30);
+
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
+
 			transaction.Commit();
 			return new BaseResponse { IsSucceed = true, Message = "Delete successfully" };
 		}

@@ -142,20 +142,8 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-		//[EnableQuery]
-		//[HttpGet("projects/bin")]
-		//public async Task<ActionResult<List<GetAllProjectResponse>>> GetProjectsDelete()
-		//{
-		//	var result = await _projectService.GetProjectsDelete();
-		//	if (result == null)
-		//	{
-		//		return StatusCode(500);
-		//	}
 
-		//	return Ok(result);
-		//}
-
-		[EnableQuery]
+        [EnableQuery]
 		[HttpGet("projects/analyzation/{userId:Guid}")]
 		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
 		{
