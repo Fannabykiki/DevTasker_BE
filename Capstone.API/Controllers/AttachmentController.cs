@@ -1,45 +1,50 @@
-﻿using Capstone.Service.AttachmentServices;
-using Microsoft.AspNetCore.Http;
+﻿using Capstone.API.Extentions;
+using Capstone.Service.BlobStorage;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/attachment-management")]
     [ApiController]
     public class AttachmentController : ControllerBase
     {
-        private readonly IAttachmentServices _attachmentServices;
+        private readonly AzureBlobService _azureBlobService;
 
-        public AttachmentController(IAttachmentServices attachmentServices)
+        public AttachmentController(AzureBlobService azureBlobService)
         {
-            _attachmentServices = attachmentServices;
+			_azureBlobService = azureBlobService;
         }
 
         [HttpGet("attachments")]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> ListAllBlobs()
         {
-            var files = await _attachmentServices.GetDriveFiles();
-            return Ok(files);
+            var result = await _azureBlobService.ListAllBlob();
+            return Ok();
         }
         [HttpPost("attachments")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        public async Task<IActionResult> UploadFile(IFormFile file,Guid commentId)
         {
-            var fileId = await _attachmentServices.UploadFileAsync(file);
-            return Ok(fileId);
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return BadRequest("You need to login first");
+            }
+            var files = await _azureBlobService.UploadFile(userId, file, commentId);
+            return Ok(files);
         }
 
-        [HttpGet("attachments/{id}/download")]
-        public IActionResult DownloadFile(string id)
+        [HttpGet("attachments/download/{fileName}")]
+        public async Task<IActionResult> DownloadFile(string fileName)
         {
-            var stream = _attachmentServices.DownloadFile(id);
-            return File(stream, "application/octet-stream");
+            var file = await  _azureBlobService.DownLoadFile(fileName);
+            return File(file.Content,file.ContentType,file.Name);
         }
 
-        [HttpDelete("attachments/{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("attachments/{fileName}")]
+        public async Task<IActionResult> Delete(string fileName)
         {
-            await _attachmentServices.DeleteAttachment(id);
-            return NoContent();
+			var file = await _azureBlobService.DeleteFile(fileName);
+			return Ok(file);
         }
     }
 }

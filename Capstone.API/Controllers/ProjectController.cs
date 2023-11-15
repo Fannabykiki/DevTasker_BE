@@ -67,6 +67,28 @@ namespace Capstone.API.Controllers
 			return Ok(projectMember);
         }
 
+		[HttpPost("projects/decline-invitation")]
+		public async Task<IActionResult> InviteMemberDeclination(string email, Guid projectId)
+		{
+			var user = await _userService.GetUserByEmailAsync(email);
+			var uId = this.GetCurrentLoginUserId();
+			if (user == null)
+			{
+				return NotFound("User account dont exist in system");
+			}
+			if (uId == Guid.Empty)
+			{
+				return BadRequest("You need to login first");
+			}
+			if (user.UserId != uId)
+			{
+				return BadRequest("Account dont match with invitation");
+			}
+			var projectMember = await _projectMemberService.AcceptInvitation(user.UserId, projectId);
+
+			return Ok(projectMember);
+		}
+
 		[HttpPost("projects/accept-invitation")]
 		public async Task<IActionResult> InviteMemberAcception(string email,Guid projectId)
 		{
@@ -120,20 +142,8 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-		//[EnableQuery]
-		//[HttpGet("projects/bin")]
-		//public async Task<ActionResult<List<GetAllProjectResponse>>> GetProjectsDelete()
-		//{
-		//	var result = await _projectService.GetProjectsDelete();
-		//	if (result == null)
-		//	{
-		//		return StatusCode(500);
-		//	}
 
-		//	return Ok(result);
-		//}
-
-		[EnableQuery]
+        [EnableQuery]
 		[HttpGet("projects/analyzation/{userId:Guid}")]
 		public async Task<ActionResult<IQueryable<GetUserProjectAnalyzeResponse>>> GetUserProjectAnalyze(Guid userId)
 		{
@@ -212,7 +222,6 @@ namespace Capstone.API.Controllers
 			{
 				return StatusCode(500);
 			}
-
 			return Ok(result);
 		}
 

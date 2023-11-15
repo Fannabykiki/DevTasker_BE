@@ -24,13 +24,6 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.Attachments)
                 .HasForeignKey(sc => sc.CommentId);
 
-            modelBuilder.Entity<Attachment>()
-                .HasOne(sc => sc.Task)
-                .WithMany(s => s.Attachments)
-                .HasForeignKey(sc => sc.TaskId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
             modelBuilder.Entity<TaskHistory>()
