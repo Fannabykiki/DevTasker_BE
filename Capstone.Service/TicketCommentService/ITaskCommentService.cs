@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.DataAccess.Entities;
 using System;
 using System.Collections;
@@ -13,7 +14,7 @@ namespace Capstone.Service.TicketCommentService
     {
         Task<IEnumerable<GetCommentResponse>> GetAllCommentByTaskID(Guid ticketId);
         Task<GetCommentResponse> CreateComment(CreateCommentRequest comment);
-        Task<GetCommentResponse> UpdateComment(Guid id, CreateCommentRequest updatedComment);
+        Task<GetCommentResponse> UpdateComment(Guid id, UpdateCommentRequest updatedComment);
         Task<bool> RemoveComment(Guid id);
     }
 }

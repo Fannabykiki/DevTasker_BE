@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.Service.TicketCommentService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -49,7 +50,7 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPut("/comment/{commentId}")]
-        public async Task<IActionResult> UpdateComment(Guid id, [FromBody] CreateCommentRequest updatedComment)
+        public async Task<IActionResult> UpdateComment(Guid id, [FromBody] UpdateCommentRequest updatedComment)
         {
             var updated = await _commentService.UpdateComment(id, updatedComment);
             if (updated == null)
