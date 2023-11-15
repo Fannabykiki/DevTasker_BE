@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Google.Apis.Drive.v3.Data;
@@ -82,7 +83,7 @@ namespace Capstone.Service.TicketCommentService
             return _mapper.Map<List<GetCommentResponse>>(listComment);
         }
 
-        public async Task<GetCommentResponse> UpdateComment(Guid id, CreateCommentRequest updatedComment)
+        public async Task<GetCommentResponse> UpdateComment(Guid id, UpdateCommentRequest updatedComment)
         {
             var commentUpdate = await _taskCommentRepository.GetAsync(x => x.CommentId == id && x.DeleteAt == null,null);
             if (commentUpdate == null) return null;

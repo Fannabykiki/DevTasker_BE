@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Capstone.DataAccess.Entities;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Base;
 
 namespace Capstone.Service.ProjectMemberService
 {
@@ -29,7 +30,7 @@ namespace Capstone.Service.ProjectMemberService
 			_userRepository = userRepository;
 		}
 
-		public async Task<bool> AcceptInvitation(Guid userId,Guid projectId)
+		public async Task<BaseResponse> AcceptInvitation(Guid userId,Guid projectId)
 		{
 			using (var transaction = _projectMemberRepository.DatabaseTransaction())
 			{
@@ -42,12 +43,20 @@ namespace Capstone.Service.ProjectMemberService
 					await _projectMemberRepository.SaveChanges();
 					transaction.Commit();
 
-					return true;
+					return new BaseResponse
+					{
+						IsSucceed = true,
+						Message = "You accept invitation successfully",
+					};
 				}
 				catch (Exception ex)
 				{
 					transaction.RollBack();
-					throw ex;
+					return new BaseResponse
+					{
+						IsSucceed = false,
+						Message = "You accept invitation fail",
+					};
 				}
 			}
 		}
@@ -87,5 +96,36 @@ namespace Capstone.Service.ProjectMemberService
 					}
 				}
 			}
+
+		public async Task<BaseResponse> DeclineInvitation(Guid userId, Guid projectId)
+		{
+			using (var transaction = _projectMemberRepository.DatabaseTransaction())
+			{
+				try
+				{
+					var projectMember = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == projectId, null);
+					projectMember.StatusId = Guid.Parse("4ba5ff61-5397-4526-a4d6-5d220081689b");
+
+					await _projectMemberRepository.UpdateAsync(projectMember);
+					await _projectMemberRepository.SaveChanges();
+					transaction.Commit();
+
+					return new BaseResponse
+					{
+						IsSucceed = true,
+						Message = "You decline invitation successfully",
+					};
+				}
+				catch (Exception ex)
+				{
+					transaction.RollBack();
+					return new BaseResponse
+					{
+						IsSucceed = false,
+						Message = "You decline invitation fail",
+					};
+				}
+			}
 		}
+	}
 	}
