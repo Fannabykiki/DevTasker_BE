@@ -203,15 +203,17 @@ public class ProjectService : IProjectService
 	public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
 	{
 		var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
-		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.ProjectMembers.Where(m => m.UserId == userId));
-		foreach (var project in projects)
+		var allProjects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
+
+		foreach (var project in allProjects)
 		{
-			var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == project.ProjectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
-			var projectStatus = await _statusRepository.GetAsync(x => x.StatusId == project.StatusId, x => x.Users);
+            var projects = await _projectRepository.GetAsync(x => x.ProjectId == project.ProjectId, x => x.Status);
+            var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == project.ProjectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
+			manager.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == manager.Users.StatusId, null);
 			var projectAnalyze = new GetUserProjectAnalyzeResponse();
-			projectAnalyze.ProjectId = project.ProjectId;
-			projectAnalyze.ProjectName = project.ProjectName;
-			projectAnalyze.ProjectStatus = projectStatus.Title;
+			projectAnalyze.ProjectId = projects.ProjectId;
+			projectAnalyze.ProjectName = projects.ProjectName;
+			projectAnalyze.ProjectStatus = projects.Status.Title;
 			projectAnalyze.Manager = new UserResponse
 			{
 				UserId = manager.UserId,
@@ -220,6 +222,8 @@ public class ProjectService : IProjectService
 				PhoneNumber = manager.Users.PhoneNumber,
 				Dob = manager.Users.Dob,
 				IsAdmin = manager.Users.IsAdmin,
+				Address= manager.Users.Address,
+				StatusName = manager.Users.Status.Title,
 			};
 			listProjectAnalyze.Add(projectAnalyze);
 		}
