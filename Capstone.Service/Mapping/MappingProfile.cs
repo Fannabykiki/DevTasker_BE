@@ -20,7 +20,11 @@ public class MappingProfile : Profile
         CreateMap<Project, GetAllProjectResponse>();
         CreateMap<Project, GetProjectUsedResponse>()
             .ForMember(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Status.Title)); ;
-        CreateMap<ProjectMember, ViewMemberProject>();
+		CreateMap<ProjectMember, ViewMemberProject>()
+			.ForPath(dest => dest.Email, opt => opt.MapFrom(src => src.Users.Email))
+			.ForPath(dest => dest.Fullname, opt => opt.MapFrom(src => src.Users.Fullname))
+			.ForPath(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
+			.ForPath(dest => dest.UserName, opt => opt.MapFrom(src => src.Users.UserName));
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
         CreateMap<Schema, GetSchemaResponse>();
         CreateMap<Role, GetRoleResponse>();

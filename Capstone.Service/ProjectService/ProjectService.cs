@@ -258,7 +258,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId)
 	{
-		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.ProjectId == projectId, null);
+		var projects = await _projectMemberRepository.GetProjectMembers(projectId);
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
@@ -389,7 +389,7 @@ public class ProjectService : IProjectService
 	{
 		var projectInfoRequests = new ViewProjectInfoRequest();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.Status)!;
-		var members = await _projectMemberRepository.GetAllWithOdata(m => m.ProjectId == projectId, p => p.Role)!;
+		var members = await _projectMemberRepository.GetProjectMembers(projectId)!;
 		var boardStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == project.ProjectId, null);
 		var totaltaskCompleted = 10;
 		foreach (var item in boardStatus)
@@ -423,16 +423,13 @@ public class ProjectService : IProjectService
 					RoleId = m.RoleId,
 					ProjectId = m.ProjectId,
 					IsOwner = m.IsOwner,
-					RoleName = m.Role.RoleName
+					RoleName = m.Role.RoleName,
+					UserName = m.Users.UserName,
+					Email = m.Users.Email,
+					Fullname = m.Users.Fullname
 				})
 				.ToList()
 		};
-        foreach (var mem in projectInfoRequests.ProjectMembers)
-        {
-            var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId, x => x.Users);
-            mem.Fullname = member.Users.Fullname;
-            mem.Email = member.Users.Email;
-        }
         return projectInfoRequests;
 	}
 
@@ -608,5 +605,36 @@ public class ProjectService : IProjectService
 	{
 		var results = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, x => x.Status);
 		return _mapper.Map<List<InterationViewModel>>(results);
+	}
+
+	public async Task<BaseResponse> RemoveProjectMember(Guid memberId)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
+
+			project.StatusId = Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274");
+
+			await _projectMemberRepository.UpdateAsync(project);
+			await _projectMemberRepository.SaveChanges();
+
+			transaction.Commit();
+
+			return new BaseResponse
+			{
+				IsSucceed = true,
+				Message = "Delete successfully"
+			};
+		}
+		catch (Exception ex)
+		{
+			transaction.RollBack();
+			return new BaseResponse
+			{
+				IsSucceed = false,
+				Message = "Delete fail",
+			};
+		}
 	}
 }

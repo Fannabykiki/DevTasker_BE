@@ -1,5 +1,6 @@
 ﻿using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
@@ -8,5 +9,11 @@ namespace Capstone.DataAccess.Repository.Implements
         public ProjectMemberRepository(CapstoneContext context) : base(context)
         {
         }
-    }
+
+		public async Task<List<ProjectMember>> GetProjectMembers(Guid projectId)
+		{
+            var projectMember = await _context.ProjectMembers.Where(x => x.ProjectId == projectId).Include(x => x.Users).Include(x => x.Role).ToListAsync();
+                return projectMember;
+		}
+	}
 }

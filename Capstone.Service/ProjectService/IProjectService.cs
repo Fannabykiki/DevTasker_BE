@@ -4,6 +4,7 @@ using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
+using Capstone.DataAccess.Entities;
 
 namespace Capstone.Service.ProjectService;
 
@@ -27,4 +28,5 @@ public interface IProjectService
 	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest);
 	Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId);
+	Task<BaseResponse> RemoveProjectMember(Guid memberId);
 }
