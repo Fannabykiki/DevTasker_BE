@@ -645,4 +645,10 @@ public class ProjectService : IProjectService
 			};
 		}
 	}
+
+    public async Task<GetProjectReportRequest> GetProjectReport(Guid projectId)
+    {
+
+		return await _projectRepository.GetProjectReport(projectId);
+    }
 }

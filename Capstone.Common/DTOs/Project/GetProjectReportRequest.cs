@@ -8,15 +8,29 @@ namespace Capstone.Common.DTOs.Project
 {
     public class GetProjectReportRequest
     {
-        public ReportRecord reportRecord { get; set; }
-        public List<ReportRecord> reportRecordByWeerk { get; set; }
+        public ReportRecord reportProject { get; set; }
+        public List<ReportRecord>? reportRecordByWeerk { get; set; }
+        public List<MemberTasks>? memberTaks { get; set; }
 
+
+    }
+    public class MemberTasks
+    {
+        public Guid MemberId { get; set; }
+        public Guid UserId { get; set; }
+        public string? Fullname { get; set; }
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+        public Guid? RoleId { get; set; }
+        public string? RoleName { get; set; }
+        public bool IsOwner { get; set; }
+        public List<ReportStatus>? reportStatuses { get; set; }
     }
     public class ReportRecord 
     {
         public int TotalTask { get; set; }
         public DateTime? DateTime { get; set; }
-        public List<ReportStatus> reportStatuses { get; set; }
+        public List<ReportStatus>? reportStatuses { get; set; }
     }
     public class ReportStatus
     {

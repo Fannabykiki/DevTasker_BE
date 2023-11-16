@@ -204,8 +204,8 @@ namespace Capstone.API.Controllers
         [HttpGet("projects/report/{projectId}")]
         public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
         {
-            
-            return Ok();
+            var result = await _projectService.GetProjectReport(projectId);
+            return Ok(result);
         }
 
         [EnableQuery]
