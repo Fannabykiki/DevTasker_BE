@@ -1,5 +1,6 @@
 ﻿using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.Service.TicketCommentService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;

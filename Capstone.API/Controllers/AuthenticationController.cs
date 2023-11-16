@@ -155,14 +155,20 @@ namespace Capstone.API.Controllers
 		[HttpPost("token")]
 		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
 		{
-			var user = await _usersService.LoginUser(request.Email, request.Password);
-			if (user == null )
+			var account = await _usersService.GetUserByEmailAsync(request.Email);
+			if (account == null)
 			{
-				return NotFound("User not exist");
+				return NotFound("Your email not exist");
+			}
+			var user = await _usersService.LoginUser(request.Email, request.Password);
+			if(user == null)
+			{
+				return NotFound("Your password not correct");
+
 			}
 			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
-				return BadRequest("User is inactive");
+				return BadRequest("Your account is inactive.Please verify your account");
 			}
 
 			var token = await _usersService.CreateToken(user);

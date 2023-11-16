@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.DataAccess.Entities;
 using System;
 using System.Collections;

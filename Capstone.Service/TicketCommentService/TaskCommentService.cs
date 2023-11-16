@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.TicketComment;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Google.Apis.Drive.v3.Data;
