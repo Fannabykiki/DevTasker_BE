@@ -117,7 +117,7 @@ namespace Capstone.API.Controllers
         }
 
         [HttpDelete("system/schema/{schemaId}")]
-        public async Task<ActionResult<GetRoleResponse>> RemoveeRole(Guid schemaId)
+        public async Task<ActionResult<GetRoleResponse>> RemoveRole(Guid schemaId)
         {
             var role = await _permissionSchemaService.GetSchemaById(schemaId);
             if (role == null)
