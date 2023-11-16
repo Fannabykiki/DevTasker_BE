@@ -74,7 +74,7 @@ namespace Capstone.API.Controllers
 			var uId = this.GetCurrentLoginUserId();
 			if (user == null)
 			{
-				return NotFound("User account dont exist in system");
+				return NotFound("ProjectMember account dont exist in system");
 			}
 			if (uId == Guid.Empty)
 			{
@@ -198,6 +198,14 @@ namespace Capstone.API.Controllers
             }
 
             return Ok(result);
+        }
+        
+        [EnableQuery]
+        [HttpGet("projects/report/{projectId}")]
+        public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
+        {
+            
+            return Ok();
         }
 
         [EnableQuery]

@@ -12,14 +12,18 @@ namespace Capstone.Service.TicketCommentService
         private readonly ITaskCommentRepository _taskCommentRepository;
         private readonly ITaskRepository _taskRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IProjectMemberRepository _projectMemberRepository;
+        private readonly IStatusRepository _statusRepository;
         private readonly IMapper _mapper;
 
-        public TaskCommentService(ITaskCommentRepository taskCommentRepository, IMapper mapper, ITaskRepository taskRepository, IUserRepository userRepository)
+        public TaskCommentService(ITaskCommentRepository taskCommentRepository, IMapper mapper, ITaskRepository taskRepository, IUserRepository userRepository, IProjectMemberRepository projectMemberRepository,IStatusRepository statusRepository)
         {
             _taskCommentRepository = taskCommentRepository;
             _mapper = mapper;
             _taskRepository = taskRepository;
             _userRepository = userRepository;
+            _projectMemberRepository = projectMemberRepository;
+            _statusRepository = statusRepository;
         }
 
         public async Task<GetCommentResponse> CreateComment(Guid byUserId, CreateCommentRequest comment)
@@ -27,6 +31,8 @@ namespace Capstone.Service.TicketCommentService
             using var transaction = _taskCommentRepository.DatabaseTransaction();
             try
             {
+                var member = await _projectMemberRepository.GetAsync(x => x.UserId == byUserId, x => x.Users);
+                member.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == member.Users.StatusId, null);
                 var newComment = new TaskComment 
                 {
                     CommentId = Guid.NewGuid(),
@@ -35,8 +41,8 @@ namespace Capstone.Service.TicketCommentService
                     UpdateAt= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     TaskId = comment.TaskId,
                     Task = await _taskRepository.GetAsync(x => x.TaskId == comment.TaskId, null),
-                    CreateBy = byUserId,
-                    User = await _userRepository.GetAsync(x => x.UserId == byUserId, x => x.Status),
+                    CreateBy = member.MemberId,
+                    ProjectMember = member,
                 };
 
                 await _taskCommentRepository.CreateAsync(newComment);
@@ -60,6 +66,8 @@ namespace Capstone.Service.TicketCommentService
             {
                 var comment = await _taskCommentRepository.GetAsync(x => x.CommentId == commentId, null);
                 if (comment == null) return null;
+                var member = await _projectMemberRepository.GetAsync(x => x.UserId == byUserId, x => x.Users);
+                member.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == member.Users.StatusId, null);
                 var newComment = new TaskComment
                 {
                     CommentId = Guid.NewGuid(),
@@ -68,11 +76,12 @@ namespace Capstone.Service.TicketCommentService
                     UpdateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     TaskId = comment.TaskId,
                     Task = await _taskRepository.GetAsync(x => x.TaskId == comment.TaskId, null),
-                    CreateBy = byUserId,
-                    User = await _userRepository.GetAsync(x => x.UserId == byUserId, x => x.Status),
+                    CreateBy = member.MemberId,
+                    ProjectMember = member,
                 };
+                
 
-                if(comment.ReplyTo == null)
+                if (comment.ReplyTo == null)
                 {
                     newComment.ReplyTo = commentId;
                 }
