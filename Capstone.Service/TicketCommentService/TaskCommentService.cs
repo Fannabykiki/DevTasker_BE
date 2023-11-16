@@ -21,7 +21,7 @@ namespace Capstone.Service.TicketCommentService
             _userRepository = userRepository;
         }
 
-        public async Task<GetCommentResponse> CreateComment(CreateCommentRequest comment)
+        public async Task<GetCommentResponse> CreateComment(Guid byUserId, CreateCommentRequest comment)
         {
             using var transaction = _taskCommentRepository.DatabaseTransaction();
             try
@@ -33,10 +33,52 @@ namespace Capstone.Service.TicketCommentService
                     CreateAt= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     UpdateAt= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                     TaskId = comment.TaskId,
-                    Task = await _taskRepository.GetAsync(x =>x.TaskId == comment.TaskId,null),
-                    CreateBy = comment.ByUser,
-                    User = await _userRepository.GetAsync(x => x.UserId == comment.ByUser,x => x.Status),
+                    Task = await _taskRepository.GetAsync(x => x.TaskId == comment.TaskId, null),
+                    CreateBy = byUserId,
+                    User = await _userRepository.GetAsync(x => x.UserId == byUserId, x => x.Status),
                 };
+
+                await _taskCommentRepository.CreateAsync(newComment);
+                await _taskCommentRepository.SaveChanges();
+
+                transaction.Commit();
+                return _mapper.Map<GetCommentResponse>(newComment);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return null;
+            }
+        }
+
+        public async Task<GetCommentResponse> ReplyComment(Guid commentId, Guid byUserId, ReplyCommentRequest request)
+        {
+            using var transaction = _taskCommentRepository.DatabaseTransaction();
+            try
+            {
+                var comment = await _taskCommentRepository.GetAsync(x => x.CommentId == commentId, null);
+                if (comment == null) return null;
+                var newComment = new TaskComment
+                {
+                    CommentId = Guid.NewGuid(),
+                    Content = request.Content,
+                    CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                    UpdateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                    TaskId = comment.TaskId,
+                    Task = await _taskRepository.GetAsync(x => x.TaskId == comment.TaskId, null),
+                    CreateBy = byUserId,
+                    User = await _userRepository.GetAsync(x => x.UserId == byUserId, x => x.Status),
+                };
+
+                if(comment.ReplyTo == null)
+                {
+                    newComment.ReplyTo = commentId;
+                }
+                else
+                {
+                    newComment.ReplyTo = comment.ReplyTo;
+                }
 
                 await _taskCommentRepository.CreateAsync(newComment);
                 await _taskCommentRepository.SaveChanges();
@@ -76,13 +118,13 @@ namespace Capstone.Service.TicketCommentService
             }
         }
 
-        public async Task<IEnumerable<GetCommentResponse>> GetAllCommentByTaskID(Guid ticketId)
+        public async Task<IEnumerable<GetCommentResponse>> GetAllCommentByTaskID(Guid taskId)
         {
-            var listComment = await _taskCommentRepository.GetAllWithOdata(x => x.TaskId == ticketId && x.DeleteAt == null, null);
-            return _mapper.Map<List<GetCommentResponse>>(listComment);
+            var listComment = await _taskCommentRepository.GetAllTaskComment(taskId);
+            return listComment;
         }
 
-        public async Task<GetCommentResponse> UpdateComment(Guid id, CreateCommentRequest updatedComment)
+        public async Task<GetCommentResponse> UpdateComment(Guid id, ReplyCommentRequest updatedComment)
         {
             var commentUpdate = await _taskCommentRepository.GetAsync(x => x.CommentId == id && x.DeleteAt == null,null);
             if (commentUpdate == null) return null;

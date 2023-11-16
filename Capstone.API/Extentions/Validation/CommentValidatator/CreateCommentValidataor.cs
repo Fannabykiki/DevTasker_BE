@@ -13,9 +13,6 @@ namespace Capstone.API.Extentions.Validation.CommentValidatator
 
             RuleFor(x => x.TaskId)
               .NotEqual(Guid.Empty).WithMessage("TaskId is required");
-
-            RuleFor(x => x.ByUser)
-              .NotEqual(Guid.Empty).WithMessage("ByUser is required");
         }
     }
 }

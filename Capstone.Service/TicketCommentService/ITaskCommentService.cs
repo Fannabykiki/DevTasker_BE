@@ -12,8 +12,9 @@ namespace Capstone.Service.TicketCommentService
     public interface ITaskCommentService
     {
         Task<IEnumerable<GetCommentResponse>> GetAllCommentByTaskID(Guid ticketId);
-        Task<GetCommentResponse> CreateComment(CreateCommentRequest comment);
-        Task<GetCommentResponse> UpdateComment(Guid id, CreateCommentRequest updatedComment);
+        Task<GetCommentResponse> CreateComment(Guid byUserId, CreateCommentRequest comment);
+        Task<GetCommentResponse> ReplyComment(Guid commentId, Guid byUserId, ReplyCommentRequest comment);
+        Task<GetCommentResponse> UpdateComment(Guid id, ReplyCommentRequest updatedComment);
         Task<bool> RemoveComment(Guid id);
     }
 }

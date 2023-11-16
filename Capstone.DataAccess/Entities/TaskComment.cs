@@ -11,6 +11,7 @@ namespace Capstone.DataAccess.Entities
         public DateTime? DeleteAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public Guid? TaskId { get; set; }
+        public Guid? ReplyTo { get; set; }
         public Guid? AttachmentId { get; set; }
         public List<Attachment>? Attachments { get; set; }
         public Task? Task  { get; set; } // 1 comment just only in 1 task

@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Comments;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Comments;
 using Capstone.Service.TicketCommentService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -19,7 +20,12 @@ namespace Capstone.API.Controllers
         [HttpPost("/comment")]
         public async Task<IActionResult> CreateComment(CreateCommentRequest comment)
         {
-            var newComment = await _commentService.CreateComment(comment);
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need to login first");
+            }
+            var newComment = await _commentService.CreateComment(userId, comment);
             if (newComment == null)
             {
                 return BadRequest("Failed to create a new comment.");
@@ -40,6 +46,24 @@ namespace Capstone.API.Controllers
             return Ok("Comment deleted.");
         }
 
+
+        [HttpPost("/comment/reply/{commentId}")]
+        public async Task<IActionResult> CreateComment(Guid commentId, ReplyCommentRequest comment)
+        {
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need to login first");
+            }
+            var newComment = await _commentService.ReplyComment(commentId, userId, comment);
+            if (newComment == null)
+            {
+                return BadRequest("Failed to create a new comment.");
+            }
+
+            return Ok(newComment);
+        }
+
         [EnableQuery]
         [HttpGet("/comment/{taskId}")]
         public async Task<IActionResult> GetAllCommentByTaskID(Guid taskId)
@@ -49,9 +73,9 @@ namespace Capstone.API.Controllers
         }
 
         [HttpPut("/comment/{commentId}")]
-        public async Task<IActionResult> UpdateComment(Guid id, [FromBody] CreateCommentRequest updatedComment)
+        public async Task<IActionResult> UpdateComment(Guid commentId, ReplyCommentRequest updatedComment)
         {
-            var updated = await _commentService.UpdateComment(id, updatedComment);
+            var updated = await _commentService.UpdateComment(commentId, updatedComment);
             if (updated == null)
             {
                 return NotFound("Comment not found or Unable to update.");
