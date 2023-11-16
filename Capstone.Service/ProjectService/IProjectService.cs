@@ -11,6 +11,7 @@ namespace Capstone.Service.ProjectService;
 public interface IProjectService
 {
 	Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin();
+	Task<GetProjectReportRequest> GetProjectReport(Guid projectId);
 	Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId);
 	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
