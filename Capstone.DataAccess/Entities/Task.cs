@@ -25,6 +25,7 @@ namespace Capstone.DataAccess.Entities
 		public List<TaskComment> TaskComments { get; set; } // 1 task has many type 
         public BoardStatus Status { get; set; } // just only 1 status 
         public List<TaskHistory> TaskHistories { get; set; } // many history of change
+        public List<Attachment> Attachments { get; set; } // many history of change
         public Guid PriorityId { get; set; }
         public PriorityLevel PriorityLevel { get; set; } // has 1 priority level 
         public Guid InterationId { get; set; }

@@ -27,7 +27,7 @@ public class ProjectService : IProjectService
 	private readonly IBoardRepository _boardRepository;
 	private readonly IInterationRepository _interationRepository;
 	private readonly IPermissionRepository _permissionRepository;
-	private readonly IPermissionSchemaRepository _permissionScemaRepo;
+	private readonly IPermissionSchemaRepository _permissionSchemaRepository;
 	private readonly IBoardStatusRepository _boardStatusRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly ITaskTypeRepository _ticketTypeRepository;
@@ -45,7 +45,7 @@ public class ProjectService : IProjectService
 		_boardRepository = boardRepository;
 		_permissionRepository = permissionRepository;
 		_interationRepository = interationRepository;
-		_permissionScemaRepo = permissionScemaRepo;
+		_permissionSchemaRepository = permissionScemaRepo;
 		_statusRepository = statusRepository;
 		_boardStatusRepository = boardStatusRepository;
 		_userRepository = userRepository;
@@ -336,8 +336,8 @@ public class ProjectService : IProjectService
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
 			project.StatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31");
-			project.DeleteAt = DateTime.UtcNow;
-			project.ExpireAt = DateTime.UtcNow.AddDays(30);
+			project.DeleteAt = DateTime.Now;
+			project.ExpireAt = DateTime.Now.AddDays(30);
 
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
@@ -428,7 +428,9 @@ public class ProjectService : IProjectService
 					RoleName = m.Role.RoleName,
 					UserName = m.Users.UserName,
 					Email = m.Users.Email,
-					Fullname = m.Users.Fullname
+					Fullname = m.Users.Fullname,
+					StatusId = m.StatusId,
+					StatusName = m.Status.Title
 				})
 				.ToList()
 		};
@@ -467,14 +469,20 @@ public class ProjectService : IProjectService
 	{
 		var newPermisisonViewModel = new List<PermissionViewModel>();
 		var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;
-		var permissions = await _permissionScemaRepo.GetPermissionByUserId(role.RoleId);
-		foreach (var permisison in permissions)
+		var permissions = await _permissionSchemaRepository.GetPermissionByUserId(role.RoleId);
+		HashSet<Guid> result = new HashSet<Guid>();
+		foreach(var permission in permissions)
 		{
+			result.Add(permission.PermissionId);
+		}
+		foreach (var permisison in result)
+		{
+			var per = await _permissionRepository.GetAsync(x => x.PermissionId == permisison, null);
 			var permissionViewModel = new PermissionViewModel
 			{
-				Description = permisison.Description,
-				Name = permisison.Name,
-				PermissionId = permisison.PermissionId,
+				Description = per.Description,
+				Name = per.Name,
+				PermissionId = per.PermissionId,
 			};
 			newPermisisonViewModel.Add(permissionViewModel);
 		}
@@ -639,4 +647,10 @@ public class ProjectService : IProjectService
 			};
 		}
 	}
+
+    public async Task<GetProjectReportRequest> GetProjectReport(Guid projectId)
+    {
+
+		return await _projectRepository.GetProjectReport(projectId);
+    }
 }

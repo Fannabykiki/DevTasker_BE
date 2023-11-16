@@ -6,7 +6,7 @@
 
 3. Run migration:
 add-migration AddMemberStatus -context CapstoneContext -o Migrations
-dotnet ef migrations add AddMemberStatus
+dotnet ef migrations add ChangeRelationshipAttachment
 
 4. Update migration:
 update-database

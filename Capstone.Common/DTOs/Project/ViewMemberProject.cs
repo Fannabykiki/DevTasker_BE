@@ -11,5 +11,7 @@
 		public Guid ProjectId { get; set; }
 		public string? RoleName { get; set; }
 		public bool IsOwner { get; set; }
-	}
+        public string StatusName { get; set; }
+        public Guid? StatusId { get; set; }
+    }
 }

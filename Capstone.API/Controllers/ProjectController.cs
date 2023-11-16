@@ -74,7 +74,7 @@ namespace Capstone.API.Controllers
 			var uId = this.GetCurrentLoginUserId();
 			if (user == null)
 			{
-				return NotFound("User account dont exist in system");
+				return NotFound("ProjectMember account dont exist in system");
 			}
 			if (uId == Guid.Empty)
 			{
@@ -199,6 +199,14 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
+        
+        [EnableQuery]
+        [HttpGet("projects/report/{projectId}")]
+        public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
+        {
+            var result = await _projectService.GetProjectReport(projectId);
+            return Ok(result);
+        }
 
         [EnableQuery]
         [HttpGet("projects/{projectId:Guid}")]
@@ -303,13 +311,20 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> RestoreProjectStatus(Guid projectId)
         {
             var project = await _projectService.GetProjectByProjectId(projectId);
-            if (project.ExpireAt >= DateTime.UtcNow)
+            if(project.DeleteAt == null)
             {
-                return BadRequest("Can not restore Project. Over 30 days");
-            }
-            var result = await _projectService.RestoreProject(projectId);
+				return BadRequest("Projects is still active. Cant restore it!!!");
+			}
+			if (project.ExpireAt >= DateTime.Now)
+            {
+				var result = await _projectService.RestoreProject(projectId);
+				return Ok(result);
+			}
+			else
+            {
+				return BadRequest("Cant restore this Project.Over 30 days from delete day");
+			}
 
-            return Ok(result);
         }
     }
 }

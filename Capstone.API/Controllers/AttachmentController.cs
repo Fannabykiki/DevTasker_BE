@@ -22,14 +22,14 @@ namespace Capstone.API.Controllers
             return Ok();
         }
         [HttpPost("attachments")]
-        public async Task<IActionResult> UploadFile(IFormFile file,Guid commentId)
+        public async Task<IActionResult> UploadFile(IFormFile file,Guid taskId)
         {
             var userId = this.GetCurrentLoginUserId();
             if (userId == Guid.Empty)
             {
                 return BadRequest("You need to login first");
             }
-            var files = await _azureBlobService.UploadFile(userId, file, commentId);
+            var files = await _azureBlobService.UploadFile(userId, file, taskId);
             return Ok(files);
         }
 

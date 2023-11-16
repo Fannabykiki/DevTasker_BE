@@ -45,7 +45,7 @@ namespace Capstone.Service.BlobStorage
 			return files;
 		}
 
-		public async Task<BlobResponse> UploadFile(Guid userId, IFormFile file, Guid commentId)
+		public async Task<BlobResponse> UploadFile(Guid userId, IFormFile file, Guid taskId)
 		{
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try
@@ -73,7 +73,7 @@ namespace Capstone.Service.BlobStorage
 					var newAttachment = new Attachment
 					{
 						AttachmentId = Guid.NewGuid(),
-						CommentId = commentId,
+						TaskId = taskId,
 						CreateAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateBy = userId,
 						Title = file.FileName,
@@ -134,10 +134,18 @@ namespace Capstone.Service.BlobStorage
 
 		public async Task<BlobResponse> DeleteFile(string blobFile)
 		{
-			BlobClient file = _blobServiceClient.GetBlobClient(blobFile);
-			if (await file.ExistsAsync())
+			using var transaction = _attachmentRepository.DatabaseTransaction();
+			try
 			{
-				await file.DeleteIfExistsAsync();
+				BlobClient file = _blobServiceClient.GetBlobClient(blobFile);
+				if (await file.ExistsAsync())
+				{
+					await file.DeleteIfExistsAsync();
+					var attachment = await _attachmentRepository.GetAsync(x => x.Title.Equals(blobFile), null);
+					await _attachmentRepository.DeleteAsync(attachment);
+					await _attachmentRepository.SaveChanges();
+					transaction.Commit();
+				}
 
 				return new BlobResponse
 				{
@@ -145,11 +153,15 @@ namespace Capstone.Service.BlobStorage
 					Message = $"Attachment : {blobFile} has been remove successfully!!!"
 				};
 			}
-			return new BlobResponse
+			catch
 			{
-				IsSucceed = false,
-				Message = $"Attachment:{blobFile} don't exist.Cant delete!!"
-			};
+				transaction.RollBack();
+				return new BlobResponse
+				{
+					IsSucceed = false,
+					Message = $"Attachment:{blobFile} don't exist.Cant delete!!"
+				};
+			}
 		}
 	}
 }

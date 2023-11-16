@@ -1,4 +1,5 @@
-﻿using Capstone.Common.Enums;
+﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.Enums;
 
 namespace Capstone.Common.DTOs.User
 {
@@ -26,5 +27,6 @@ namespace Capstone.Common.DTOs.User
 		public bool IsFirstTime { get; set; } //true
 		public Guid StatusId { get; set; } // Active = 1,Inactive = 2
 		public bool IsAdmin { get; set; } //True: Admin , False : User
+		public BaseResponse BaseResponse { get; set; } //True: Admin , False : User
 	}
 }
