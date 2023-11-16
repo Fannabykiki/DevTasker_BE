@@ -617,5 +617,11 @@ namespace Capstone.Service.TaskService
             var result = await _ticketRepository.GetAllTaskDelete(projectId);
             return result;
         }
-    }
+
+		public async Task<TaskDetailViewModel> GetTaskDetail(Guid taskId)
+		{
+			var result = await _ticketRepository.GetTaskDetail(taskId);
+			return result;
+		}
+	}
 }

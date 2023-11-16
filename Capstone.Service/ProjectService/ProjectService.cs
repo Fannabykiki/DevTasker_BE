@@ -336,8 +336,8 @@ public class ProjectService : IProjectService
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
 			project.StatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31");
-			project.DeleteAt = DateTime.UtcNow;
-			project.ExpireAt = DateTime.UtcNow.AddDays(30);
+			project.DeleteAt = DateTime.Now;
+			project.ExpireAt = DateTime.Now.AddDays(30);
 
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
@@ -428,7 +428,9 @@ public class ProjectService : IProjectService
 					RoleName = m.Role.RoleName,
 					UserName = m.Users.UserName,
 					Email = m.Users.Email,
-					Fullname = m.Users.Fullname
+					Fullname = m.Users.Fullname,
+					StatusId = m.StatusId,
+					StatusName = m.Status.Title
 				})
 				.ToList()
 		};

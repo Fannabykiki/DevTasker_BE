@@ -39,6 +39,7 @@ static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder 
         await scope.ServiceProvider.GetRequiredService<CapstoneContext>().Database.MigrateAsync();
     }
 }
+
 static IEdmModel GetEdmModel()
 {
     ODataConventionModelBuilder builder = new();
@@ -159,24 +160,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                };
            }
        );
-//// Add Google OAuth authentication
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.Authority = "https://accounts.google.com";
-//        options.Audience = configuration["Authentication:Google:ClientId"]; 
-//    });
-
-//// Add authorization policies if needed
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("GoogleDriveAccess", policy =>
-//    {
-//        policy.RequireAuthenticatedUser();
-//        policy.RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-//        // Add more requirements as needed
-//    });
-//});
 
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -185,9 +168,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization(
     options =>
     {
-        options.AddPolicy("CanView", policy =>
+        options.AddPolicy("CreateTask", policy =>
         {
             policy.Requirements.Add(new PermissionRequirement(null));
+            policy.RequireAuthenticatedUser();
+            policy.RequireRole("993951AD-5457-41B9-8FFF-4D1C1FA557D0");
         });
     }
     );

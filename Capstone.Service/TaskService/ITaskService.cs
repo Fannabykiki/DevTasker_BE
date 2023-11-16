@@ -21,5 +21,6 @@ namespace Capstone.Service.TicketService
 		Task<List<GetAllTaskPriority>> GetAllTaskPriotiry();
 		Task<BaseResponse> RestoreTask(Guid taskId);
 		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
+		Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
 	}
 }
