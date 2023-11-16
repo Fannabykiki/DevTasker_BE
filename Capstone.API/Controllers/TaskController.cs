@@ -33,9 +33,17 @@ namespace Capstone.API.Controllers
 
 		[HttpGet("tasks/bin")]
 		[EnableQuery()]
-		public async Task<ActionResult<TaskViewModel>> GetAllTaskDelete(Guid projetcId)
+		public async Task<ActionResult<List<TaskViewModel>>> GetAllTaskDelete(Guid projetcId)
 		{
 			var response = await _taskService.GetAllTaskDeleteAsync(projetcId);
+			return Ok(response);
+		}
+
+		[HttpGet("tasks/detail")]
+		[EnableQuery()]
+		public async Task<ActionResult<TaskDetailViewModel>> GetTaskDetail(Guid taskId)
+		{
+			var response = await _taskService.GetTaskDetail(taskId);
 			return Ok(response);
 		}
 
