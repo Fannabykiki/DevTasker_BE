@@ -76,7 +76,7 @@ namespace Capstone.DataAccess.Repository.Implements
                     BoardStatusId = status.BoardStatusId,
                     Title = status.Title,
                     NumberTask = numberTask,
-                    Percent = (int)Math.Round((double)(100 * numberTask) / tasks.Count)
+                    Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * numberTask) / tasks.Count)
                 });
             }
             return reports;
