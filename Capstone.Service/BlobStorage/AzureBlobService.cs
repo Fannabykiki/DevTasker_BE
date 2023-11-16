@@ -45,7 +45,7 @@ namespace Capstone.Service.BlobStorage
 			return files;
 		}
 
-		public async Task<BlobResponse> UploadFile(Guid userId, IFormFile file, Guid commentId)
+		public async Task<BlobResponse> UploadFile(Guid userId, IFormFile file, Guid taskId)
 		{
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try
@@ -73,7 +73,7 @@ namespace Capstone.Service.BlobStorage
 					var newAttachment = new Attachment
 					{
 						AttachmentId = Guid.NewGuid(),
-						CommentId = commentId,
+						TaskId = taskId,
 						CreateAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 						CreateBy = userId,
 						Title = file.FileName,

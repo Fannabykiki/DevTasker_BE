@@ -311,13 +311,20 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> RestoreProjectStatus(Guid projectId)
         {
             var project = await _projectService.GetProjectByProjectId(projectId);
-            if (project.ExpireAt >= DateTime.UtcNow)
+            if(project.DeleteAt == null)
             {
-                return BadRequest("Can not restore Project. Over 30 days");
-            }
-            var result = await _projectService.RestoreProject(projectId);
+				return BadRequest("Projects is still active. Cant restore it!!!");
+			}
+			if (project.ExpireAt >= DateTime.Now)
+            {
+				var result = await _projectService.RestoreProject(projectId);
+				return Ok(result);
+			}
+			else
+            {
+				return BadRequest("Cant restore this Project.Over 30 days from delete day");
+			}
 
-            return Ok(result);
         }
     }
 }

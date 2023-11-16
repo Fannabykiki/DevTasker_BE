@@ -29,7 +29,7 @@ namespace Capstone.DataAccess.Entities
         public bool IsFirstTime { get; set; } //true
         public Guid StatusId { get; set; }
         public Status Status { get; set; }
-        public bool IsAdmin { get; set; } //True: Admin , False : ProjectMember
+        public bool IsAdmin { get; set; } //True: Admin , False : User
         public List<Notification> Notifications { get; set; } // 1 user has many noti
         public List<ProjectMember> ProjectMember { get; set; } // 1 user is many porject_member in other project
     }

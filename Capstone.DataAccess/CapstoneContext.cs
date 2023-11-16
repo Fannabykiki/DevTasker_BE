@@ -20,9 +20,9 @@ namespace Capstone.DataAccess
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attachment>()
-                .HasOne(sc => sc.TaskComment)
+                .HasOne(sc => sc.Task)
                 .WithMany(s => s.Attachments)
-                .HasForeignKey(sc => sc.CommentId);
+                .HasForeignKey(sc => sc.TaskId);
 
             modelBuilder.Entity<TaskHistory>().HasKey(sc => new { sc.HistoryId });
 
@@ -39,7 +39,13 @@ namespace Capstone.DataAccess
                 .WithMany(wi => wi.TaskComments)
                 .HasForeignKey(tc => tc.TaskId)
                 .OnDelete(DeleteBehavior.Restrict);
-
+            
+            modelBuilder.Entity<TaskComment>()
+                .HasOne(sc => sc.ProjectMember)
+                .WithMany(s => s.TaskComments)
+                .HasForeignKey(sc => sc.CreateBy)
+                .OnDelete(DeleteBehavior.Restrict);
+            
             modelBuilder.Entity<ProjectMember>().HasKey(sc => new { sc.MemberId });
 
             modelBuilder.Entity<ProjectMember>()
@@ -47,7 +53,7 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.ProjectMembers)
                 .HasForeignKey(sc => sc.ProjectId)
                 .OnDelete(DeleteBehavior.Restrict);
-
+            
 			modelBuilder.Entity<ProjectMember>()
 			   .HasOne(sc => sc.Status)
 			   .WithMany(s => s.ProjectMembers)
@@ -65,7 +71,7 @@ namespace Capstone.DataAccess
                 .WithMany(s => s.ProjectMember)
                 .HasForeignKey(sc => sc.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
-
+            
             modelBuilder.Entity<TaskType>().HasKey(sc => new { sc.TypeId });
 
             modelBuilder.Entity<TaskType>()
@@ -187,7 +193,6 @@ namespace Capstone.DataAccess
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
-            
         }
 
 		public DbSet<Attachment>? Attachments { get; set; }
