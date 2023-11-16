@@ -16,6 +16,7 @@ namespace Capstone.DataAccess.Entities
         public Role Role { get; set; } // Project member has 1 role
         public Project Project { get; set; } //Project member just in 1 project
         public List<Task> Tasks { get; set; } //Project member just in 1 project
+        public List<TaskComment> TaskComments { get; set; }
         public List<TaskHistory> TaskHistories { get; set; } //Project member just in 1 project
         public List<Attachment> Attachments { get; set; }
     }

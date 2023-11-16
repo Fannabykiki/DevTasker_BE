@@ -29,12 +29,12 @@ public class MappingProfile : Profile
         CreateMap<Schema, GetSchemaResponse>();
         CreateMap<Role, GetRoleResponse>();
         CreateMap<TaskComment, GetCommentResponse>()
-            .ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.User.UserId))
-            .ForPath(dest => dest.User.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
-            .ForPath(dest => dest.User.Email, opt => opt.MapFrom(src => src.User.Email))
-            .ForPath(dest => dest.User.IsFirstTime, opt => opt.MapFrom(src => src.User.IsFirstTime))
-            .ForPath(dest => dest.User.IsAdmin, opt => opt.MapFrom(src => src.User.IsAdmin))
-            .ForPath(dest => dest.User.Status, opt => opt.MapFrom(src => src.User.Status.Title));
+            .ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.ProjectMember.UserId))
+            .ForPath(dest => dest.User.Fullname, opt => opt.MapFrom(src => src.ProjectMember.Users.Fullname))
+            .ForPath(dest => dest.User.Email, opt => opt.MapFrom(src => src.ProjectMember.Users.Email))
+            .ForPath(dest => dest.User.IsFirstTime, opt => opt.MapFrom(src => src.ProjectMember.Users.IsFirstTime))
+            .ForPath(dest => dest.User.IsAdmin, opt => opt.MapFrom(src => src.ProjectMember.Users.IsAdmin))
+            .ForPath(dest => dest.User.Status, opt => opt.MapFrom(src => src.ProjectMember.Users.Status.Title));
         CreateMap<User, UserResponse>()
 		   .ForPath(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 		CreateMap<ProjectMember, GetAllProjectViewModel>()
