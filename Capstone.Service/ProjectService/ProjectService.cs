@@ -428,7 +428,9 @@ public class ProjectService : IProjectService
 					RoleName = m.Role.RoleName,
 					UserName = m.Users.UserName,
 					Email = m.Users.Email,
-					Fullname = m.Users.Fullname
+					Fullname = m.Users.Fullname,
+					StatusId = m.StatusId,
+					StatusName = m.Status.Title
 				})
 				.ToList()
 		};
