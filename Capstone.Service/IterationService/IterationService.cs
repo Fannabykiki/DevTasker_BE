@@ -80,64 +80,6 @@ namespace Capstone.Service.IterationService
             return result;
         }
 
-        //private async Task<List<Tasks>> GetWorkItemsForIterationAsync(Interation iteration)
-        //{
-        //    var workItems = new List<Tasks>();
-        //    var Tasks = await _TaskRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, x => x.Status);
-
-        //    if (Tasks == null) return null;
-
-        //    foreach (var Task in Tasks)
-        //    {
-        //        if (Task.PrevId == null)
-        //        {
-        //            var item = new Tasks
-        //            {
-        //                TaskId = Task.TaskId,
-        //                Title = Task.Title,
-        //                Description = Task.Description,
-        //                StartDate = Task.StartDate,
-        //                DueDate = Task.DueDate,
-        //                CreateTime = Task.CreateTime,
-        //                DeleteAt = Task.DeleteAt,
-        //                IsDelete = Task.IsDelete,
-        //                AssignTo = _mapper.Map<UserResponse>(await _userRepository.GetAsync(x =>x.UserId == Task.AssignTo,null)),
-
-        //                TaskType = "Work Item",
-        //                StatusId= Task.StatusId,
-        //                TaskStatus = Task.Status.Title
-        //            };
-
-        //            item.SubTasks = await GetChildTasksAsync(Task.TaskId, Tasks);
-
-        //            workItems.Add(item);
-        //        }
-        //    }
-
-        //    return workItems;
-        //}
-
-        //private async Task<List<TaskResponse>> GetChildTasksAsync(Guid parentId, IEnumerable<DataAccess.Entities.Task> allTasks)
-        //{
-
-        //    foreach (var Task in allTasks)
-        //    {
-        //        Task.TicketType = await _TaskTypeRepository.GetAsync(x => x.TypeId == Task.TypeId, null);
-        //    }
-        //    return allTasks
-        //      .Where(x => x.PrevId == parentId)
-        //      .Select(x => new TaskResponse
-        //      {
-        //          TaskId = x.TaskId,
-        //          Title = x.Title,
-        //          StatusId = x.StatusId,
-        //          TaskType = x.TicketType.Title,
-        //          TaskStatus = x.Status.Title
-        //      })
-        //      .ToList();
-            
-        //}
-
         public async Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();

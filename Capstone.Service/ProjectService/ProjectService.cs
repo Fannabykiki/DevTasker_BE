@@ -4,7 +4,6 @@ using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
@@ -33,8 +32,9 @@ public class ProjectService : IProjectService
 	private readonly ITaskTypeRepository _ticketTypeRepository;
 	private readonly IPriorityRepository _priorityRepository;
 	private readonly ITaskRepository _ticketRepository;
+	private readonly IInvitationRepository _invitationRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository)
+	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository, IInvitationRepository invitationRepository)
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -49,10 +49,11 @@ public class ProjectService : IProjectService
 		_statusRepository = statusRepository;
 		_boardStatusRepository = boardStatusRepository;
 		_userRepository = userRepository;
-		_ticketTypeRepository= ticketTypeRepository;
+		_ticketTypeRepository = ticketTypeRepository;
 		_priorityRepository = priorityRepository;
-		_ticketRepository= ticketRepository;
-    }
+		_ticketRepository = ticketRepository;
+		_invitationRepository = invitationRepository;
+	}
 
 	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
 	{
@@ -104,7 +105,7 @@ public class ProjectService : IProjectService
 				Order = 2,
 				BoardStatusId = new Guid()
 			};
-			
+
 			var done = new BoardStatus
 			{
 				BoardId = newProject.Board.BoardId,
@@ -117,7 +118,7 @@ public class ProjectService : IProjectService
 			await _boardStatusRepository.CreateAsync(todo);
 			await _boardStatusRepository.CreateAsync(inProgress);
 			await _boardStatusRepository.SaveChanges();
-			
+
 			var newInteration = new Interation
 			{
 				StartDate = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -128,7 +129,7 @@ public class ProjectService : IProjectService
 				InterationId = Guid.NewGuid(),
 			};
 
-			 var inter = await _interationRepository.CreateAsync(newInteration);
+			var inter = await _interationRepository.CreateAsync(newInteration);
 			await _interationRepository.SaveChanges();
 
 			var newPo = new ProjectMember
@@ -203,6 +204,7 @@ public class ProjectService : IProjectService
 	public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
 	{
 		var allProjects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
+
 		HashSet<GetUserProjectAnalyzeResponse> projectResult = new HashSet<GetUserProjectAnalyzeResponse>();
         HashSet<Guid> projectIds = new HashSet<Guid>();
         foreach (var record in allProjects)
@@ -405,7 +407,7 @@ public class ProjectService : IProjectService
 		{
 			if (item.Title.Equals("Done"))
 			{
-				 totaltaskCompleted = (await _ticketRepository.GetAllTaskCompleted(projectId,item.BoardStatusId)).Count();
+				totaltaskCompleted = (await _ticketRepository.GetAllTaskCompleted(projectId, item.BoardStatusId)).Count();
 			}
 		}
 		var totaltask = await _ticketRepository.GetAllTask(projectId);
@@ -441,35 +443,56 @@ public class ProjectService : IProjectService
 				})
 				.ToList()
 		};
-        return projectInfoRequests;
+		return projectInfoRequests;
 	}
 
-	public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest)
+	public async Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest, Guid userId)
 	{
-		foreach (var user in inviteUserRequest.Email)
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
 		{
-			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
-			string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "email=" + user + "&projectId=" + inviteUserRequest.ProjectId;
-			var email = new MimeMessage();
-			email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
-			email.To.Add(MailboxAddress.Parse("" + user));
-			email.Subject = "DevTakser verification step";
-			email.Body = new TextPart(TextFormat.Html)
+			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
+			foreach (var user in inviteUserRequest.Email)
 			{
-				Text = $"<h1>You've been invited to DevTasker</h1>" +
-				$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
-			};
+				var newInvite = new Invitation
+				{
+					CreateAt = DateTime.Now,
+					CreateBy = member.MemberId,
+					InvitationId = Guid.NewGuid(),
+					InviteTo = user,
+					StatusId = Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"),
+				};
+				var invitation = await _invitationRepository.CreateAsync(newInvite);
+				await _invitationRepository.SaveChanges();
+				transaction.Commit();
 
-			using (var client = new MailKit.Net.Smtp.SmtpClient())
-			{
-				client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-				client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
-				client.Send(email);
-				client.Disconnect(true);
+				var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
+				string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "email=" + user + "&projectId=" + inviteUserRequest.ProjectId + "&invitationId=" + invitation.InvitationId;
+				var email = new MimeMessage();
+				email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
+				email.To.Add(MailboxAddress.Parse("" + user));
+				email.Subject = "DevTakser verification step";
+				email.Body = new TextPart(TextFormat.Html)
+				{
+					Text = $"<h1>You've been invited to DevTasker</h1>" +
+					$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
+				};
+
+				using (var client = new MailKit.Net.Smtp.SmtpClient())
+				{
+					client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+					client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
+					client.Send(email);
+					client.Disconnect(true);
+				}
 			}
 		}
+		catch
+		{
+			transaction.RollBack();
+			return false;
+		}
 		return true;
-
 	}
 
 	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
@@ -478,7 +501,7 @@ public class ProjectService : IProjectService
 		var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;
 		var permissions = await _permissionSchemaRepository.GetPermissionByUserId(role.RoleId);
 		HashSet<Guid> result = new HashSet<Guid>();
-		foreach(var permission in permissions)
+		foreach (var permission in permissions)
 		{
 			result.Add(permission.PermissionId);
 		}
@@ -559,7 +582,7 @@ public class ProjectService : IProjectService
 	{
 		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
 		var totalProject = projects.Count();
-		var activeProject = projects.Where(x => x.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
+		var activeProject = projects.Where(x => x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5")).Count();
 		var inactiveProject = projects.Where(x => x.StatusId == Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7")).Count();
 		var deleteProject = totalProject - activeProject - inactiveProject;
 		var activeProjectPercent = (int)Math.Round((double)(100 * activeProject) / totalProject);
@@ -578,45 +601,45 @@ public class ProjectService : IProjectService
 		};
 	}
 
-    public async Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId)
-    {
-        var results = new List<GetProjectTasksResponse>();
-        var iterations = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
-        if (iterations == null) return null;
-		foreach ( var interation in iterations)
+	public async Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId)
+	{
+		var results = new List<GetProjectTasksResponse>();
+		var iterations = await _interationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
+		if (iterations == null) return null;
+		foreach (var interation in iterations)
 		{
-			var tasks = await _ticketRepository.GetAllWithOdata(x => x.InterationId == interation.InterationId,x => x.Status);
-			foreach ( var task in tasks)
+			var tasks = await _ticketRepository.GetAllWithOdata(x => x.InterationId == interation.InterationId, x => x.Status);
+			foreach (var task in tasks)
 			{
-				var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo,x =>x.Users);
-					assignTo.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == assignTo.Users.StatusId, null);
+				var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo, x => x.Users);
+				assignTo.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == assignTo.Users.StatusId, null);
 
-                var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
+				var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
 
-				var taskType = await _ticketTypeRepository.GetAsync(x => x.TypeId == task.TypeId,null);
-				var priority = await _priorityRepository.GetAsync(x => x.LevelId == task.PriorityId,null);
+				var taskType = await _ticketTypeRepository.GetAsync(x => x.TypeId == task.TypeId, null);
+				var priority = await _priorityRepository.GetAsync(x => x.LevelId == task.PriorityId, null);
 
-                var newTask = new GetProjectTasksResponse();
+				var newTask = new GetProjectTasksResponse();
 				newTask.TaskId = task.TaskId;
 				newTask.Title = task.Title;
 				newTask.Description = task.Description;
-				newTask.StartDate= task.StartDate;
+				newTask.StartDate = task.StartDate;
 				newTask.DueDate = task.DueDate;
-				newTask.CreateTime= task.CreateTime;
+				newTask.CreateTime = task.CreateTime;
 				newTask.DeleteAt = task.DeleteAt;
-				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo.Users); 
+				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo.Users);
 				newTask.CreateBy = _mapper.Map<UserResponse>(createBy);
 				newTask.TaskType = taskType.Title;
-				newTask.PrevId= task.PrevId;
-				newTask.StatusId= task.StatusId;
+				newTask.PrevId = task.PrevId;
+				newTask.StatusId = task.StatusId;
 				newTask.TaskStatus = task.Status.Title;
 				newTask.Priority = priority.Title;
 				newTask.Interation = interation.InterationName;
-                results.Add(newTask);
-            }
+				results.Add(newTask);
+			}
 		}
 		return results;
-    }
+	}
 
 	public async Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId)
 	{
@@ -655,9 +678,79 @@ public class ProjectService : IProjectService
 		}
 	}
 
-    public async Task<GetProjectReportRequest> GetProjectReport(Guid projectId)
-    {
-
+	public async Task<GetProjectReportRequest> GetProjectReport(Guid projectId)
+	{
 		return await _projectRepository.GetProjectReport(projectId);
-    }
+	}
+
+	public async Task<BaseResponse> ExitProject(Guid userId, Guid projectId)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == projectId, null);
+			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == member.MemberId, null);
+
+			project.StatusId = Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274");
+
+			await _projectMemberRepository.UpdateAsync(project);
+			await _projectMemberRepository.SaveChanges();
+
+			transaction.Commit();
+
+			return new BaseResponse
+			{
+				IsSucceed = true,
+				Message = "Exit successfully"
+			};
+		}
+		catch (Exception ex)
+		{
+			transaction.RollBack();
+			return new BaseResponse
+			{
+				IsSucceed = false,
+				Message = "Exit fail",
+			};
+		}
+	}
+
+	public async Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest)
+	{
+		using var transaction = _projectRepository.DatabaseTransaction();
+		try
+		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == changeProjectStatusRequest.ProjectId, x => x.Status)!;
+
+			project.StatusId = Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C");
+
+			var update = await _projectRepository.UpdateAsync(project);
+			await _projectRepository.SaveChanges();
+			transaction.Commit();
+			return new ChangeProjectStatusRespone
+			{
+				ProjectId = update.ProjectId,
+				ProjectName = update.ProjectName,
+				StatusId = update.StatusId,
+				StatusName = update.Status.Title,
+				StatusResponse = new BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Change project's status to done successfully"
+				}
+			};
+		}
+		catch (Exception)
+		{
+			transaction.RollBack();
+			return new ChangeProjectStatusRespone
+			{
+				StatusResponse = new BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Update Project fail"
+				}
+			};
+		}
+	}
 }

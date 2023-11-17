@@ -146,6 +146,34 @@ namespace Capstone.DataAccess.Migrations
                     b.ToTable("Interations");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Invitation", b =>
+                {
+                    b.Property<Guid>("InvitationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreateBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InviteTo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("InvitationId");
+
+                    b.HasIndex("CreateBy");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("Invitations");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
                 {
                     b.Property<Guid>("NotificationId")
@@ -685,6 +713,25 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Status");
                 });
 
+            modelBuilder.Entity("Capstone.DataAccess.Entities.Invitation", b =>
+                {
+                    b.HasOne("Capstone.DataAccess.Entities.ProjectMember", "ProjectMember")
+                        .WithMany("Invitations")
+                        .HasForeignKey("CreateBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                        .WithMany("Invitations")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ProjectMember");
+
+                    b.Navigation("Status");
+                });
+
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.User", "User")
@@ -927,6 +974,8 @@ namespace Capstone.DataAccess.Migrations
                 {
                     b.Navigation("Attachments");
 
+                    b.Navigation("Invitations");
+
                     b.Navigation("TaskComments");
 
                     b.Navigation("TaskHistories");
@@ -951,6 +1000,8 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Boards");
 
                     b.Navigation("Interations");
+
+                    b.Navigation("Invitations");
 
                     b.Navigation("Project");
 
