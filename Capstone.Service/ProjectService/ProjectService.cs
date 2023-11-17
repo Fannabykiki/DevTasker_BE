@@ -1,6 +1,7 @@
 
 using AutoMapper;
 using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
@@ -206,38 +207,38 @@ public class ProjectService : IProjectService
 		var allProjects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
 
 		HashSet<GetUserProjectAnalyzeResponse> projectResult = new HashSet<GetUserProjectAnalyzeResponse>();
-        HashSet<Guid> projectIds = new HashSet<Guid>();
-        foreach (var record in allProjects)
-        {
-            projectIds.Add(record.ProjectId);
-        }
+		HashSet<Guid> projectIds = new HashSet<Guid>();
+		foreach (var record in allProjects)
+		{
+			projectIds.Add(record.ProjectId);
+		}
 
-        foreach (var projectId in projectIds)
-        {
-            var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Status);
-            var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
-            manager.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == manager.Users.StatusId, null);
-            var projectAnalyze = new GetUserProjectAnalyzeResponse();
-            projectAnalyze.ProjectId = projects.ProjectId;
-            projectAnalyze.ProjectName = projects.ProjectName;
-            projectAnalyze.ProjectStatus = projects.Status.Title;
-            projectAnalyze.StartDate = projects.StartDate;
-            projectAnalyze.Manager = new UserResponse
-            {
-                UserId = manager.UserId,
-                UserName = manager.Users.Fullname,
-                Email = manager.Users.Email,
-                PhoneNumber = manager.Users.PhoneNumber,
-                Dob = manager.Users.Dob,
-                IsAdmin = manager.Users.IsAdmin,
-                Address = manager.Users.Address,
-                StatusName = manager.Users.Status.Title,
-            };
-            projectResult.Add(projectAnalyze);
+		foreach (var projectId in projectIds)
+		{
+			var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Status);
+			var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
+			manager.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == manager.Users.StatusId, null);
+			var projectAnalyze = new GetUserProjectAnalyzeResponse();
+			projectAnalyze.ProjectId = projects.ProjectId;
+			projectAnalyze.ProjectName = projects.ProjectName;
+			projectAnalyze.ProjectStatus = projects.Status.Title;
+			projectAnalyze.StartDate = projects.StartDate;
+			projectAnalyze.Manager = new UserResponse
+			{
+				UserId = manager.UserId,
+				UserName = manager.Users.Fullname,
+				Email = manager.Users.Email,
+				PhoneNumber = manager.Users.PhoneNumber,
+				Dob = manager.Users.Dob,
+				IsAdmin = manager.Users.IsAdmin,
+				Address = manager.Users.Address,
+				StatusName = manager.Users.Status.Title,
+			};
+			projectResult.Add(projectAnalyze);
 
-        }
-        return projectResult.ToList();
-    }
+		}
+		return projectResult.ToList();
+	}
 
 	public async Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest)
 	{
@@ -451,6 +452,7 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
 			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
 			foreach (var user in inviteUserRequest.Email)
 			{
@@ -460,14 +462,15 @@ public class ProjectService : IProjectService
 					CreateBy = member.MemberId,
 					InvitationId = Guid.NewGuid(),
 					InviteTo = user,
+					ProjectName = project.ProjectName,
+					ProjectId = project.ProjectId,
 					StatusId = Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"),
 				};
 				var invitation = await _invitationRepository.CreateAsync(newInvite);
 				await _invitationRepository.SaveChanges();
 				transaction.Commit();
 
-				var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
-				string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "email=" + user + "&projectId=" + inviteUserRequest.ProjectId + "&invitationId=" + invitation.InvitationId;
+				string verificationLink = "https://devtasker.azurewebsites.net/invitation?" + "invitation=" + invitation.InvitationId;
 				var email = new MimeMessage();
 				email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 				email.To.Add(MailboxAddress.Parse("" + user));
@@ -752,5 +755,11 @@ public class ProjectService : IProjectService
 				}
 			};
 		}
+	}
+
+	public async Task<InvitationResponse> CheckInvation(Guid invationId)
+	{
+		var result = await _invitationRepository.GetInvitation(invationId);
+		return result;
 	}
 }
