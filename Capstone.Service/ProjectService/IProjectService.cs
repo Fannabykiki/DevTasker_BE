@@ -1,4 +1,5 @@
 ﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Paging;
 using Capstone.Common.DTOs.Permission;
@@ -32,4 +33,5 @@ public interface IProjectService
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
 	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
+	Task<InvitationResponse> CheckInvation(Guid invationId);
 }

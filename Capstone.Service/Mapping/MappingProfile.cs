@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
@@ -54,6 +55,8 @@ public class MappingProfile : Profile
 			.ForPath(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project.ProjectName))
 			.ForPath(dest => dest.ProjectStatus, opt => opt.MapFrom(src => src.Project.Status.Title));
 		CreateMap<BoardStatus, StatusTaskViewModel>();
+		CreateMap<Invitation, InvitationResponse>()
+			.ForPath(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 		CreateMap<TaskType, TaskTypeViewModel>();
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
 		CreateMap<Interation, InterationViewModel>()

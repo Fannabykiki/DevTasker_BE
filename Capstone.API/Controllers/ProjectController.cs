@@ -1,16 +1,17 @@
 using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
+using Capstone.DataAccess.Entities;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using System.Security.Claims;
 
 namespace Capstone.API.Controllers
 {
@@ -82,6 +83,13 @@ namespace Capstone.API.Controllers
 		{
 
 			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
+			return Ok(project);
+		}
+
+		[HttpGet("projects/check-invitation")]
+		public async Task<ActionResult<InvitationResponse>> CheckInvation(Guid invationId)
+		{
+			var project = await _projectService.CheckInvation(invationId);
 			return Ok(project);
 		}
 
