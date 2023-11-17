@@ -32,7 +32,7 @@ namespace Capstone.API.Controllers
             return Ok(response);
         }
 
-		[HttpGet("tasks/bin")]
+		[HttpGet("tasks/task-bin")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<TaskViewModel>>> GetAllTaskDelete(Guid projetcId)
 		{
@@ -135,9 +135,9 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPut("tasks/{taskId}")]
-        public async Task<IActionResult> UpdateaTask(Guid taskId, UpdateTaskRequest updateTicketRequest)
+        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
         {
-            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
+            var result = await _taskService.UpdateTask(updateTicketRequest);
 
             return Ok(result);
         }
