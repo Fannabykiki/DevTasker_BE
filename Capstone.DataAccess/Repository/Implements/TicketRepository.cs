@@ -18,7 +18,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.Interation.BoardId == projectId)
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false)
 								.Select(x => new TaskViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
@@ -43,7 +43,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
-														.Where(m => m.PrevId == x.TaskId)
+														.Where(m => m.PrevId == x.TaskId && x.IsDelete == false)
 														.Select(m => new TaskViewModel
 														{
 															TaskId = m.TaskId,
@@ -72,7 +72,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTaskCompleted(Guid projectId, Guid statusId)
 		{
 			var taskList = await _context.Tasks
-							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId)
+							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId && x.IsDelete == false)
 							.Select(x => new TaskViewModel
 							{
 								AssignTo = x.ProjectMember.Users.UserName,
@@ -117,6 +117,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									StatusName = x.Status.Title,
 									StatusId = x.StatusId,
 									Title = x.Title,
+									TypeId = x.TypeId,
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
 								}).ToListAsync();
@@ -126,7 +127,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<TaskDetailViewModel> GetTaskDetail(Guid taskId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.TaskId == taskId)
+								.Where(x => x.TaskId == taskId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
 								.Select(x => new TaskDetailViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
@@ -151,7 +152,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									CommentResponse = _context.TaskComments
-									.Where(m => m.TaskId == x.TaskId)
+									.Where(m => m.TaskId == x.TaskId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
 									.Select(m => new GetCommentResponse
 									{
 										Content = m.Content,
@@ -165,14 +166,40 @@ namespace Capstone.DataAccess.Repository.Implements
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										ReplyTo = m.ReplyTo,
 										TaskId = m.TaskId,
-
+										User = new GetUserCommentResponse
+										{
+											Email = m.ProjectMember.Users.Email,
+											UserId = m.ProjectMember.Users.UserId,
+											UserName = m.ProjectMember.Users.UserName,
+										},
+										SubComments = _context.TaskComments.Where(c => c.ReplyTo == m.CommentId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
+													.Select(c => new GetCommentResponse
+													{
+														CommentId = c.CommentId,
+														Content = c.Content,
+														CreateAt = c.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+														ReplyTo = m.CommentId,
+														DeleteAt = c.DeleteAt == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+														UpdateAt = c.UpdateAt == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+														TaskId = c.TaskId,
+														User = new GetUserCommentResponse
+														{
+															Email = c.ProjectMember.Users.Email,
+															UserId = c.ProjectMember.Users.UserId,
+															UserName = c.ProjectMember.Users.UserName,
+														},
+													}).ToList()
 									}).ToList(),
 									AttachmentResponse = _context.Attachments
 									.Where(a => a.TaskId == x.TaskId)
 									.Select(a => new Common.DTOs.Attachment.AttachmentViewModel
 									{
 										CreateAt = a.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-										TaskId= a.TaskId,
+										TaskId = a.TaskId,
 										AttachmentId = a.AttachmentId,
 										DeleteAt = a.DeleteAt == null
   ? null

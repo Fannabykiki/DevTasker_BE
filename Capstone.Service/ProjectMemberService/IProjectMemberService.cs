@@ -7,8 +7,8 @@ namespace Capstone.Service.ProjectMemberService
 {
 	public interface IProjectMemberService
 	{
-		Task<BaseResponse> DeclineInvitation(Guid userId,Guid projectId);
-		Task<BaseResponse> AcceptInvitation(Guid userId,Guid projectId);
+		Task<BaseResponse> DeclineInvitation(Guid userId, AcceptInviteRequest acceptInviteRequest);
+		Task<BaseResponse> AcceptInvitation(Guid userId,AcceptInviteRequest acceptInviteRequest);
 		Task<AddNewProjectMemberResponse> AddNewProjectMember(InviteUserRequest inviteUserRequest);
 	}
 }

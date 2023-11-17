@@ -18,7 +18,7 @@ namespace Capstone.API.Controllers
             _commentService = commentService;
         }
 
-        [HttpPost("/comment")]
+        [HttpPost("comment")]
         public async Task<IActionResult> CreateComment(CreateCommentRequest comment)
         {
             var userId = this.GetCurrentLoginUserId();
@@ -35,7 +35,7 @@ namespace Capstone.API.Controllers
             return Ok(newComment);
         }
 
-        [HttpDelete("/comment/{commentId}")]
+        [HttpDelete("comment/{commentId}")]
         public async Task<IActionResult> RemoveComment(Guid commentId)
         {
             var success = await _commentService.RemoveComment(commentId);
@@ -48,7 +48,7 @@ namespace Capstone.API.Controllers
         }
 
 
-        [HttpPost("/comment/reply/{commentId}")]
+        [HttpPost("comment/reply/{commentId}")]
         public async Task<IActionResult> CreateComment(Guid commentId, ReplyCommentRequest comment)
         {
             var userId = this.GetCurrentLoginUserId();
@@ -66,14 +66,14 @@ namespace Capstone.API.Controllers
         }
 
         [EnableQuery]
-        [HttpGet("/comment/{taskId}")]
+        [HttpGet("comment/{taskId}")]
         public async Task<IActionResult> GetAllCommentByTaskID(Guid taskId)
         {
             var comments = await _commentService.GetAllCommentByTaskID(taskId);
             return Ok(comments);
         }
 
-        [HttpPut("/comment/{commentId}")]
+        [HttpPut("comment/{commentId}")]
         public async Task<IActionResult> UpdateComment(Guid commentId, ReplyCommentRequest updatedComment)
         {
             var updated = await _commentService.UpdateComment(commentId, updatedComment);
