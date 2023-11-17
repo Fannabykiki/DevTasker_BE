@@ -202,33 +202,40 @@ public class ProjectService : IProjectService
 	}
 	public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
 	{
-		var listProjectAnalyze = new List<GetUserProjectAnalyzeResponse>();
 		var allProjects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
+		HashSet<GetUserProjectAnalyzeResponse> projectResult = new HashSet<GetUserProjectAnalyzeResponse>();
+        HashSet<Guid> projectIds = new HashSet<Guid>();
+        foreach (var record in allProjects)
+        {
+            projectIds.Add(record.ProjectId);
+        }
 
-		foreach (var project in allProjects)
-		{
-            var projects = await _projectRepository.GetAsync(x => x.ProjectId == project.ProjectId, x => x.Status);
-            var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == project.ProjectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
-			manager.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == manager.Users.StatusId, null);
-			var projectAnalyze = new GetUserProjectAnalyzeResponse();
-			projectAnalyze.ProjectId = projects.ProjectId;
-			projectAnalyze.ProjectName = projects.ProjectName;
-			projectAnalyze.ProjectStatus = projects.Status.Title;
-			projectAnalyze.Manager = new UserResponse
-			{
-				UserId = manager.UserId,
-				UserName = manager.Users.Fullname,
-				Email = manager.Users.Email,
-				PhoneNumber = manager.Users.PhoneNumber,
-				Dob = manager.Users.Dob,
-				IsAdmin = manager.Users.IsAdmin,
-				Address= manager.Users.Address,
-				StatusName = manager.Users.Status.Title,
-			};
-			listProjectAnalyze.Add(projectAnalyze);
-		}
-		return listProjectAnalyze;
-	}
+        foreach (var projectId in projectIds)
+        {
+            var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Status);
+            var manager = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"), x => x.Users);
+            manager.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == manager.Users.StatusId, null);
+            var projectAnalyze = new GetUserProjectAnalyzeResponse();
+            projectAnalyze.ProjectId = projects.ProjectId;
+            projectAnalyze.ProjectName = projects.ProjectName;
+            projectAnalyze.ProjectStatus = projects.Status.Title;
+            projectAnalyze.StartDate = projects.StartDate;
+            projectAnalyze.Manager = new UserResponse
+            {
+                UserId = manager.UserId,
+                UserName = manager.Users.Fullname,
+                Email = manager.Users.Email,
+                PhoneNumber = manager.Users.PhoneNumber,
+                Dob = manager.Users.Dob,
+                IsAdmin = manager.Users.IsAdmin,
+                Address = manager.Users.Address,
+                StatusName = manager.Users.Status.Title,
+            };
+            projectResult.Add(projectAnalyze);
+
+        }
+        return projectResult.ToList();
+    }
 
 	public async Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest)
 	{
