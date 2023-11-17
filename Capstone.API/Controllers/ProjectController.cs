@@ -77,8 +77,8 @@ namespace Capstone.API.Controllers
 			return Ok(projectMember);
 		}
 
-		[HttpPost("projects/change-status")]
-		public async Task<ActionResult<ChangeProjectStatusRespone>> ChangeStatusProject(ChangeProjectStatusRequest changeProjectStatusRequest)
+		[HttpPost("projects/close-project")]
+		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
 
 			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
