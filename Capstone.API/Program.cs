@@ -121,6 +121,7 @@ builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
 builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
+builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
