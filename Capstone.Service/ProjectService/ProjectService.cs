@@ -198,7 +198,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid userId)
 	{
-		var projects = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId, x => x.Project);
+		var projects = await _projectMemberRepository.GetProjectByUserId(userId);
 		return _mapper.Map<List<GetAllProjectViewModel>>(projects);
 	}
 	public async Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId)
