@@ -193,6 +193,20 @@ namespace Capstone.DataAccess
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Invitation>().HasKey(sc => new { sc.InvitationId});
+            
+            modelBuilder.Entity<Invitation>()
+                .HasOne(sc => sc.ProjectMember)
+                .WithMany(s => s.Invitations)
+                .HasForeignKey(sc => sc.CreateBy)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Invitation>()
+                .HasOne(sc => sc.Status)
+                .WithMany(s => s.Invitations)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
 		public DbSet<Attachment>? Attachments { get; set; }
@@ -213,6 +227,7 @@ namespace Capstone.DataAccess
         public DbSet<Status>? Status { get; set; }
         public DbSet<BoardStatus>? BoardStatus { get; set; }
         public DbSet<TaskType>? TaskTypes { get; set; }
+        public DbSet<Invitation>? Invitations { get; set; }
         public DbSet<User>? Users { get; set; }
     }
 }

@@ -293,14 +293,15 @@ namespace Capstone.Service.TaskService
             }
         }
 
-        public async Task<CreateTaskResponse> UpdateTask(Guid taskId, UpdateTaskRequest updateTicketRequest)
+        public async Task<CreateTaskResponse> UpdateTask(UpdateTaskRequest updateTicketRequest)
         {
             using var transaction = _iterationRepository.DatabaseTransaction();
             try
             {
-                var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, null);
+                var task = await _ticketRepository.GetAsync(x => x.TaskId == updateTicketRequest.TaskId, null);
                 if (task == null) throw new Exception("Can not found task!");
 
+                task.InterationId = updateTicketRequest.InterationId;
                 task.Title= updateTicketRequest.Title;
                 task.Description = updateTicketRequest.Description;
                 task.DueDate = DateTime.Parse(updateTicketRequest.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));

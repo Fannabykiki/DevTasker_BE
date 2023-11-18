@@ -14,6 +14,7 @@ namespace Capstone.Service.TicketCommentService
         private readonly IUserRepository _userRepository;
         private readonly IProjectMemberRepository _projectMemberRepository;
         private readonly IStatusRepository _statusRepository;
+
         private readonly IMapper _mapper;
 
         public TaskCommentService(ITaskCommentRepository taskCommentRepository, IMapper mapper, ITaskRepository taskRepository, IUserRepository userRepository, IProjectMemberRepository projectMemberRepository,IStatusRepository statusRepository)
@@ -56,6 +57,10 @@ namespace Capstone.Service.TicketCommentService
                 Console.WriteLine("Error occurred: " + ex.Message);
                 transaction.RollBack();
                 return null;
+            }
+            finally
+            {
+                transaction.Dispose();
             }
         }
 

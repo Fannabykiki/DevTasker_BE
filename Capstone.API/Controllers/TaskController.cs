@@ -7,6 +7,7 @@ using Capstone.Service.LoggerService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.CodeAnalysis;
 
 namespace Capstone.API.Controllers
 {
@@ -31,7 +32,7 @@ namespace Capstone.API.Controllers
             return Ok(response);
         }
 
-		[HttpGet("tasks/bin")]
+		[HttpGet("tasks/task-bin")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<TaskViewModel>>> GetAllTaskDelete(Guid projetcId)
 		{
@@ -79,11 +80,24 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
-		[HttpPost("tasks/restoration")]
+		[HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(Guid taskId)
 		{
-			var response = await _taskService.RestoreTask(taskId);
-			return Ok(response);
+			
+			var task = await _taskService.GetTaskDetail(taskId);
+			if (task.DeleteAt == null)
+			{
+				return BadRequest("Task is still active. Cant restore it!!!");
+			}
+			if (DateTime.Parse(task.ExpireTime) >= DateTime.Now)
+			{
+				var response = await _taskService.RestoreTask(taskId);
+				return Ok(response);
+			}
+			else
+			{
+				return BadRequest("Cant restore this Task.Over 30 days from delete day");
+			}
 		}
 
 
@@ -121,9 +135,9 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPut("tasks/{taskId}")]
-        public async Task<IActionResult> UpdateaTask(Guid taskId, UpdateTaskRequest updateTicketRequest)
+        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
         {
-            var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
+            var result = await _taskService.UpdateTask(updateTicketRequest);
 
             return Ok(result);
         }

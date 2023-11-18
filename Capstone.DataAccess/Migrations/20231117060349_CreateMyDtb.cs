@@ -42,7 +42,9 @@ namespace Capstone.DataAccess.Migrations
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDelete = table.Column<bool>(type: "bit", nullable: true)
+                    IsDelete = table.Column<bool>(type: "bit", nullable: true),
+                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExprireTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,7 +59,8 @@ namespace Capstone.DataAccess.Migrations
                     SchemaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true),
-                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExprireTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -186,7 +189,8 @@ namespace Capstone.DataAccess.Migrations
                 {
                     BoardStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -329,16 +333,42 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubTasks",
+                name: "Invitations",
+                columns: table => new
+                {
+                    InvitationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InviteTo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Invitations", x => x.InvitationId);
+                    table.ForeignKey(
+                        name: "FK_Invitations_ProjectMembers_CreateBy",
+                        column: x => x.CreateBy,
+                        principalTable: "ProjectMembers",
+                        principalColumn: "MemberId");
+                    table.ForeignKey(
+                        name: "FK_Invitations_Status_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Status",
+                        principalColumn: "StatusId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tasks",
                 columns: table => new
                 {
                     TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Decription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExprireTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true),
                     AssignTo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -383,62 +413,32 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubTask",
+                name: "Attachments",
                 columns: table => new
                 {
-                    SubTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttachmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Decription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDelete = table.Column<bool>(type: "bit", nullable: true),
-                    AssignTo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExprireTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PrevId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PriorityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    InterationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubTask", x => x.SubTaskId);
+                    table.PrimaryKey("PK_Attachments", x => x.AttachmentId);
                     table.ForeignKey(
-                        name: "FK_SubTask_BoardStatus_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "BoardStatus",
-                        principalColumn: "BoardStatusId");
-                    table.ForeignKey(
-                        name: "FK_SubTask_Interations_InterationId",
-                        column: x => x.InterationId,
-                        principalTable: "Interations",
-                        principalColumn: "InterationId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SubTask_PriorityLevels_PriorityId",
-                        column: x => x.PriorityId,
-                        principalTable: "PriorityLevels",
-                        principalColumn: "LevelId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SubTask_ProjectMembers_AssignTo",
-                        column: x => x.AssignTo,
+                        name: "FK_Attachments_ProjectMembers_CreateBy",
+                        column: x => x.CreateBy,
                         principalTable: "ProjectMembers",
                         principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_SubTask_Tasks_TaskId",
+                        name: "FK_Attachments_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "SubTasks",
-                        principalColumn: "TaskId");
-                    table.ForeignKey(
-                        name: "FK_SubTask_TaskTypes_TypeId",
-                        column: x => x.TypeId,
-                        principalTable: "TaskTypes",
-                        principalColumn: "TypeId",
+                        principalTable: "Tasks",
+                        principalColumn: "TaskId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -451,33 +451,25 @@ namespace Capstone.DataAccess.Migrations
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SubTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttachmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ReplyTo = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TaskComments", x => x.CommentId);
                     table.ForeignKey(
-                        name: "FK_TaskComments_SubTask_CommentId",
-                        column: x => x.CommentId,
-                        principalTable: "SubTask",
-                        principalColumn: "SubTaskId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_TaskComments_ProjectMembers_CreateBy",
+                        column: x => x.CreateBy,
+                        principalTable: "ProjectMembers",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_TaskComments_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "SubTasks",
+                        principalTable: "Tasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TaskComments_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -491,7 +483,6 @@ namespace Capstone.DataAccess.Migrations
                     PreviousStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CurrentStatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SubTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -513,73 +504,17 @@ namespace Capstone.DataAccess.Migrations
                         principalTable: "Status",
                         principalColumn: "StatusId");
                     table.ForeignKey(
-                        name: "FK_TaskHistories_SubTask_SubTaskId",
-                        column: x => x.SubTaskId,
-                        principalTable: "SubTask",
-                        principalColumn: "SubTaskId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_TaskHistories_Tasks_TaskId",
                         column: x => x.TaskId,
-                        principalTable: "SubTasks",
+                        principalTable: "Tasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "Attachments",
-                columns: table => new
-                {
-                    AttachmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DeleteAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SubTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreateBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attachments", x => x.AttachmentId);
-                    table.ForeignKey(
-                        name: "FK_Attachments_ProjectMembers_CreateBy",
-                        column: x => x.CreateBy,
-                        principalTable: "ProjectMembers",
-                        principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Attachments_SubTask_SubTaskId",
-                        column: x => x.SubTaskId,
-                        principalTable: "SubTask",
-                        principalColumn: "SubTaskId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Attachments_TaskComments_CommentId",
-                        column: x => x.CommentId,
-                        principalTable: "TaskComments",
-                        principalColumn: "CommentId");
-                    table.ForeignKey(
-                        name: "FK_Attachments_Tasks_TaskId",
-                        column: x => x.TaskId,
-                        principalTable: "SubTasks",
-                        principalColumn: "TaskId");
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Attachments_CommentId",
-                table: "Attachments",
-                column: "CommentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_CreateBy",
                 table: "Attachments",
                 column: "CreateBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Attachments_SubTaskId",
-                table: "Attachments",
-                column: "SubTaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_TaskId",
@@ -604,6 +539,16 @@ namespace Capstone.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Interations_StatusId",
                 table: "Interations",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invitations_CreateBy",
+                table: "Invitations",
+                column: "CreateBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invitations_StatusId",
+                table: "Invitations",
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
@@ -652,44 +597,14 @@ namespace Capstone.DataAccess.Migrations
                 column: "SchemaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SubTask_AssignTo",
-                table: "SubTask",
-                column: "AssignTo");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubTask_InterationId",
-                table: "SubTask",
-                column: "InterationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubTask_PriorityId",
-                table: "SubTask",
-                column: "PriorityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubTask_StatusId",
-                table: "SubTask",
-                column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubTask_TaskId",
-                table: "SubTask",
-                column: "TaskId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubTask_TypeId",
-                table: "SubTask",
-                column: "TypeId");
+                name: "IX_TaskComments_CreateBy",
+                table: "TaskComments",
+                column: "CreateBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TaskComments_TaskId",
                 table: "TaskComments",
                 column: "TaskId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TaskComments_UserId",
-                table: "TaskComments",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TaskHistories_ChangeBy",
@@ -707,38 +622,33 @@ namespace Capstone.DataAccess.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskHistories_SubTaskId",
-                table: "TaskHistories",
-                column: "SubTaskId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TaskHistories_TaskId",
                 table: "TaskHistories",
                 column: "TaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_AssignTo",
-                table: "SubTasks",
+                table: "Tasks",
                 column: "AssignTo");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_InterationId",
-                table: "SubTasks",
+                table: "Tasks",
                 column: "InterationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_PriorityId",
-                table: "SubTasks",
+                table: "Tasks",
                 column: "PriorityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_StatusId",
-                table: "SubTasks",
+                table: "Tasks",
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_TypeId",
-                table: "SubTasks",
+                table: "Tasks",
                 column: "TypeId");
 
             migrationBuilder.CreateIndex(
@@ -753,25 +663,25 @@ namespace Capstone.DataAccess.Migrations
                 name: "Attachments");
 
             migrationBuilder.DropTable(
+                name: "Invitations");
+
+            migrationBuilder.DropTable(
                 name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "SchemaPermissions");
 
             migrationBuilder.DropTable(
-                name: "TaskHistories");
+                name: "TaskComments");
 
             migrationBuilder.DropTable(
-                name: "TaskComments");
+                name: "TaskHistories");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
 
             migrationBuilder.DropTable(
-                name: "SubTask");
-
-            migrationBuilder.DropTable(
-                name: "SubTasks");
+                name: "Tasks");
 
             migrationBuilder.DropTable(
                 name: "BoardStatus");
