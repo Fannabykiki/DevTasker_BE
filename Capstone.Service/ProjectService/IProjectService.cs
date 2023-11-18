@@ -15,6 +15,7 @@ public interface IProjectService
 	Task<GetProjectReportRequest> GetProjectReport(Guid projectId);
 	Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId);
 	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
+	Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest);
