@@ -32,6 +32,7 @@ public interface IProjectService
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest,Guid userId);
 	Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId);
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
+	Task<BaseResponse> ChangeProjectSchema(Guid projectId);
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
 	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);

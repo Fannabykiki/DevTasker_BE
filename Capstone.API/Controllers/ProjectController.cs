@@ -359,6 +359,12 @@ namespace Capstone.API.Controllers
 				return BadRequest("Cant restore this Project.Over 30 days from delete day");
 			}
 		}
+		
+		[HttpPut("project/change-schema/{projectId}")]
+		public async Task<IActionResult> ChangeProjectSchema(Guid projectId)
+		{
+            return Ok();
+        }
 	}
 }
 
