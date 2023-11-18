@@ -43,14 +43,14 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
-														.Where(m => m.PrevId == x.TaskId && x.IsDelete == false)
+														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false)
 														.Select(m => new TaskViewModel
 														{
 															TaskId = m.TaskId,
 															StatusName = m.Status.Title,
-															StatusId = x.StatusId,
+															StatusId = m.StatusId,
 															StartDate = m.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-															TypeId = x.TypeId,
+															TypeId = m.TypeId,
 															TypeName = m.TicketType.Title,
 															Title = m.Title,
 															Description = m.Description,
