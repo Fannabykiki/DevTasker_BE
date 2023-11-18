@@ -767,4 +767,9 @@ public class ProjectService : IProjectService
 		var result = await _invitationRepository.GetInvitation(invationId);
 		return result;
 	}
+
+    public Task<BaseResponse> ChangeProjectSchema(Guid projectId)
+    {
+        throw new NotImplementedException();
+    }
 }

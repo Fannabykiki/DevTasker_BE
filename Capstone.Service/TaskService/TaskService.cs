@@ -98,7 +98,7 @@ namespace Capstone.Service.TaskService
                             TypeId = newTask.TypeId,
                             StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             Title = newTask.Title,
-                            Status = status.Title,
+                            StatusName = status.Title,
                             BaseResponse = new BaseResponse
                             {
                                 IsSucceed = true,
@@ -149,7 +149,7 @@ namespace Capstone.Service.TaskService
                                     TypeId = newTask.TypeId,
                                     StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     Title = newTask.Title,
-                                    Status = status.Title,
+                                    StatusName = status.Title,
                                     StatusId = newTask.StatusId,
                                     BaseResponse = new BaseResponse
                                     {
@@ -204,7 +204,7 @@ namespace Capstone.Service.TaskService
                             TypeId = newTask.TypeId,
                             StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             Title = newTask.Title,
-                            Status = status.Title,
+                            StatusName = status.Title,
                             BaseResponse = new BaseResponse
                             {
                                 IsSucceed = true,
@@ -255,7 +255,7 @@ namespace Capstone.Service.TaskService
                                     TypeId = newTask.TypeId,
                                     StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     Title = newTask.Title,
-                                    Status = status.Title,
+                                    StatusName = status.Title,
                                     StatusId = newTask.StatusId,
                                     BaseResponse = new BaseResponse
                                     {
@@ -365,7 +365,7 @@ namespace Capstone.Service.TaskService
                 await _ticketRepository.UpdateAsync(task);
                 await _ticketRepository.SaveChanges();
                 transaction.Commit();
-
+                var status = await _boardStatusRepository.GetAsync(x =>x.BoardStatusId == task.StatusId,null);
                 return new CreateTaskResponse
                 {
                     AssignTo = task.AssignTo,
@@ -382,6 +382,7 @@ namespace Capstone.Service.TaskService
                     StartDate = task.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     Title = task.Title,
                     StatusId = task.StatusId,
+                    StatusName = status.Title,
                     BaseResponse = new BaseResponse
                     {
                         IsSucceed = true,
@@ -551,7 +552,7 @@ namespace Capstone.Service.TaskService
                     TypeId = newTask.TypeId,
                     StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     Title = newTask.Title,
-                    Status = status.Title,
+                    StatusName = status.Title,
                     StatusId = newTask.StatusId,
                     BaseResponse = new BaseResponse
                     {

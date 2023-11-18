@@ -55,7 +55,7 @@ namespace NUnitTest.DevTasker.Service
             var createBoardRequest = new CreateBoardRequest
             {
                 Title = "Test Board",
-                Status = (StatusEnum?)BoardStatusEnum.InProgress,
+                StatusName = (StatusEnum?)BoardStatusEnum.InProgress,
             };
             var interationId = Guid.NewGuid();
 
@@ -96,7 +96,7 @@ namespace NUnitTest.DevTasker.Service
              var createBoardRequest = new CreateBoardRequest
              {
                  Title = null,
-                 Status = (StatusEnum?)BoardStatusEnum.InProgress,
+                 StatusName = (StatusEnum?)BoardStatusEnum.InProgress,
              };
              var interationId = Guid.NewGuid();
              _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
@@ -118,14 +118,14 @@ namespace NUnitTest.DevTasker.Service
             var updateBoardRequest = new UpdateBoardRequest
             {
                 Title = "Updated Board Title",
-                Status = (StatusEnum?)BoardStatusEnum.Closed, 
+                StatusName = (StatusEnum?)BoardStatusEnum.Closed, 
                 InterationId = Guid.NewGuid(), 
             };
             var fakeBoard = new Board
             {
                 BoardId = boardId,
                 Title = "Initial Board Title",
-                Status = (StatusEnum?)BoardStatusEnum.InProgress, 
+                StatusName = (StatusEnum?)BoardStatusEnum.InProgress, 
                 //InterationId = Guid.NewGuid(),
             };
             _boardRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
@@ -146,7 +146,7 @@ namespace NUnitTest.DevTasker.Service
            *//* // Arrange
             var updateBoardRequest = new UpdateBoardRequest
             {
-                Status = (StatusEnum?)BoardStatusEnum.InProgress,
+                StatusName = (StatusEnum?)BoardStatusEnum.InProgress,
                 InterationId = Guid.NewGuid(),
             };
             var boardId = Guid.NewGuid();
