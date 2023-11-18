@@ -1,9 +1,11 @@
 ﻿using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
+using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
@@ -34,7 +36,86 @@ namespace Capstone.DataAccess.Repository.Implements
 
             return result;
         }
+        public async Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId)
+        {
+            var result = new List<GetProjectCalendarResponse>();
+            var curentMonth =new List<DateTime>();
+            var project = await LoadProjectWithTasks(projectId);
+            var tasks = GetTasksFromProject(project);
 
+            DateTime currentDate = DateTime.Today;
+
+            // Get the first day of the current month
+            DateTime firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
+            // Get the last day of the current month
+            DateTime lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            // Loop through from the first day to the last day of the month
+            for (DateTime date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+            {
+                curentMonth.Add(date);
+            }
+
+            foreach (var day in curentMonth)
+            {
+                var taskResult = new GetProjectCalendarResponse();
+                
+                var taskByDay = tasks.Where(x => x.CreateTime <= day && x.DueDate >= day).ToList();
+                taskResult.TotalTask = taskByDay.Count;
+                taskResult.DateTime = day;
+                taskResult.TasksByDay = new List<GetProjectTasksResponse>();
+                foreach (var task in taskByDay)
+                {
+                    var assignTo = _context.ProjectMembers.Include(x => x.Users).ThenInclude(s => s.Status).FirstOrDefault(x => x.MemberId == task.AssignTo);
+
+                    var createBy =  _context.Users.Include(s => s.Status).FirstOrDefault(x => x.UserId == task.CreateBy);
+
+                    var taskType =  _context.TaskTypes.FirstOrDefault(x => x.TypeId == task.TypeId);
+                    var priority = _context.PriorityLevels.FirstOrDefault(x => x.LevelId == task.PriorityId);
+
+                    var newTask = new GetProjectTasksResponse();
+                    newTask.TaskId = task.TaskId;
+                    newTask.Title = task.Title;
+                    newTask.Description = task.Description;
+                    newTask.StartDate = task.StartDate;
+                    newTask.DueDate = task.DueDate;
+                    newTask.CreateTime = task.CreateTime;
+                    newTask.DeleteAt = task.DeleteAt;
+                    newTask.AssignTo = new UserResponse {
+                        UserId = assignTo.UserId,
+                        Address = assignTo.Users.Address,
+                        Dob = assignTo.Users.Dob,
+                        Email = assignTo.Users.Email,
+                        IsAdmin = assignTo.Users.IsAdmin,
+                        PhoneNumber = assignTo.Users.PhoneNumber,
+                        StatusName = assignTo.Users.Status.Title,
+                        UserName = assignTo.Users.UserName,
+                    };
+                    newTask.CreateBy = createBy == null ? null : new UserResponse
+                    {
+                        UserId = createBy.UserId,
+                        Address = createBy.Address,
+                        Dob = createBy.Dob,
+                        Email = createBy.Email,
+                        IsAdmin = createBy.IsAdmin,
+                        PhoneNumber = createBy.PhoneNumber,
+                        StatusName = createBy.Status.Title,
+                        UserName = createBy.UserName,
+                    }; 
+                    newTask.TaskType = taskType.Title;
+                    newTask.PrevId = task.PrevId;
+                    newTask.StatusId = task.StatusId;
+                    newTask.TaskStatus = _context.BoardStatus.FirstOrDefault(x => x.BoardStatusId == task.StatusId).Title;
+                    newTask.Priority = priority.Title;
+                    newTask.Interation = task.Interation.InterationName;
+                    taskResult.TasksByDay.Add(newTask);
+                }
+                result.Add(taskResult);
+            }
+
+            return result;
+        }
         private async Task<Project> LoadProjectWithTasks(Guid projectId)
         {
             return await _context.Projects
@@ -135,6 +216,8 @@ namespace Capstone.DataAccess.Repository.Implements
                                                     .ToList();
             return datesOfWeek;
         }
+
+        
     }
 
 }
