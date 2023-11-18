@@ -757,13 +757,11 @@ public class ProjectService : IProjectService
 		}
 	}
 
-		return await _projectRepository.GetProjectReport(projectId);
-    }
-
     public async Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId)
     {
         return await _projectRepository.GetProjectCalender(projectId);
     }
+
 	public async Task<InvitationResponse> CheckInvation(Guid invationId)
 	{
 		var result = await _invitationRepository.GetInvitation(invationId);
