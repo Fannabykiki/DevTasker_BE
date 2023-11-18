@@ -9,5 +9,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
     public interface IProjectRepository : IBaseRepository<Project>
     {
         Task<GetProjectReportRequest> GetProjectReport(Guid projectId);
+        Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId);
     }
 }
