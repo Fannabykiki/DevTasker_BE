@@ -228,7 +228,7 @@ namespace Capstone.API.Controllers
 
         [EnableQuery]
         [HttpGet("projects/report/{projectId}")]
-        public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
+        public async Task<ActionResult<GetProjectReportRequest>> GetProjectReport(Guid projectId)
         {
             var result = await _projectService.GetProjectReport(projectId);
             return Ok(result);
@@ -352,6 +352,12 @@ namespace Capstone.API.Controllers
 				return BadRequest("Cant restore this Project.Over 30 days from delete day");
 			}
 		}
+		
+		[HttpPut("project/change-schema/{projectId}")]
+		public async Task<IActionResult> ChangeProjectSchema(Guid projectId)
+		{
+            return Ok();
+        }
 	}
 }
 

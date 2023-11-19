@@ -403,7 +403,7 @@ namespace Capstone.DataAccess.Migrations
                     b.ToTable("SchemaPermissions");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.Status", b =>
+            modelBuilder.Entity("Capstone.DataAccess.Entities.StatusName", b =>
                 {
                     b.Property<Guid>("StatusId")
                         .ValueGeneratedOnAdd()
@@ -415,7 +415,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("Status");
+                    b.ToTable("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Task", b =>
@@ -678,7 +678,7 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Status", null)
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", null)
                         .WithMany("Boards")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -688,7 +688,7 @@ namespace Capstone.DataAccess.Migrations
             modelBuilder.Entity("Capstone.DataAccess.Entities.BoardStatus", b =>
                 {
                     b.HasOne("Capstone.DataAccess.Entities.Board", "Board")
-                        .WithMany("Status")
+                        .WithMany("StatusName")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -704,7 +704,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", "StatusName")
                         .WithMany("Interations")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -712,7 +712,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("Board");
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Invitation", b =>
@@ -723,7 +723,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", "StatusName")
                         .WithMany("Invitations")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -731,7 +731,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("ProjectMember");
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Notification", b =>
@@ -759,7 +759,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", "StatusName")
                         .WithMany("Project")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -769,7 +769,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("Schemas");
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.ProjectMember", b =>
@@ -786,7 +786,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", "StatusName")
                         .WithMany("ProjectMembers")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -801,7 +801,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("Role");
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
 
                     b.Navigation("Users");
                 });
@@ -853,7 +853,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.BoardStatus", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.BoardStatus", "StatusName")
                         .WithMany("Tasks")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -871,7 +871,7 @@ namespace Capstone.DataAccess.Migrations
 
                     b.Navigation("ProjectMember");
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
 
                     b.Navigation("TicketType");
                 });
@@ -907,7 +907,7 @@ namespace Capstone.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Capstone.DataAccess.Entities.Status", null)
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", null)
                         .WithMany("TaskHistories")
                         .HasForeignKey("StatusId");
 
@@ -926,13 +926,13 @@ namespace Capstone.DataAccess.Migrations
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.User", b =>
                 {
-                    b.HasOne("Capstone.DataAccess.Entities.Status", "Status")
+                    b.HasOne("Capstone.DataAccess.Entities.StatusName", "StatusName")
                         .WithMany("Users")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.Board", b =>
@@ -942,7 +942,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("Project")
                         .IsRequired();
 
-                    b.Navigation("Status");
+                    b.Navigation("StatusName");
                 });
 
             modelBuilder.Entity("Capstone.DataAccess.Entities.BoardStatus", b =>
@@ -997,7 +997,7 @@ namespace Capstone.DataAccess.Migrations
                     b.Navigation("SchemaPermissions");
                 });
 
-            modelBuilder.Entity("Capstone.DataAccess.Entities.Status", b =>
+            modelBuilder.Entity("Capstone.DataAccess.Entities.StatusName", b =>
                 {
                     b.Navigation("Boards");
 
