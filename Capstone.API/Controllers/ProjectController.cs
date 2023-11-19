@@ -223,16 +223,23 @@ namespace Capstone.API.Controllers
 				return StatusCode(500);
 			}
 
-			return Ok(result);
-		}
+            return Ok(result);
+        }
 
-		[EnableQuery]
-		[HttpGet("projects/report/{projectId}")]
-		public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
-		{
-			var result = await _projectService.GetProjectReport(projectId);
-			return Ok(result);
-		}
+        [HttpGet("projects/calendar/{projectId}")]
+        public async Task<IActionResult> GetTasksForCalendar(Guid projectId)
+        {
+            var result = await _projectService.GetProjectCalender(projectId);
+            return Ok(result);
+        }
+
+        [EnableQuery]
+        [HttpGet("projects/report/{projectId}")]
+        public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
+        {
+            var result = await _projectService.GetProjectReport(projectId);
+            return Ok(result);
+        }
 
 		[EnableQuery]
 		[HttpGet("projects/{projectId:Guid}")]
@@ -279,19 +286,25 @@ namespace Capstone.API.Controllers
 				return StatusCode(500);
 			}
 
-			return Ok(result);
-		}
+            return Ok(result);
+        }
+        
+        [HttpPost("projects/change-schema/{projectId}")]
+        public async Task<IActionResult> ChangePermissionSchema(Guid projectId)
+        {
+            return Ok();
+        }
 
-		[HttpPut("roles/{memberId}")]
-		public async Task<IActionResult> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
-		{
-			if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
-				return BadRequest("You can not change to this role !");
-			var result = await _projectService.UpdateMemberRole(memberId, updateMemberRoleRequest);
-			if (result == null)
-			{
-				return StatusCode(500);
-			}
+        [HttpPut("roles/{memberId}")]
+        public async Task<IActionResult> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+        {
+            if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+                return BadRequest("You can not change to this role !");
+            var result = await _projectService.UpdateMemberRole(memberId, updateMemberRoleRequest);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
 
 			return Ok(result);
 		}
@@ -346,6 +359,12 @@ namespace Capstone.API.Controllers
 				return BadRequest("Cant restore this Project.Over 30 days from delete day");
 			}
 		}
+		
+		[HttpPut("project/change-schema/{projectId}")]
+		public async Task<IActionResult> ChangeProjectSchema(Guid projectId)
+		{
+            return Ok();
+        }
 	}
 }
 

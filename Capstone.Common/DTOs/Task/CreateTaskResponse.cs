@@ -15,7 +15,7 @@ public class CreateTaskResponse
     public Guid AssignTo { get; set; }
     public Guid CreateBy { get; set; }
     public Guid TypeId { get; set; } // 1 task has many type 
-    public string? Status { get; set; }
+    public string? StatusName { get; set; }
     public Guid? StatusId { get; set; }
     public Guid PriorityId { get; set; }
     public Guid InterationId { get; set; }

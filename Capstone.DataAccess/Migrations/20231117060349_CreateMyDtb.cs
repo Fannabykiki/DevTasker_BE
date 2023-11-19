@@ -68,7 +68,7 @@ namespace Capstone.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Status",
+                name: "StatusName",
                 columns: table => new
                 {
                     StatusId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -140,7 +140,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Boards_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -179,7 +179,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Users_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId");
                 });
 
@@ -225,7 +225,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Interations_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId");
                 });
 
@@ -265,7 +265,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Projects_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId");
                 });
 
@@ -321,7 +321,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_ProjectMembers_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -353,7 +353,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Invitations_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId");
                 });
 
@@ -501,7 +501,7 @@ namespace Capstone.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_TaskHistories_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: "StatusName",
                         principalColumn: "StatusId");
                     table.ForeignKey(
                         name: "FK_TaskHistories_Tasks_TaskId",
@@ -714,7 +714,7 @@ namespace Capstone.DataAccess.Migrations
                 name: "Schema");
 
             migrationBuilder.DropTable(
-                name: "Status");
+                name: "StatusName");
         }
     }
 }

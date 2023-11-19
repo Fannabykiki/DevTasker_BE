@@ -15,6 +15,7 @@ public interface IProjectService
 	Task<GetProjectReportRequest> GetProjectReport(Guid projectId);
 	Task<List<GetProjectTasksResponse>> GetProjectsTasks(Guid projectId);
 	Task<IEnumerable<GetUserProjectAnalyzeResponse>> GetUserProjectAnalyze(Guid userId);
+	Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId);
     Task<ProjectAnalyzeRespone> ProjectAnalyzeAdmin();
     Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId);
     Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest);
@@ -31,6 +32,7 @@ public interface IProjectService
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest,Guid userId);
 	Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId);
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
+	Task<BaseResponse> ChangeProjectSchema(Guid projectId);
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
 	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);

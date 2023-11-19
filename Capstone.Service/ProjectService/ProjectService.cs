@@ -757,9 +757,19 @@ public class ProjectService : IProjectService
 		}
 	}
 
+    public async Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId)
+    {
+        return await _projectRepository.GetProjectCalender(projectId);
+    }
+
 	public async Task<InvitationResponse> CheckInvation(Guid invationId)
 	{
 		var result = await _invitationRepository.GetInvitation(invationId);
 		return result;
 	}
+
+    public Task<BaseResponse> ChangeProjectSchema(Guid projectId)
+    {
+        throw new NotImplementedException();
+    }
 }
