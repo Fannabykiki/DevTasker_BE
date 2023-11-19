@@ -200,6 +200,14 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
+		[HttpGet("projects/status")]
+		public async Task<ActionResult<List<ProjectStatusViewModel>>> GetProjectStatus(Guid projectId)
+		{
+			var result = await _projectService.GetAllProjectStatus(projectId);
+
+			return Ok(result);
+		}
+
 		[EnableQuery]
 		[HttpGet("admin/projects/analyzation")]
 		public async Task<ActionResult<IQueryable<GetAllProjectViewModel>>> GetProjectAnalyze()

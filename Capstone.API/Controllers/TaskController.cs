@@ -100,7 +100,6 @@ namespace Capstone.API.Controllers
 			}
 		}
 
-
 		[HttpGet("tasks/type")]
 		public async Task<ActionResult<StatusTaskViewModel>> GetAllTypeTaskByProjectId()
 		{

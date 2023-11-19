@@ -772,4 +772,33 @@ public class ProjectService : IProjectService
     {
         throw new NotImplementedException();
     }
+
+	public async Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId)
+	{
+		var doneProject = await _statusRepository.GetAsync(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"), null);
+		var doingProject = await _statusRepository.GetAsync(x => x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"), null);
+		var deletedProject = await _statusRepository.GetAsync(x => x.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"), null);
+
+		var projectStatusList = new List<ProjectStatusViewModel>();
+
+		projectStatusList.Add(new ProjectStatusViewModel
+		{
+			StatusId = doneProject.StatusId,
+			StatusName = doneProject.Title
+		});
+
+		projectStatusList.Add(new ProjectStatusViewModel
+		{
+			StatusId = doingProject.StatusId,
+			StatusName = doingProject.Title
+		});
+
+		projectStatusList.Add(new ProjectStatusViewModel
+		{
+			StatusId = deletedProject.StatusId,
+			StatusName = deletedProject.Title
+		});
+
+		return projectStatusList;
+	}
 }
