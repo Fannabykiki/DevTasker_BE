@@ -112,7 +112,7 @@ namespace Capstone.API.Controllers
         public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
         {   
             var userId = this.GetCurrentLoginUserId();
-            if(userId == null)
+            if(userId == Guid.Empty)
             {
                 return BadRequest("You need login first");
             }
