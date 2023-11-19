@@ -200,6 +200,7 @@ namespace Capstone.DataAccess.Repository.Implements
                     RoleId= member.RoleId,
                     RoleName = _context.Roles.FirstOrDefault(r => r.RoleId == member.RoleId).RoleName,
                     IsOwner= member.IsOwner,
+                    TotalTasks = memberTasks.Count(),
                     reportStatuses = reportByWeeks
                 });
             }
