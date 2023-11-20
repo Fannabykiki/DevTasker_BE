@@ -36,4 +36,5 @@ public interface IProjectService
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
 	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);
+	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 }
