@@ -36,6 +36,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IUserRepository> _userRepository;
         private Mock<ITaskTypeRepository> _ticketTypeRepository;
         private Mock<IPriorityRepository> _priorityRepository;
+        private Mock <IInvitationRepository> _invitationRepository;
 
         [SetUp]
         public void Setup()
@@ -55,29 +56,31 @@ namespace NUnitTest.DevTasker.Service
             _userRepository = new Mock<IUserRepository>();
             _ticketTypeRepository = new Mock<ITaskTypeRepository>();
             _priorityRepository = new Mock<IPriorityRepository>();
+            _invitationRepository = new Mock<IInvitationRepository>();
 
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
 
 
-            // _projectService = new ProjectService(
-            //     _context,
-            //     _projectRepositoryMock.Object,
-            //     _roleRepositoryMock.Object,
-            //    _mapper,
-            //     _schemaRepository.Object,
-            //    _projectMemberRepositoryMock.Object,
-            //    _boardRepositoryMock.Object,
-            //     _permissionRepositoryMock.Object,
-            //     _interationRepositoryMock.Object,
-            //     _permissionScemaRepo.Object,
-            //     _statusRepository.Object,
-            //     _boardStatusRepository.Object,
-            //     _userRepository.Object,
-            //     _ticketTypeRepository.Object,
-            //      _priorityRepository.Object,
-            //     _ticketRepository.Object
-            // );
+            _projectService = new ProjectService(
+                _context,
+                _projectRepositoryMock.Object,
+                _roleRepositoryMock.Object,
+               _mapper,
+                _schemaRepository.Object,
+               _projectMemberRepositoryMock.Object,
+               _boardRepositoryMock.Object,
+                _permissionRepositoryMock.Object,
+                _interationRepositoryMock.Object,
+                _permissionScemaRepo.Object,
+                _statusRepository.Object,
+                _boardStatusRepository.Object,
+                _userRepository.Object,
+                _ticketTypeRepository.Object,
+                 _priorityRepository.Object,
+                _ticketRepository.Object,
+                _invitationRepository.Object
+            );
         }
 
         //Create Project 
