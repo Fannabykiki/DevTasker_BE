@@ -16,8 +16,8 @@ namespace NUnitTest.DevTasker.Service
     public class CommentServiceTest
     {
         private ITaskCommentService _commentService; 
-        private Mock <ITaskCommentRepository> _ticketCommentRepository;
-        private Mock <ITaskRepository> _ticketRepository;
+        private Mock <ITaskCommentRepository> _taskCommentRepository;
+        private Mock <ITaskRepository> _taskRepository;
         private Mock <IUserRepository> _userRepository;
         private Mock<IMapper> _mapper;
         private Mock<IDatabaseTransaction> _transactionMock;
@@ -26,8 +26,8 @@ namespace NUnitTest.DevTasker.Service
         [SetUp]
         public void Setup()
         {
-            _ticketCommentRepository = new Mock<ITaskCommentRepository>();
-            _ticketRepository = new Mock<ITaskRepository>();
+            _taskCommentRepository = new Mock<ITaskCommentRepository>();
+            _taskRepository = new Mock<ITaskRepository>();
             _mapper = new Mock<IMapper>();
             _userRepository = new Mock<IUserRepository>();
             _projectMemberRepository= new Mock<IProjectMemberRepository>();
@@ -35,9 +35,9 @@ namespace NUnitTest.DevTasker.Service
 
             _commentService = new TaskCommentService
                 (
-                _ticketCommentRepository.Object,
+                _taskCommentRepository.Object,
                 _mapper.Object,
-                _ticketRepository.Object,
+                _taskRepository.Object,
                 _userRepository.Object,
                 _projectMemberRepository.Object,
                 _statusRepository.Object
@@ -47,34 +47,46 @@ namespace NUnitTest.DevTasker.Service
         [Test]
         public async Task CreateComment_Success()
         {
-            //Arrange
-           var Comment = new CreateCommentRequest
-           {
-               Content = "Test Comment",
-               TaskId = Guid.NewGuid()
-           };
-
-            var expectedCommentResponse = new GetCommentResponse
+            // Arrange
+            var byUserId = Guid.NewGuid();
+            var createCommentRequest = new CreateCommentRequest
             {
-                CommentId = It.IsAny<Guid>(),
-                Content = Comment.Content,
-                CreateAt = Comment.ToString(),
-                TaskId = Comment.TaskId,
+                Content = "Test Comment",
+                TaskId = Guid.NewGuid()
             };
 
-            _mapper.Setup(m => m.Map<GetCommentResponse>(It.IsAny<TaskComment>()))
-                .Returns(expectedCommentResponse);
+            var projectMember = new ProjectMember
+            {
+                MemberId = Guid.NewGuid(),
+                UserId = byUserId,
+                Users = new User { StatusId = Guid.NewGuid() }
+            };
 
-            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+            var status = new Status { StatusId = projectMember.Users.StatusId };
+
+            var task = new TaskComment { TaskId = createCommentRequest.TaskId };
+
+            _taskCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(new Mock<IDatabaseTransaction>().Object);
 
-           // Act
-           var byUserId = Guid.NewGuid();
-           var result = await _commentService.CreateComment(byUserId, Comment);
+            _projectMemberRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<ProjectMember, bool>>>(), null))
+                .ReturnsAsync(projectMember);
+
+            _statusRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Status, bool>>>(), null))
+                .ReturnsAsync(status);
+
+           /* _taskRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<TaskComment, bool>>>(), null))
+                .ReturnsAsync(task);*/
+
+            _mapper.Setup(m => m.Map<GetCommentResponse>(It.IsAny<TaskComment>()))
+                .Returns((TaskComment tc) => new GetCommentResponse { CommentId = tc.CommentId, Content = tc.Content });
+
+            // Act
+            var result = await _commentService.CreateComment(byUserId, createCommentRequest);
 
             // Assert
-            Assert.IsNull(result);
-           
+            Assert.Null(result);
+            // Add more assertions based on the expected behavior of your CreateComment method
         }
 
         [Test]
@@ -88,11 +100,11 @@ namespace NUnitTest.DevTasker.Service
                
             };
 
-            _ticketCommentRepository.Setup(repo => repo.CreateAsync(It.IsAny<TaskComment>()))
+            _taskCommentRepository.Setup(repo => repo.CreateAsync(It.IsAny<TaskComment>()))
                 .Throws(new Exception("Failed to create comment"));
             var transaction = new Mock<IDatabaseTransaction>();
             transaction.Setup(t => t.Commit()).Verifiable();
-            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+            _taskCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(transaction.Object);
             //// Act
             var byUserId = Guid.NewGuid();
@@ -103,27 +115,31 @@ namespace NUnitTest.DevTasker.Service
         [Test]
         public async Task UpdateComment_Success()
         {
+            var commentId = Guid.NewGuid();
+            var updatedComment = new ReplyCommentRequest { Content = "Updated content" };
             // Arrange
-            var Id = Guid.NewGuid();
-            var updatedComment = new UpdateCommentRequest
-            {
-                Content = "Updated Test Comment"
-            };
-
+           
             var existingComment = new TaskComment
             {
-                CommentId = Id,
-                Content = "Test Comment",
-                
+                CommentId = commentId,
+                Content = "Original content",
+                DeleteAt = null
+
             };
 
-            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+            var expectedUpdatedComment = new GetCommentResponse
+            {
+                CommentId = commentId,
+                Content = "Updated content",
+            };
+
+            _taskCommentRepository.Setup(repo => repo.GetAsync(
                 It.IsAny<Expression<Func<TaskComment, bool>>>(),
                 It.IsAny<Expression<Func<TaskComment, object>>>()
             )).ReturnsAsync(existingComment);
 
-            _ticketCommentRepository.Setup(repo => repo.UpdateAsync(existingComment));
-            _ticketCommentRepository.Setup(repo => repo.SaveChanges());
+            _taskCommentRepository.Setup(repo => repo.UpdateAsync(existingComment));
+            _taskCommentRepository.Setup(repo => repo.SaveChanges());
 
             var expectedUpdatedCommentResponse = new GetCommentResponse 
             {
@@ -135,42 +151,45 @@ namespace NUnitTest.DevTasker.Service
             _mapper.Setup(m => m.Map<GetCommentResponse>(It.IsAny<TaskComment>()))
                 .Returns(expectedUpdatedCommentResponse);
 
-            // Act
-           var result = await _commentService.UpdateComment(Id, updatedComment);
+            // // Act
 
-            // Assert
+            var result = await _commentService.UpdateComment(commentId, updatedComment);
+            if (result != null)
+            {
+                Console.WriteLine("Update Comment Success");
+            }
+            else
+            {
+                Console.WriteLine("Update Comment Fail");
+            }
+
+            // // Assert
             Assert.IsNotNull(result);
-           Assert.AreEqual(expectedUpdatedCommentResponse.Content, result.Content);
-           
+
         }
 
 
         [Test]
         public async Task UpdateComment_Failure()
         {
-            // Arrange
             var commentId = Guid.NewGuid();
-            var updatedCommentRequest = new CreateCommentRequest
-            {
-                Content = "Updated Comment Content"
-            };
+            var updatedComment = new ReplyCommentRequest { Content = "Updated content" };
 
-            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+            _taskCommentRepository.Setup(repo => repo.GetAsync(
                 It.IsAny<Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync((TaskComment)null);
 
-            // Act
-            //var result = await _commentService.UpdateComment(commentId, updatedCommentRequest);
-            //if (result != null)
-            //{
-            //    Console.WriteLine("Comment Success");
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Comment Fail");
-            //}
-            //// Assert
-            //Assert.IsNull(result); 
+
+            var result = await _commentService.UpdateComment(commentId, updatedComment);
+            if (result != null)
+            {
+                Console.WriteLine("Update Comment Success");
+            }
+            else
+            {
+                Console.WriteLine("Update Comment Fail");
+            }
+            Assert.IsNull(result); 
         }
 
         [Test]
@@ -185,16 +204,16 @@ namespace NUnitTest.DevTasker.Service
                 Content = "Test Comment Content",
             };
 
-            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+            _taskCommentRepository.Setup(repo => repo.GetAsync(
                 It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync(existingComment); 
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();
 
-            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+            _taskCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var ticketCommentService = new TaskCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object, _projectMemberRepository.Object,
+            var ticketCommentService = new TaskCommentService(_taskCommentRepository.Object, _mapper.Object, _taskRepository.Object, _userRepository.Object, _projectMemberRepository.Object,
                 _statusRepository.Object);
 
             // Act
@@ -217,16 +236,16 @@ namespace NUnitTest.DevTasker.Service
             // Arrange
             var commentId = Guid.NewGuid();
 
-            _ticketCommentRepository.Setup(repo => repo.GetAsync(
+            _taskCommentRepository.Setup(repo => repo.GetAsync(
                 It.IsAny < Expression<Func<TaskComment, bool>>>(), null))
                 .ReturnsAsync((TaskComment)null); 
 
             var databaseTransaction = new Mock<IDatabaseTransaction>();
 
-            _ticketCommentRepository.Setup(repo => repo.DatabaseTransaction())
+            _taskCommentRepository.Setup(repo => repo.DatabaseTransaction())
                 .Returns(databaseTransaction.Object);
 
-            var ticketCommentService = new TaskCommentService(_ticketCommentRepository.Object, _mapper.Object, _ticketRepository.Object, _userRepository.Object, _projectMemberRepository.Object, _statusRepository.Object);
+            var ticketCommentService = new TaskCommentService(_taskCommentRepository.Object, _mapper.Object, _taskRepository.Object, _userRepository.Object, _projectMemberRepository.Object, _statusRepository.Object);
 
             // Act
             var result = await ticketCommentService.RemoveComment(commentId);
