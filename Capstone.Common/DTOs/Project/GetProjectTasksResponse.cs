@@ -10,10 +10,10 @@ namespace Capstone.Common.DTOs.Project
         public Guid TaskId { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime CreateTime { get; set; }
-        public DateTime? DeleteAt { get; set; }
+        public string StartDate { get; set; }
+        public string DueDate { get; set; }
+        public string CreateTime { get; set; }
+        public string? DeleteAt { get; set; }
         public UserResponse AssignTo { get; set; }
         public UserResponse CreateBy { get; set; }
         public string TaskType { get; set; } 
