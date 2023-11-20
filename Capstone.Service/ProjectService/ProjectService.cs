@@ -626,11 +626,11 @@ public class ProjectService : IProjectService
 				newTask.TaskId = task.TaskId;
 				newTask.Title = task.Title;
 				newTask.Description = task.Description;
-				newTask.StartDate = task.StartDate;
-				newTask.DueDate = task.DueDate;
-				newTask.CreateTime = task.CreateTime;
-				newTask.DeleteAt = task.DeleteAt;
-				newTask.AssignTo = _mapper.Map<UserResponse>(assignTo.Users);
+                newTask.StartDate = task.StartDate == null ? null : task.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                newTask.DueDate = task.DueDate == null ? null : task.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                newTask.CreateTime = task.CreateTime == null ? null : task.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                newTask.DeleteAt = task.DeleteAt == null ? null : task.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                newTask.AssignTo = _mapper.Map<UserResponse>(assignTo.Users);
 				newTask.CreateBy = _mapper.Map<UserResponse>(createBy);
 				newTask.TaskType = taskType.Title;
 				newTask.PrevId = task.PrevId;
