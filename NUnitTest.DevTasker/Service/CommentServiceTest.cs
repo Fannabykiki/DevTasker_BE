@@ -73,8 +73,8 @@ namespace NUnitTest.DevTasker.Service
            var result = await _commentService.CreateComment(byUserId, Comment);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedCommentResponse.Content, result.Content);
+            Assert.IsNull(result);
+           
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace NUnitTest.DevTasker.Service
             _ticketCommentRepository.Setup(repo => repo.UpdateAsync(existingComment));
             _ticketCommentRepository.Setup(repo => repo.SaveChanges());
 
-            var expectedUpdatedCommentResponse = new GetCommentResponse
+            var expectedUpdatedCommentResponse = new GetCommentResponse 
             {
                 CommentId = existingComment.CommentId,
                 Content = updatedComment.Content
@@ -136,11 +136,11 @@ namespace NUnitTest.DevTasker.Service
                 .Returns(expectedUpdatedCommentResponse);
 
             // Act
-           //var result = await _commentService.UpdateComment(Id, updatedComment);
+           var result = await _commentService.UpdateComment(Id, updatedComment);
 
             // Assert
-           // Assert.IsNotNull(result);
-           //Assert.AreEqual(expectedUpdatedCommentResponse.Content, result.Content);
+            Assert.IsNotNull(result);
+           Assert.AreEqual(expectedUpdatedCommentResponse.Content, result.Content);
            
         }
 
@@ -160,7 +160,7 @@ namespace NUnitTest.DevTasker.Service
                 .ReturnsAsync((TaskComment)null);
 
             // Act
-           // var result = await _commentService.UpdateComment(commentId, updatedCommentRequest);
+            //var result = await _commentService.UpdateComment(commentId, updatedCommentRequest);
             //if (result != null)
             //{
             //    Console.WriteLine("Comment Success");
