@@ -44,8 +44,8 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeName = x.TicketType.Title,
 									SubTask = _context.Tasks
 														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false)
-														.Select(m => new TaskViewModel
-														{
+														.Select(m => new SubTask
+                                                        {
 															TaskId = m.TaskId,
 															StatusName = m.Status.Title,
 															StatusId = m.StatusId,
