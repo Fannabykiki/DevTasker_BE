@@ -78,10 +78,10 @@ namespace Capstone.DataAccess.Repository.Implements
                     newTask.TaskId = task.TaskId;
                     newTask.Title = task.Title;
                     newTask.Description = task.Description;
-                    newTask.StartDate = task.StartDate;
-                    newTask.DueDate = task.DueDate;
-                    newTask.CreateTime = task.CreateTime;
-                    newTask.DeleteAt = task.DeleteAt;
+                    newTask.StartDate = task.StartDate == null? null : task.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                    newTask.DueDate = task.DueDate == null ? null : task.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                    newTask.CreateTime = task.CreateTime == null ? null : task.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                    newTask.DeleteAt = task.DeleteAt == null ? null : task.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
                     newTask.AssignTo = new UserResponse {
                         UserId = assignTo.UserId,
                         Address = assignTo.Users.Address,
@@ -176,7 +176,7 @@ namespace Capstone.DataAccess.Repository.Implements
                 reportByWeek.Add(new ReportRecord
                 {
                     TotalTask = taskByDay.Count(),
-                    DateTime = day,
+                    DateTime = day.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                     reportStatuses = reportByWeeks
                 });
             }
@@ -200,6 +200,7 @@ namespace Capstone.DataAccess.Repository.Implements
                     RoleId= member.RoleId,
                     RoleName = _context.Roles.FirstOrDefault(r => r.RoleId == member.RoleId).RoleName,
                     IsOwner= member.IsOwner,
+                    TotalTasks = memberTasks.Count(),
                     reportStatuses = reportByWeeks
                 });
             }

@@ -234,16 +234,9 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("projects/calendar/{projectId}")]
-        public async Task<IActionResult> GetTasksForCalendar(Guid projectId)
-        {
-            var result = await _projectService.GetProjectCalender(projectId);
-            return Ok(result);
-        }
-
         [EnableQuery]
         [HttpGet("projects/report/{projectId}")]
-        public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetProjectReport(Guid projectId)
+        public async Task<ActionResult<GetProjectReportRequest>> GetProjectReport(Guid projectId)
         {
             var result = await _projectService.GetProjectReport(projectId);
             return Ok(result);

@@ -24,12 +24,13 @@ namespace Capstone.Common.DTOs.Project
         public Guid? RoleId { get; set; }
         public string? RoleName { get; set; }
         public bool IsOwner { get; set; }
+        public int TotalTasks { get; set; }
         public List<ReportStatus>? reportStatuses { get; set; }
     }
     public class ReportRecord 
     {
         public int TotalTask { get; set; }
-        public DateTime? DateTime { get; set; }
+        public string? DateTime { get; set; }
         public List<ReportStatus>? reportStatuses { get; set; }
     }
     public class ReportStatus
