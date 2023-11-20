@@ -37,4 +37,5 @@ public interface IProjectService
 	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
+	Task<int> GetTaskStatusDone(Guid projectId);
 }

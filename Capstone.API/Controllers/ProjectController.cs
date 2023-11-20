@@ -5,7 +5,6 @@ using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
-using Capstone.DataAccess.Entities;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
@@ -81,7 +80,11 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
-
+			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
+			if (pro != 0)
+			{
+				return BadRequest("Task of project hasn't done yet. Please set all task with status done before close project");
+			}
 			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
 			return Ok(project);
 		}
@@ -326,12 +329,11 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpDelete("projects/{projectId}")]
+		[HttpPut("projects/{projectId}")]
 		public async Task<IActionResult> DeleteProject(Guid projectId)
 		{
 			var project = await _projectService.GetProjectByProjectId(projectId);
-			var pro = await _projectService.GetProjectsTasks(projectId);
-			
+		
 			if (project.DeleteAt is not null)
 			{
 				return BadRequest("Project is already deleted");

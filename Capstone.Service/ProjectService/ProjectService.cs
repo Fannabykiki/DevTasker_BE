@@ -801,4 +801,11 @@ public class ProjectService : IProjectService
 
 		return projectStatusList;
 	}
+
+	public async Task<int> GetTaskStatusDone(Guid projectId)
+	{
+		int taskDone = await _ticketRepository.GetTaskDone(projectId);
+		int taskTotal = (await _ticketRepository.GetAllTask(projectId)).Count();
+		return taskTotal - taskDone;
+	}
 }

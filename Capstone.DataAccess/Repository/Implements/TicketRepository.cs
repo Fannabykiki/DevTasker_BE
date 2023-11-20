@@ -214,5 +214,33 @@ namespace Capstone.DataAccess.Repository.Implements
 								}).FirstOrDefaultAsync();
 			return taskList;
 		}
+
+		public async Task<int> GetTaskDone(Guid projectId)
+		{
+			var taskList = await _context.Tasks
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == true && x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"))
+								.Select(x => new TaskViewModel
+								{
+									AssignTo = x.ProjectMember.Users.UserName,
+									CreateBy = x.ProjectMember.Users.UserName,
+									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									Description = x.Description,
+									DeleteAt = x.DeleteAt == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									InterationName = x.Interation.InterationName,
+									IsDelete = x.IsDelete,
+									PriorityName = x.PriorityLevel.Title,
+									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									StatusName = x.Status.Title,
+									StatusId = x.StatusId,
+									Title = x.Title,
+									TypeId = x.TypeId,
+									TaskId = x.TaskId,
+									TypeName = x.TicketType.Title,
+								}).ToListAsync();
+			return taskList.Count();
+		}
 	}
 }
