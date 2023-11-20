@@ -5,6 +5,7 @@ using Capstone.Common.DTOs.User;
 using Capstone.DataAccess.Entities;
 using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
+using Capstone.Service.ProjectService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -17,25 +18,46 @@ namespace Capstone.API.Controllers
     {
         private readonly ILoggerManager _logger;
         private readonly IIterationService _iterationService;
+        private readonly IProjectService _projectService;
 
-        public IterationController(ILoggerManager logger, IIterationService iterationService)
-        {
-            _logger = logger;
-            _iterationService = iterationService;
-        }
+		public IterationController(ILoggerManager logger, IIterationService iterationService, IProjectService projectService)
+		{
+			_logger = logger;
+			_iterationService = iterationService;
+			_projectService = projectService;
+		}
 
-        [HttpPost("Iteration")]
+		[HttpPost("Iteration")]
         public async Task<ActionResult<GetIntergrationResponse>> CreateIteration(CreateIterationRequest createIterationRequest)
         {
-            var result = await _iterationService.CreateInteration(createIterationRequest);
+            var project = await _projectService.GetProjectByProjectId(createIterationRequest.ProjectId);
+            if(createIterationRequest.StartDate <= project.StartDate)
+            {
+                return BadRequest("Cant create new interation with start date before project's start date. Please update and try again");
+            }
+			if (createIterationRequest.EndDate >= project.EndDate)
+			{
+				return BadRequest("Cant create new interation with end date after project's end date. Please update and try again");
+			}
+			var result = await _iterationService.CreateInteration(createIterationRequest);
 
             return Ok(result);
         }
 
         [HttpPut("Iteration/{iterationId}")]
-        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
+        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest)
         {
-            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+            var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
+			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
+			if (updateIterationRequest.StartDate <= project.StartDate)
+			{
+				return BadRequest("Cant create new interation with start date before project's start date. Please update and try again");
+			}
+			if (updateIterationRequest.EndDate >= project.EndDate)
+			{
+				return BadRequest("Cant create new interation with end date after project's end date. Please update and try again");
+			}
+			var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, updateIterationRequest.InterationId);
             if (result == null)
             {
                 return StatusCode(500);

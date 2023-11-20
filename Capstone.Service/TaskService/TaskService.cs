@@ -98,6 +98,7 @@ namespace Capstone.Service.TaskService
                             TypeId = newTask.TypeId,
                             StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             Title = newTask.Title,
+                            StatusId = newTask.StatusId,
                             StatusName = status.Title,
                             BaseResponse = new BaseResponse
                             {
@@ -205,7 +206,8 @@ namespace Capstone.Service.TaskService
                             StartDate = newTask.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                             Title = newTask.Title,
                             StatusName = status.Title,
-                            BaseResponse = new BaseResponse
+							StatusId = newTask.StatusId,
+							BaseResponse = new BaseResponse
                             {
                                 IsSucceed = true,
                                 Message = "Create Successfully"
