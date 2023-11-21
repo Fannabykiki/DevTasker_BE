@@ -32,7 +32,7 @@ namespace Capstone.Service.ProjectMemberService
 			_invitationRepository = invitationRepository;
 		}
 
-		public async Task<BaseResponse> AcceptInvitation(Guid userId,AcceptInviteRequest acceptInviteRequest)
+		public async Task<BaseResponse> AcceptInvitation(Guid userId, AcceptInviteRequest acceptInviteRequest)
 		{
 			using (var transaction = _projectMemberRepository.DatabaseTransaction())
 			{
@@ -44,7 +44,7 @@ namespace Capstone.Service.ProjectMemberService
 					await _projectMemberRepository.UpdateAsync(projectMember);
 					await _projectMemberRepository.SaveChanges();
 
-					var invitation = await _invitationRepository.GetAsync(x => x.InvitationId == acceptInviteRequest.InvitationId,null);
+					var invitation = await _invitationRepository.GetAsync(x => x.InvitationId == acceptInviteRequest.InvitationId, null);
 					invitation.StatusId = Guid.Parse("ea91f463-44e8-4209-bad9-eb5b96732844");
 
 					await _invitationRepository.UpdateAsync(invitation);
@@ -108,11 +108,42 @@ namespace Capstone.Service.ProjectMemberService
 
 		public async Task<bool> CheckMemberExist(string email, Guid projectId)
 		{
-			var projects = await _projectMemberRepository.GetProjectMembers(projectId);
+			var statusId = Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1");
+			var projects = await _projectMemberRepository.CheckStatus(projectId, statusId);
 			var list = _mapper.Map<List<ViewMemberProject>>(projects);
 			foreach (var member in list)
 			{
-				if(email.Equals(member.Email))
+				if (email.Equals(member.Email))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public async Task<bool> CheckMemberStatus(string email, Guid projectId)
+		{
+			var statusId = Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274");
+			var projects = await _projectMemberRepository.CheckStatus(projectId, statusId);
+			var list = _mapper.Map<List<ViewMemberProject>>(projects);
+			foreach (var member in list)
+			{
+				if (email.Equals(member.Email))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public async Task<bool> CheckSendMail(string email, Guid projectId)
+		{
+			var statusId = Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746");
+			var projects = await _projectMemberRepository.CheckStatus(projectId, statusId);
+			var list = _mapper.Map<List<ViewMemberProject>>(projects);
+			foreach (var member in list)
+			{
+				if (email.Equals(member.Email))
 				{
 					return false;
 				}

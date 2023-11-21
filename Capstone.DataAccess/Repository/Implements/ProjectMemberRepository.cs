@@ -22,5 +22,11 @@ namespace Capstone.DataAccess.Repository.Implements
 			var projectMember = await _context.ProjectMembers.Where(x => x.UserId == userId).Include(x => x.Users).Include(x => x.Role).Include(x => x.Status).Include(x =>x.Project).ThenInclude(x=>x.Status).ToListAsync();
 			return projectMember;
 		}
+
+		public async Task<List<ProjectMember>> CheckStatus(Guid projectId,Guid statusId)
+		{
+			var projectMember = await _context.ProjectMembers.Where(x => x.ProjectId == projectId && x.StatusId == statusId).Include(x => x.Users).Include(x => x.Role).Include(x => x.Status).ToListAsync();
+			return projectMember;
+		}
 	}
 }
