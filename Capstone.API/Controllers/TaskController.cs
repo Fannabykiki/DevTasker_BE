@@ -1,9 +1,13 @@
 ﻿using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
+using Capstone.DataAccess.Entities;
+using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
+using Capstone.Service.ProjectService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -11,26 +15,29 @@ using Microsoft.CodeAnalysis;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/task-management")]
-    [ApiController]
-    public class TaskController : ControllerBase
-    {
-        private readonly ILoggerManager _logger;
-        private readonly ITaskService _taskService;
+	[Route("api/task-management")]
+	[ApiController]
+	public class TaskController : ControllerBase
+	{
+		private readonly ILoggerManager _logger;
+		private readonly ITaskService _taskService;
+		private readonly IProjectService _projectService;
+		private readonly IIterationService _interationService;
 
-        public TaskController(ILoggerManager logger, ITaskService taskService)
-        {
-            _logger = logger;
-            _taskService = taskService;
-        }
+		public TaskController(ILoggerManager logger, ITaskService taskService, IIterationService interationService)
+		{
+			_logger = logger;
+			_taskService = taskService;
+			_interationService = interationService;
+		}
 
-        [HttpGet("tasks/kanban")]
-        [EnableQuery()]
-        public async Task<ActionResult<List<TaskViewModel>>> GetAllTask(Guid projetcId)
-        {
-            var response = await _taskService.GetAllTaskAsync(projetcId);
-            return Ok(response);
-        }
+		[HttpGet("tasks/kanban")]
+		[EnableQuery()]
+		public async Task<ActionResult<List<TaskViewModel>>> GetAllTask(Guid projetcId)
+		{
+			var response = await _taskService.GetAllTaskAsync(projetcId);
+			return Ok(response);
+		}
 
 		[HttpGet("tasks/task-bin")]
 		[EnableQuery()]
@@ -49,12 +56,12 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpGet("task/{task}")]
-        [EnableQuery()]
-        public async Task<ActionResult<UserResponse>> GetAllTaskByInterationId(Guid interationId)
-        {
-            var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
-            return Ok(response);
-        }
+		[EnableQuery()]
+		public async Task<ActionResult<UserResponse>> GetAllTaskByInterationId(Guid interationId)
+		{
+			var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
+			return Ok(response);
+		}
 
 		[HttpGet("tasks/status")]
 		[EnableQuery()]
@@ -83,7 +90,7 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(Guid taskId)
 		{
-			
+
 			var task = await _taskService.GetTaskDetail(taskId);
 			if (task.DeleteAt == null)
 			{
@@ -108,53 +115,106 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPost("tasks")]
-        public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
-        {   
-            var userId = this.GetCurrentLoginUserId();
-            if(userId == Guid.Empty)
-            {
-                return BadRequest("You need login first");
-            }
-            var result = await _taskService.CreateTask(request, userId);
+		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
+		{
+			if (request.InterationId != Guid.Empty)
+			{
+				var interation = await _interationService.GetIterationsById(request.InterationId);
+				if (request.StartDate <= interation.StartDate)
+				{
+					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+				}
+				if (request.DueDate >= interation.EndDate)
+				{
+					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+				}
+				var userId = this.GetCurrentLoginUserId();
+				if (userId == Guid.Empty)
+				{
+					return BadRequest("You need login first");
+				}
+				var result = await _taskService.CreateTask(request, userId);
+				return Ok(result);
+			}
+			else
+			{
+				var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
-            return Ok(result);
-        }
+				if (request.StartDate <= DateTime.Parse(interation.StartDate))
+				{
+					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+				}
+				if (request.DueDate >= DateTime.Parse(interation.EndDate))
+				{
+					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+				}
+				var userId = this.GetCurrentLoginUserId();
+				if (userId == Guid.Empty)
+				{
+					return BadRequest("You need login first");
+				}
+				var result = await _taskService.CreateTask(request, userId);
+				return Ok(result);
+			}
+		}
 
 		[HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
+			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
+
+			if (request.StartDate <= DateTime.Parse(interation.StartDate))
+			{
+				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+			}
+			if (request.DueDate >= DateTime.Parse(interation.EndDate))
+			{
+				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+			}
 			var userId = this.GetCurrentLoginUserId();
-			if (userId == null)
+			if (userId == Guid.Empty)
 			{
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
-
 			return Ok(result);
 		}
 
 		[HttpPut("tasks/{taskId}")]
-        public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
-        {
-            var result = await _taskService.UpdateTask(updateTicketRequest);
+		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
+		{
+			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
+			if (updateTicketRequest.StartDate <= interation.StartDate)
+			{
+				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+			}
+			if (updateTicketRequest.DueDate >= interation.EndDate)
+			{
+				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+			}
+			var userId = this.GetCurrentLoginUserId();
+			if (userId == Guid.Empty)
+			{
+				return BadRequest("You need login first");
+			}
+			var result = await _taskService.UpdateTask(updateTicketRequest);
+			return Ok(result);
+		}
 
-            return Ok(result);
-        }
-		
 		[HttpPut("tasks/change-status/{taskId}")]
-        public async Task<IActionResult> UpdateaTaskStastus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest)
-        {
-            var result = await _taskService.UpdateTaskStatus(taskId, updateTaskStatusRequest);
+		public async Task<IActionResult> UpdateaTaskStastus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest)
+		{
+			var result = await _taskService.UpdateTaskStatus(taskId, updateTaskStatusRequest);
 
-            return Ok(result);
-        }
-        
-        [HttpPut("task/deletion/{taskId}")]
-        public async Task<IActionResult> DeleteTicket(Guid ticketId)
-        {
-            var result = await _taskService.DeleteTask( ticketId);
+			return Ok(result);
+		}
 
-            return Ok(result);
-        }
-    }
+		[HttpPut("task/deletion/{taskId}")]
+		public async Task<IActionResult> DeleteTicket(Guid ticketId)
+		{
+			var result = await _taskService.DeleteTask(ticketId);
+
+			return Ok(result);
+		}
+	}
 }

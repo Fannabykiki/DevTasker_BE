@@ -9,5 +9,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
         Task<List<TaskViewModel>> GetAllTaskCompleted(Guid projectId,Guid statusId);
         Task<List<TaskViewModel>> GetAllTaskDelete(Guid projectId);
 	    Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
+		Task<int> GetTaskDone(Guid projectId);
 	}
 }

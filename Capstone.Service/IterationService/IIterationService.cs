@@ -9,5 +9,6 @@ namespace Capstone.Service.IterationService
         Task<GetInterrationByIdResonse> GetIterationsById(Guid iterationId);
         Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest);
         Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId);
-    }
+		Task<GetIntergrationResponse> GetCurrentInterationId(Guid projectId);
+	}
 }
