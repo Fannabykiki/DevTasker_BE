@@ -106,6 +106,20 @@ namespace Capstone.Service.ProjectMemberService
 			}
 		}
 
+		public async Task<bool> CheckMemberExist(string email, Guid projectId)
+		{
+			var projects = await _projectMemberRepository.GetProjectMembers(projectId);
+			var list = _mapper.Map<List<ViewMemberProject>>(projects);
+			foreach (var member in list)
+			{
+				if(email.Equals(member.Email))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public async Task<BaseResponse> DeclineInvitation(Guid userId, AcceptInviteRequest acceptInviteRequest)
 		{
 			using (var transaction = _projectMemberRepository.DatabaseTransaction())

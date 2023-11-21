@@ -161,21 +161,43 @@ namespace Capstone.API.Controllers
 		[HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
+			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
+
+			if (request.StartDate <= DateTime.Parse(interation.StartDate))
+			{
+				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+			}
+			if (request.DueDate >= DateTime.Parse(interation.EndDate))
+			{
+				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+			}
 			var userId = this.GetCurrentLoginUserId();
-			if (userId == null)
+			if (userId == Guid.Empty)
 			{
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
-
 			return Ok(result);
 		}
 
 		[HttpPut("tasks/{taskId}")]
-		public async Task<IActionResult> UpdateaTask(UpdateTaskRequest updateTicketRequest)
+		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
+			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
+			if (updateTicketRequest.StartDate <= interation.StartDate)
+			{
+				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+			}
+			if (updateTicketRequest.DueDate >= interation.EndDate)
+			{
+				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+			}
+			var userId = this.GetCurrentLoginUserId();
+			if (userId == Guid.Empty)
+			{
+				return BadRequest("You need login first");
+			}
 			var result = await _taskService.UpdateTask(updateTicketRequest);
-
 			return Ok(result);
 		}
 
