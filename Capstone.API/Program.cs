@@ -34,6 +34,7 @@ using Capstone.Service.NotificationService;
 using Hangfire;
 using Capstone.API.Jobs;
 using Hangfire.Dashboard;
+using Capstone.Service.Hubs;
 
 static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -173,7 +174,7 @@ builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
                                     .UseRecommendedSerializerSettings()
                                     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DBConnString")));
 builder.Services.AddHangfireServer();
-
+builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -211,4 +212,5 @@ app.MapControllers();
 app.UseHangfireDashboard("/hangfire");
 //RecurringJob.RemoveIfExists("email-for-deadline");
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *");
+app.MapHub<NotificationHub>("/notificattionHub");
 app.Run();
