@@ -63,8 +63,17 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
 		{
 			var userId = this.GetCurrentLoginUserId();
+			if (userId == Guid.Empty)
+			{
+				return BadRequest("You need to login first");
+			}
 			foreach (var email in inviteUserRequest.Email)
 			{
+				var isExist = await _projectMemberService.CheckMemberExist(email, inviteUserRequest.ProjectId);
+				if(isExist == false)
+				{
+					return BadRequest("User is already exist in project. Can't invite anymore!!!");
+				}
 				var user = await _userService.GetUserByEmailAsync(email);
 				if (user == null)
 				{
