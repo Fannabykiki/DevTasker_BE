@@ -17,6 +17,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Capstone.Service.PermissionSchemaService
 {
@@ -278,6 +279,32 @@ namespace Capstone.Service.PermissionSchemaService
                 transaction.RollBack();
                 return false;
             }
+        }
+
+        public async Task<List<GetProjectSchemasResponse>> GetProjectSchemas(Guid projectId)
+        {
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+            var schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete != true, null);
+            
+            var results = _mapper.Map<List<GetProjectSchemasResponse>>(schemas);
+            foreach (var schema in results)
+            {
+                schema.isCurrentProjectSchema = project.SchemasId == schema.SchemaId ? true : false;
+                var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schema.SchemaId, x => x.Status);
+                if (projects != null)
+                {
+                    var projectUsed = projects.Select(p => new GetProjectUsedResponse
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName,
+                        Description = p.Description,
+                        ProjectStatus = p.Status.Title
+                    }).ToList();
+                    schema.ProjectsUsed = (List<GetProjectUsedResponse>?)projectUsed;
+                }
+
+            }
+            return results;
         }
     }
 }
