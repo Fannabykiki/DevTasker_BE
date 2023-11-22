@@ -93,6 +93,10 @@ namespace Capstone.API.Controllers
 		[HttpPut("users/{id}")]
 		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
 		{
+			if(request.DoB >= DateTime.Now)
+			{
+				return BadRequest("Can't update date of birth greater than today");
+			}
 			// Validate model
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
