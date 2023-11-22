@@ -67,16 +67,16 @@ namespace Capstone.API.Controllers
 		}
 
         [HttpGet("external-login/token")]
-		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? userProfile)
+		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
 		{
 			GoogleProfile googleUser = new GoogleProfile();
 			try
 			{
-				//var ClientSecret = _config["Authentication:Google:ClientSecret"];
-				//var ClientID = _config["Authentication:Google:ClientId"];
-				//var url = _config["Authentication:Google:CallBackUrl"];
-				//var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
-				//var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
+				var ClientSecret = _config["Authentication:Google:ClientSecret"];
+				var ClientID = _config["Authentication:Google:ClientId"];
+				var url = _config["Authentication:Google:CallBackUrl"];
+				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
+				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
 				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
             }
 			catch (Exception ex)
