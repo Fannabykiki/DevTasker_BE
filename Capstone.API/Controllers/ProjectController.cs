@@ -321,12 +321,13 @@ namespace Capstone.API.Controllers
             return Ok();
         }
 
-        [HttpPut("roles/{memberId}")]
-        public async Task<IActionResult> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+		//4
+        [HttpPut("roles")]
+        public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
         {
             if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
                 return BadRequest("You can not change to this role !");
-            var result = await _projectService.UpdateMemberRole(memberId, updateMemberRoleRequest);
+            var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
             if (result == null)
             {
                 return StatusCode(500);
@@ -335,48 +336,52 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpPut("projects/info/{projectId}")]
-		public async Task<IActionResult> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo)
+		//3
+		[HttpPut("projects/info")]
+		public async Task<IActionResult> UpdateProjectInfo( UpdateProjectNameInfo updateProjectNameInfo)
 		{
-			var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
+			var result = await _projectService.UpdateProjectInfo(updateProjectNameInfo.ProjectId, updateProjectNameInfo);
 
 			return Ok(result);
 		}
 
-		[HttpPut("projects/privacy/{projectId}")]
-		public async Task<IActionResult> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
+		//2
+		[HttpPut("projects/privacy")]
+		public async Task<IActionResult> UpdateProjectPrivacy( UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 		{
-			var result = await _projectService.UpdateProjectPrivacy(projectId, updateProjectPrivacyRequest);
+			var result = await _projectService.UpdateProjectPrivacy(updateProjectPrivacyRequest.ProjectId, updateProjectPrivacyRequest);
 
 			return Ok(result);
 		}
 
-		[HttpPut("projects/{projectId}")]
-		public async Task<IActionResult> DeleteProject(Guid projectId)
+		//1
+		[HttpPut("projects/delete")]
+		public async Task<IActionResult> DeleteProject(DeleteProjectRequest deleteProjectRequest)
 		{
-			var project = await _projectService.GetProjectByProjectId(projectId);
+			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
 		
-			if (project.DeleteAt is not null)
+			if (project.IsDelete == true)
 			{
 				return BadRequest("Project is already deleted");
 			}
 
-			var result = await _projectService.DeleteProject(projectId);
+			var result = await _projectService.DeleteProject(deleteProjectRequest.ProjectId);
 
 			return Ok(result);
 		}
 
-		[HttpPut("project/restoration/{projectId}")]
-		public async Task<IActionResult> RestoreProjectStatus(Guid projectId)
+		//5
+		[HttpPut("project/restoration")]
+		public async Task<IActionResult> RestoreProjectStatus(DeleteProjectRequest deleteProjectRequest)
 		{
-			var project = await _projectService.GetProjectByProjectId(projectId);
+			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
 			if (project.DeleteAt == null)
 			{
 				return BadRequest("Projects is still active. Cant restore it!!!");
 			}
 			if (project.ExpireAt >= DateTime.Now)
 			{
-				var result = await _projectService.RestoreProject(projectId);
+				var result = await _projectService.RestoreProject(deleteProjectRequest.ProjectId);
 				return Ok(result);
 			}
 			else

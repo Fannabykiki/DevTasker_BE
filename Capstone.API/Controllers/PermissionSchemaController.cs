@@ -65,19 +65,20 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-        
-        [HttpPut("schemas/{schemaId:Guid}")]
-        public async Task<IActionResult> UpdateSchema(Guid schemaId, UpdateSchemaRequest request)
+
+        //1
+        [HttpPut("schemas")]
+        public async Task<IActionResult> UpdateSchema(UpdateSchemaRequest request)
         {
             var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
             if (role != null)
             {
                 return BadRequest("Schema name existed!");
             }
-            var result = await _permissionSchemaService.UpdateSchema(schemaId, request);
+            var result = await _permissionSchemaService.UpdateSchema(request.SchemaId, request);
             if(result == true)
             {
-                var schema = await _permissionSchemaService.GetSchemaById(schemaId);
+                var schema = await _permissionSchemaService.GetSchemaById(request.SchemaId);
                 return Ok(schema);
             }
             else
@@ -85,14 +86,14 @@ namespace Capstone.API.Controllers
                 return StatusCode(500);
             }
         }
-
-        [HttpPut("schemas/grant-permission/{schemaId:Guid}")]
-        public async Task<IActionResult> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest request)
+        //2
+        [HttpPut("schemas/grant-permission")]
+        public async Task<IActionResult> GrantSchemaPermissionRoles(GrantPermissionSchemaRequest request)
         {
-            var result = await _permissionSchemaService.GrantSchemaPermissionRoles(schemaId, request);
+            var result = await _permissionSchemaService.GrantSchemaPermissionRoles(request.SchemaId, request);
             if(result == true)
             {
-                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
                 return Ok(schemaDetails);
             }
             else
@@ -100,14 +101,14 @@ namespace Capstone.API.Controllers
                 return BadRequest("Can not grant this role!");
             }
         }
-        
-        [HttpPut("schemas/revoke-permission/{schemaId:Guid}")]
-        public async Task<IActionResult> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest request)
+        //3
+        [HttpPut("schemas/revoke-permission")]
+        public async Task<IActionResult> RevokeSchemaPermissionRoles(RevokePermissionSchemaRequest request)
         {
-            var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(schemaId, request);
+            var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(request.SchemaId, request);
             if(result == true)
             {
-                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
                 return Ok(schemaDetails);
             }
             else

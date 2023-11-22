@@ -348,6 +348,7 @@ public class ProjectService : IProjectService
 			project.StatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31");
 			project.DeleteAt = DateTime.Now;
 			project.ExpireAt = DateTime.Now.AddDays(30);
+			project.IsDelete = true;
 
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
