@@ -98,5 +98,10 @@ namespace Capstone.DataAccess.Repository.Implements
 
             return await Task.FromResult(result);
         }
+
+        public IQueryable<T> GetQuery()
+        {
+            return _dbSet.AsQueryable();
+        }
     }
 }
