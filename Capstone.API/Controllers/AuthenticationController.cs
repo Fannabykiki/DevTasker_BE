@@ -83,7 +83,7 @@ namespace Capstone.API.Controllers
                 var handler = new JwtSecurityTokenHandler();
 
 				// Read and validate the token
-                var tokenGG = handler.ReadJwtToken(request.credential);
+                var tokenGG = handler.ReadJwtToken(request.code);
 
                 var claimsDictionary = new Dictionary<string, string>();
 

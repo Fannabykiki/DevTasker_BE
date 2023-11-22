@@ -6,7 +6,7 @@ namespace Capstone.API.Extentions.Validation.Authencation
     public class ExternalLoginValidator : AbstractValidator<ExternalLoginRequest>
     {
         public ExternalLoginValidator() {
-            RuleFor(x => x.credential).NotEmpty().WithMessage("Credential is required");
+            RuleFor(x => x.code).NotEmpty().WithMessage("Credential is required");
         }
     }
 }

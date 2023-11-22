@@ -1,3 +1,4 @@
+using AutoMapper.Execution;
 using Capstone.API.Extentions;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Invitaion;
@@ -315,10 +316,16 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
         
-        [HttpPost("projects/change-schema/{projectId}")]
-        public async Task<IActionResult> ChangePermissionSchema(Guid projectId)
-        {
-            return Ok();
+        [HttpPost("projects/change-schema")]
+        public async Task<IActionResult> ChangePermissionSchema(UpdatePermissionSchemaRequest request)
+		{
+            var result = await _projectService.UpdateProjectSchema(request);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok(result);
         }
 
         [HttpPut("roles/{memberId}")]
