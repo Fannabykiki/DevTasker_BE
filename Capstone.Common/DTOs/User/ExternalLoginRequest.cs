@@ -8,6 +8,6 @@ namespace Capstone.Common.DTOs.User
 {
     public class ExternalLoginRequest
     {
-        public string credential { get; set; }
+        public string code { get; set; }
     }
 }
