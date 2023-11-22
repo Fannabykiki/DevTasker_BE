@@ -69,10 +69,22 @@ namespace Capstone.API.Controllers
 			}
 			foreach (var email in inviteUserRequest.Email)
 			{
-				var isExist = await _projectMemberService.CheckMemberExist(email, inviteUserRequest.ProjectId);
-				if(isExist == false)
+				var isInTeam = await _projectMemberService.CheckMemberExist(email, inviteUserRequest.ProjectId);
+				if(isInTeam == false)
 				{
-					return BadRequest("User is already exist in project. Can't invite anymore!!!");
+
+					return BadRequest($"Email {email} is already existed in project. Can't invite anymore!!!");
+				}
+				var isPending = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId);
+				if(isPending == false)
+				{
+					await _projectService.SendMailInviteUser(inviteUserRequest, userId);
+					return Ok($"Email {email} is already left project. Please check mail and confirm invitation to join project again");
+				}
+				var isSendMail = await _projectMemberService.CheckSendMail(email, inviteUserRequest.ProjectId);
+				if (isSendMail == false)
+				{
+					return BadRequest($"Invitation is already sent to {email}. Please check mail and confirm invitation");
 				}
 				var user = await _userService.GetUserByEmailAsync(email);
 				if (user == null)
@@ -80,6 +92,7 @@ namespace Capstone.API.Controllers
 					return BadRequest(email + "not exist in system");
 				}
 			}
+
 			var projectMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
 			await _projectService.SendMailInviteUser(inviteUserRequest, userId);
 
