@@ -69,8 +69,8 @@ namespace Capstone.API.Controllers
 		}
 
         [HttpPost("external-login/token")]
-		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
-		{
+		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(ExternalLoginRequest request)
+        {
 			GoogleProfile googleUser = new GoogleProfile();
 			try
 			{
@@ -83,7 +83,7 @@ namespace Capstone.API.Controllers
                 var handler = new JwtSecurityTokenHandler();
 
 				// Read and validate the token
-                var tokenGG = handler.ReadJwtToken(code);
+                var tokenGG = handler.ReadJwtToken(request.credential);
 
                 var claimsDictionary = new Dictionary<string, string>();
 

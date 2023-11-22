@@ -14,4 +14,12 @@ namespace Capstone.Common.DTOs.PermissionSchema
         public string Description { get; set; }
         public List<GetProjectUsedResponse>? ProjectsUsed { get; set; }
     }
+    public class GetProjectSchemasResponse
+    {
+        public Guid SchemaId { get; set; }
+        public string SchemaName { get; set; }
+        public string Description { get; set; }
+        public bool isCurrentProjectSchema { get; set; }
+        public List<GetProjectUsedResponse>? ProjectsUsed { get; set; }
+    }
 }
