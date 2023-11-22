@@ -170,7 +170,7 @@ namespace Capstone.DataAccess.Repository.Implements
 
             foreach (var day in currentWeek)
             {
-                var taskByDay = tasks.Where(x => x.CreateTime <= day && x.DueDate >= day).ToList();
+                var taskByDay = tasks.Where(x => x.CreateTime == day).ToList();
                 var reportByWeeks = GenerateReportStatusList(listStatus, taskByDay);
 
                 reportByWeek.Add(new ReportRecord
