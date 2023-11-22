@@ -1,18 +1,13 @@
-﻿using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.PermissionSchema;
-using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.User;
-using Capstone.DataAccess.Entities;
+﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/Iteration-management")]
+	[Route("api/Iteration-management")]
     [ApiController]
     public class IterationController : ControllerBase
     {
@@ -44,8 +39,8 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Iteration/{iterationId}")]
-        public async Task<IActionResult> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest)
+        [HttpPut("Iteration")]
+        public async Task<ActionResult<BaseResponse>> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest)
         {
             var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
 			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
