@@ -8,6 +8,8 @@ using GoogleAuthentication.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Capstone.API.Controllers
@@ -66,19 +68,36 @@ namespace Capstone.API.Controllers
 
 		}
 
-        [HttpGet("external-login/token")]
+        [HttpPost("external-login/token")]
 		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
 		{
 			GoogleProfile googleUser = new GoogleProfile();
 			try
 			{
-				var ClientSecret = _config["Authentication:Google:ClientSecret"];
-				var ClientID = _config["Authentication:Google:ClientId"];
-				var url = _config["Authentication:Google:CallBackUrl"];
-				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
-				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
-				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
-            }
+                //var ClientSecret = _config["Authentication:Google:ClientSecret"];
+                //var ClientID = _config["Authentication:Google:ClientId"];
+                //var url = _config["Authentication:Google:CallBackUrl"];
+                //var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
+                //var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
+                //googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
+                var handler = new JwtSecurityTokenHandler();
+
+				// Read and validate the token
+                var tokenGG = handler.ReadJwtToken(code);
+
+                var claimsDictionary = new Dictionary<string, string>();
+
+                // Extract claims into a dictionary
+                foreach (var claim in tokenGG.Claims)
+                {
+                    claimsDictionary.Add(claim.Type, claim.Value);
+                }
+                // Serialize the claims dictionary into JSON
+                var jsonClaims = JsonConvert.SerializeObject(claimsDictionary);
+
+                // Deserialize the JSON back into a GoogleProfile object
+                googleUser = JsonConvert.DeserializeObject<GoogleProfile>(jsonClaims);
+			}
 			catch (Exception ex)
 			{
 
