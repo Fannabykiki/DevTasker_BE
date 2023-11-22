@@ -39,6 +39,15 @@ namespace Capstone.API.Controllers
         }
         
         [EnableQuery]
+        [HttpGet("schemas/project-schema/{projectId:Guid}")]
+        public async Task<ActionResult<List<GetSchemaResponse>>> GetProjectSchemas(Guid projectId)
+        {
+            var result = await _permissionSchemaService.GetProjectSchemas(projectId);
+
+            return Ok(result);
+        }
+        
+        [EnableQuery]
         [HttpGet("schemas/deleted")]
         public async Task<ActionResult<List<GetSchemaResponse>>> GetAllSchemaDeleted()
         {
