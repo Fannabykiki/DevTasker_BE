@@ -161,7 +161,7 @@ namespace Capstone.Service.IterationService
 				transaction.RollBack();
 				return new BaseResponse
 				{
-					IsSucceed = true,
+					IsSucceed = false,
 					Message = "Update interation fail because" + ex.Message
 				};
 			}
