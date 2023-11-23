@@ -198,7 +198,6 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
-
 			var task = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
 			if (task.DeleteAt == null)
 			{
