@@ -9,13 +9,13 @@ namespace Capstone.API.Controllers
 {
 	[Route("api/Interation-management")]
     [ApiController]
-    public class IterationController : ControllerBase
+    public class InterationController : ControllerBase
     {
         private readonly ILoggerManager _logger;
         private readonly IIterationService _iterationService;
         private readonly IProjectService _projectService;
 
-		public IterationController(ILoggerManager logger, IIterationService iterationService, IProjectService projectService)
+		public InterationController(ILoggerManager logger, IIterationService iterationService, IProjectService projectService)
 		{
 			_logger = logger;
 			_iterationService = iterationService;

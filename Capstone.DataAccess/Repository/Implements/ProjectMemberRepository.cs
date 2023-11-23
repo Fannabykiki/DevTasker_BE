@@ -19,7 +19,7 @@ namespace Capstone.DataAccess.Repository.Implements
 
 		public async Task<List<ProjectMember>> GetProjectByUserId(Guid userId)
 		{
-			var projectMember = await _context.ProjectMembers.Where(x => x.UserId == userId).Include(x => x.Users).Include(x => x.Role).Include(x => x.Status).Include(x =>x.Project).ThenInclude(x=>x.Status).ToListAsync();
+			var projectMember = await _context.ProjectMembers.Where(x => x.UserId == userId && x.StatusId == Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1")).Include(x => x.Users).Include(x => x.Role).Include(x => x.Status).Include(x =>x.Project).ThenInclude(x=>x.Status).ToListAsync();
 			return projectMember;
 		}
 
