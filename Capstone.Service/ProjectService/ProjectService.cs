@@ -758,6 +758,35 @@ public class ProjectService : IProjectService
 		}
 	}
 
+    public async Task<BaseResponse> UpdateProjectSchema(UpdatePermissionSchemaRequest changePermissionSchemaRequest)
+    {
+        using var transaction = _projectRepository.DatabaseTransaction();
+        try
+        {
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == changePermissionSchemaRequest.ProjectId, x => x.ProjectMembers)!;
+
+
+            project.SchemasId = changePermissionSchemaRequest.SchemaId;
+
+            var update = await _projectRepository.UpdateAsync(project);
+            await _projectRepository.SaveChanges();
+            transaction.Commit();
+			return new BaseResponse
+			{
+				IsSucceed = true,
+				Message = "Change project's schema successfully"
+			};
+        }
+        catch (Exception)
+        {
+            transaction.RollBack();
+            return new BaseResponse
+            {
+                IsSucceed = false,
+                Message = "Update Project fail"
+            };
+        }
+    }
     public async Task<List<GetProjectCalendarResponse>> GetProjectCalender(Guid projectId)
     {
         return await _projectRepository.GetProjectCalender(projectId);
@@ -809,4 +838,6 @@ public class ProjectService : IProjectService
 		int taskTotal = (await _ticketRepository.GetAllTask(projectId)).Count();
 		return taskTotal - taskDone;
 	}
+
+    
 }

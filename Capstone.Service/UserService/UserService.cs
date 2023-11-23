@@ -115,7 +115,7 @@ namespace Capstone.Service.UserService
 						IsFirstTime = true,
 						VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
 						Email = createUserGGLoginRequest.Email,
-						StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
+						StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 						VerifiedAt = DateTime.UtcNow
 					};
 

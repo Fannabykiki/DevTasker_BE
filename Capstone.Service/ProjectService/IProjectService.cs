@@ -23,6 +23,7 @@ public interface IProjectService
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);
 	Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
 	Task<BaseResponse> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);
+	Task<BaseResponse> UpdateProjectSchema(UpdatePermissionSchemaRequest changePermissionSchemaRequest);
 	Task<BaseResponse> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest);
 	Task<BaseResponse> DeleteProject(Guid projectId);
 	Task<BaseResponse> RestoreProject(Guid projectId);

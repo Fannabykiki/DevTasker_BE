@@ -2,6 +2,7 @@
 using Capstone.Common.DTOs.Comments;
 using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
+using Capstone.Common.DTOs.Notification;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Role;
@@ -30,6 +31,7 @@ public class MappingProfile : Profile
 			.ForPath(dest => dest.StatusId, opt => opt.MapFrom(src => src.StatusId));
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
         CreateMap<Schema, GetSchemaResponse>();
+        CreateMap<Schema, GetProjectSchemasResponse>();
         CreateMap<Role, GetRoleResponse>();
 		CreateMap<TaskComment, GetCommentResponse>()
 			.ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.ProjectMember.Users.UserId))
@@ -61,5 +63,6 @@ public class MappingProfile : Profile
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
 		CreateMap<Interation, InterationViewModel>()
 			.ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
-	}
+        CreateMap<Notification, NotificationViewModel>();
+    }
 }
