@@ -50,7 +50,7 @@ namespace Capstone.Service.Hubs
         }
         public override async System.Threading.Tasks.Task OnConnectedAsync()
         {
-            var UserId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var UserId = Context.User.FindFirstValue("UserId");
             if (!String.IsNullOrEmpty(UserId))
             {
                 //var userName = _capstoneContext.Users.FirstOrDefault(u => u.UserId.ToString() == UserId).UserName;
@@ -59,7 +59,7 @@ namespace Capstone.Service.Hubs
         }
         public override async System.Threading.Tasks.Task OnDisconnectedAsync(Exception? exception)
         {
-            var UserId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var UserId = Context.User.FindFirstValue("UserId");
             await _presenceTracker.UserDisconnected(UserId, Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
@@ -77,7 +77,7 @@ namespace Capstone.Service.Hubs
             var listReceiver = lstProjectAdmin;
             var title = "";
             var description = "";
-            var TargetUrl = $"https://devtasker.azurewebsites.net/{taskId}";
+            var TargetUrl = $"https://devtasker.azurewebsites.net/task/{taskId}";
 
             switch (task.Status.Title)
             {
@@ -127,6 +127,10 @@ namespace Capstone.Service.Hubs
 
             foreach(var user in listReceiver)
             {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
                 await Clients.User(user.ToString()).SendAsync("EmitNotification", new NotificationMessage
                 {
                     Message = "You got new Notifications",
@@ -148,7 +152,7 @@ namespace Capstone.Service.Hubs
                 CreateAt = DateTime.Now,
                 IsRead = false,
                 RecerverId = x,
-                TargetUrl = $"https://devtasker.azurewebsites.net//{projectId}"
+                TargetUrl = $"https://devtasker.azurewebsites.net/project/{projectId}"
             }).ToList();
             foreach (var notif in lstNotification)
             {
@@ -162,11 +166,11 @@ namespace Capstone.Service.Hubs
 
             foreach (var user in lstReceived)
             {
-                await Clients.User(user.ToString()).SendAsync("EmitNotification", new NotificationMessage
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
                 {
-                    Message = "You got new Notifications",
-                    Reload = true,
-                });
+                    continue;
+                }
+                await Clients.User(user.ToString()).SendAsync("EmitNotification");
             }
         }
 
@@ -221,7 +225,7 @@ namespace Capstone.Service.Hubs
                         CreateAt = DateTime.Now,
                         IsRead = false,
                         RecerverId = x.UserId,
-                        TargetUrl = $"https://devtasker.azurewebsites.net//{comment.TaskId}"
+                        TargetUrl = $"https://devtasker.azurewebsites.net/task/{comment.TaskId}"
                     }).ToList();
                     break;
 
@@ -232,11 +236,11 @@ namespace Capstone.Service.Hubs
             }
             foreach (var user in lstReceived)
             {
-                await Clients.User(user.ToString()).SendAsync("EmitNotification", new NotificationMessage
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
                 {
-                    Message = "You got new Notifications",
-                    Reload = true,
-                });
+                    continue;
+                }
+                await Clients.User(user.ToString()).SendAsync("EmitNotification");
             }
             await _notificationRepository.SaveChanges();
 
