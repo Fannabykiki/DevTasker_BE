@@ -120,6 +120,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
+									ExpireTime = x.ExprireTime == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								}).ToListAsync();
 			return taskList;
 		}

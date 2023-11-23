@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.API.Controllers
 {
-	[Route("api/Iteration-management")]
+	[Route("api/Interation-management")]
     [ApiController]
     public class IterationController : ControllerBase
     {
@@ -22,9 +22,17 @@ namespace Capstone.API.Controllers
 			_projectService = projectService;
 		}
 
-		[HttpPost("Iteration")]
+		[HttpPost("Interation")]
         public async Task<ActionResult<GetIntergrationResponse>> CreateIteration(CreateIterationRequest createIterationRequest)
-        {
+        {   
+            var interationList = await _projectService.GetInterationByProjectId(createIterationRequest.ProjectId);
+            foreach (var interation in interationList)
+            {
+                if (createIterationRequest.InterationName.Equals(interation.InterationName))
+                {
+					return BadRequest("Interation's name is exist. Please try another interation name");
+				}
+			}
             var project = await _projectService.GetProjectByProjectId(createIterationRequest.ProjectId);
             if(createIterationRequest.StartDate <= project.StartDate)
             {
@@ -38,11 +46,19 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-
-        [HttpPut("Iteration")]
-        public async Task<ActionResult<BaseResponse>> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest)
+        //1
+        [HttpPut("Interation")]
+        public async Task<ActionResult<BaseResponse>> UpdateIteration(UpdateIterationRequest updateIterationRequest)
         {
-            var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
+			var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
+			var interationList = await _projectService.GetInterationByProjectId(interation.BoardId);
+			foreach (var inter in interationList)
+			{
+				if (updateIterationRequest.InterationName.Equals(inter.InterationName))
+				{
+					return BadRequest("Interation's name is exist. Please try another interation name");
+				}
+			}
 			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
 			if (updateIterationRequest.StartDate <= project.StartDate)
 			{
@@ -62,7 +78,7 @@ namespace Capstone.API.Controllers
         }
 
 
-        [HttpGet("Iteration/{projectId}")]
+        [HttpGet("Interation/{projectId}")]
         public async Task<ActionResult<IQueryable<GetInterrationByIdResonse>>> GetAllIteration(Guid projectId)
         {
             var result = await _iterationService.GetIterationTasksByProjectId(projectId);
@@ -73,7 +89,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("Iteration/tasks/{iterationId}")]
+        [HttpGet("Interation/tasks/{iterationId}")]
         public async Task<ActionResult<GetInterrationByIdResonse>> GetIterationById(Guid iterationId)
         {
             var result = await _iterationService.GetIterationsById(iterationId);

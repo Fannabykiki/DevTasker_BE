@@ -145,7 +145,6 @@ namespace Capstone.Service.IterationService
 				iteration.InterationName = updateIterationRequest.InterationName;
 				iteration.StartDate = updateIterationRequest.StartDate;
 				iteration.EndDate = updateIterationRequest.EndDate;
-				iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == updateIterationRequest.StatusId, null);
 
 				await _iterationRepository.UpdateAsync(iteration);
 				await _iterationRepository.SaveChanges();
@@ -162,7 +161,7 @@ namespace Capstone.Service.IterationService
 				transaction.RollBack();
 				return new BaseResponse
 				{
-					IsSucceed = true,
+					IsSucceed = false,
 					Message = "Update interation fail because" + ex.Message
 				};
 			}
