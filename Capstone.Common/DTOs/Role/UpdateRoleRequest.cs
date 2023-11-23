@@ -8,6 +8,7 @@ namespace Capstone.Common.DTOs.Role
 {
     public class UpdateRoleRequest
     {
+        public Guid RoleId { get; set; }
         public string RoleName { get; set; }
         public string? Description { get; set; }
     }

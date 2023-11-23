@@ -14,6 +14,7 @@ public class GetAllProjectViewModel
 	public DateTime CreateAt { get; set; }
 	public DateTime? DeleteAt { get; set; }
 	public DateTime? ExpireAt { get; set; }
+	public bool? IsDelete { get; set; }
 	public bool PrivacyStatus { get; set; } // false: Private , true: Public
 
 }

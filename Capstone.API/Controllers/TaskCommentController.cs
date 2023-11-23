@@ -72,11 +72,11 @@ namespace Capstone.API.Controllers
             var comments = await _commentService.GetAllCommentByTaskID(taskId);
             return Ok(comments);
         }
-
-        [HttpPut("comment/{commentId}")]
-        public async Task<IActionResult> UpdateComment(Guid commentId, ReplyCommentRequest updatedComment)
+        //1
+        [HttpPut("comment")]
+        public async Task<IActionResult> UpdateComment( ReplyCommentRequest updatedComment)
         {
-            var updated = await _commentService.UpdateComment(commentId, updatedComment);
+            var updated = await _commentService.UpdateComment(updatedComment.CommentId, updatedComment);
             if (updated == null)
             {
                 return NotFound("Comment not found or Unable to update.");

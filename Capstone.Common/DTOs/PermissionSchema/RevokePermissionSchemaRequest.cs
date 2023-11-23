@@ -8,7 +8,8 @@ namespace Capstone.Common.DTOs.PermissionSchema
 {
     public class RevokePermissionSchemaRequest
     {
-        public Guid PermissionId { get; set; }
+		public Guid SchemaId { get; set; }
+		public Guid PermissionId { get; set; }
         public List<Guid> RoleIds { get; set; }
     }
 }

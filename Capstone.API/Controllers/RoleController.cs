@@ -99,11 +99,11 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-
-        [HttpPut("system/roles/{id}")]
-        public async Task<ActionResult<GetRoleResponse>> UpdateRole(Guid id, UpdateRoleRequest request)
+        //1
+        [HttpPut("system/roles")]
+        public async Task<ActionResult<GetRoleResponse>> UpdateRole( UpdateRoleRequest request)
         {
-            var updatedRole = await _roleService.UpdateSystemRole(id, request);
+            var updatedRole = await _roleService.UpdateSystemRole(request.RoleId, request);
             if (updatedRole == null)
             {
                 return NotFound();
@@ -112,7 +112,7 @@ namespace Capstone.API.Controllers
         }
         
         [HttpDelete("system/roles/{roleId}")]
-        public async Task<ActionResult<GetRoleResponse>> RemoveeRole(Guid roleId)
+        public async Task<ActionResult<GetRoleResponse>> RemoveRole(Guid roleId)
         {
             var role = await _roleService.GetSystemRoleById(roleId);
             if (role == null)
