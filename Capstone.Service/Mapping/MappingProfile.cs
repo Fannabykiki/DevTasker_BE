@@ -31,6 +31,7 @@ public class MappingProfile : Profile
 			.ForPath(dest => dest.StatusId, opt => opt.MapFrom(src => src.StatusId));
         CreateMap<Schema, GetAllPermissionSchemaResponse>();
         CreateMap<Schema, GetSchemaResponse>();
+        CreateMap<Schema, GetProjectSchemasResponse>();
         CreateMap<Role, GetRoleResponse>();
 		CreateMap<TaskComment, GetCommentResponse>()
 			.ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.ProjectMember.Users.UserId))

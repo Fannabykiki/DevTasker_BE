@@ -2,6 +2,7 @@
 {
     public class ReplyCommentRequest
     {
+        public Guid CommentId { get; set; }
         public string? Content { get; set; }
     }
 }

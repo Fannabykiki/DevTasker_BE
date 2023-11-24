@@ -8,6 +8,8 @@ namespace Capstone.Common.DTOs.Schema
 {
     public class UpdateSchemaRequest
     {
+
+		public Guid SchemaId { get; set; }
         public string? SchemaName { get; set; }
         public string? Description { get; set; }
     }

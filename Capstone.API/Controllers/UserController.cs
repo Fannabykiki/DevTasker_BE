@@ -89,22 +89,26 @@ namespace Capstone.API.Controllers
             };
 		}
 
-
-		[HttpPut("users/{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+		//1
+		[HttpPut("users")]
+		public async Task<IActionResult> UpdateUser([FromBody] UpdateProfileRequest request)
 		{
+			if(request.DoB >= DateTime.Now)
+			{
+				return BadRequest("Can't update date of birth greater than today");
+			}
 			// Validate model
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var result = await _usersService.UpdateProfileAsync(request, id);
+			var result = await _usersService.UpdateProfileAsync(request, request.UserId);
 
 			return Ok(result);
 
 		}
-		
-		[HttpPut("users/change-status/{id}")]
-		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest,Guid id)
+		//2
+		[HttpPut("users/change-status")]
+		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest)
 		{
             var userId = this.GetCurrentLoginUserId();
 			if (userId == null)
@@ -117,10 +121,10 @@ namespace Capstone.API.Controllers
 				return Unauthorized();
 			}
 
-            var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
+            var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, changeUserStatusRequest.UserId);
 			if (result == true)
 			{
-                var userBeChange = await _usersService.GetUserByIdAsync(id);
+                var userBeChange = await _usersService.GetUserByIdAsync(changeUserStatusRequest.UserId);
 				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {userBeChange.Status.Title}", changeUserStatusRequest.reason);
             }
             

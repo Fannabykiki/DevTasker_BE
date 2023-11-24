@@ -21,6 +21,7 @@ namespace Capstone.API.Controllers
             var result = await _azureBlobService.ListAllBlob();
             return Ok();
         }
+
         [HttpPost("attachments")]
         public async Task<IActionResult> UploadFile(IFormFile file,Guid taskId)
         {

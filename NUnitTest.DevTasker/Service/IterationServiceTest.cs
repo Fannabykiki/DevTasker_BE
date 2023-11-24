@@ -179,7 +179,7 @@ namespace Capstone.UnitTests.Service
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.IsTrue(result.IsSucceed);
            
         }
 
@@ -203,7 +203,7 @@ namespace Capstone.UnitTests.Service
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
            
         }
         [Test]
@@ -223,7 +223,7 @@ namespace Capstone.UnitTests.Service
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
             Console.WriteLine("Update iteration Fail");
 
         }
@@ -245,7 +245,7 @@ namespace Capstone.UnitTests.Service
             var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.IsSucceed);
             Console.WriteLine("Update iteration Fail");
 
         }

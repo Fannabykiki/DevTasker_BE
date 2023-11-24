@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.User;
 using Capstone.Common.Enums;
@@ -133,11 +134,10 @@ namespace Capstone.Service.IterationService
 				};
 			}
 		}
-		public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
+		public async Task<BaseResponse> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
 		{
 
 			using var transaction = _iterationRepository.DatabaseTransaction();
-
 			try
 			{
 				var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
@@ -145,19 +145,25 @@ namespace Capstone.Service.IterationService
 				iteration.InterationName = updateIterationRequest.InterationName;
 				iteration.StartDate = updateIterationRequest.StartDate;
 				iteration.EndDate = updateIterationRequest.EndDate;
-				iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == updateIterationRequest.StatusId, null);
-
 
 				await _iterationRepository.UpdateAsync(iteration);
-
 				await _iterationRepository.SaveChanges();
 				transaction.Commit();
-				return true;
+
+				return new BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Update interation successfully"
+				};
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
 				transaction.RollBack();
-				return false;
+				return new BaseResponse
+				{
+					IsSucceed = false,
+					Message = "Update interation fail because" + ex.Message
+				};
 			}
 		}
 

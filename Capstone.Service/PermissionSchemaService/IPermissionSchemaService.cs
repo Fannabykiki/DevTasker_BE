@@ -13,6 +13,7 @@ namespace Capstone.Service.PermissionSchemaService
     public interface IPermissionSchemaService
     {
         Task<List<GetSchemaResponse>> GetAllSchema(bool mode);
+        Task<List<GetProjectSchemasResponse>> GetProjectSchemas(Guid projectId);
         Task<GetSchemaResponse> GetSchemaById(Guid SchemaId);
         Task<GetSchemaResponse> GetSchemaByName(string schemaName);
         Task<bool> RemoveSchemaAsync(Guid SchemaId);
