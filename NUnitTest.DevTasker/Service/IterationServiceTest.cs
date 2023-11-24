@@ -236,7 +236,7 @@ namespace Capstone.UnitTests.Service
             {
                
                 InterationName = "Updated Iteration",
-                StartDate = DateTime.UtcNow.AddDays(14), // StartDate is greater than EndDate
+                StartDate = DateTime.UtcNow.AddDays(14), 
                 EndDate = DateTime.UtcNow
             };
 
