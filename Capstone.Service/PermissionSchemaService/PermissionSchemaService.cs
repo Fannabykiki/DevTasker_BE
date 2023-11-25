@@ -1,27 +1,15 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Schema;
-using Capstone.Common.DTOs.User;
-using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Capstone.Service.PermissionSchemaService
 {
-    public class PermissionSchemaService : IPermissionSchemaService
+	public class PermissionSchemaService : IPermissionSchemaService
     {
         private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly ISchemaRepository _schemaRepository;
@@ -306,5 +294,15 @@ namespace Capstone.Service.PermissionSchemaService
             }
             return results;
         }
-    }
+
+		public async Task<bool> CheckExist(Guid schemaId)
+		{
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+            if (schema == null)
+            {
+                return false;
+            }
+            return true;
+		}
+	}
 }

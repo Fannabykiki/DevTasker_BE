@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.DTOs.User;
-using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Capstone.Service.IterationService
 {
@@ -188,6 +183,16 @@ namespace Capstone.Service.IterationService
 				}
 			}
 			return inter;
+		}
+
+		public async Task<bool> CheckExist(Guid interationId)
+		{
+			var interation = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
+			if(interation == null)
+			{
+				return false;
+			}
+			return true;
 		}
 	}
 }

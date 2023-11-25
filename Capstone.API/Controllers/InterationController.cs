@@ -50,6 +50,11 @@ namespace Capstone.API.Controllers
         [HttpPut("Interation")]
         public async Task<ActionResult<BaseResponse>> UpdateIteration(UpdateIterationRequest updateIterationRequest)
         {
+			var isExist = await _iterationService.CheckExist(updateIterationRequest.InterationId);
+			if (!isExist)
+			{
+				return NotFound("Interation not exist!!!");
+			}
 			var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
 			var interationList = await _projectService.GetInterationByProjectId(interation.BoardId);
 			foreach (var inter in interationList)

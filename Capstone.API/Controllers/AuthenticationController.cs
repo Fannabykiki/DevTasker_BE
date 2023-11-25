@@ -1,14 +1,9 @@
-﻿using Capstone.API.Extentions;
-using Capstone.Common.DTOs.Email;
+﻿using Capstone.Common.DTOs.Email;
 using Capstone.Common.DTOs.User;
-using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
-using GoogleAuthentication.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 

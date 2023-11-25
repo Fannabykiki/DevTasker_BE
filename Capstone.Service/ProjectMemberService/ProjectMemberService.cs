@@ -106,6 +106,14 @@ namespace Capstone.Service.ProjectMemberService
 			}
 		}
 
+		public async Task<bool> CheckExist(Guid memberId)
+		{
+			var member = await _projectMemberRepository.GetAsync(x=>x.MemberId == memberId,null);
+			if (member == null)
+				return false;
+			return true;
+		}
+
 		public async Task<bool> CheckMemberExist(string email, Guid projectId)
 		{
 			var statusId = Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1");

@@ -76,6 +76,11 @@ namespace Capstone.API.Controllers
         [HttpPut("comment")]
         public async Task<IActionResult> UpdateComment( ReplyCommentRequest updatedComment)
         {
+            var comment = await _commentService.CheckExist(updatedComment.CommentId);
+            if (!comment)
+            {
+                return BadRequest("Comment not exist");
+            }
             var updated = await _commentService.UpdateComment(updatedComment.CommentId, updatedComment);
             if (updated == null)
             {

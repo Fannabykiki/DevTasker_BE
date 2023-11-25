@@ -161,6 +161,10 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
+			var task = await _taskService.CheckExist(updateTicketRequest.TaskId);
+			if (!task) {
+				return NotFound("Task not found");
+			}
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
 			if (updateTicketRequest.StartDate <= interation.StartDate)
 			{
@@ -182,6 +186,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
+			var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
 			var result = await _taskService.UpdateTaskStatus(updateTaskStatusRequest.TaskId, updateTaskStatusRequest);
 
 			return Ok(result);
@@ -190,6 +199,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/deletion")]
 		public async Task<IActionResult> DeleteTicket(RestoreTaskRequest restoreTaskRequest)
 		{
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
 			var result = await _taskService.DeleteTask(restoreTaskRequest.TaskId);
 
 			return Ok(result);
@@ -198,12 +212,17 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
-			var task = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
-			if (task.DeleteAt == null)
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
+			if (taskDetail.DeleteAt == null)
 			{
 				return BadRequest("Task is still active. Cant restore it!!!");
 			}
-			if (DateTime.Parse(task.ExpireTime) >= DateTime.Now)
+			if (DateTime.Parse(taskDetail.ExpireTime) >= DateTime.Now)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest.TaskId);
 				return Ok(response);
