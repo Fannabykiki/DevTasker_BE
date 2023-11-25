@@ -23,11 +23,11 @@ public interface IProjectService
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);
 	Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
 	Task<BaseResponse> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);
-	Task<BaseResponse> UpdateProjectSchema(UpdatePermissionSchemaRequest changePermissionSchemaRequest);
+	Task<BaseResponse> UpdateProjectSchema(Guid projectId, UpdatePermissionSchemaRequest changePermissionSchemaRequest);
 	Task<BaseResponse> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest);
 	Task<BaseResponse> DeleteProject(Guid projectId);
 	Task<BaseResponse> RestoreProject(Guid projectId);
-	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId);
+	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId );
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
 	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest,Guid userId);
@@ -39,4 +39,5 @@ public interface IProjectService
 	Task<InvitationResponse> CheckInvation(Guid invationId);
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 	Task<int> GetTaskStatusDone(Guid projectId);
+	Task<bool> CheckExist(Guid projectId);
 }

@@ -60,6 +60,7 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
+
 		[HttpGet("tasks/status")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
@@ -76,8 +77,8 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
-
-		[HttpPost("tasks/status")]
+        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPost("tasks/status")]
 		public async Task<ActionResult<StatusTaskViewModel>> CreateNewStatus(CreateNewTaskStatus createNewTaskStatus)
 		{
 			var response = await _taskService.CreateTaskStatus(createNewTaskStatus);
@@ -91,7 +92,8 @@ namespace Capstone.API.Controllers
 			return Ok(response);
 		}
 
-		[HttpPost("tasks")]
+        //  993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
+        [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
 		{
 			if (request.InterationId != Guid.Empty)
@@ -135,7 +137,8 @@ namespace Capstone.API.Controllers
 			}
 		}
 
-		[HttpPost("tasks/subtask")]
+        // 993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
+        [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
 			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
@@ -155,12 +158,21 @@ namespace Capstone.API.Controllers
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
 			return Ok(result);
-		}
+        }
 
-		//2
-		[HttpPut("tasks")]
+        //2  3C815EC0-267E-4054-A9F4-052BE036F3E0 - Resolve Tasks
+        //   7E5B494A-9408-4E51-BC8E-3E8E691DE567 - Schedule Tasks
+        //   8CA7772E-F397-47FE-AB09-4D53D4A8815D - Assignable User
+        //   3B2F8222-D69C-4E45-B1B5-5FF0412BF3D9 - Edit Tasks
+        //   7594A882-7833-4B65-9F3E-B27F8A7DCA64 - Assign tasks
+        //   10486DAB-608D-4CF5-813E-E6DCD10F43F9 - Edit Tasks
+        [HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
+			var task = await _taskService.CheckExist(updateTicketRequest.TaskId);
+			if (!task) {
+				return NotFound("Task not found");
+			}
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
 			if (updateTicketRequest.StartDate <= interation.StartDate)
 			{
@@ -178,32 +190,49 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.UpdateTask(updateTicketRequest);
 			return Ok(result);
 		}
-		//3
-		[HttpPut("tasks/status")]
+
+        //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
+        [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
+			var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
 			var result = await _taskService.UpdateTaskStatus(updateTaskStatusRequest.TaskId, updateTaskStatusRequest);
 
 			return Ok(result);
 		}
-		//4
-		[HttpPut("tasks/deletion")]
+
+        //4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
+        [HttpPut("tasks/deletion")]
 		public async Task<IActionResult> DeleteTicket(RestoreTaskRequest restoreTaskRequest)
 		{
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
 			var result = await _taskService.DeleteTask(restoreTaskRequest.TaskId);
 
 			return Ok(result);
 		}
-		//1
-		[HttpPut("tasks/restoration")]
+        //1 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
-			var task = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
-			if (task.DeleteAt == null)
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
+			if (taskDetail.DeleteAt == null)
 			{
 				return BadRequest("Task is still active. Cant restore it!!!");
 			}
-			if (DateTime.Parse(task.ExpireTime) >= DateTime.Now)
+			if (DateTime.Parse(taskDetail.ExpireTime) >= DateTime.Now)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest.TaskId);
 				return Ok(response);

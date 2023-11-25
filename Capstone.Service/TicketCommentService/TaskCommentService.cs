@@ -151,5 +151,12 @@ namespace Capstone.Service.TicketCommentService
 
             return _mapper.Map<GetCommentResponse>(commentUpdate);
         }
-    }
+
+		public async Task<bool> CheckExist(Guid commentId)
+		{
+            var comment = await _taskCommentRepository.GetAsync(x => x.CommentId == commentId, null);
+            if (comment == null) return false;
+            return true;
+		}
+	}
 }
