@@ -213,7 +213,7 @@ namespace Capstone.DataAccess.Repository.Implements
             DateTime startOfWeek = today.AddDays(-(int)today.DayOfWeek);
 
             List<DateTime> datesOfWeek = Enumerable.Range(0, 7)
-                                                    .Select(i => startOfWeek.AddDays(i-1))
+                                                    .Select(i => startOfWeek.AddDays(i))
                                                     .ToList();
             return datesOfWeek;
         }
