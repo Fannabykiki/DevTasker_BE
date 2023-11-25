@@ -83,17 +83,12 @@ namespace Capstone.Service.TicketCommentService
                     Task = await _taskRepository.GetAsync(x => x.TaskId == comment.TaskId, null),
                     CreateBy = member.MemberId,
                     ProjectMember = member,
+                    ReplyTo = comment.ReplyTo == null ?  commentId : comment.ReplyTo,
+                
                 };
                 
 
-                if (comment.ReplyTo == null)
-                {
-                    newComment.ReplyTo = commentId;
-                }
-                else
-                {
-                    newComment.ReplyTo = comment.ReplyTo;
-                }
+                
 
                 await _taskCommentRepository.CreateAsync(newComment);
                 await _taskCommentRepository.SaveChanges();
