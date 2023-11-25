@@ -64,7 +64,11 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> CreateSchema(CreateNewSchemaRequest request)
         {
             var result = await _permissionSchemaService.CreateNewPermissionSchema(request);
-
+            var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
+            if (role != null)
+            {
+                return BadRequest("Schema name existed!");
+            }
             return Ok(result);
         }
 
@@ -78,7 +82,7 @@ namespace Capstone.API.Controllers
 				return NotFound("Interation not exist!!!");
 			}
 			var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
-            if (role != null)
+            if (role != null && role.SchemaId != request.SchemaId)
             {
                 return BadRequest("Schema name existed!");
             }
