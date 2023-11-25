@@ -35,6 +35,8 @@ namespace Capstone.API.Controllers
             return Ok(newComment);
         }
 
+        //  2C5354D7-B5A0-487A-AD0D-E380A0592021 - Delete Own Comments
+        //  4340744E-E232-4509-A792-F1FC1554D4B1 - Delete All Comments
         [HttpDelete("comment/{commentId}")]
         public async Task<IActionResult> RemoveComment(Guid commentId)
         {
@@ -72,7 +74,8 @@ namespace Capstone.API.Controllers
             var comments = await _commentService.GetAllCommentByTaskID(taskId);
             return Ok(comments);
         }
-        //1
+        //1 C922CC8A-F023-45B8-B656-260B4463A351 - Edit Own Comments
+        // 76A0B105-C0C2-4290-B264-D8FE2699C69C - Edit All Comments
         [HttpPut("comment")]
         public async Task<IActionResult> UpdateComment( ReplyCommentRequest updatedComment)
         {
