@@ -102,7 +102,7 @@ namespace Capstone.API.Controllers
         public async Task<ActionResult<GetRoleResponse>> UpdateRole( UpdateRoleRequest request)
         {
 			var role = await _roleService.GetSystemRoleByName(request.RoleName);
-			if (role != null)
+			if (role != null && role.RoleId != request.RoleId)
 			{
 				return BadRequest("Role name existed!");
 			}

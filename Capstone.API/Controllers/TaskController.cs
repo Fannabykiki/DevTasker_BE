@@ -192,7 +192,6 @@ namespace Capstone.API.Controllers
 		}
 
         //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
-        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
@@ -207,7 +206,6 @@ namespace Capstone.API.Controllers
 		}
 
         //4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
-        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPut("tasks/deletion")]
 		public async Task<IActionResult> DeleteTicket(RestoreTaskRequest restoreTaskRequest)
 		{

@@ -78,7 +78,7 @@ namespace Capstone.API.Controllers
 				return NotFound("Interation not exist!!!");
 			}
 			var role = await _permissionSchemaService.GetSchemaByName(request.SchemaName);
-            if (role != null)
+            if (role != null && role.SchemaId != request.SchemaId)
             {
                 return BadRequest("Schema name existed!");
             }
