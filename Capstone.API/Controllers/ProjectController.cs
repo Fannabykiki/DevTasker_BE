@@ -43,7 +43,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpPost("projects/remove-member")]
+        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPost("projects/remove-member")]
 		public async Task<ActionResult<BaseResponse>> RemoveProjectMember(Guid memberId)
 		{
 			var result = await _projectService.RemoveProjectMember(memberId);
@@ -60,7 +61,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpPost("projects/invitation")]
+        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPost("projects/invitation")]
 		public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
 		{
 			var userId = this.GetCurrentLoginUserId();
@@ -100,7 +102,9 @@ namespace Capstone.API.Controllers
 			return Ok(projectMember);
 		}
 
-		[HttpPost("projects/close-project")]
+        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        //  31085E0A-EEDC-495D-BD68-94A60A661B05 - Browse Projects
+        [HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
 			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
@@ -119,7 +123,8 @@ namespace Capstone.API.Controllers
 			return Ok(project);
 		}
 
-		[HttpPost("projects/decline-invitation")]
+        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPost("projects/decline-invitation")]
 		public async Task<IActionResult> InviteMemberDeclination(AcceptInviteRequest acceptInviteRequest)
 		{
 			var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
@@ -303,8 +308,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-
-		[HttpPost("roles")]
+        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPost("roles")]
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
 		{
 			var result = await _projectService.CreateProjectRole(createRoleRequest);
@@ -315,7 +320,8 @@ namespace Capstone.API.Controllers
 
             return Ok(result);
         }
-        
+
+        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPost("projects/change-schema")]
         public async Task<IActionResult> ChangePermissionSchema(UpdatePermissionSchemaRequest request)
 		{
@@ -328,7 +334,8 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-		//4
+        //4  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		//   User IsAdmin == true
         [HttpPut("roles")]
         public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
         {
@@ -362,8 +369,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//2
-		[HttpPut("projects/privacy")]
+        //2 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPut("projects/privacy")]
 		public async Task<IActionResult> UpdateProjectPrivacy( UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 		{
 			var project = await _projectService.CheckExist(updateProjectPrivacyRequest.ProjectId);
@@ -376,8 +383,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//1
-		[HttpPut("projects/delete")]
+        //1  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPut("projects/delete")]
 		public async Task<IActionResult> DeleteProject(DeleteProjectRequest deleteProjectRequest)
 		{
 			var pro = await _projectService.CheckExist(deleteProjectRequest.ProjectId);
@@ -397,8 +404,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//5
-		[HttpPut("project/restoration")]
+        //5  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPut("project/restoration")]
 		public async Task<IActionResult> RestoreProjectStatus(DeleteProjectRequest deleteProjectRequest)
 		{
 			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
@@ -416,8 +423,9 @@ namespace Capstone.API.Controllers
 				return BadRequest("Cant restore this Project.Over 30 days from delete day");
 			}
 		}
-		
-		[HttpPut("project/change-schema/{projectId}")]
+
+        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+        [HttpPut("project/change-schema/{projectId}")]
 		public async Task<IActionResult> ChangeProjectSchema(Guid projectId)
 		{
             return Ok();
