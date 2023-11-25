@@ -321,19 +321,6 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPost("projects/change-schema")]
-        public async Task<IActionResult> ChangePermissionSchema(UpdatePermissionSchemaRequest request)
-		{
-            var result = await _projectService.UpdateProjectSchema(request);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
-
-            return Ok(result);
-        }
-
         //4  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
 		//   User IsAdmin == true
         [HttpPut("roles")]
@@ -426,9 +413,14 @@ namespace Capstone.API.Controllers
 
         // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPut("project/change-schema/{projectId}")]
-		public async Task<IActionResult> ChangeProjectSchema(Guid projectId)
+		public async Task<IActionResult> ChangeProjectSchema(Guid projectId, UpdatePermissionSchemaRequest request)
 		{
-            return Ok();
+			var result = await _projectService.UpdateProjectSchema(projectId,request);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok(result);
         }
 	}
 }
