@@ -134,8 +134,6 @@ namespace NUnitTest.DevTasker.Service
 
             // Act
             using var transaction = _transactionMock.Object;
-
-            // Set up repo.GetAsync to return null to simulate a non-existing task
             _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
                 .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
 

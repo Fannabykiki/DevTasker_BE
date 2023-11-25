@@ -58,7 +58,13 @@ namespace Capstone.Service.Hubs
 
             return Task.FromResult(onlineUsers);
         }
-
+        public Task<bool> IsOnlineUser(string userId)
+        {
+            lock (OnlineUsers)
+            {
+                return Task.FromResult(OnlineUsers.ContainsKey(userId));
+            }
+        } 
         public Task<List<string>> GetConnectionsForUser(string userId)
         {
             List<string> connectionIds;
