@@ -332,6 +332,11 @@ namespace Capstone.API.Controllers
         [HttpPut("roles")]
         public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
         {
+			var member = await _projectMemberService.CheckExist(updateMemberRoleRequest.MemberId);
+			if (!member)
+			{
+				return NotFound("Member not exist");
+			}
             if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
                 return BadRequest("You can not change to this role !");
             var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
@@ -347,6 +352,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("projects/info")]
 		public async Task<IActionResult> UpdateProjectInfo( UpdateProjectNameInfo updateProjectNameInfo)
 		{
+			var project = await _projectService.CheckExist(updateProjectNameInfo.ProjectId);
+			if (!project)
+			{
+				return NotFound("Project not exist");
+			}
 			var result = await _projectService.UpdateProjectInfo(updateProjectNameInfo.ProjectId, updateProjectNameInfo);
 
 			return Ok(result);
@@ -356,6 +366,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("projects/privacy")]
 		public async Task<IActionResult> UpdateProjectPrivacy( UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 		{
+			var project = await _projectService.CheckExist(updateProjectPrivacyRequest.ProjectId);
+			if (!project)
+			{
+				return NotFound("Project not exist");
+			}
 			var result = await _projectService.UpdateProjectPrivacy(updateProjectPrivacyRequest.ProjectId, updateProjectPrivacyRequest);
 
 			return Ok(result);
@@ -365,6 +380,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("projects/delete")]
 		public async Task<IActionResult> DeleteProject(DeleteProjectRequest deleteProjectRequest)
 		{
+			var pro = await _projectService.CheckExist(deleteProjectRequest.ProjectId);
+			if (!pro)
+			{
+				return NotFound("Project not exist");
+			}
 			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
 		
 			if (project.IsDelete == true)

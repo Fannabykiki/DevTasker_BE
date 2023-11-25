@@ -4,13 +4,11 @@ using Capstone.Common.DTOs.Role;
 using Capstone.Service.LoggerService;
 using Capstone.Service.RoleService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.OData.Query;
-using System.Collections.Generic;
 
 namespace Capstone.API.Controllers
 {
-    [Route("api/role-management")]
+	[Route("api/role-management")]
     [ApiController]
     public class RoleController : ControllerBase
     {
@@ -103,7 +101,12 @@ namespace Capstone.API.Controllers
         [HttpPut("system/roles")]
         public async Task<ActionResult<GetRoleResponse>> UpdateRole( UpdateRoleRequest request)
         {
-            var updatedRole = await _roleService.UpdateSystemRole(request.RoleId, request);
+			var role = await _roleService.GetSystemRoleByName(request.RoleName);
+			if (role != null)
+			{
+				return BadRequest("Role name existed!");
+			}
+			var updatedRole = await _roleService.UpdateSystemRole(request.RoleId, request);
             if (updatedRole == null)
             {
                 return NotFound();
@@ -113,12 +116,7 @@ namespace Capstone.API.Controllers
         
         [HttpDelete("system/roles/{roleId}")]
         public async Task<ActionResult<GetRoleResponse>> RemoveRole(Guid roleId)
-        {
-            var role = await _roleService.GetSystemRoleById(roleId);
-            if (role == null)
-            {
-                return BadRequest("Role not existed!");
-            }
+        {   
             var isRemoved = await _roleService.RemoveSystemRoleAsync(roleId);
             if (isRemoved == null)
             {

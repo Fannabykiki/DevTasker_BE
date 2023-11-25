@@ -22,5 +22,6 @@ namespace Capstone.Service.PermissionSchemaService
         Task<bool> UpdateSchema(Guid schemaId, UpdateSchemaRequest updateSchemaRequest);
         Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest grantPermissionSchemaRequest);
         Task<bool> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest revokePermissionSchemaRequest);
-    }
+		Task<bool> CheckExist(Guid schemaId);
+	}
 }

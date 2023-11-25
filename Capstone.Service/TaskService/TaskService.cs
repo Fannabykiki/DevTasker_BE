@@ -627,5 +627,12 @@ namespace Capstone.Service.TaskService
 			var result = await _ticketRepository.GetTaskDetail(taskId);
 			return result;
 		}
+
+		public async Task<bool> CheckExist(Guid taskId)
+		{
+            var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, null);
+            if(task == null) return false;
+            return true;
+		}
 	}
 }

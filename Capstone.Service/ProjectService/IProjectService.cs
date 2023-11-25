@@ -39,4 +39,5 @@ public interface IProjectService
 	Task<InvitationResponse> CheckInvation(Guid invationId);
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 	Task<int> GetTaskStatusDone(Guid projectId);
+	Task<bool> CheckExist(Guid projectId);
 }

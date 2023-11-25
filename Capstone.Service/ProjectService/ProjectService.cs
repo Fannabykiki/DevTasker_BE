@@ -839,5 +839,11 @@ public class ProjectService : IProjectService
 		return taskTotal - taskDone;
 	}
 
-    
+	public async Task<bool> CheckExist(Guid projectId)
+	{
+		var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+		if (project == null)
+			return false;
+		return true;
+	}
 }
