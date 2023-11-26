@@ -14,12 +14,12 @@ namespace Capstone.Service.TicketService
         Task<CreateTaskResponse> UpdateTaskStatus(Guid taskId, UpdateTaskStatusRequest updateTaskStatusRequest);
         Task<List<TaskViewModel>> GetAllTaskAsync(Guid projectId);
         Task<IQueryable<Task>> GetAllTaskByInterationIdAsync(Guid interationId);
-        Task<BaseResponse> DeleteTask(Guid ticketId);
+        Task<BaseResponse> DeleteTask(RestoreTaskRequest restoreTaskRequest);
 		Task<StatusTaskViewModel>  CreateTaskStatus(CreateNewTaskStatus createNewTaskStatus);
 		Task<List<StatusTaskViewModel>> GetAllTaskStatus(Guid projectId);
 		Task<List<TaskTypeViewModel>> GetAllTaskType();
 		Task<List<GetAllTaskPriority>> GetAllTaskPriotiry();
-		Task<BaseResponse> RestoreTask(Guid taskId);
+		Task<BaseResponse> RestoreTask(RestoreTaskRequest restoreTaskRequest);
 		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
 		Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
 		Task<bool> CheckExist(Guid taskId);

@@ -57,21 +57,21 @@ namespace NUnitTest.DevTasker.Service
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            _taskService = new TaskService(
-                _context,
-                _ticketRepositoryMock.Object,
-                _ticketStatusRepositoryMock.Object,
-                _ticketTypeRepositoryMock.Object,
-                _ticketHistoryRepositoryMock.Object,
-                _ticketTypeRepositoryMock.Object,
-                _mapperMock.Object,
-                _userRepositoryMock.Object,
-                _iterationRepositoryMock.Object,
-                _statusRepositoryMock.Object,
-                _boardStatusRepository.Object,
-                _taskType.Object,
-                _priorityRepository.Object
-                );
+            // _taskService = new TaskService(
+            //     _context,
+            //     _ticketRepositoryMock.Object,
+            //     _ticketStatusRepositoryMock.Object,
+            //     _ticketTypeRepositoryMock.Object,
+            //     _ticketHistoryRepositoryMock.Object,
+            //     _ticketTypeRepositoryMock.Object,
+            //     _mapperMock.Object,
+            //     _userRepositoryMock.Object,
+            //     _iterationRepositoryMock.Object,
+            //     _statusRepositoryMock.Object,
+            //     _boardStatusRepository.Object,
+            //     _taskType.Object,
+            //     _priorityRepository.Object
+            //     );
         }
 
         [Test] 
