@@ -15,14 +15,21 @@ namespace Capstone.Service.BlobStorage
 		private readonly string _accessKey = "N2vam2LLK2IusA3BDTUbeIkjy8kR0eqyHPG8g467C1L1mu29I5RCBhWA8MTXbxpREhqCjQ7n3czQ+AStBFDgKg==";
 		private readonly BlobContainerClient _blobServiceClient;
 		private readonly IAttachmentRepository _attachmentRepository;
+		private readonly IProjectMemberRepository _projectMemberRepository;
+		private readonly IInterationRepository _interationRepository;
+		private readonly ITaskRepository _taskRepository;
 
-		public AzureBlobService(IAttachmentRepository attachmentRepository)
+
+		public AzureBlobService(IAttachmentRepository attachmentRepository, IProjectMemberRepository projectMemberRepository, IInterationRepository interationRepository, ITaskRepository taskRepository)
 		{
 			var credential = new StorageSharedKeyCredential(_storageAccount, _accessKey);
 			var blobUri = $"https://{_storageAccount}.blob.core.windows.net";
 			var blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 			_blobServiceClient = blobServiceClient.GetBlobContainerClient("files");
 			_attachmentRepository = attachmentRepository;
+			_projectMemberRepository = projectMemberRepository;
+			_interationRepository = interationRepository;
+			_taskRepository = taskRepository;
 		}
 
 		public async Task<List<BlobViewModel>> ListAllBlob()
@@ -50,6 +57,9 @@ namespace Capstone.Service.BlobStorage
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try
 			{
+				var interation = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
+				var project = await _interationRepository.GetAsync(i => i.InterationId == interation.InterationId, null);
+				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId,null);
 				BlobClient client = _blobServiceClient.GetBlobClient(file.FileName);
 				var fileSize = file.Length;
 				if(fileSize > 20 * 1024 * 1024)
@@ -75,7 +85,7 @@ namespace Capstone.Service.BlobStorage
 						AttachmentId = Guid.NewGuid(),
 						TaskId = taskId,
 						CreateAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-						CreateBy = userId,
+						CreateBy = member.MemberId,
 						Title = file.FileName,
 						IsDeleted = false
 					};
