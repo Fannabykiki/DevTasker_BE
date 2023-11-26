@@ -9,7 +9,7 @@ namespace Capstone.Common.DTOs.Project
     public class GetProjectReportRequest
     {
         public ReportRecord reportProject { get; set; }
-        public List<ReportRecord>? reportRecordByWeerk { get; set; }
+        public List<ReportRecord>? reportRecordByWeek { get; set; }
         public List<MemberTasks>? memberTaks { get; set; }
 
 

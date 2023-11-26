@@ -30,7 +30,7 @@ namespace Capstone.DataAccess.Repository.Implements
             var result = new GetProjectReportRequest
             {
                 reportProject = reportRecord,
-                reportRecordByWeerk = reportByWeek,
+                reportRecordByWeek = reportByWeek,
                 memberTaks = reportMembers
             };
 
@@ -170,7 +170,7 @@ namespace Capstone.DataAccess.Repository.Implements
 
             foreach (var day in currentWeek)
             {
-                var taskByDay = tasks.Where(x => x.CreateTime == day).ToList();
+                var taskByDay = tasks.Where(x => x.CreateTime.Date == day).ToList();
                 var reportByWeeks = GenerateReportStatusList(listStatus, taskByDay);
 
                 reportByWeek.Add(new ReportRecord

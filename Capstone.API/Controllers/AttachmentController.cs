@@ -22,6 +22,7 @@ namespace Capstone.API.Controllers
             return Ok();
         }
 
+        // E291ABC0-C869-4FF0-9E3C-48B74022577D - Create Attachments
         [HttpPost("attachments")]
         public async Task<IActionResult> UploadFile(IFormFile file,Guid taskId)
         {
@@ -45,6 +46,7 @@ namespace Capstone.API.Controllers
             return File(file.Content,file.ContentType,file.Name);
         }
 
+        //  FC0A6071-8F8D-4BD5-B365-81FF722CC174 - Delete All Attachments
         [HttpDelete("attachments/{fileName}")]
         public async Task<IActionResult> Delete(string fileName)
         {

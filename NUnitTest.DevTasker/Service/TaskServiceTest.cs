@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess;
+using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TaskService;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IBoardStatusRepository> _boardStatusRepository;
         private Mock<ITaskTypeRepository> _taskType;
         private Mock<IPriorityRepository> _priorityRepository;
+        private Mock <IProjectMemberRepository> _projectMemberRepository;
+        private Mock <IBoardRepository> _boardRepository;
 
         [SetUp]
         public void Setup()
@@ -54,24 +57,28 @@ namespace NUnitTest.DevTasker.Service
             _boardStatusRepository = new Mock<IBoardStatusRepository>();
             _taskType = new Mock<ITaskTypeRepository>();
             _priorityRepository = new Mock<IPriorityRepository>();
+            _projectMemberRepository = new Mock<IProjectMemberRepository>();
+            _boardRepository = new Mock<IBoardRepository>();
 
             _iterationRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
-            // _taskService = new TaskService(
-            //     _context,
-            //     _ticketRepositoryMock.Object,
-            //     _ticketStatusRepositoryMock.Object,
-            //     _ticketTypeRepositoryMock.Object,
-            //     _ticketHistoryRepositoryMock.Object,
-            //     _ticketTypeRepositoryMock.Object,
-            //     _mapperMock.Object,
-            //     _userRepositoryMock.Object,
-            //     _iterationRepositoryMock.Object,
-            //     _statusRepositoryMock.Object,
-            //     _boardStatusRepository.Object,
-            //     _taskType.Object,
-            //     _priorityRepository.Object
-            //     );
+            _taskService = new TaskService(
+                _context,
+                _ticketRepositoryMock.Object,
+                _ticketStatusRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _ticketHistoryRepositoryMock.Object,
+                _ticketTypeRepositoryMock.Object,
+                _mapperMock.Object,
+                _userRepositoryMock.Object,
+                _iterationRepositoryMock.Object,
+                _statusRepositoryMock.Object,
+                _boardStatusRepository.Object,
+                _taskType.Object,
+                _priorityRepository.Object,
+                _projectMemberRepository.Object,
+                _boardRepository.Object
+                );
         }
 
         [Test] 
@@ -185,10 +192,10 @@ namespace NUnitTest.DevTasker.Service
      .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
             // Act
             using var transaction = _transactionMock.Object;
-            var taskId = Guid.NewGuid();
-            //var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
-            //// Assert
-            //Assert.IsTrue(result.BaseResponse.IsSucceed);
+            
+            var result = await _taskService.UpdateTask(updateTicketRequest);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
         public async System.Threading.Tasks.Task TestUpdateTask_Fail()
@@ -208,10 +215,10 @@ namespace NUnitTest.DevTasker.Service
      .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
             // Act
             using var transaction = _transactionMock.Object;
-            var taskId = Guid.NewGuid();
-            //var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
-            //// Assert
-            //Assert.IsTrue(result.BaseResponse.IsSucceed);
+            
+            var result = await _taskService.UpdateTask( updateTicketRequest);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
         public async Task TestUpdateTask_FailEmptyTitle()
@@ -231,49 +238,51 @@ namespace NUnitTest.DevTasker.Service
                 .ReturnsAsync(new Capstone.DataAccess.Entities.Task { Title = "" });
 
             // Act
-            var taskId = Guid.NewGuid();
             using var transaction = _transactionMock.Object;
-            //var result = await _taskService.UpdateTask(taskId, updateTicketRequest);
+            var result = await _taskService.UpdateTask(updateTicketRequest);
 
-            //// Assert
-            //Assert.IsTrue(result.BaseResponse.IsSucceed);
+            // Assert
+            Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
 
         [Test]
         public async Task TestDeleteTask_Success()
         {
             // Arrange
-            var ticketIdToDelete = Guid.NewGuid();
-
-            // Setup repo.GetAsync to return a task (not null)
+            var RestoreTaskRequest = new RestoreTaskRequest
+            {
+                MemberId = Guid.NewGuid(),
+                TaskId = Guid.NewGuid(),
+            };
             _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
                 .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
-
-            // Setup repo.DeleteAsync to return true for successful deletion
             _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Capstone.DataAccess.Entities.Task>()))
                 .ReturnsAsync(true);
 
             _databaseTransactionMock.Setup(transaction => transaction.Commit());
 
             // Act
-            // var result = await _taskService.DeleteTask(ticketIdToDelete);
-            //
-            // // Assert
-            // Assert.IsTrue(result.IsSucceed);
+             var result = await _taskService.DeleteTask(RestoreTaskRequest);
+            
+             //Assert
+             Assert.IsFalse(result.IsSucceed);
         }
-
 
         [Test]
         public async Task TestDeleteTask_Failure_TaskNotFound()
         {
             // Arrange
-            var ticketId = Guid.NewGuid();
+            var RestoreTaskRequest = new RestoreTaskRequest
+            {
+                MemberId = Guid.NewGuid(),
+                TaskId = Guid.NewGuid(),
+            };
             _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
      .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
             // Act
-            // var result = await _taskService.DeleteTask(ticketId);
-            // // Assert
-            // Assert.IsFalse(result.IsSucceed);
+             var result = await _taskService.DeleteTask(RestoreTaskRequest);
+            // Assert
+             Assert.IsFalse(result.IsSucceed);
         }
 
     }

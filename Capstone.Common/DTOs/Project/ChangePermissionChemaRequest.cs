@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Capstone.Common.DTOs.Project
 {
-    public class UpdatePermissionSchemaRequest
+    public class ChangePermissionChemaRequest
     {
         public Guid SchemaId { get; set; }
     }
