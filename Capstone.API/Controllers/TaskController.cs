@@ -214,7 +214,7 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Task not found");
 			}
-			var result = await _taskService.DeleteTask(restoreTaskRequest.TaskId);
+			var result = await _taskService.DeleteTask(restoreTaskRequest);
 
 			return Ok(result);
 		}
@@ -234,7 +234,7 @@ namespace Capstone.API.Controllers
 			}
 			if (DateTime.Parse(taskDetail.ExpireTime) >= DateTime.Now)
 			{
-				var response = await _taskService.RestoreTask(restoreTaskRequest.TaskId);
+				var response = await _taskService.RestoreTask(restoreTaskRequest);
 				return Ok(response);
 			}
 			else
