@@ -28,7 +28,7 @@ namespace Capstone.API.Controllers
             var interationList = await _projectService.GetInterationByProjectId(createIterationRequest.ProjectId);
             foreach (var interation in interationList)
             {
-                if (createIterationRequest.InterationName.Equals(interation.InterationName))
+                if (createIterationRequest.InterationName.ToLower().Equals(interation.InterationName.ToLower()))
                 {
 					return BadRequest("Interation's name is exist. Please try another interation name");
 				}
@@ -56,14 +56,6 @@ namespace Capstone.API.Controllers
 				return NotFound("Interation not exist!!!");
 			}
 			var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
-			var interationList = await _projectService.GetInterationByProjectId(interation.BoardId);
-			foreach (var inter in interationList)
-			{
-				if (updateIterationRequest.InterationName.Equals(inter.InterationName))
-				{
-					return BadRequest("Interation's name is exist. Please try another interation name");
-				}
-			}
 			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
 			if (updateIterationRequest.StartDate <= project.StartDate)
 			{
