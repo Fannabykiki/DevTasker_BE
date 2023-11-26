@@ -759,12 +759,12 @@ public class ProjectService : IProjectService
 		}
 	}
 
-    public async Task<BaseResponse> UpdateProjectSchema(UpdatePermissionSchemaRequest changePermissionSchemaRequest)
+    public async Task<BaseResponse> UpdateProjectSchema(Guid projectId, UpdatePermissionSchemaRequest changePermissionSchemaRequest)
     {
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
-            var project = await _projectRepository.GetAsync(x => x.ProjectId == changePermissionSchemaRequest.ProjectId, x => x.ProjectMembers)!;
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
 
 
             project.SchemasId = changePermissionSchemaRequest.SchemaId;
