@@ -18,7 +18,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false).OrderBy(x=>x.CreateTime)
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false && x.PrevId == null).OrderBy(x=>x.CreateTime)
 								.Select(x => new TaskViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
@@ -162,11 +162,11 @@ namespace Capstone.DataAccess.Repository.Implements
 										CommentId = m.CommentId,
 										UpdateAt = m.UpdateAt == null
   ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+  : m.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										CreateAt = m.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										DeleteAt = m.DeleteAt == null
   ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+  : m.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										ReplyTo = m.ReplyTo,
 										TaskId = m.TaskId,
 										User = new GetUserCommentResponse
@@ -216,12 +216,11 @@ namespace Capstone.DataAccess.Repository.Implements
 									}).ToList(),
 									TaskHistories = _context.TaskHistories
 									.Where(h => h.TaskId == taskId)
+									.OrderBy(h => h.ChangeAt)
 									.Select(h => new TaskHistoryViewModel
 									{
 										TaskId = taskId,
-										ChangeAt = h.ChangeAt == null
-  ? null
-  : h.ChangeAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										ChangeAt = h.ChangeAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										HistoryId = h.HistoryId,
 										Title = h.Title
 									}).ToList()				

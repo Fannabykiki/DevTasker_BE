@@ -8,7 +8,7 @@ namespace Capstone.DataAccess.Entities
         [Key]
         public Guid HistoryId { get; set; }
         public string Title { get; set; }
-        public DateTime? ChangeAt { get; set; }
+        public DateTime ChangeAt { get; set; }
         public Guid? ChangeBy { get; set; }
         public Guid PreviousStatusId { get; set; } //to do
         public Guid CurrentStatusId { get; set; } //to do => in progess FE 

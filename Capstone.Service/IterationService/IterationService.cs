@@ -164,7 +164,7 @@ namespace Capstone.Service.IterationService
 
 		public async Task<GetIntergrationResponse> GetCurrentInterationId(Guid projectId)
 		{
-			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
+			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, x=>x.Status);
 			var inter = new GetIntergrationResponse();
 			foreach (var interation in interations)
 			{
