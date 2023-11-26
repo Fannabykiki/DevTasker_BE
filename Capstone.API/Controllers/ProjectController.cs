@@ -346,7 +346,6 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//3
 		[HttpPut("projects/info")]
 		public async Task<IActionResult> UpdateProjectInfo( UpdateProjectNameInfo updateProjectNameInfo)
 		{
