@@ -12,5 +12,6 @@
         public Guid TypeId{ get; set; }
         public Guid PriorityId { get; set; }
         public Guid StatusId { get; set; }
+        public Guid MemberId { get; set; }
     }
 }

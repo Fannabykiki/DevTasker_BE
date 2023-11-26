@@ -15,36 +15,36 @@ namespace Capstone.DataAccess.Repository.Implements
 
         }
 
-        public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
-        {
-            var taskList = await _context.Tasks
-                                .Where(x => x.Interation.BoardId == projectId && x.IsDelete == false)
-                                .Select(x => new TaskViewModel
-                                {
-                                    AssignTo = x.ProjectMember.Users.UserName,
-                                    CreateBy = x.ProjectMember.Users.UserName,
-                                    CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    Description = x.Description,
-                                    DeleteAt = x.DeleteAt == null
+		public async Task<List<TaskViewModel>> GetAllTask(Guid projectId)
+		{
+			var taskList = await _context.Tasks
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false && x.PrevId == null).OrderBy(x=>x.CreateTime)
+								.Select(x => new TaskViewModel
+								{
+									AssignTo = x.ProjectMember.Users.UserName,
+									CreateBy = x.ProjectMember.Users.UserName,
+									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									Description = x.Description,
+									DeleteAt = x.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
                                     ExpireTime = x.ExprireTime == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    InterationName = x.Interation.InterationName,
-                                    IsDelete = x.IsDelete,
-                                    PriorityName = x.PriorityLevel.Title,
-                                    StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    StatusName = x.Status.Title,
-                                    StatusId = x.StatusId,
-                                    Title = x.Title,
-                                    TaskId = x.TaskId,
-                                    TypeId = x.TypeId,
-                                    TypeName = x.TicketType.Title,
-                                    SubTask = _context.Tasks
-                                                        .Where(m => m.PrevId == x.TaskId && m.IsDelete == false)
-                                                        .Select(m => new SubTask
+									InterationName = x.Interation.InterationName,
+									IsDelete = x.IsDelete,
+									PriorityName = x.PriorityLevel.Title,
+									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									StatusName = x.Status.Title,
+									StatusId = x.StatusId,
+									Title = x.Title,
+									TaskId = x.TaskId,
+									TypeId = x.TypeId,
+									TypeName = x.TicketType.Title,
+									SubTask = _context.Tasks
+														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
+														.Select(m => new SubTask
                                                         {
                                                             TaskId = m.TaskId,
                                                             StatusName = m.Status.Title,
@@ -219,12 +219,22 @@ namespace Capstone.DataAccess.Repository.Implements
                                         ExprireTime = a.ExprireTime == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                        IsDeleted = a.IsDeleted,
-                                        TaskTitle = a.Task.Title
-                                    }).ToList()
-                                }).FirstOrDefaultAsync();
-            return taskList;
-        }
+										IsDeleted = a.IsDeleted,
+										TaskTitle = a.Task.Title
+									}).ToList(),
+									TaskHistories = _context.TaskHistories
+									.Where(h => h.TaskId == taskId)
+									.OrderBy(h => h.ChangeAt)
+									.Select(h => new TaskHistoryViewModel
+									{
+										TaskId = taskId,
+										ChangeAt = h.ChangeAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										HistoryId = h.HistoryId,
+										Title = h.Title
+									}).ToList()				
+								}).FirstOrDefaultAsync();
+			return taskList;
+		}
 
         public async Task<int> GetTaskDone(Guid projectId)
         {
