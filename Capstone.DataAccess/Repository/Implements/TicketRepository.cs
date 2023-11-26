@@ -205,16 +205,13 @@ namespace Capstone.DataAccess.Repository.Implements
 									.Where(a => a.TaskId == x.TaskId)
 									.Select(a => new Common.DTOs.Attachment.AttachmentViewModel
 									{
+										Title = a.Title,
 										CreateAt = a.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										TaskId = a.TaskId,
 										AttachmentId = a.AttachmentId,
-										DeleteAt = a.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										DeleteAt = a.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										CreateBy = a.ProjectMember.Users.UserName,
-										ExprireTime = a.ExprireTime == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										ExprireTime = a.ExprireTime == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										IsDeleted = a.IsDeleted,
 										TaskTitle = a.Task.Title
 									}).ToList(),

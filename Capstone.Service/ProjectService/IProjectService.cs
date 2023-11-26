@@ -40,4 +40,5 @@ public interface IProjectService
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 	Task<int> GetTaskStatusDone(Guid projectId);
 	Task<bool> CheckExist(Guid projectId);
+	Task<bool> CheckMemberStatus(Guid memberId);
 }

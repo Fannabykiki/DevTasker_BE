@@ -332,7 +332,6 @@ namespace Capstone.API.Controllers
             return Ok(result);
         }
 
-		//4
         [HttpPut("roles")]
         public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
         {
@@ -352,7 +351,6 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//3
 		[HttpPut("projects/info")]
 		public async Task<IActionResult> UpdateProjectInfo( UpdateProjectNameInfo updateProjectNameInfo)
 		{
@@ -366,7 +364,6 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//2
 		[HttpPut("projects/privacy")]
 		public async Task<IActionResult> UpdateProjectPrivacy( UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 		{
@@ -380,7 +377,6 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-		//1
 		[HttpPut("projects/delete")]
 		public async Task<IActionResult> DeleteProject(DeleteProjectRequest deleteProjectRequest)
 		{

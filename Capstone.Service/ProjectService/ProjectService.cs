@@ -847,4 +847,11 @@ public class ProjectService : IProjectService
 			return false;
 		return true;
 	}
+
+	public async Task<bool> CheckMemberStatus(Guid memberId)
+	{
+		var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status);
+		if (member.StatusId != Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1")) return false;
+		return true;
+	}
 }
