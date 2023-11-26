@@ -20,7 +20,9 @@ namespace Capstone.Common.DTOs.Task
 		public string? StatusName { get; set; }
 		public Guid? StatusId { get; set; }
 		public Guid? TypeId { get; set; }
+		public Guid Priority { get; set; }
 		public string PriorityName { get; set; }
+		public int PriorityLevel { get; set; }
 		public string InterationName { get; set; }
         public List<SubTask> SubTask { get; set; }
     }
@@ -42,7 +44,9 @@ namespace Capstone.Common.DTOs.Task
         public string? StatusName { get; set; }
         public Guid? StatusId { get; set; }
         public Guid? TypeId { get; set; }
+        public Guid Priority { get; set; }
         public string PriorityName { get; set; }
-        public string InterationName { get; set; }
+		public int PriorityLevel { get; set; }
+		public string InterationName { get; set; }
     }
 }
