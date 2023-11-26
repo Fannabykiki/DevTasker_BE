@@ -23,6 +23,7 @@ namespace Capstone.Common.DTOs.Task
 		public string PriorityName { get; set; }
 		public string InterationName { get; set; }
 		public List<GetCommentResponse> CommentResponse { get; set; }
+		public List<TaskHistoryViewModel> TaskHistories { get; set; }
 		public List<AttachmentViewModel> AttachmentResponse { get; set; }
 	}
 }

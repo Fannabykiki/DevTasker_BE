@@ -82,7 +82,7 @@ namespace Capstone.API.Controllers
             var comment = await _commentService.CheckExist(updatedComment.CommentId);
             if (!comment)
             {
-                return BadRequest("Comment not exist");
+                return NotFound("Comment not exist");
             }
             var updated = await _commentService.UpdateComment(updatedComment.CommentId, updatedComment);
             if (updated == null)

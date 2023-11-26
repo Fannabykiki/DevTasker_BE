@@ -2,6 +2,7 @@
 {
 	public class RestoreTaskRequest
 	{
-        public Guid TaskId { get; set; }
+		public Guid MemberId { get; set; }
+		public Guid TaskId { get; set; }
     }
 }
