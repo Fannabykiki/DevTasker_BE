@@ -57,6 +57,8 @@ namespace Capstone.Service.BlobStorage
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try
 			{
+				var task = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
+
 				var interation = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
 				var project = await _interationRepository.GetAsync(i => i.InterationId == interation.InterationId, null);
 				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId,null);
@@ -120,6 +122,8 @@ namespace Capstone.Service.BlobStorage
 
 		public async Task<BlobViewModel> DownLoadFile(string blobFile)
 		{
+			
+
 			BlobClient file = _blobServiceClient.GetBlobClient(blobFile);
 
 			if (await file.ExistsAsync())

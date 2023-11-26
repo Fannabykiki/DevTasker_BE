@@ -96,6 +96,11 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
 		{
+			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
+			if(!memberStatus)
+			{
+				return BadRequest("Can't assign to unavailable member");
+			}
 			if (request.InterationId != Guid.Empty)
 			{
 				var interation = await _interationService.GetIterationsById(request.InterationId);

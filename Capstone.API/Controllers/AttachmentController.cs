@@ -39,6 +39,10 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> DownloadFile(string fileName)
         {
             var file = await  _azureBlobService.DownLoadFile(fileName);
+            if(file == null)
+            {
+                return NotFound("File not exist");
+            }
             return File(file.Content,file.ContentType,file.Name);
         }
 
