@@ -62,7 +62,12 @@ namespace Capstone.API.Controllers
 
 		[HttpPost("projects/invitation")]
 		public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
-		{
+		{	
+			var projectPrivacy = await _projectService.GetProjectByProjectId(inviteUserRequest.ProjectId);
+			if(projectPrivacy.PrivacyStatus == false)
+			{
+				return BadRequest("Your project is private status. Can't invite any member");
+			}
 			var userId = this.GetCurrentLoginUserId();
 			if (userId == Guid.Empty)
 			{
@@ -73,7 +78,6 @@ namespace Capstone.API.Controllers
 				var isInTeam = await _projectMemberService.CheckMemberExist(email, inviteUserRequest.ProjectId);
 				if(isInTeam == false)
 				{
-
 					return BadRequest($"Email {email} is already existed in project. Can't invite anymore!!!");
 				}
 				var isPending = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId);
