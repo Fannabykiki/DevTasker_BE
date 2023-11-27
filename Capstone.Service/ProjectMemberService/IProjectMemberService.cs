@@ -10,9 +10,7 @@ namespace Capstone.Service.ProjectMemberService
 		Task<BaseResponse> DeclineInvitation(Guid userId, AcceptInviteRequest acceptInviteRequest);
 		Task<BaseResponse> AcceptInvitation(Guid userId,AcceptInviteRequest acceptInviteRequest);
 		Task<AddNewProjectMemberResponse> AddNewProjectMember(InviteUserRequest inviteUserRequest);
-		Task<bool> CheckMemberExist(string email,Guid projectId);
-		Task<bool> CheckSendMail(string email, Guid projectId);
-		Task<bool> CheckMemberStatus(string email, Guid projectId);
+		Task<bool> CheckMemberStatus(string email, Guid projectId,Guid statusId);
 		Task<bool> CheckExist(Guid memberId);
 	}
 }

@@ -80,11 +80,11 @@ namespace Capstone.API.Controllers
 				var user = await _userService.GetUserByEmailAsync(email);
 				if (user == null)
 				{
-					return BadRequest(email + "not exist in system");
+					return BadRequest(email + " not exist in system");
 				}
-				var isInTeam = await _projectMemberService.CheckMemberExist(email, inviteUserRequest.ProjectId);
-				var isPending = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId);
-				var isSendMail = await _projectMemberService.CheckSendMail(email, inviteUserRequest.ProjectId);
+				var isInTeam = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId,Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1"));
+				var isPending = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId, Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"));
+				var isSendMail = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId, Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"));
 
 				if (isInTeam == false)
 				{
@@ -99,10 +99,11 @@ namespace Capstone.API.Controllers
 				{
 					return BadRequest($"Invitation is already sent to {email}. Please check mail and confirm invitation");
 				}
-				else
+				if(user.StatusId == Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"))
 				{
-					return BadRequest($"{email} is inactive. Can't invite inactive user");
+					return BadRequest("Can't invite inactive user !!!");
 				}
+				
 			}
 
 			var projectMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
