@@ -403,7 +403,7 @@ public class ProjectService : IProjectService
 	{
 		var projectInfoRequests = new ViewProjectInfoRequest();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.Status)!;
-		var members = await _projectMemberRepository.GetProjectMembers(projectId)!;
+		var members = await _projectMemberRepository.GetAllProjectMember(projectId)!;
 		var boardStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == project.ProjectId, null);
 		var totaltaskCompleted = 10;
 		foreach (var item in boardStatus)
