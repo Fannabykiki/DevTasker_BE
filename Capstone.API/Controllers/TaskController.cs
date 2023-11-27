@@ -105,11 +105,11 @@ namespace Capstone.API.Controllers
 			if (request.InterationId != Guid.Empty)
 			{
 				var interation = await _interationService.GetIterationsById(request.InterationId);
-				if (request.StartDate <= interation.StartDate)
+				if (request.StartDate.Date < interation.StartDate.Date)
 				{
 					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
 				}
-				if (request.DueDate >= interation.EndDate)
+				if (request.DueDate.Date > interation.EndDate.Date)
 				{
 					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
 				}
@@ -125,11 +125,11 @@ namespace Capstone.API.Controllers
 			{
 				var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
-				if (request.StartDate <= DateTime.Parse(interation.StartDate))
+				if (request.StartDate.Date < DateTime.Parse(interation.StartDate).Date)
 				{
 					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
 				}
-				if (request.DueDate >= DateTime.Parse(interation.EndDate))
+				if (request.DueDate.Date > DateTime.Parse(interation.EndDate).Date)
 				{
 					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
 				}
@@ -154,11 +154,11 @@ namespace Capstone.API.Controllers
 			}
 			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
-			if (request.StartDate <= DateTime.Parse(interation.StartDate))
+			if (request.StartDate.Date < DateTime.Parse(interation.StartDate).Date)
 			{
 				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
 			}
-			if (request.DueDate >= DateTime.Parse(interation.EndDate))
+			if (request.DueDate.Date > DateTime.Parse(interation.EndDate).Date)
 			{
 				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
 			}
