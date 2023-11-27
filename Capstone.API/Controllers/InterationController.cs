@@ -57,13 +57,13 @@ namespace Capstone.API.Controllers
 			}
 			var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
 			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
-			if (updateIterationRequest.StartDate <= project.StartDate)
+			if (updateIterationRequest.StartDate.Date < project.StartDate.Date)
 			{
-				return BadRequest("Cant create new interation with start date before project's start date. Please update and try again");
+				return BadRequest("Cant update interation with start date before project's start date. Please update and try again");
 			}
-			if (updateIterationRequest.EndDate >= project.EndDate)
+			if (updateIterationRequest.EndDate.Date > project.EndDate.Date)
 			{
-				return BadRequest("Cant create new interation with end date after project's end date. Please update and try again");
+				return BadRequest("Cant update interation with end date after project's end date. Please update and try again");
 			}
 			var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, updateIterationRequest.InterationId);
             if (result == null)

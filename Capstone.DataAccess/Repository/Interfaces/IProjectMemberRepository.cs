@@ -9,5 +9,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
 		public Task<List<ProjectMember>> GetProjectMembers(Guid projectId);
 		public Task<List<ProjectMember>> GetProjectByUserId(Guid userId);
 		Task<List<ProjectMember>> CheckStatus(Guid projectId, Guid statusId);
+		public Task<List<ProjectMember>> GetAllProjectMember(Guid projectId);
 	}
 }
