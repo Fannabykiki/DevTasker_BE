@@ -7,11 +7,11 @@ namespace Capstone.API.Extentions.Validation.IterationValidator
 {
     public CreateIterationValidatator()
     {
-        RuleFor(request => request.InterationName).NotEmpty().WithMessage("Iteration name cannot be empty");
+        RuleFor(request => request.InterationName).NotEmpty().WithMessage("Sprint name can't be empty");
         RuleFor(request => request.StartDate).NotEmpty().WithMessage("Start date cannot be blank");
 
         RuleFor(request => request.EndDate)
-            .Must((request, endDate) => endDate > request.StartDate)
+            .Must((request, endDate) => endDate.Date > request.StartDate.Date)
             .WithMessage("The end date must be greater than the start date");
     }
 }

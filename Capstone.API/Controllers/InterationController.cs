@@ -30,17 +30,17 @@ namespace Capstone.API.Controllers
             {
                 if (createIterationRequest.InterationName.ToLower().Equals(interation.InterationName.ToLower()))
                 {
-					return BadRequest("Interation's name is exist. Please try another interation name");
+					return BadRequest("Sprint's name is exist. Please try another Sprint's name");
 				}
 			}
             var project = await _projectService.GetProjectByProjectId(createIterationRequest.ProjectId);
             if(createIterationRequest.StartDate <= project.StartDate)
             {
-                return BadRequest("Cant create new interation with start date before project's start date. Please update and try again");
+                return BadRequest("Cant create new sprint with start date before project's start date. Please update and try again");
             }
 			if (createIterationRequest.EndDate >= project.EndDate)
 			{
-				return BadRequest("Cant create new interation with end date after project's end date. Please update and try again");
+				return BadRequest("Can't create new sprint with end date after project's end date. Please update and try again");
 			}
 			var result = await _iterationService.CreateInteration(createIterationRequest);
 
@@ -53,17 +53,17 @@ namespace Capstone.API.Controllers
 			var isExist = await _iterationService.CheckExist(updateIterationRequest.InterationId);
 			if (!isExist)
 			{
-				return NotFound("Interation not exist!!!");
+				return NotFound("Sprint not exist!!!");
 			}
 			var interation = await _iterationService.GetIterationsById(updateIterationRequest.InterationId);
 			var project = await _projectService.GetProjectByProjectId(interation.BoardId);
 			if (updateIterationRequest.StartDate.Date < project.StartDate.Date)
 			{
-				return BadRequest("Cant update interation with start date before project's start date. Please update and try again");
+				return BadRequest("Can't update sprint with start date before project's start date. Please update and try again");
 			}
 			if (updateIterationRequest.EndDate.Date > project.EndDate.Date)
 			{
-				return BadRequest("Cant update interation with end date after project's end date. Please update and try again");
+				return BadRequest("Can't update sprint with end date after project's end date. Please update and try again");
 			}
 			var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, updateIterationRequest.InterationId);
             if (result == null)
