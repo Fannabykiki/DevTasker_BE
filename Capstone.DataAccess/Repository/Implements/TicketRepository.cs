@@ -246,6 +246,7 @@ namespace Capstone.DataAccess.Repository.Implements
                     User = new GetUserCommentResponse
                     {
                         UserId = x.ProjectMember.UserId,
+                        UserName = x.ProjectMember.Users.UserName,
                         Fullname = x.ProjectMember.Users.Fullname,
                         Email = x.ProjectMember.Users.Email,
                         IsFirstTime = x.ProjectMember.Users.IsFirstTime,
@@ -269,6 +270,7 @@ namespace Capstone.DataAccess.Repository.Implements
                             User = new GetUserCommentResponse
                             {
                                 UserId = sub.ProjectMember.UserId,
+                                UserName = sub.ProjectMember.Users.UserName,
                                 Fullname = sub.ProjectMember.Users.Fullname,
                                 Email = sub.ProjectMember.Users.Email,
                                 IsFirstTime = sub.ProjectMember.Users.IsFirstTime,
