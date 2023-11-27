@@ -32,7 +32,8 @@ namespace Capstone.DataAccess.Repository.Implements
 									ExpireTime = x.ExprireTime == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									InterationName = x.Interation.InterationName,
+                                    InterationId = x.InterationId,
+                                    InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
 									PriorityName = x.PriorityLevel.Title,
 									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -61,7 +62,8 @@ namespace Capstone.DataAccess.Repository.Implements
 															AssignTo = m.ProjectMember.Users.UserName,
 															DueDate = m.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 															CreateTime = m.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-															InterationName = m.Interation.InterationName,
+                                                            InterationId = m.InterationId,
+                                                            InterationName = m.Interation.InterationName,
 															IsDelete = m.IsDelete,
 															PriorityLevel = m.PriorityLevel.Level,
 															DeleteAt = m.DeleteAt == null
@@ -69,6 +71,74 @@ namespace Capstone.DataAccess.Repository.Implements
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 															Priority = m.PriorityId
 														}).ToList(),
+								}).ToListAsync();
+			return taskList;
+		}
+		
+		public async Task<List<TaskViewModel>> GetTaskByInterationId(Guid interationId)
+		{
+			var taskList = await _context.Tasks
+								.Where(x => x.InterationId == interationId && x.IsDelete == false && x.PrevId == null).OrderBy(x => x.CreateTime).Include(x => x.PriorityLevel)
+								.Select(x => new TaskViewModel
+								{
+									AssignTo = x.ProjectMember.Users.UserName,
+									CreateBy = x.ProjectMember.Users.UserName,
+									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									Description = x.Description,
+									DeleteAt = x.DeleteAt == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									ExpireTime = x.ExprireTime == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                                    InterationId = x.InterationId,
+                                    InterationName = x.Interation.InterationName,
+									IsDelete = x.IsDelete,
+									PriorityName = x.PriorityLevel.Title,
+									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									StatusName = x.Status.Title,
+									StatusId = x.StatusId,
+									Title = x.Title,
+									TaskId = x.TaskId,
+									TypeId = x.TypeId,
+									Priority = x.PriorityId,
+									TypeName = x.TicketType.Title,
+									PriorityLevel = x.PriorityLevel.Level,
+									TotalComment = _context.TaskComments
+                                    .Where(m => m.TaskId == x.TaskId).Count(),
+									TotalAttachment = _context.Attachments
+                                    .Where(a => a.TaskId == x.TaskId).Count(),
+									SubTask = _context.Tasks
+														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
+														.Select(m => new SubTask
+														{
+															TaskId = m.TaskId,
+															StatusName = m.Status.Title,
+															StatusId = m.StatusId,
+															StartDate = m.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+															TypeId = m.TypeId,
+															TypeName = m.TicketType.Title,
+															Title = m.Title,
+															Description = m.Description,
+															PriorityName = m.PriorityLevel.Title,
+															CreateBy = m.ProjectMember.Users.UserName,
+															AssignTo = m.ProjectMember.Users.UserName,
+															DueDate = m.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+															CreateTime = m.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                                                            InterationId = m.InterationId,
+                                                            InterationName = m.Interation.InterationName,
+															IsDelete = m.IsDelete,
+															PriorityLevel = m.PriorityLevel.Level,
+															DeleteAt = m.DeleteAt == null
+  ? null
+  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+															Priority = m.PriorityId,
+                                                            TotalComment = _context.TaskComments
+																		.Where(c => c.TaskId == m.TaskId).Count(),
+                                                            TotalAttachment = _context.Attachments
+																		.Where(a => a.TaskId == m.TaskId).Count(),
+                                                        }).ToList(),
 								}).ToListAsync();
 			return taskList;
 		}
@@ -159,48 +229,58 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									CommentResponse = _context.TaskComments
-									.Where(m => m.TaskId == x.TaskId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
-									.Select(m => new GetCommentResponse
-									{
-										Content = m.Content,
-										CommentId = m.CommentId,
-										UpdateAt = m.UpdateAt == null
-  ? null
-  : m.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-										CreateAt = m.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-										DeleteAt = m.DeleteAt == null
-  ? null
-  : m.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-										ReplyTo = m.ReplyTo,
-										TaskId = m.TaskId,
-										User = new GetUserCommentResponse
-										{
-											Email = m.ProjectMember.Users.Email,
-											UserId = m.ProjectMember.Users.UserId,
-											UserName = m.ProjectMember.Users.UserName,
-										},
-										SubComments = _context.TaskComments.Where(c => c.ReplyTo == m.CommentId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
-													.Select(c => new GetCommentResponse
-													{
-														CommentId = c.CommentId,
-														Content = c.Content,
-														CreateAt = c.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-														ReplyTo = m.CommentId,
-														DeleteAt = c.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-														UpdateAt = c.UpdateAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-														TaskId = c.TaskId,
-														User = new GetUserCommentResponse
-														{
-															Email = c.ProjectMember.Users.Email,
-															UserId = c.ProjectMember.Users.UserId,
-															UserName = c.ProjectMember.Users.UserName,
-														},
-													}).ToList()
-									}).ToList(),
+                .AsQueryable()
+                .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
+                .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users.Status)
+                .Where(x => x.TaskId == taskId && x.ReplyTo == null && x.DeleteAt == null)
+                .OrderBy(c => c.CreateAt)
+                .Select(x => new GetCommentResponse
+                {
+                    CommentId = x.CommentId,
+                    Content = x.Content,
+                    CreateAt = x.CreateAt == null ? null : x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    UpdateAt = x.UpdateAt == null ? null : x.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    TaskId = x.TaskId, // No need for type conversion
+                    ReplyTo = x.ReplyTo,
+                    User = new GetUserCommentResponse
+                    {
+                        UserId = x.ProjectMember.UserId,
+                        UserName = x.ProjectMember.Users.UserName,
+                        Fullname = x.ProjectMember.Users.Fullname,
+                        Email = x.ProjectMember.Users.Email,
+                        IsFirstTime = x.ProjectMember.Users.IsFirstTime,
+                        IsAdmin = x.ProjectMember.Users.IsAdmin,
+                        Status = x.ProjectMember.Users.Status.Title
+                    },
+                    SubComments = _context.TaskComments
+                        .AsQueryable()
+                        .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
+                        .Where(m => m.ReplyTo == x.CommentId && m.DeleteAt == null)
+                        .OrderBy(c => c.CreateAt)
+                        .Select(sub => new GetCommentResponse
+                        {
+                            CommentId = sub.CommentId,
+                            Content = sub.Content,
+                            CreateAt = sub.CreateAt == null ? null : sub.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                            DeleteAt = sub.DeleteAt == null ? null : sub.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                            UpdateAt = sub.UpdateAt == null ? null : sub.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                            TaskId = sub.TaskId, // No need for type conversion
+                            ReplyTo = sub.ReplyTo,
+                            User = new GetUserCommentResponse
+                            {
+                                UserId = sub.ProjectMember.UserId,
+                                UserName = sub.ProjectMember.Users.UserName,
+                                Fullname = sub.ProjectMember.Users.Fullname,
+                                Email = sub.ProjectMember.Users.Email,
+                                IsFirstTime = sub.ProjectMember.Users.IsFirstTime,
+                                IsAdmin = sub.ProjectMember.Users.IsAdmin,
+                                Status = sub.ProjectMember.Users.Status.Title
+                            },
+                        })
+                        .ToList()
+                })
+                .ToList(),
 									AttachmentResponse = _context.Attachments
 									.Where(a => a.TaskId == x.TaskId)
 									.Select(a => new Common.DTOs.Attachment.AttachmentViewModel
