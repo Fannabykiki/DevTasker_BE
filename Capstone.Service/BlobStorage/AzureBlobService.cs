@@ -1,5 +1,6 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
+using Capstone.Common.DTOs.Attachment;
 using Capstone.Common.DTOs.BlobAzure;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Implements;
@@ -14,6 +15,7 @@ namespace Capstone.Service.BlobStorage
 		private readonly string _storageAccount = "devtasker";
 		private readonly string _accessKey = "N2vam2LLK2IusA3BDTUbeIkjy8kR0eqyHPG8g467C1L1mu29I5RCBhWA8MTXbxpREhqCjQ7n3czQ+AStBFDgKg==";
 		private readonly BlobContainerClient _blobServiceClient;
+		private readonly BlobServiceClient _blobService;
 		private readonly IAttachmentRepository _attachmentRepository;
 		private readonly IProjectMemberRepository _projectMemberRepository;
 		private readonly IInterationRepository _interationRepository;
@@ -29,6 +31,7 @@ namespace Capstone.Service.BlobStorage
 			_attachmentRepository = attachmentRepository;
 			_projectMemberRepository = projectMemberRepository;
 			_interationRepository = interationRepository;
+			_blobService = new BlobServiceClient(new Uri(blobUri), credential);
 			_taskRepository = taskRepository;
 		}
 
@@ -58,11 +61,16 @@ namespace Capstone.Service.BlobStorage
 			try
 			{
 				var task = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
+				var containerClient = _blobService.GetBlobContainerClient(task.TaskId.ToString().Trim().ToLower());
+				if (!await containerClient.ExistsAsync())
+				{
+					await containerClient.CreateAsync();
+				}
 
 				var interation = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
 				var project = await _interationRepository.GetAsync(i => i.InterationId == interation.InterationId, null);
 				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId,null);
-				BlobClient client = _blobServiceClient.GetBlobClient(file.FileName);
+				BlobClient client = containerClient.GetBlobClient(file.FileName);
 				var fileSize = file.Length;
 				if(fileSize > 20 * 1024 * 1024)
 				{
@@ -120,11 +128,16 @@ namespace Capstone.Service.BlobStorage
 
 		}
 
-		public async Task<BlobViewModel> DownLoadFile(string blobFile)
+		public async Task<BlobViewModel> DownLoadFile(string fileName, Guid taskId)
 		{
-			
+			var task = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
+			var containerClient = _blobService.GetBlobContainerClient(task.TaskId.ToString().Trim().ToLower());
+			if (!await containerClient.ExistsAsync())
+			{
+				return null;
+			}
 
-			BlobClient file = _blobServiceClient.GetBlobClient(blobFile);
+			BlobClient file = containerClient.GetBlobClient(fileName);
 
 			if (await file.ExistsAsync())
 			{
@@ -133,7 +146,7 @@ namespace Capstone.Service.BlobStorage
 
 				var content = await file.DownloadContentAsync();
 
-				string name = blobFile;
+				string name = fileName;
 				string contentType = content.Value.Details.ContentType;
 
 				return new BlobViewModel
@@ -146,12 +159,18 @@ namespace Capstone.Service.BlobStorage
 			return null;
 		}
 
-		public async Task<BlobResponse> DeleteFile(string blobFile)
+		public async Task<BlobResponse> DeleteFile(string blobFile,Guid taskId)
 		{
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try
 			{
-				BlobClient file = _blobServiceClient.GetBlobClient(blobFile);
+				var task = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
+				var containerClient = _blobService.GetBlobContainerClient(task.TaskId.ToString().Trim().ToLower());
+				if (!await containerClient.ExistsAsync())
+				{
+					await containerClient.CreateAsync();
+				}
+				BlobClient file = containerClient.GetBlobClient(blobFile);
 				if (await file.ExistsAsync())
 				{
 					await file.DeleteIfExistsAsync();
