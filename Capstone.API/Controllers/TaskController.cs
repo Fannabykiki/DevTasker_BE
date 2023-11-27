@@ -21,11 +21,12 @@ namespace Capstone.API.Controllers
 		private readonly IProjectService _projectService;
 		private readonly IIterationService _interationService;
 
-		public TaskController(ILoggerManager logger, ITaskService taskService, IIterationService interationService)
+		public TaskController(ILoggerManager logger, ITaskService taskService, IIterationService interationService, IProjectService projectService)
 		{
 			_logger = logger;
 			_taskService = taskService;
 			_interationService = interationService;
+			_projectService = projectService;
 		}
 
 		[HttpGet("tasks/kanban")]
@@ -146,6 +147,11 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
+			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
+			if (!memberStatus)
+			{
+				return BadRequest("Can't assign to unavailable member");
+			}
 			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
 			if (request.StartDate <= DateTime.Parse(interation.StartDate))
@@ -174,6 +180,11 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
+			var memberStatus = await _projectService.CheckMemberStatus(updateTicketRequest.AssignTo);
+			if (!memberStatus)
+			{
+				return BadRequest("Can't assign to unavailable member");
+			}
 			var task = await _taskService.CheckExist(updateTicketRequest.TaskId);
 			if (!task) {
 				return NotFound("Task not found");
@@ -199,7 +210,8 @@ namespace Capstone.API.Controllers
         //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
-		{
+		{	
+
 			var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
 			if (!task)
 			{

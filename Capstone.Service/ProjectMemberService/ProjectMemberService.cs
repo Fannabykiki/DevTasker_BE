@@ -76,7 +76,6 @@ namespace Capstone.Service.ProjectMemberService
 				{
 					foreach (var email in inviteUserRequest.Email)
 					{
-
 						var user = await _userRepository.GetAsync(x => x.Email == email, null);
 						var projectMember = new ProjectMember
 						{
@@ -95,7 +94,8 @@ namespace Capstone.Service.ProjectMemberService
 					}
 					return new AddNewProjectMemberResponse
 					{
-						IsSucceed = true
+						IsSucceed = true,
+						Message = "Invite user to project successfully"
 					};
 				}
 				catch (Exception ex)
