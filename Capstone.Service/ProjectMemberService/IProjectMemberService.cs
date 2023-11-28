@@ -12,5 +12,6 @@ namespace Capstone.Service.ProjectMemberService
 		Task<AddNewProjectMemberResponse> AddNewProjectMember(InviteUserRequest inviteUserRequest);
 		Task<bool> CheckMemberStatus(string email, Guid projectId,Guid statusId);
 		Task<bool> CheckExist(Guid memberId);
+		Task<ViewMemberProject> GetMemberByMemberId(Guid memberId);
 	}
 }

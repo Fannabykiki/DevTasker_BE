@@ -32,8 +32,8 @@ namespace Capstone.DataAccess.Repository.Implements
 									ExpireTime = x.ExprireTime == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    InterationId = x.InterationId,
-                                    InterationName = x.Interation.InterationName,
+									InterationId = x.InterationId,
+									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
 									PriorityName = x.PriorityLevel.Title,
 									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -62,8 +62,8 @@ namespace Capstone.DataAccess.Repository.Implements
 															AssignTo = m.ProjectMember.Users.UserName,
 															DueDate = m.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 															CreateTime = m.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                                            InterationId = m.InterationId,
-                                                            InterationName = m.Interation.InterationName,
+															InterationId = m.InterationId,
+															InterationName = m.Interation.InterationName,
 															IsDelete = m.IsDelete,
 															PriorityLevel = m.PriorityLevel.Level,
 															DeleteAt = m.DeleteAt == null
@@ -74,7 +74,7 @@ namespace Capstone.DataAccess.Repository.Implements
 								}).ToListAsync();
 			return taskList;
 		}
-		
+
 		public async Task<List<TaskViewModel>> GetTaskByInterationId(Guid interationId)
 		{
 			var taskList = await _context.Tasks
@@ -92,8 +92,8 @@ namespace Capstone.DataAccess.Repository.Implements
 									ExpireTime = x.ExprireTime == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                    InterationId = x.InterationId,
-                                    InterationName = x.Interation.InterationName,
+									InterationId = x.InterationId,
+									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
 									PriorityName = x.PriorityLevel.Title,
 									StartDate = x.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -106,9 +106,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeName = x.TicketType.Title,
 									PriorityLevel = x.PriorityLevel.Level,
 									TotalComment = _context.TaskComments
-                                    .Where(m => m.TaskId == x.TaskId).Count(),
+									.Where(m => m.TaskId == x.TaskId).Count(),
 									TotalAttachment = _context.Attachments
-                                    .Where(a => a.TaskId == x.TaskId).Count(),
+									.Where(a => a.TaskId == x.TaskId).Count(),
 									SubTask = _context.Tasks
 														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
 														.Select(m => new SubTask
@@ -126,19 +126,19 @@ namespace Capstone.DataAccess.Repository.Implements
 															AssignTo = m.ProjectMember.Users.UserName,
 															DueDate = m.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 															CreateTime = m.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                                                            InterationId = m.InterationId,
-                                                            InterationName = m.Interation.InterationName,
+															InterationId = m.InterationId,
+															InterationName = m.Interation.InterationName,
 															IsDelete = m.IsDelete,
 															PriorityLevel = m.PriorityLevel.Level,
 															DeleteAt = m.DeleteAt == null
   ? null
   : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 															Priority = m.PriorityId,
-                                                            TotalComment = _context.TaskComments
+															TotalComment = _context.TaskComments
 																		.Where(c => c.TaskId == m.TaskId).Count(),
-                                                            TotalAttachment = _context.Attachments
+															TotalAttachment = _context.Attachments
 																		.Where(a => a.TaskId == m.TaskId).Count(),
-                                                        }).ToList(),
+														}).ToList(),
 								}).ToListAsync();
 			return taskList;
 		}
@@ -180,9 +180,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
@@ -194,9 +192,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
-									ExpireTime = x.ExprireTime == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									ExpireTime = x.ExprireTime == null ? null : x.ExprireTime.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								}).ToListAsync();
 			return taskList;
 		}
@@ -213,13 +209,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									ExpireTime = x.ExprireTime == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									ExpireTime = x.ExprireTime == null ? null : x.ExprireTime.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
 									PriorityName = x.PriorityLevel.Title,
@@ -231,58 +223,58 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
 									CommentResponse = _context.TaskComments
-                .AsQueryable()
-                .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
-                .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users.Status)
-                .Where(x => x.TaskId == taskId && x.ReplyTo == null && x.DeleteAt == null)
-                .OrderBy(c => c.CreateAt)
-                .Select(x => new GetCommentResponse
-                {
-                    CommentId = x.CommentId,
-                    Content = x.Content,
-                    CreateAt = x.CreateAt == null ? null : x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    UpdateAt = x.UpdateAt == null ? null : x.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    TaskId = x.TaskId, // No need for type conversion
-                    ReplyTo = x.ReplyTo,
-                    User = new GetUserCommentResponse
-                    {
-                        UserId = x.ProjectMember.UserId,
-                        UserName = x.ProjectMember.Users.UserName,
-                        Fullname = x.ProjectMember.Users.Fullname,
-                        Email = x.ProjectMember.Users.Email,
-                        IsFirstTime = x.ProjectMember.Users.IsFirstTime,
-                        IsAdmin = x.ProjectMember.Users.IsAdmin,
-                        Status = x.ProjectMember.Users.Status.Title
-                    },
-                    SubComments = _context.TaskComments
-                        .AsQueryable()
-                        .Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
-                        .Where(m => m.ReplyTo == x.CommentId && m.DeleteAt == null)
-                        .OrderBy(c => c.CreateAt)
-                        .Select(sub => new GetCommentResponse
-                        {
-                            CommentId = sub.CommentId,
-                            Content = sub.Content,
-                            CreateAt = sub.CreateAt == null ? null : sub.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                            DeleteAt = sub.DeleteAt == null ? null : sub.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                            UpdateAt = sub.UpdateAt == null ? null : sub.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                            TaskId = sub.TaskId, // No need for type conversion
-                            ReplyTo = sub.ReplyTo,
-                            User = new GetUserCommentResponse
-                            {
-                                UserId = sub.ProjectMember.UserId,
-                                UserName = sub.ProjectMember.Users.UserName,
-                                Fullname = sub.ProjectMember.Users.Fullname,
-                                Email = sub.ProjectMember.Users.Email,
-                                IsFirstTime = sub.ProjectMember.Users.IsFirstTime,
-                                IsAdmin = sub.ProjectMember.Users.IsAdmin,
-                                Status = sub.ProjectMember.Users.Status.Title
-                            },
-                        })
-                        .ToList()
-                })
-                .ToList(),
+				.AsQueryable()
+				.Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
+				.Include(m => m.ProjectMember).ThenInclude(pm => pm.Users.Status)
+				.Where(x => x.TaskId == taskId && x.ReplyTo == null && x.DeleteAt == null)
+				.OrderBy(c => c.CreateAt)
+				.Select(x => new GetCommentResponse
+				{
+					CommentId = x.CommentId,
+					Content = x.Content,
+					CreateAt = x.CreateAt == null ? null : x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					UpdateAt = x.UpdateAt == null ? null : x.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					TaskId = x.TaskId, // No need for type conversion
+					ReplyTo = x.ReplyTo,
+					User = new GetUserCommentResponse
+					{
+						UserId = x.ProjectMember.UserId,
+						UserName = x.ProjectMember.Users.UserName,
+						Fullname = x.ProjectMember.Users.Fullname,
+						Email = x.ProjectMember.Users.Email,
+						IsFirstTime = x.ProjectMember.Users.IsFirstTime,
+						IsAdmin = x.ProjectMember.Users.IsAdmin,
+						Status = x.ProjectMember.Users.Status.Title
+					},
+					SubComments = _context.TaskComments
+						.AsQueryable()
+						.Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
+						.Where(m => m.ReplyTo == x.CommentId && m.DeleteAt == null)
+						.OrderBy(c => c.CreateAt)
+						.Select(sub => new GetCommentResponse
+						{
+							CommentId = sub.CommentId,
+							Content = sub.Content,
+							CreateAt = sub.CreateAt == null ? null : sub.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							DeleteAt = sub.DeleteAt == null ? null : sub.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							UpdateAt = sub.UpdateAt == null ? null : sub.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							TaskId = sub.TaskId, // No need for type conversion
+							ReplyTo = sub.ReplyTo,
+							User = new GetUserCommentResponse
+							{
+								UserId = sub.ProjectMember.UserId,
+								UserName = sub.ProjectMember.Users.UserName,
+								Fullname = sub.ProjectMember.Users.Fullname,
+								Email = sub.ProjectMember.Users.Email,
+								IsFirstTime = sub.ProjectMember.Users.IsFirstTime,
+								IsAdmin = sub.ProjectMember.Users.IsAdmin,
+								Status = sub.ProjectMember.Users.Status.Title
+							},
+						})
+						.ToList()
+				})
+				.ToList(),
 									AttachmentResponse = _context.Attachments
 									.Where(a => a.TaskId == x.TaskId)
 									.Select(a => new Common.DTOs.Attachment.AttachmentViewModel
@@ -321,9 +313,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
