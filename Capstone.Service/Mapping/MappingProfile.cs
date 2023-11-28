@@ -64,7 +64,6 @@ public class MappingProfile : Profile
 			.ForPath(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
 		CreateMap<TaskType, TaskTypeViewModel>();
 		CreateMap<PriorityLevel, GetAllTaskPriority>();
-		CreateMap<ProjectMember, ViewMemberProject>();
 		CreateMap<Interation, InterationViewModel>()
 			.ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.Title));
         CreateMap<Notification, NotificationViewModel>();
