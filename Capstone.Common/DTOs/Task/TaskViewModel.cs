@@ -23,7 +23,10 @@ namespace Capstone.Common.DTOs.Task
 		public Guid Priority { get; set; }
 		public string PriorityName { get; set; }
 		public int PriorityLevel { get; set; }
+		public Guid InterationId { get; set; }
 		public string InterationName { get; set; }
+        public int? TotalComment { get; set; }
+        public int? TotalAttachment { get; set; }
         public List<SubTask> SubTask { get; set; }
     }
 
@@ -47,6 +50,9 @@ namespace Capstone.Common.DTOs.Task
         public Guid Priority { get; set; }
         public string PriorityName { get; set; }
 		public int PriorityLevel { get; set; }
-		public string InterationName { get; set; }
+        public Guid InterationId { get; set; }
+        public string InterationName { get; set; }
+        public int? TotalComment { get; set; }
+        public int? TotalAttachment { get; set; }
     }
 }

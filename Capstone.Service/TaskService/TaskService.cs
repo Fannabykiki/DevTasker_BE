@@ -357,8 +357,8 @@ namespace Capstone.Service.TaskService
 					BaseResponse = new BaseResponse
 					{
 						IsSucceed = true,
-						Message = "Update Successfully"
-					},
+						Message = task.PrevId == null ? "Update Task Successfully" : "Update Subtask Successfully"
+                    },
 				};
 			}
 			catch (Exception ex)

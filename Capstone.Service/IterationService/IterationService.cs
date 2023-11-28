@@ -46,7 +46,7 @@ namespace Capstone.Service.IterationService
 				BoardId = iteration.BoardId,
 				Status = iteration.Status.Title
 			};
-			response.Tasks = await _TaskRepository.GetAllTask(iteration.BoardId);
+			response.Tasks = await _TaskRepository.GetTaskByInterationId(iteration.InterationId);
 
 			return response;
 		}
@@ -70,7 +70,7 @@ namespace Capstone.Service.IterationService
 					BoardId = iteration.BoardId,
 				};
 
-				response.Tasks = await _TaskRepository.GetAllTask(projectId);
+				response.Tasks = await _TaskRepository.GetTaskByInterationId(iteration.InterationId);
 				result.Add(response);
 			}
 
