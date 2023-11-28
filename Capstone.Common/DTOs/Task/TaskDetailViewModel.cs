@@ -15,6 +15,8 @@ namespace Capstone.Common.DTOs.Task
 		public string? DeleteAt { get; set; }
 		public bool? IsDelete { get; set; }
 		public string AssignTo { get; set; }
+		public string AssignToStatus { get; set; }
+		public Guid AssignToStatusId { get; set; }
 		public string CreateBy { get; set; }
 		public string TypeName { get; set; }
 		public string? StatusName { get; set; }

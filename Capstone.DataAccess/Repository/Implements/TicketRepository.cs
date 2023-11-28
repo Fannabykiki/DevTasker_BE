@@ -138,6 +138,8 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Select(x => new TaskDetailViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
+									AssignToStatus = x.ProjectMember.Users.Status.Title,
+									AssignToStatusId = x.ProjectMember.Users.Status.StatusId,
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
