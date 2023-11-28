@@ -16,7 +16,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using static Capstone.Common.Constants.StatusNameConstant;
+using static Capstone.Common.Constants.CapstoneNameConstant;
 
 namespace Capstone.Service.Hubs
 {
@@ -67,9 +67,9 @@ namespace Capstone.Service.Hubs
         {
             var task = await _taskRepository.GetQuery().FirstOrDefaultAsync(x => x.TaskId.ToString() == taskId);
             if (task == null) return;
-            if (task.Status.Title != StatusNameConstant.Task.ToDo
-                || task.Status.Title != StatusNameConstant.Task.Done
-                || task.Status.Title != StatusNameConstant.Task.Deleted) return;
+            if (task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.ToDo
+                || task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done
+                || task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Deleted) return;
 
             var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
                 .Where(x => x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor).Select(y => y.UserId);
@@ -81,25 +81,25 @@ namespace Capstone.Service.Hubs
 
             switch (task.Status.Title)
             {
-                case StatusNameConstant.Task.ToDo:
+                case CapstoneNameConstant.TaskStatusNameConstant.ToDo:
 
                     title = "[Task Is Ready]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.ToDo}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.ToDo}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     break;
 
-                case StatusNameConstant.Task.Done:
+                case CapstoneNameConstant.TaskStatusNameConstant.Done:
 
                     title = "[Task Is Done]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.Done}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Done}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
                     break;
 
-                case StatusNameConstant.Task.Deleted:
+                case CapstoneNameConstant.TaskStatusNameConstant.Deleted:
 
                     title = "[Task Is Deleted]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.Deleted}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Deleted}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
                     break;
