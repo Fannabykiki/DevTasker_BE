@@ -7,7 +7,9 @@ namespace Capstone.API.Extentions.Validation.IterationValidator
 {
     public CreateIterationValidatator()
     {
-        RuleFor(request => request.InterationName).NotEmpty().WithMessage("Sprint name can't be empty");
+        RuleFor(request => request.InterationName)
+                .Matches("^[a-zA-Z0-9 ]*$").WithMessage("Iteration name should not contain special characters")
+                .NotEmpty().WithMessage("Iteration name cannot be empty");
         RuleFor(request => request.StartDate).NotEmpty().WithMessage("Start date cannot be blank");
 
         RuleFor(request => request.EndDate)

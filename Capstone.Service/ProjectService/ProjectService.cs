@@ -616,7 +616,11 @@ public class ProjectService : IProjectService
 			var tasks = await _ticketRepository.GetAllWithOdata(x => x.InterationId == interation.InterationId, x => x.Status);
 			foreach (var task in tasks)
 			{
-				var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo, x => x.Users);
+                if (task.IsDelete == true)
+                {
+					continue;
+                }
+                var assignTo = await _projectMemberRepository.GetAsync(x => x.MemberId == task.AssignTo, x => x.Users);
 				assignTo.Users.Status = await _statusRepository.GetAsync(x => x.StatusId == assignTo.Users.StatusId, null);
 
 				var createBy = await _userRepository.GetAsync(x => x.UserId == task.CreateBy, null);
