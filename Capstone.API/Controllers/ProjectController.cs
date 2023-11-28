@@ -43,10 +43,19 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPost("projects/remove-member")]
+		// E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPost("projects/remove-member")]
 		public async Task<ActionResult<BaseResponse>> RemoveProjectMember(Guid memberId)
 		{
+			var member = await _projectMemberService.GetMemberByMemberId(memberId);
+			if (member.IsOwner)
+			{
+				return BadRequest("Can't remove Project Owner");
+			}
+			else if (member.UserId == Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+			{
+				return BadRequest("Can't remove System Admin");
+			}
 			var result = await _projectService.RemoveProjectMember(memberId);
 
 			return Ok(result);
@@ -56,17 +65,17 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<BaseResponse>> ExitProject(Guid projectId)
 		{
 			var userId = this.GetCurrentLoginUserId();
-			var result = await _projectService.ExitProject(userId,projectId);
+			var result = await _projectService.ExitProject(userId, projectId);
 
 			return Ok(result);
 		}
 
-        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPost("projects/invitation")]
+		//  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPost("projects/invitation")]
 		public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
-		{	
+		{
 			var projectPrivacy = await _projectService.GetProjectByProjectId(inviteUserRequest.ProjectId);
-			if(projectPrivacy.PrivacyStatus == false)
+			if (projectPrivacy.PrivacyStatus == false)
 			{
 				return BadRequest("Your project is private status. Can't invite any member");
 			}
@@ -82,7 +91,7 @@ namespace Capstone.API.Controllers
 				{
 					return BadRequest(email + " not exist in system");
 				}
-				var isInTeam = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId,Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1"));
+				var isInTeam = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId, Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1"));
 				var isPending = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId, Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"));
 				var isSendMail = await _projectMemberService.CheckMemberStatus(email, inviteUserRequest.ProjectId, Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"));
 
@@ -90,20 +99,20 @@ namespace Capstone.API.Controllers
 				{
 					return BadRequest($"Email {email} is already existed in project. Can't invite anymore!!!");
 				}
-				else if(isPending == false)
+				else if (isPending == false)
 				{
 					await _projectService.SendMailInviteUser(inviteUserRequest, userId);
 					return Ok($"Email {email} is already left project. Please check mail and confirm invitation to join project again");
 				}
-				else if(isSendMail == false)
+				else if (isSendMail == false)
 				{
 					return BadRequest($"Invitation is already sent to {email}. Please check mail and confirm invitation");
 				}
-				if(user.StatusId == Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"))
+				if (user.StatusId == Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"))
 				{
 					return BadRequest("Can't invite inactive user !!!");
 				}
-				
+
 			}
 
 			var projectMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
@@ -112,9 +121,9 @@ namespace Capstone.API.Controllers
 			return Ok(projectMember);
 		}
 
-        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        //  31085E0A-EEDC-495D-BD68-94A60A661B05 - Browse Projects
-        [HttpPost("projects/close-project")]
+		//  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		//  31085E0A-EEDC-495D-BD68-94A60A661B05 - Browse Projects
+		[HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
 			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
@@ -133,8 +142,8 @@ namespace Capstone.API.Controllers
 			return Ok(project);
 		}
 
-        //  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPost("projects/decline-invitation")]
+		//  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPost("projects/decline-invitation")]
 		public async Task<IActionResult> InviteMemberDeclination(AcceptInviteRequest acceptInviteRequest)
 		{
 			var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
@@ -272,16 +281,16 @@ namespace Capstone.API.Controllers
 				return StatusCode(500);
 			}
 
-            return Ok(result);
-        }
+			return Ok(result);
+		}
 
-        [EnableQuery]
-        [HttpGet("projects/report/{projectId}")]
-        public async Task<ActionResult<GetProjectReportRequest>> GetProjectReport(Guid projectId)
-        {
-            var result = await _projectService.GetProjectReport(projectId);
-            return Ok(result);
-        }
+		[EnableQuery]
+		[HttpGet("projects/report/{projectId}")]
+		public async Task<ActionResult<GetProjectReportRequest>> GetProjectReport(Guid projectId)
+		{
+			var result = await _projectService.GetProjectReport(projectId);
+			return Ok(result);
+		}
 
 		[EnableQuery]
 		[HttpGet("projects/{projectId:Guid}")]
@@ -318,8 +327,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPost("roles")]
+		// E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPost("roles")]
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
 		{
 			var result = await _projectService.CreateProjectRole(createRoleRequest);
@@ -328,32 +337,32 @@ namespace Capstone.API.Controllers
 				return StatusCode(500);
 			}
 
-            return Ok(result);
-        }
+			return Ok(result);
+		}
 
-        //4  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		//4  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
 		//   User IsAdmin == true
-        [HttpPut("roles")]
-        public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
-        {
+		[HttpPut("roles")]
+		public async Task<IActionResult> UpdateMemberRole(UpdateMemberRoleRequest updateMemberRoleRequest)
+		{
 			var member = await _projectMemberService.CheckExist(updateMemberRoleRequest.MemberId);
 			if (!member)
 			{
 				return NotFound("Member not exist");
 			}
-            if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
-                return BadRequest("You can not change to this role !");
-            var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
+			if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+				return BadRequest("You can not change to this role !");
+			var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
 
 			return Ok(result);
 		}
 
 		[HttpPut("projects/info")]
-		public async Task<IActionResult> UpdateProjectInfo( UpdateProjectNameInfo updateProjectNameInfo)
+		public async Task<IActionResult> UpdateProjectInfo(UpdateProjectNameInfo updateProjectNameInfo)
 		{
 			var project = await _projectService.CheckExist(updateProjectNameInfo.ProjectId);
 			if (!project)
@@ -365,9 +374,9 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        //2 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPut("projects/privacy")]
-		public async Task<IActionResult> UpdateProjectPrivacy( UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
+		//2 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPut("projects/privacy")]
+		public async Task<IActionResult> UpdateProjectPrivacy(UpdateProjectPrivacyRequest updateProjectPrivacyRequest)
 		{
 			var project = await _projectService.CheckExist(updateProjectPrivacyRequest.ProjectId);
 			if (!project)
@@ -379,8 +388,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        //1  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPut("projects/delete")]
+		//1  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPut("projects/delete")]
 		public async Task<IActionResult> DeleteProject(DeleteProjectRequest deleteProjectRequest)
 		{
 			var pro = await _projectService.CheckExist(deleteProjectRequest.ProjectId);
@@ -389,7 +398,7 @@ namespace Capstone.API.Controllers
 				return NotFound("Project not exist");
 			}
 			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
-		
+
 			if (project.IsDelete == true)
 			{
 				return BadRequest("Project is already deleted");
@@ -400,8 +409,8 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        //5  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPut("project/restoration")]
+		//5  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPut("project/restoration")]
 		public async Task<IActionResult> RestoreProjectStatus(DeleteProjectRequest deleteProjectRequest)
 		{
 			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
@@ -420,17 +429,17 @@ namespace Capstone.API.Controllers
 			}
 		}
 
-        // E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPut("project/change-schema/{projectId}")]
+		// E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPut("project/change-schema/{projectId}")]
 		public async Task<IActionResult> ChangeProjectSchema(Guid projectId, UpdatePermissionSchemaRequest request)
 		{
-			var result = await _projectService.UpdateProjectSchema(projectId,request);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
-            return Ok(result);
-        }
+			var result = await _projectService.UpdateProjectSchema(projectId, request);
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+			return Ok(result);
+		}
 	}
 }
 

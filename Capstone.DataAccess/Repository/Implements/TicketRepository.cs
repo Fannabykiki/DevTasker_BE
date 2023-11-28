@@ -110,9 +110,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
@@ -124,9 +122,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeId = x.TypeId,
 									TaskId = x.TaskId,
 									TypeName = x.TicketType.Title,
-									ExpireTime = x.ExprireTime == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									ExpireTime = x.ExprireTime == null ? null : x.ExprireTime.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								}).ToListAsync();
 			return taskList;
 		}
@@ -143,13 +139,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-									ExpireTime = x.ExprireTime == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									ExpireTime = x.ExprireTime == null ? null : x.ExprireTime.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
 									PriorityName = x.PriorityLevel.Title,
@@ -166,13 +158,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									{
 										Content = m.Content,
 										CommentId = m.CommentId,
-										UpdateAt = m.UpdateAt == null
-  ? null
-  : m.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										UpdateAt = m.UpdateAt == null ? null : m.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										CreateAt = m.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-										DeleteAt = m.DeleteAt == null
-  ? null
-  : m.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+										DeleteAt = m.DeleteAt == null ? null : m.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 										ReplyTo = m.ReplyTo,
 										TaskId = m.TaskId,
 										User = new GetUserCommentResponse
@@ -188,12 +176,8 @@ namespace Capstone.DataAccess.Repository.Implements
 														Content = c.Content,
 														CreateAt = c.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 														ReplyTo = m.CommentId,
-														DeleteAt = c.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-														UpdateAt = c.UpdateAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+														DeleteAt = c.DeleteAt == null ? null : c.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+														UpdateAt = c.UpdateAt == null ? null : c.UpdateAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 														TaskId = c.TaskId,
 														User = new GetUserCommentResponse
 														{
@@ -241,9 +225,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									CreateBy = x.ProjectMember.Users.UserName,
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
-									DeleteAt = x.DeleteAt == null
-  ? null
-  : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = x.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									InterationName = x.Interation.InterationName,
 									IsDelete = x.IsDelete,
