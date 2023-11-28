@@ -126,7 +126,7 @@ public class ProjectService : IProjectService
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProject.Board.BoardId,
 				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-				InterationName = "Interation 1",
+				InterationName = "Sprint 1",
 				InterationId = Guid.NewGuid(),
 			};
 

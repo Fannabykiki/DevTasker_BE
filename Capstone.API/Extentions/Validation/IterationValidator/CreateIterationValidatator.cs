@@ -13,7 +13,7 @@ namespace Capstone.API.Extentions.Validation.IterationValidator
         RuleFor(request => request.StartDate).NotEmpty().WithMessage("Start date cannot be blank");
 
         RuleFor(request => request.EndDate)
-            .Must((request, endDate) => endDate > request.StartDate)
+            .Must((request, endDate) => endDate.Date > request.StartDate.Date)
             .WithMessage("The end date must be greater than the start date");
     }
 }
