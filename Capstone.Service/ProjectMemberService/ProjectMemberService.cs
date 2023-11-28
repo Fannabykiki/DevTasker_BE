@@ -165,5 +165,11 @@ namespace Capstone.Service.ProjectMemberService
 				}
 			}
 		}
+
+		public async Task<ViewMemberProject> GetMemberByMemberId(Guid memberId)
+		{
+			var member = await _projectMemberRepository.GetAsync(x=>x.MemberId == memberId,null);
+			return _mapper.Map<ViewMemberProject>(member);
+		}
 	}
 }

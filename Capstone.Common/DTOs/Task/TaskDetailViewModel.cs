@@ -10,7 +10,7 @@ namespace Capstone.Common.DTOs.Task
 		public string? Description { get; set; }
 		public string StartDate { get; set; }
 		public string DueDate { get; set; }
-		public string ExpireTime { get; set; }
+		public string? ExpireTime { get; set; }
 		public string CreateTime { get; set; }
 		public string? DeleteAt { get; set; }
 		public bool? IsDelete { get; set; }
