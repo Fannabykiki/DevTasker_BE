@@ -262,7 +262,7 @@ namespace Capstone.Service.Hubs
                 {
                     continue;
                 }
-                await _hubContext.Clients.User(user.ToString()).SendAsync("EmitNotification");
+                await Clients.User(user.ToString()).SendAsync("EmitNotification");
             }
             await _notificationRepository.SaveChanges();
 
