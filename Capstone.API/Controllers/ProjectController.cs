@@ -272,10 +272,15 @@ namespace Capstone.API.Controllers
 		}
 
 		[EnableQuery]
-		[HttpGet("projects/permission")]
-		public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetPermisisionByUseriId(Guid projectId, Guid userId)
+		[HttpGet("projects/member-permission")]
+		public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetPermisisionByUseriId(GetPermissionByProjectRequest request)
 		{
-			var result = await _projectService.GetPermissionByUserId(projectId, userId);
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need login first");
+            }
+            var result = await _projectService.GetPermissionByUserId(request.ProjectId, userId);
 			if (result == null)
 			{
 				return StatusCode(500);
