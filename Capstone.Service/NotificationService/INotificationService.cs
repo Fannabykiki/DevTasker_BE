@@ -11,5 +11,8 @@ namespace Capstone.Service.NotificationService
     public interface INotificationService
     {
         public Task<List<NotificationViewModel>> GetLatestNotifications(Guid userid, int page = 10);
+        public System.Threading.Tasks.Task SendNotificationChangeProjectStatus(string projectId, string userId);
+        public System.Threading.Tasks.Task SendNotificationChangeTaskStatus(string taskId, string userId);
+        public System.Threading.Tasks.Task SendNotificationCommentTask(string commentId, string userId, string action);
     }
 }

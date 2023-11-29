@@ -81,6 +81,7 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
     opt.UseSqlServer(configuration.GetConnectionString("DBConnString"));
 });
 // Add services to the container.
+builder.Services.AddSingleton<PresenceTracker>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -171,6 +172,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                    ValidAudience = JwtConstant.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key)),
                };
+               
            }
        );
 builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
@@ -221,7 +223,7 @@ app.MapControllers();
 
 app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
-RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *");
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
-app.MapHub<NotificationHub>("/notificattionHub");
+app.MapHub<NotificationHub>("/notificattion");
 app.Run();
