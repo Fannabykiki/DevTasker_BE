@@ -794,7 +794,6 @@ namespace Capstone.Service.TaskService
 				};
 			}
 		}
-	}
         public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
         {
 			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId,null);
