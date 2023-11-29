@@ -721,10 +721,9 @@ namespace Capstone.Service.TaskService
 						status.Order += 1;
 						await _boardStatusRepository.UpdateAsync(status);
 						await _boardStatusRepository.SaveChanges();
-						transaction.Commit();
 					}
 				}
-
+				transaction.Commit();
 				return new UpdateTaskOrderResponse
 				{
 					BoardId = boardstatus.BoardId,
