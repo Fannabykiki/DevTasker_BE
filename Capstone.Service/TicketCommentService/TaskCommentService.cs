@@ -153,5 +153,11 @@ namespace Capstone.Service.TicketCommentService
             if (comment == null) return false;
             return true;
 		}
-	}
+
+        public async Task<Guid?> GetProjectIdFromComment(Guid commentId)
+        {
+            var comment = await _taskCommentRepository.GetAsync(x => x.CommentId == commentId,null);
+            return comment.Task.Interation.Board.Project.ProjectId;
+        }
+    }
 }

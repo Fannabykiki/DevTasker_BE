@@ -22,6 +22,7 @@ namespace Capstone.Service.TicketService
 		Task<BaseResponse> RestoreTask(RestoreTaskRequest restoreTaskRequest);
 		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
 		Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
+        Task<Guid?> GetProjectIdOfTask(Guid taskId);
 		Task<bool> CheckExist(Guid taskId);
 	}
 }

@@ -16,7 +16,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using static Capstone.Common.Constants.StatusNameConstant;
+using static Capstone.Common.Constants.CapstoneNameConstant;
 
 namespace Capstone.Service.Hubs
 {
@@ -65,15 +65,22 @@ namespace Capstone.Service.Hubs
         }
         public async System.Threading.Tasks.Task SendNotificationChangeTaskStatus(string taskId, string userId)
         {
-            var task = await _taskRepository.GetQuery().FirstOrDefaultAsync(x => x.TaskId.ToString() == taskId);
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .FirstOrDefaultAsync(x => x.TaskId.ToString() == taskId);
             if (task == null) return;
-            if (task.Status.Title != StatusNameConstant.Task.ToDo
-                || task.Status.Title != StatusNameConstant.Task.Done
-                || task.Status.Title != StatusNameConstant.Task.Deleted) return;
+            if (task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.ToDo
+                && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done
+                && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Deleted) return;
 
             var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
                 .Where(x => x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor).Select(y => y.UserId);
-            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.MemberId == task.CreateBy);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
             var listReceiver = lstProjectAdmin;
             var title = "";
             var description = "";
@@ -81,25 +88,25 @@ namespace Capstone.Service.Hubs
 
             switch (task.Status.Title)
             {
-                case StatusNameConstant.Task.ToDo:
+                case CapstoneNameConstant.TaskStatusNameConstant.ToDo:
 
                     title = "[Task Is Ready]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.ToDo}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.ToDo}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     break;
 
-                case StatusNameConstant.Task.Done:
+                case CapstoneNameConstant.TaskStatusNameConstant.Done:
 
                     title = "[Task Is Done]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.Done}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Done}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
                     break;
 
-                case StatusNameConstant.Task.Deleted:
+                case CapstoneNameConstant.TaskStatusNameConstant.Deleted:
 
                     title = "[Task Is Deleted]";
-                    description = $"The task {task.Title} has been set to {StatusNameConstant.Task.Deleted}";
+                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Deleted}";
                     listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
                     listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
                     break;
@@ -115,17 +122,17 @@ namespace Capstone.Service.Hubs
                 IsRead = false,
                 RecerverId = id
             });
-            foreach(var notif in listNotification)
+            foreach (var notif in listNotification)
             {
                 await _notificationRepository.UpdateAsync(notif);
             }
-            
+
             await _notificationRepository.SaveChanges();
 
             //send mail for admins
             await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
 
-            foreach(var user in listReceiver)
+            foreach (var user in listReceiver)
             {
                 if (!await _presenceTracker.IsOnlineUser(user.ToString()))
                 {
@@ -137,13 +144,14 @@ namespace Capstone.Service.Hubs
                     Reload = true,
                 });
             }
-            
+
         }
         public async System.Threading.Tasks.Task SendNotificationChangeProjectStatus(string projectId, string userId)
         {
-            var project = await _projectRepository.GetQuery().FirstOrDefaultAsync(x => x.ProjectId.ToString() == projectId);
+            var project = await _projectRepository.GetQuery().Include("Status").FirstOrDefaultAsync(x => x.ProjectId.ToString() == projectId);
+            var projectMembers = await _projectMemberRepository.GetQuery().Include("Role").Where(x => x.ProjectId.ToString() == projectId).ToListAsync();
             if (project == null) return;
-            var lstReceived = project.ProjectMembers.Where(x => x.UserId.ToString() != userId).Select(x => x.UserId);
+            var lstReceived = projectMembers.Where(x => x.UserId.ToString() != userId).Select(x => x.UserId);
             var lstNotification = lstReceived.Select(x => new Notification
             {
                 NotificationId = new Guid(),
@@ -177,7 +185,21 @@ namespace Capstone.Service.Hubs
         public async System.Threading.Tasks.Task SendNotificationCommentTask(string commentId, string userId, string action)
         {
             var comment = await _taskCommentRepository.GetQuery().FirstOrDefaultAsync(x => x.CommentId.ToString() == commentId);
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Users)
+                .FirstOrDefaultAsync(x => x.TaskId == comment.TaskId);
+            if (task == null) return;
             if (comment == null) return;
+            comment.Task = task;
             var lstReceived = comment.Task.Interation.Board.Project.ProjectMembers
                 .Where(x => x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor || x.MemberId == comment.Task.AssignTo)
                 .Select(y => new
