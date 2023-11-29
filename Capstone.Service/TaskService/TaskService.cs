@@ -507,7 +507,7 @@ namespace Capstone.Service.TaskService
 
 		public async Task<List<StatusTaskViewModel>> GetAllTaskStatus(Guid projectId)
 		{
-			var result = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
+			var result = (await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == projectId, null)).OrderBy(x => x.Order);
 			return _mapper.Map<List<StatusTaskViewModel>>(result);
 		}
 
@@ -708,22 +708,73 @@ namespace Capstone.Service.TaskService
 			using var transaction = _ticketRepository.DatabaseTransaction();
 			try
 			{
+				var count = 0;
 				var boardstatus = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == updateTaskOrderRequest.StatusId, null);
+				var taskStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == boardstatus.BoardId, null);
+				//2					<		//5
+				if (boardstatus.Order < updateTaskOrderRequest.Order)
+				{
+					//5
+					foreach (var status in taskStatus)
+					{
+						if (count == updateTaskOrderRequest.Order - boardstatus.Order)
+						{
+							break;
+						}
+						if (updateTaskOrderRequest.Order == boardstatus.Order)
+						{
+							break;
+						}
+						//1 2 3 4 5
+						if (status.Order > boardstatus.Order)
+						{
+							status.Order -= 1;
+							var board = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == status.BoardStatusId, null);
+							await _boardStatusRepository.UpdateAsync(board);
+							await _boardStatusRepository.SaveChanges();
+							count++;
+						}
+					}
+				}
+				else if (boardstatus.Order == updateTaskOrderRequest.Order)
+				{
+					return new UpdateTaskOrderResponse
+					{
+						BoardId = boardstatus.BoardId,
+						BoardStatusId = boardstatus.BoardStatusId,
+						Order = boardstatus.Order,
+						Title = boardstatus.Title,
+						IsSucceed = true,
+						Message = "Nothing to update"
+					};
+				}
+				else
+				{
+					foreach (var status in taskStatus)
+					{
+						if (count == boardstatus.Order - updateTaskOrderRequest.Order)
+						{
+							break;
+						}
+						if (updateTaskOrderRequest.Order == boardstatus.Order)
+						{
+							break;
+						}
+						else if (status.Order >= updateTaskOrderRequest.Order)
+						{
+							status.Order += 1;
+							var board = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == status.BoardStatusId, null);
+							await _boardStatusRepository.UpdateAsync(board);
+							await _boardStatusRepository.SaveChanges();
+							count++;
+						}
+					}
+				}
 				boardstatus.Order = updateTaskOrderRequest.Order;
 				await _boardStatusRepository.UpdateAsync(boardstatus);
 				await _boardStatusRepository.SaveChanges();
-
-				var taskStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardStatusId == updateTaskOrderRequest.StatusId, null);
-				foreach (var status in taskStatus)
-				{
-					if (status.Order >= updateTaskOrderRequest.Order)
-					{
-						status.Order += 1;
-						await _boardStatusRepository.UpdateAsync(status);
-						await _boardStatusRepository.SaveChanges();
-					}
-				}
 				transaction.Commit();
+
 				return new UpdateTaskOrderResponse
 				{
 					BoardId = boardstatus.BoardId,
@@ -736,12 +787,12 @@ namespace Capstone.Service.TaskService
 			}
 			catch
 			{
+				transaction.RollBack();
 				return new UpdateTaskOrderResponse
 				{
 					IsSucceed = false,
 					Message = "Update fail"
 				};
-				transaction.RollBack();
 			}
 		}
 	}
