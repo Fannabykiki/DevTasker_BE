@@ -245,7 +245,7 @@ namespace Capstone.Service.TaskService
 								};
 
 								var newTask = await _ticketRepository.CreateAsync(ticketEntity);
-								
+
 								await _ticketRepository.SaveChanges();
 								transaction.Commit();
 
@@ -332,7 +332,7 @@ namespace Capstone.Service.TaskService
 				task.PriorityId = updateTicketRequest.PriorityId;
 				task.StatusId = updateTicketRequest.StatusId;
 
-				
+
 
 				var updateTask = await _ticketRepository.UpdateAsync(task);
 				await _ticketRepository.SaveChanges();
@@ -358,7 +358,7 @@ namespace Capstone.Service.TaskService
 					{
 						IsSucceed = true,
 						Message = task.PrevId == null ? "Update Task Successfully" : "Update Subtask Successfully"
-                    },
+					},
 				};
 			}
 			catch (Exception ex)
@@ -380,10 +380,10 @@ namespace Capstone.Service.TaskService
 		{
 			using var transaction = _iterationRepository.DatabaseTransaction();
 			try
-			{	
-				var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x=>x.Status);
+			{
+				var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x => x.Status);
 				var newStatus = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == updateTaskStatusRequest.StatusId, null);
-				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == updateTaskStatusRequest.MemberId, x=>x.Users);
+				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == updateTaskStatusRequest.MemberId, x => x.Users);
 				task.StatusId = updateTaskStatusRequest.StatusId;
 
 				var newHistory = new TaskHistory
@@ -463,7 +463,7 @@ namespace Capstone.Service.TaskService
 			using var transaction = _iterationRepository.DatabaseTransaction();
 			try
 			{
-				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == restoreTaskRequest.TaskId, x=>x.Status)!;
+				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == restoreTaskRequest.TaskId, x => x.Status)!;
 				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == restoreTaskRequest.MemberId, x => x.Users);
 
 				selectedTicket.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
@@ -701,6 +701,49 @@ namespace Capstone.Service.TaskService
 			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, null);
 			if (task == null) return false;
 			return true;
+		}
+
+		public async Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest)
+		{
+			using var transaction = _ticketRepository.DatabaseTransaction();
+			try
+			{
+				var boardstatus = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == updateTaskOrderRequest.StatusId, null);
+				boardstatus.Order = updateTaskOrderRequest.Order;
+				await _boardStatusRepository.UpdateAsync(boardstatus);
+				await _boardStatusRepository.SaveChanges();
+
+				var taskStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardStatusId == updateTaskOrderRequest.StatusId, null);
+				foreach (var status in taskStatus)
+				{
+					if (status.Order >= updateTaskOrderRequest.Order)
+					{
+						status.Order += 1;
+						await _boardStatusRepository.UpdateAsync(status);
+						await _boardStatusRepository.SaveChanges();
+						transaction.Commit();
+					}
+				}
+
+				return new UpdateTaskOrderResponse
+				{
+					BoardId = boardstatus.BoardId,
+					BoardStatusId = boardstatus.BoardStatusId,
+					Order = boardstatus.Order,
+					Title = boardstatus.Title,
+					IsSucceed = true,
+					Message = "Update successfully"
+				};
+			}
+			catch
+			{
+				return new UpdateTaskOrderResponse
+				{
+					IsSucceed = false,
+					Message = "Update fail"
+				};
+				transaction.RollBack();
+			}
 		}
 	}
 }

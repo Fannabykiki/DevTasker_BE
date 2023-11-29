@@ -23,5 +23,6 @@ namespace Capstone.Service.TicketService
 		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
 		Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
 		Task<bool> CheckExist(Guid taskId);
+		Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest);
 	}
 }

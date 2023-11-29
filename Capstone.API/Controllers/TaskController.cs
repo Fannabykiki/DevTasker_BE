@@ -221,8 +221,21 @@ namespace Capstone.API.Controllers
 			return Ok(result);
 		}
 
-        //4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
-        [HttpPut("tasks/deletion")]
+		[HttpPut("tasks/status/order")]
+		public async Task<IActionResult> MoveStastus(UpdateTaskOrderRequest updateTaskOrderRequest)
+		{
+			var task = await _taskService.CheckExist(updateTaskOrderRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var result = await _taskService.UpdateTaskOrder(updateTaskOrderRequest);
+
+			return Ok(result);
+		}
+
+		//4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
+		[HttpPut("tasks/deletion")]
 		public async Task<IActionResult> DeleteTicket(RestoreTaskRequest restoreTaskRequest)
 		{
 			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
