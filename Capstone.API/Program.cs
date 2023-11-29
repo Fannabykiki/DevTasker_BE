@@ -153,11 +153,14 @@ builder.Services.AddControllers()
                     options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());                  
                 });
 
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+//}));
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
-
 //add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
            options =>
@@ -172,7 +175,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                    ValidAudience = JwtConstant.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key)),
                };
-               
+               options.Events = new JwtBearerEvents
+               {
+                   OnMessageReceived = context =>
+                   {
+                       var accessToken = context.Request.Query["access_token"];
+
+                       var path = context.HttpContext.Request.Path;
+                       if (!string.IsNullOrEmpty(accessToken) &&
+                           path.StartsWithSegments("/notification"))
+                       {
+                           context.Token = accessToken;
+                       }
+
+                       return System.Threading.Tasks.Task.CompletedTask;
+                   }
+               };
+
            }
        );
 builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
@@ -225,5 +244,5 @@ app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
-app.MapHub<NotificationHub>("/notificattion");
+app.MapHub<NotificationHub>("/notification");
 app.Run();
