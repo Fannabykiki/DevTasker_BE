@@ -224,11 +224,11 @@ namespace Capstone.API.Controllers
 		[HttpPut("tasks/status/order")]
 		public async Task<IActionResult> MoveStastus(UpdateTaskOrderRequest updateTaskOrderRequest)
 		{
-			var task = await _taskService.CheckExist(updateTaskOrderRequest.TaskId);
-			if (!task)
-			{
-				return NotFound("Task not found");
-			}
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
 			var result = await _taskService.UpdateTaskOrder(updateTaskOrderRequest);
 
 			return Ok(result);
