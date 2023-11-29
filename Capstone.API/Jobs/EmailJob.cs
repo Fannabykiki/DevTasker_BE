@@ -22,7 +22,8 @@ namespace Capstone.API.Jobs
         }
         public async Task RunJob()
         {
-            var lstTaskToSendEmail = await _taskRepository.GetQuery().Where(x => x.DueDate >= DateTime.Today.AddDays(-3) && !x.IsDelete.Value && x.Status.Title != StatusNameConstant.Task.Done).ToListAsync();
+            Console.WriteLine($"Deadline email check and send at {DateTime.Now}");
+            var lstTaskToSendEmail = await _taskRepository.GetQuery().Where(x => x.DueDate >= DateTime.Today.AddDays(-3) && !x.IsDelete.Value && x.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done).ToListAsync();
             var lstAssigned = lstTaskToSendEmail.Select(x => x.AssignTo).ToList();
             var lstCreatedBBy = lstTaskToSendEmail.Select(x => x.CreateBy).ToList();
             var lstMemberToSendMail = await _projectMemberRepository.GetQuery().Where(x => lstAssigned.Contains(x.MemberId) || lstCreatedBBy.Contains(x.MemberId)).Select(d=> new
