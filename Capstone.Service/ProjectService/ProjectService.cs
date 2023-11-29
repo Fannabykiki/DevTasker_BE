@@ -126,7 +126,7 @@ public class ProjectService : IProjectService
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProject.Board.BoardId,
 				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-				InterationName = "Interation 1",
+				InterationName = "Sprint 1",
 				InterationId = Guid.NewGuid(),
 			};
 
@@ -268,7 +268,7 @@ public class ProjectService : IProjectService
 
 	public async Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId)
 	{
-		var projects = await _projectMemberRepository.GetProjectMembers(projectId);
+		var projects = await _projectMemberRepository.GetAllProjectMember(projectId);
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
@@ -403,7 +403,7 @@ public class ProjectService : IProjectService
 	{
 		var projectInfoRequests = new ViewProjectInfoRequest();
 		var project = await _projectRepository.GetAsync(p => p.ProjectId == projectId, p => p.Status)!;
-		var members = await _projectMemberRepository.GetAllProjectMember(projectId)!;
+		var members = await _projectMemberRepository.GetProjectMembers(projectId)!;
 		var boardStatus = await _boardStatusRepository.GetAllWithOdata(x => x.BoardId == project.ProjectId, null);
 		var totaltaskCompleted = 10;
 		foreach (var item in boardStatus)

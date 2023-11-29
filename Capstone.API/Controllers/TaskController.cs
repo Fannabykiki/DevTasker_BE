@@ -128,11 +128,11 @@ namespace Capstone.API.Controllers
 				var interation = await _interationService.GetIterationsById(request.InterationId);
 				if (request.StartDate.Date < interation.StartDate.Date)
 				{
-					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+					return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 				}
 				if (request.DueDate.Date > interation.EndDate.Date)
 				{
-					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+					return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 				}
 				var userId = this.GetCurrentLoginUserId();
 				if (userId == Guid.Empty)
@@ -148,11 +148,11 @@ namespace Capstone.API.Controllers
 
 				if (request.StartDate.Date < DateTime.Parse(interation.StartDate).Date)
 				{
-					return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+					return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 				}
 				if (request.DueDate.Date > DateTime.Parse(interation.EndDate).Date)
 				{
-					return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+					return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 				}
 				var userId = this.GetCurrentLoginUserId();
 				if (userId == Guid.Empty)
@@ -185,15 +185,14 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't assign to unavailable member");
 			}
-			var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
-
-			if (request.StartDate.Date < DateTime.Parse(interation.StartDate).Date)
+			var task = await _taskService.GetTaskDetail(request.TaskId);
+			if (request.StartDate.Date < DateTime.Parse(task.StartDate).Date)
 			{
-				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+				return BadRequest("Can't create new task with start date before task's start date. Please update and try again");
 			}
-			if (request.DueDate.Date > DateTime.Parse(interation.EndDate).Date)
+			if (request.DueDate.Date > DateTime.Parse(task.DueDate).Date)
 			{
-				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+				return BadRequest("Cant create new task with end date after task's end date. Please update and try again");
 			}
 			var userId = this.GetCurrentLoginUserId();
 			if (userId == Guid.Empty)
@@ -240,13 +239,13 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
-			if (updateTicketRequest.StartDate <= interation.StartDate)
+			if (updateTicketRequest.StartDate.Date < interation.StartDate.Date)
 			{
-				return BadRequest("Can't create new task with start date before interation's start date. Please update and try again");
+				return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 			}
-			if (updateTicketRequest.DueDate >= interation.EndDate)
+			if (updateTicketRequest.DueDate.Date > interation.EndDate.Date)
 			{
-				return BadRequest("Cant create new task with end date after interation's end date. Please update and try again");
+				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 			}
 			var userId = this.GetCurrentLoginUserId();
 			if (userId == Guid.Empty)
@@ -348,7 +347,7 @@ namespace Capstone.API.Controllers
 			}
 			else
 			{
-				return BadRequest("Cant restore this Task.Over 30 days from delete day");
+				return BadRequest("Can't restore this Task.Over 30 days from delete day");
 			}
 		}
 	}
