@@ -219,7 +219,7 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Account dont match with invitation");
 			}
-			var projectMember = await _projectMemberService.AcceptInvitation(user.UserId, acceptInviteRequest);
+			var projectMember = await _projectMemberService.DeclineInvitation(user.UserId, acceptInviteRequest);
 
 			return Ok(projectMember);
 		}
@@ -308,6 +308,7 @@ namespace Capstone.API.Controllers
 
 			return Ok(result);
 		}
+		
 
 		[HttpGet("projects/status")]
 		public async Task<ActionResult<List<ProjectStatusViewModel>>> GetProjectStatus(Guid projectId)
