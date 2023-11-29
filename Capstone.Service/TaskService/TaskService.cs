@@ -702,7 +702,6 @@ namespace Capstone.Service.TaskService
 			if (task == null) return false;
 			return true;
 		}
-
 		public async Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest)
 		{
 			using var transaction = _ticketRepository.DatabaseTransaction();
@@ -796,4 +795,11 @@ namespace Capstone.Service.TaskService
 			}
 		}
 	}
+        public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
+        {
+			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId,null);
+			var projectId = task.Interation.Board.Project.ProjectId;
+			return projectId;
+        }
+    }
 }

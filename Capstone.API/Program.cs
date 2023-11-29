@@ -35,6 +35,9 @@ using Hangfire;
 using Capstone.API.Jobs;
 using Hangfire.Dashboard;
 using Capstone.Service.Hubs;
+using Capstone.API.Extentions.RolePermissionAuthorize;
+using Microsoft.AspNetCore.Authorization;
+using Capstone.Common.Constants;
 
 static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
@@ -78,6 +81,7 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
     opt.UseSqlServer(configuration.GetConnectionString("DBConnString"));
 });
 // Add services to the container.
+builder.Services.AddSingleton<PresenceTracker>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -133,8 +137,8 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
-builder.Services.AddTransient<IEmailJob, EmailJob>();
-
+builder.Services.AddScoped<IEmailJob, EmailJob>();
+builder.Services.AddScoped<RolePermissionFilter>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
@@ -146,7 +150,7 @@ builder.Services.AddControllers()
 					options.ImplicitlyValidateRootCollectionElements = true;
 
                     // Automatic registration of validators in assembly
-                    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());                  
                 });
 
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
@@ -168,6 +172,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                    ValidAudience = JwtConstant.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key)),
                };
+               
            }
        );
 builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
@@ -188,8 +193,15 @@ builder.Services.AddAuthorization(
             policy.RequireAuthenticatedUser();
             policy.RequireRole("993951AD-5457-41B9-8FFF-4D1C1FA557D0");
         });
+        options.AddPolicy(AuthorizationRequirementNameConstant.RolePermission, policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.Requirements.Add(new PermissionRoleRequirement());
+        });
     }
     );
+builder.Services.AddSingleton<IAuthorizationHandler, AppAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationService, RolePermissionAuthorizationService>();
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
@@ -210,7 +222,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseHangfireDashboard("/hangfire");
-//RecurringJob.RemoveIfExists("email-for-deadline");
-//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *");
-app.MapHub<NotificationHub>("/notificattionHub");
+RecurringJob.RemoveIfExists("email-for-deadline");
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
+app.MapHub<NotificationHub>("/notificattion");
 app.Run();

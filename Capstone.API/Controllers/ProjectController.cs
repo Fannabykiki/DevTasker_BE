@@ -1,5 +1,7 @@
 using AutoMapper.Execution;
 using Capstone.API.Extentions;
+using Capstone.API.Extentions.RolePermissionAuthorize;
+using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
@@ -10,8 +12,10 @@ using Capstone.Service.LoggerService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.CodeAnalysis;
 
 namespace Capstone.API.Controllers
 {
@@ -24,14 +28,21 @@ namespace Capstone.API.Controllers
 		private readonly IProjectMemberService _projectMemberService;
 		private readonly IUserService _userService;
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IAuthorizationService _authorizationService;
 
-		public ProjectController(ILoggerManager logger, IProjectService projectService, IHttpContextAccessor httpContextAccessor, IProjectMemberService projectMemberService, IUserService userService)
+		public ProjectController(ILoggerManager logger, 
+			IProjectService projectService, 
+			IHttpContextAccessor httpContextAccessor, 
+			IProjectMemberService projectMemberService, 
+			IUserService userService,
+			IAuthorizationService authorizationService)
 		{
 			_logger = logger;
 			_projectService = projectService;
 			_httpContextAccessor = httpContextAccessor;
 			_projectMemberService = projectMemberService;
 			_userService = userService;
+			_authorizationService = authorizationService;
 		}
 
 		[HttpPost("projects")]
@@ -47,6 +58,18 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/remove-member")]
 		public async Task<ActionResult<BaseResponse>> RemoveProjectMember(Guid memberId)
 		{
+			var projectId = await _projectMemberService.GetProjectIdFromMember(memberId);
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { projectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+
 			var member = await _projectMemberService.GetMemberByMemberId(memberId);
 			if (member.IsOwner)
 			{
@@ -74,8 +97,20 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/invitation")]
 		public async Task<IActionResult> InviteMember(InviteUserRequest inviteUserRequest)
 		{
-			var projectPrivacy = await _projectService.GetProjectByProjectId(inviteUserRequest.ProjectId);
-			if (projectPrivacy.PrivacyStatus == false)
+            //Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { inviteUserRequest.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			};
+
+            var projectPrivacy = await _projectService.GetProjectByProjectId(inviteUserRequest.ProjectId);
+			if(projectPrivacy.PrivacyStatus == false)
 			{
 				return BadRequest("Your project is private status. Can't invite any member");
 			}
@@ -126,7 +161,19 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
-			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
+			//Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { changeProjectStatusRequest.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects, "Browse Projects" }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+
+            var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
 			if (pro != 0)
 			{
 				return BadRequest("Task of project hasn't done yet. Please set all task with status done before close project");
@@ -146,7 +193,19 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/decline-invitation")]
 		public async Task<IActionResult> InviteMemberDeclination(AcceptInviteRequest acceptInviteRequest)
 		{
-			var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
+            //Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { acceptInviteRequest.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+
+            var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
 			var uId = this.GetCurrentLoginUserId();
 			if (user == null)
 			{
@@ -273,10 +332,15 @@ namespace Capstone.API.Controllers
 		}
 
 		[EnableQuery]
-		[HttpGet("projects/permission")]
-		public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetPermisisionByUseriId(Guid projectId, Guid userId)
+		[HttpGet("projects/member-permission")]
+		public async Task<ActionResult<IQueryable<PermissionViewModel>>> GetPermisisionByUseriId(GetPermissionByProjectRequest request)
 		{
-			var result = await _projectService.GetPermissionByUserId(projectId, userId);
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need login first");
+            }
+            var result = await _projectService.GetPermissionByUserId(request.ProjectId, userId);
 			if (result == null)
 			{
 				return StatusCode(500);
@@ -332,7 +396,19 @@ namespace Capstone.API.Controllers
 		[HttpPost("roles")]
 		public async Task<IActionResult> CreateRole(CreateRoleRequest createRoleRequest)
 		{
-			var result = await _projectService.CreateProjectRole(createRoleRequest);
+			var projects = await _projectService.GetProjectByUserId(this.GetCurrentLoginUserId());
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = projects.Select(x=> x.ProjectId as Guid?).ToList(),
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+            var result = await _projectService.CreateProjectRole(createRoleRequest);
 			if (result == null)
 			{
 				return StatusCode(500);
@@ -343,10 +419,25 @@ namespace Capstone.API.Controllers
 
 		//4  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
 		//   User IsAdmin == true
-		[HttpPut("roles")]
-		public async Task<IActionResult> UpdateMemberRole(UpdateMemberRoleRequest updateMemberRoleRequest)
-		{
+        [HttpPut("roles")]
+        public async Task<IActionResult> UpdateMemberRole( UpdateMemberRoleRequest updateMemberRoleRequest)
+        {
+			//Authorize
+			if (!this.HttpContext.User.GetIsAdmin()){
+                var projects = await _projectService.GetProjectByUserId(this.GetCurrentLoginUserId());
+                var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = projects.Select(x => x.ProjectId as Guid?).ToList(),
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized(ErrorMessage.InvalidPermission);
+                }
+            }
 			var member = await _projectMemberService.CheckExist(updateMemberRoleRequest.MemberId);
+
 			if (!member)
 			{
 				return NotFound("Member not exist");
@@ -370,6 +461,9 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Project not exist");
 			}
+
+
+
 			var result = await _projectService.UpdateProjectInfo(updateProjectNameInfo.ProjectId, updateProjectNameInfo);
 
 			return Ok(result);
@@ -384,7 +478,20 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Project not exist");
 			}
-			var result = await _projectService.UpdateProjectPrivacy(updateProjectPrivacyRequest.ProjectId, updateProjectPrivacyRequest);
+
+			//Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?>() { updateProjectPrivacyRequest.ProjectId},
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+
+            var result = await _projectService.UpdateProjectPrivacy(updateProjectPrivacyRequest.ProjectId, updateProjectPrivacyRequest);
 
 			return Ok(result);
 		}
@@ -398,8 +505,21 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Project not exist");
 			}
-			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
+			//Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { deleteProjectRequest.ProjectId},
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
 
+
+			}
+            var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
+		
 			if (project.IsDelete == true)
 			{
 				return BadRequest("Project is already deleted");
@@ -414,7 +534,21 @@ namespace Capstone.API.Controllers
 		[HttpPut("project/restoration")]
 		public async Task<IActionResult> RestoreProjectStatus(DeleteProjectRequest deleteProjectRequest)
 		{
-			var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
+            //Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { deleteProjectRequest.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+
+
+            }
+
+            var project = await _projectService.GetProjectByProjectId(deleteProjectRequest.ProjectId);
 			if (project.DeleteAt == null)
 			{
 				return BadRequest("Projects is still active. Cant restore it!!!");
@@ -434,13 +568,26 @@ namespace Capstone.API.Controllers
 		[HttpPut("project/change-schema/{projectId}")]
 		public async Task<IActionResult> ChangeProjectSchema(Guid projectId, UpdatePermissionSchemaRequest request)
 		{
-			var result = await _projectService.UpdateProjectSchema(projectId, request);
-			if (result == null)
-			{
-				return StatusCode(500);
-			}
-			return Ok(result);
-		}
+            //Authorize
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { projectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+
+
+            }
+            var result = await _projectService.UpdateProjectSchema(projectId,request);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok(result);
+        }
 	}
 }
 
