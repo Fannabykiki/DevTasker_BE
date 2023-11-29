@@ -18,5 +18,6 @@ namespace Capstone.Service.TicketCommentService
         Task<GetCommentResponse> UpdateComment(Guid id, ReplyCommentRequest updatedComment);
         Task<bool> RemoveComment(Guid id);
 		Task<bool> CheckExist(Guid commentId);
+        Task<Guid?> GetProjectIdFromComment(Guid commentId);
 	}
 }

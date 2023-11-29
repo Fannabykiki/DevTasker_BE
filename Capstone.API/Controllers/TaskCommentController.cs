@@ -1,7 +1,12 @@
 ﻿using Capstone.API.Extentions;
+using Capstone.API.Extentions.RolePermissionAuthorize;
+using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Comments;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TicketComment;
 using Capstone.Service.TicketCommentService;
+using Capstone.Service.TicketService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 
@@ -12,10 +17,16 @@ namespace Capstone.API.Controllers
     public class TaskCommentController : ControllerBase
     {
         private readonly ITaskCommentService _commentService;
+        private readonly ITaskService _taskService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public TaskCommentController(ITaskCommentService commentService)
+        public TaskCommentController(ITaskCommentService commentService, 
+            ITaskService taskService,
+            IAuthorizationService authorizationService)
         {
             _commentService = commentService;
+            _taskService = taskService;
+            _authorizationService = authorizationService;
         }
 
         [HttpPost("comment")]
@@ -40,6 +51,20 @@ namespace Capstone.API.Controllers
         [HttpDelete("comment/{commentId}")]
         public async Task<IActionResult> RemoveComment(Guid commentId)
         {
+            //Authorize
+            var projectId = await _commentService.GetProjectIdFromComment(commentId);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { projectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.DeleteOwnComments,
+                                                                    PermissionNameConstant.DeleteAllComments}
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+
             var success = await _commentService.RemoveComment(commentId);
             if (!success)
             {
@@ -84,6 +109,20 @@ namespace Capstone.API.Controllers
             {
                 return NotFound("Comment not exist");
             }
+
+            //Authorize
+            var projectId = await _commentService.GetProjectIdFromComment(updatedComment.CommentId);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { projectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.EditOwnComments, PermissionNameConstant.EditAllComments}
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+
             var updated = await _commentService.UpdateComment(updatedComment.CommentId, updatedComment);
             if (updated == null)
             {

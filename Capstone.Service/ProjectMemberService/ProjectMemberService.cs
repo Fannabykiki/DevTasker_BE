@@ -166,6 +166,16 @@ namespace Capstone.Service.ProjectMemberService
 			}
 		}
 
+        public async Task<Guid?> GetProjectIdFromMember(Guid memberId)
+        {
+			var projectmember = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
+			if(projectmember!= null)
+			{
+				return projectmember.ProjectId;
+			}
+			return null;
+        }
+    
 		public async Task<ViewMemberProject> GetMemberByMemberId(Guid memberId)
 		{
 			var member = await _projectMemberRepository.GetAsync(x=>x.MemberId == memberId,null);
