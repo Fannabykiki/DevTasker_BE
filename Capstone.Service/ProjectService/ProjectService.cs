@@ -272,18 +272,30 @@ public class ProjectService : IProjectService
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
-	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest, Guid updateBy)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
+
+			
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
-			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true)
-			{
-				return new BaseResponse { IsSucceed = false, Message = "Update Member Role successfully" };
-			}
+
+            if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+            {
+                if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
+                {
+                    return new BaseResponse { IsSucceed = false, Message = "Update Member Role successfully" };
+                }
+                var updateByUser = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.UserId == updateBy, null)!;
+                member.IsOwner = true;
+                updateByUser.IsOwner= false;
+				updateByUser.RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56");
+            }
+
+            
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
