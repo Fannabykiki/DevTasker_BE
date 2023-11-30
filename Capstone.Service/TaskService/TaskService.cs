@@ -527,7 +527,8 @@ namespace Capstone.Service.TaskService
 					BoardId = createNewTaskStatus.ProjectId,
 					BoardStatusId = Guid.NewGuid(),
 					Order = statusCount.Count() + 1,
-					Title = createNewTaskStatus.Title
+					Title = createNewTaskStatus.Title,
+					StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 				};
 				var status = await _boardStatusRepository.CreateAsync(newStatus);
 				await _boardStatusRepository.SaveChanges();
