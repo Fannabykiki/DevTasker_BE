@@ -203,10 +203,10 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Where(x => x.TaskId == taskId).Include(x => x.ProjectMember).ThenInclude(x => x.Users).ThenInclude(x => x.Status)
 								.Select(x => new TaskDetailViewModel
 								{
-									AssignTo = x.ProjectMember.Users.UserName,
+									AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a=>a.Users).Select(a=>a.Users.UserName).FirstOrDefault(),
 									AssignToStatus = x.ProjectMember.Users.Status.Title,
 									AssignToStatusId = x.ProjectMember.Users.Status.StatusId,
-									CreateBy = x.ProjectMember.Users.UserName,
+									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
 									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
