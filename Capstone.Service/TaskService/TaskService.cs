@@ -6,8 +6,6 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
-using Org.BouncyCastle.Math.EC.Rfc7748;
-using System.Diagnostics.Metrics;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
@@ -840,14 +838,42 @@ namespace Capstone.Service.TaskService
 			try
 			{
 				var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == deleteTaskStatusRequest.TaskStatusId, null);
+				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == deleteTaskStatusRequest.MemberId, x => x.Users);
+
+				status.StatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31");
+
 				await _boardStatusRepository.UpdateAsync(status);
 				await _boardStatusRepository.SaveChanges();
+
+				var taskList = await _ticketRepository.GetAllWithOdata(x => x.StatusId == deleteTaskStatusRequest.TaskStatusId,null);
+				foreach (var task in taskList)
+				{
+					var taskDetail = await _ticketRepository.GetAsync(x => x.TaskId == task.TaskId, null);
+
+					taskDetail.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+					taskDetail.IsDelete = true;
+					taskDetail.ExprireTime = DateTime.Parse(DateTime.Now.AddDays(30).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+
+					var newHistory = new TaskHistory
+					{
+						ChangeAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						ChangeBy = deleteTaskStatusRequest.MemberId,
+						CurrentStatusId = taskDetail.StatusId,
+						PreviousStatusId = taskDetail.StatusId,
+						HistoryId = Guid.NewGuid(),
+						TaskId = taskDetail.TaskId,
+						Title = $"Task {taskDetail.Title} has been deleted by {member.Users.UserName} because of removing {status.Title} status"
+					};
+
+					await _taskHistoryRepository.CreateAsync(newHistory);
+					await _taskHistoryRepository.SaveChanges();
+				}
 				transaction.Commit();
 
 				return new UpdateTaskOrderResponse
 				{
 					IsSucceed = true,
-					Message = "Update title successfully",
+					Message = "Delete successfully",
 					BoardId = status.BoardId,
 					BoardStatusId = status.BoardStatusId,
 					Order = status.Order,
@@ -860,9 +886,16 @@ namespace Capstone.Service.TaskService
 				return new UpdateTaskOrderResponse
 				{
 					IsSucceed = false,
-					Message = "Update title fail",
+					Message = "Delete fail",
 				};
 			}
+		}
+
+		public async Task<bool> CheckTaskStatus(Guid statusId)
+		{
+			var status = await _boardStatusRepository.GetAsync(x=>x.BoardStatusId == statusId,null);
+			if (status.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31")) return false;
+			return true;
 		}
 	}
 }

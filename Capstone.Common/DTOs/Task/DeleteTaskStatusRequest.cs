@@ -3,5 +3,7 @@
 	public class DeleteTaskStatusRequest
 	{
         public Guid TaskStatusId { get; set; }
+        public Guid MemberId { get; set; }
+
     }
 }

@@ -27,5 +27,6 @@ namespace Capstone.Service.TicketService
 		Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest);
 		Task<UpdateTaskOrderResponse> UpdateTaskTitle(UpdateTaskNameRequest updateTaskNameRequest);
 		Task<BaseResponse> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest);
+		Task<bool> CheckTaskStatus(Guid taskId);
 	}
 }

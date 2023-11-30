@@ -351,20 +351,8 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
-            
-            var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
-			if (!task)
-			{
-				return NotFound("Task not found");
-			}
-			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
-			if (taskDetail.DeleteAt == null)
-			{
-				return BadRequest("Task is still active. Cant restore it!!!");
-			}
-
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(restoreTaskRequest.TaskId);
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(restoreTaskRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
@@ -375,9 +363,23 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
+			if (taskDetail.DeleteAt == null)
+			{
+				return BadRequest("Task is still active. Cant restore it!!!");
+			}
+			var status = await _taskService.CheckTaskStatus(taskDetail.StatusId);
+			if (!status)
+			{
+				return BadRequest($"Can't restore task because {taskDetail.StatusName} column has been removed ");
+			}
 
-
-            if (DateTime.Parse(taskDetail.ExpireTime) >= DateTime.Now)
+			if (DateTime.Parse(taskDetail.ExpireTime).Date > DateTime.Now.Date)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest);
 				return Ok(response);
