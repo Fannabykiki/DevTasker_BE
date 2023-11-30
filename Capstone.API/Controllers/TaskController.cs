@@ -2,7 +2,6 @@
 using Capstone.API.Extentions.RolePermissionAuthorize;
 using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Base;
-using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
@@ -69,7 +68,6 @@ namespace Capstone.API.Controllers
 			var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
 			return Ok(response);
 		}
-
 
 		[HttpGet("tasks/status")]
 		[EnableQuery()]
@@ -293,6 +291,32 @@ namespace Capstone.API.Controllers
 			//	return NotFound("Task not found");
 			//}
 			var result = await _taskService.UpdateTaskOrder(updateTaskOrderRequest);
+
+			return Ok(result);
+		}
+
+		[HttpPut("tasks/status/title")]
+		public async Task<IActionResult> UpdateStastusName(UpdateTaskNameRequest updateTaskNameRequest)
+		{
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
+			var result = await _taskService.UpdateTaskTitle(updateTaskNameRequest);
+
+			return Ok(result);
+		}
+
+		[HttpPut("tasks/status/deletion")]
+		public async Task<IActionResult> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest)
+		{
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
+			var result = await _taskService.DeleteTaskStatus(deleteTaskStatusRequest);
 
 			return Ok(result);
 		}

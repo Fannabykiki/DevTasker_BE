@@ -77,7 +77,7 @@ public class ProjectService : IProjectService
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
 				Board = new Board
-				{
+				{	
 					BoardId = Guid.NewGuid(),
 					ProjectId = projectId,
 					DeleteAt = null,
@@ -96,7 +96,8 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "To do",
 				Order = 1,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			var inProgress = new BoardStatus
@@ -104,7 +105,8 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "In Progress",
 				Order = 2,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			var done = new BoardStatus
@@ -112,12 +114,23 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "Done",
 				Order = 3,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
+			};
+
+			var fail = new BoardStatus
+			{
+				BoardId = newProject.Board.BoardId,
+				Title = "Fail",
+				Order = 4,
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			await _boardStatusRepository.CreateAsync(done);
 			await _boardStatusRepository.CreateAsync(todo);
 			await _boardStatusRepository.CreateAsync(inProgress);
+			await _boardStatusRepository.CreateAsync(fail);
 			await _boardStatusRepository.SaveChanges();
 
 			var newInteration = new Interation
