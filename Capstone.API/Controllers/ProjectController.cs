@@ -444,7 +444,12 @@ namespace Capstone.API.Controllers
 			}
 			if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
 				return BadRequest("You can not change to this role !");
-			var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need to login first");
+            }
+            var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest, userId);
 			if (result == null)
 			{
 				return StatusCode(500);

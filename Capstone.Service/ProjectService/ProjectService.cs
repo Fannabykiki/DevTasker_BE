@@ -285,7 +285,7 @@ public class ProjectService : IProjectService
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
-	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest, Guid updateBy)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
@@ -293,10 +293,36 @@ public class ProjectService : IProjectService
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
-			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true)
-			{
-				return new BaseResponse { IsSucceed = false, Message = "Update Member Role successfully" };
-			}
+            if (member.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+            {
+                return new BaseResponse { IsSucceed = false, Message = "You cannot change the role of the user who has the System Admin role" };
+            }
+            if (updateMemberRoleRequest.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+            {
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
+                {
+                    return new BaseResponse { IsSucceed = true, Message = "Update Member Role successfully" };
+                }
+				
+                var updateByUser = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.UserId == updateBy, null)!;
+				if (updateByUser.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+				{
+					var PO = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.IsOwner == true, null)!;
+                    PO.IsOwner = false;
+                    PO.RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56");
+                    await _projectMemberRepository.UpdateAsync(PO);
+                    await _projectMemberRepository.SaveChanges();
+                }
+				else
+				{
+                    updateByUser.IsOwner = false;
+                    updateByUser.RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56");
+                    await _projectMemberRepository.UpdateAsync(updateByUser);
+                    await _projectMemberRepository.SaveChanges();
+                }
+                member.IsOwner = true;
+                
+            }
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);

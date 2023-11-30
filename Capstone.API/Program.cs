@@ -157,9 +157,13 @@ builder.Services.AddControllers()
 //{
 //    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 //}));
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+//}));
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    build.SetIsOriginAllowed(host => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
 //add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
@@ -220,7 +224,6 @@ builder.Services.AddAuthorization(
     }
     );
 builder.Services.AddSingleton<IAuthorizationHandler, AppAuthorizationHandler>();
-builder.Services.AddScoped<IAuthorizationService, RolePermissionAuthorizationService>();
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
@@ -229,7 +232,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
-
 app.UseCors("corspolicy");
 
 app.UseHttpsRedirection();
@@ -239,7 +241,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCorsMiddleware();
 app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
