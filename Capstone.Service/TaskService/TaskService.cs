@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using AutoMapper.Execution;
 using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
 using Org.BouncyCastle.Math.EC.Rfc7748;
@@ -795,11 +793,75 @@ namespace Capstone.Service.TaskService
 				};
 			}
 		}
+		
         public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
         {
 			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x => x.Interation);
 			var projectId = task.Interation.BoardId;
 			return projectId;
-        }
-    }
+		}
+
+		public async Task<UpdateTaskOrderResponse> UpdateTaskTitle(UpdateTaskNameRequest updateTaskNameRequest)
+		{
+			using var transaction = _boardStatusRepository.DatabaseTransaction();
+			try
+			{
+				var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == updateTaskNameRequest.StatusTaskId, null);
+				status.Title = updateTaskNameRequest.Title;
+				await _boardStatusRepository.UpdateAsync(status);
+				await _boardStatusRepository.SaveChanges();
+				transaction.Commit();
+
+				return new UpdateTaskOrderResponse
+				{
+					IsSucceed = true,
+					Message = "Update title successfully",
+					BoardId = status.BoardId,
+					BoardStatusId = status.BoardStatusId,
+					Order = status.Order,
+					Title = status.Title,
+				};
+			}
+			catch
+			{
+				transaction.RollBack();
+				return new UpdateTaskOrderResponse
+				{
+					IsSucceed = false,
+					Message = "Update title fail",
+				};
+			}
+		}
+
+		public async Task<BaseResponse> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest)
+		{
+			using var transaction = _boardStatusRepository.DatabaseTransaction();
+			try
+			{
+				var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == deleteTaskStatusRequest.TaskStatusId, null);
+				await _boardStatusRepository.UpdateAsync(status);
+				await _boardStatusRepository.SaveChanges();
+				transaction.Commit();
+
+				return new UpdateTaskOrderResponse
+				{
+					IsSucceed = true,
+					Message = "Update title successfully",
+					BoardId = status.BoardId,
+					BoardStatusId = status.BoardStatusId,
+					Order = status.Order,
+					Title = status.Title,
+				};
+			}
+			catch
+			{
+				transaction.RollBack();
+				return new UpdateTaskOrderResponse
+				{
+					IsSucceed = false,
+					Message = "Update title fail",
+				};
+			}
+		}
+	}
 }

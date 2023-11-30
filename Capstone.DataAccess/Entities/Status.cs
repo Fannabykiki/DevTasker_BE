@@ -13,6 +13,7 @@ namespace Capstone.DataAccess.Entities
         public List<Interation> Interations { get; set; }
         public List<Board> Boards { get; set; }
         public List<TaskHistory> TaskHistories { get; set; }
+        public List<BoardStatus> BoardStatuses { get; set; }
         public List<Invitation> Invitations { get; set; }
     }
 }

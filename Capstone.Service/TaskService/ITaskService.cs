@@ -25,5 +25,7 @@ namespace Capstone.Service.TicketService
         Task<Guid?> GetProjectIdOfTask(Guid taskId);
 		Task<bool> CheckExist(Guid taskId);
 		Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest);
+		Task<UpdateTaskOrderResponse> UpdateTaskTitle(UpdateTaskNameRequest updateTaskNameRequest);
+		Task<BaseResponse> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest);
 	}
 }
