@@ -72,5 +72,12 @@ namespace Capstone.DataAccess.Repository.Implements
 
             return commentList;
         }
+
+        public Guid GetProjectIdByCommentId(Guid commentId)
+        {
+            var comment = _context.TaskComments.Include(t=>t.Task).ThenInclude(i => i.Interation).FirstOrDefault(tc => tc.CommentId == commentId);
+            var result = comment.Task.Interation.BoardId;
+            return result;
+        }
     }
 }
