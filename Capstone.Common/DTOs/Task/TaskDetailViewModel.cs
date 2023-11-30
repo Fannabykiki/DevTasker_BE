@@ -20,7 +20,7 @@ namespace Capstone.Common.DTOs.Task
 		public string CreateBy { get; set; }
 		public string TypeName { get; set; }
 		public string? StatusName { get; set; }
-		public Guid? StatusId { get; set; }
+		public Guid StatusId { get; set; }
 		public Guid? TypeId { get; set; }
 		public string PriorityName { get; set; }
 		public string InterationName { get; set; }
