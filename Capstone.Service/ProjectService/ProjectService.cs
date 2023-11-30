@@ -299,7 +299,7 @@ public class ProjectService : IProjectService
             }
             if (updateMemberRoleRequest.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
             {
-                if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
                 {
                     return new BaseResponse { IsSucceed = true, Message = "Update Member Role successfully" };
                 }
