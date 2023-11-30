@@ -6,6 +6,8 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
+using Org.BouncyCastle.Math.EC.Rfc7748;
+using System.Diagnostics.Metrics;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
@@ -791,10 +793,11 @@ namespace Capstone.Service.TaskService
 				};
 			}
 		}
-		public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
-		{
-			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, null);
-			var projectId = task.Interation.Board.Project.ProjectId;
+		
+        public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
+        {
+			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x => x.Interation);
+			var projectId = task.Interation.BoardId;
 			return projectId;
 		}
 
