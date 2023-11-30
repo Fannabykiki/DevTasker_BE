@@ -292,22 +292,20 @@ public class ProjectService : IProjectService
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-
-			
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
-            if (member.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+            if (member.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
             {
                 return new BaseResponse { IsSucceed = false, Message = "You cannot change the role of the user who has the System Admin role" };
             }
-            if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+            if (updateMemberRoleRequest.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
             {
-                if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
                 {
                     return new BaseResponse { IsSucceed = true, Message = "Update Member Role successfully" };
                 }
 				
                 var updateByUser = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.UserId == updateBy, null)!;
-				if (updateByUser.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+				if (updateByUser.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
 				{
 					var PO = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.IsOwner == true, null)!;
                     PO.IsOwner = false;
@@ -325,8 +323,6 @@ public class ProjectService : IProjectService
                 member.IsOwner = true;
                 
             }
-
-            
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
