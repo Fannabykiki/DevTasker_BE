@@ -1,13 +1,16 @@
-﻿using Capstone.Common.DTOs.Iteration;
+﻿using Capstone.Common.DTOs.Base;
+using Capstone.Common.DTOs.Iteration;
 
 
 namespace Capstone.Service.IterationService
 {
     public interface IIterationService
     {
-        Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId);
-        Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsById(Guid iterationId);
-        Task<bool> CreateInteration(CreateIterationRequest createIterationRequest, Guid boardId);
-        Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId);
-    }
+        Task<IEnumerable<GetInterrationByIdResonse>> GetIterationTasksByProjectId(Guid projectId);
+        Task<GetInterrationByIdResonse> GetIterationsById(Guid iterationId);
+        Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest);
+        Task<BaseResponse> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId);
+		Task<GetIntergrationResponse> GetCurrentInterationId(Guid projectId);
+		Task<bool> CheckExist(Guid interationId);
+	}
 }

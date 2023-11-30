@@ -19,6 +19,8 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
 using System.Numerics;
+using Task = System.Threading.Tasks.Task;
+using Capstone.Common.DTOs.Paging;
 
 namespace Capstone.Service.UserService
 {
@@ -76,7 +78,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true
 					};
 				}
 				else
@@ -88,7 +90,7 @@ namespace Capstone.Service.UserService
 			{
 				return new CreateUserResponse
 				{
-					IsSucced = false,
+					IsSucceed = false
 				};
 			}
 		}
@@ -113,7 +115,7 @@ namespace Capstone.Service.UserService
 						IsFirstTime = true,
 						VerificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64)),
 						Email = createUserGGLoginRequest.Email,
-						StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB"),
+						StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE"),
 						VerifiedAt = DateTime.UtcNow
 					};
 
@@ -122,7 +124,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true,
 						VerifyToken = newUser.VerificationToken
 					};
 				}
@@ -135,7 +137,7 @@ namespace Capstone.Service.UserService
 			{
 				return new CreateUserResponse
 				{
-					IsSucced = false,
+					IsSucceed = false
 				};
 			}
 		}
@@ -165,7 +167,7 @@ namespace Capstone.Service.UserService
 					if (user == null)
 						return new UpdateProfileResponse
 						{
-							IsSucced = false,
+							IsSucceed = true,
 						};
 
 					// Update user properties from request
@@ -185,7 +187,7 @@ namespace Capstone.Service.UserService
 					transaction.Commit();
 					return new UpdateProfileResponse
 					{
-						IsSucced = true,
+						IsSucceed = true,
 						VerifyToken = result.VerificationToken
 					};
 				}
@@ -195,7 +197,7 @@ namespace Capstone.Service.UserService
 
 					return new UpdateProfileResponse
 					{
-						IsSucced = false,
+						IsSucceed = false,
 					};
 				}
 			}
@@ -203,7 +205,7 @@ namespace Capstone.Service.UserService
 
 		public async Task<User> GetUserByIdAsync(Guid id)
 		{
-			var user = await _userRepository.GetAsync(x => x.UserId == id, null)!;
+			var user = await _userRepository.GetAsync(x => x.UserId == id, x => x.Status)!;
 			return user;
 		}
 
@@ -306,7 +308,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = true,
+						IsSucceed = true
 					};
 				}
 				catch (Exception)
@@ -315,7 +317,7 @@ namespace Capstone.Service.UserService
 
 					return new CreateUserResponse
 					{
-						IsSucced = false,
+						IsSucceed =false
 					};
 				}
 			}
@@ -435,8 +437,9 @@ namespace Capstone.Service.UserService
 				try
 				{
 					var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
+					var status = changeUserStatusRequest.StatusIdChangeTo == true ? "BB93DD2D-B9E7-401F-83AA-174C588AB9DE" : "093416CB-1A26-43A4-9E11-DBDF5166DFFB";
 
-					updateRequest.StatusId = changeUserStatusRequest.StatusIdChangeTo;
+                    updateRequest.StatusId = Guid.Parse(status);
 
 					await _userRepository.UpdateAsync(updateRequest);
 					await _userRepository.SaveChanges();
@@ -489,35 +492,11 @@ namespace Capstone.Service.UserService
 			}
 		}
 
-		public async Task<GetAllUsersResponse> GetUsersAsync()
+		public async Task<List<UserResponse>> GetUsersAsync()
 		{
-			var listUser = new GetAllUsersResponse();
 			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
-            listUser.TotalUser = users.Count();
-            listUser.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
-			listUser.InActiveUser = listUser.TotalUser - listUser.ActiveUsers;
-			listUser.PercentActive = (int)Math.Round((double)(100 * listUser.ActiveUsers) / listUser.TotalUser);
-            listUser.PercentInActive = 100 - listUser.PercentActive;
-
-			var listU = new List<UserResponse>();
-            foreach (var user in users)
-			{
-				var reponse = new UserResponse
-				{
-					Id = user.UserId,
-					Name = user.Fullname,
-					Email = user.Email,
-					PhoneNumber= user.PhoneNumber,
-					StatusName = user.Status.Title,
-                    IsAdmin = user.IsAdmin
-                };
-                listU.Add(reponse);
-
-			}
-            listUser.users = listU;
-
-            return listUser;
-
+			
+			return _mapper.Map<List<UserResponse>>(users);
 		}
 
 		public async Task<bool> SendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest)
@@ -539,6 +518,18 @@ namespace Capstone.Service.UserService
 				client.Disconnect(true);
 			}
 			return true;
+		}
+
+        public async Task<GetUsersAnalyzeResponse> GetUsersAnalyze()
+        {
+			var usersAnalyze = new GetUsersAnalyzeResponse();
+			var users = await _userRepository.GetAllWithOdata(x => true, x => x.Status);
+			usersAnalyze.TotalUser = users.Count();
+			usersAnalyze.ActiveUsers = users.Where(x => x.Status.StatusId == Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")).Count();
+			usersAnalyze.InactiveUser = usersAnalyze.TotalUser - usersAnalyze.ActiveUsers;
+			usersAnalyze.PercentActive = (int)Math.Round((double)(100 * usersAnalyze.ActiveUsers) / usersAnalyze.TotalUser);
+			usersAnalyze.PercentInactive = 100 - usersAnalyze.PercentActive;
+			return usersAnalyze;
 		}
 	}
 }

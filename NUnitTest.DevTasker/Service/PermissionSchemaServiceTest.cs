@@ -8,6 +8,7 @@ using Capstone.Service.PermissionSchemaService;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
 {
@@ -20,6 +21,7 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IRoleRepository> _roleRepositoryMock;
         private Mock<IDatabaseTransaction> _databaseTransactionMock;
         private Mock<IMapper> _mapperMock;
+        private Mock<IProjectRepository> _projectRepository;
         private readonly ILoggerManager _logger;
 
         [SetUp]
@@ -31,6 +33,7 @@ namespace NUnitTest.DevTasker.Service
             _roleRepositoryMock = new Mock<IRoleRepository>();
             _databaseTransactionMock = new Mock<IDatabaseTransaction>();
             _mapperMock = new Mock<IMapper>();
+            _projectRepository = new Mock<IProjectRepository>();
 
             _permissionSchemaRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
             
@@ -40,7 +43,9 @@ namespace NUnitTest.DevTasker.Service
                 _schemaRepositoryMock.Object,
                 _roleRepositoryMock.Object,
                 _permissionRepositoryMock.Object,
-                _mapperMock.Object);
+                _mapperMock.Object,
+                _projectRepository.Object
+                );
         }
 
         [Test]
@@ -71,7 +76,6 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result);
           
         }
-
         [Test]
         public async Task UpdateSchema_Success()
         {

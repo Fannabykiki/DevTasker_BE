@@ -5,5 +5,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
 {
     public interface INotificationRepository : IBaseRepository<Notification>
     {
+        
     }
 }

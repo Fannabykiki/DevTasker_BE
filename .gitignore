@@ -453,3 +453,6 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 
+Capstone.DataAccess/Migrations/20231112061705_SubTask.cs
+Capstone.DataAccess/Migrations/20231112061705_SubTask.cs
+Capstone.DataAccess/Migrations/20231112061705_SubTask.Designer.cs

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Iteration;
-using Capstone.Common.Enums;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
@@ -8,186 +8,191 @@ using Capstone.DataAccess.Repository.Interfaces;
 namespace Capstone.Service.IterationService
 {
 
-    public class IterationService : IIterationService
-    {
+	public class IterationService : IIterationService
+	{
 
-        private readonly CapstoneContext _context;
-        private readonly IProjectRepository _projectRepository;
-        private readonly IMapper _mapper;
-        private readonly IInterationRepository _iterationRepository;
-        private readonly IBoardRepository _boardRepository;
-        private readonly ITicketRepository _ticketRepository;
-        private readonly IStatusRepository _statusRepository;
-        private readonly ITicketTypeRepository _ticketTypeRepository;
-
-
-        public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITicketRepository ticketRepository, IStatusRepository statusRepository, ITicketTypeRepository ticketTypeRepository)
-        {
-            _context = context;
-            _projectRepository = projectRepository;
-            _mapper = mapper;
-            _iterationRepository = iterationRepository;
-            _boardRepository = boardRepository;
-            _ticketRepository = ticketRepository;
-            _statusRepository = statusRepository;
-            _ticketTypeRepository = ticketTypeRepository;
-        }
-        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsById(Guid iterationId)
-        {
-            var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
-
-            iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
-            var response = new GetInterrationByBoardIdResonse
-            {
-                InterationId = iteration.InterationId,
-                InterationName = iteration.InterationName,
-                StartDate = iteration.StartDate,
-                EndDate = iteration.EndDate,
-                BoardId = iteration.BoardId,
-                Status = iteration.Status.Title
-            };
-            response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
-
-            return new List<GetInterrationByBoardIdResonse> { response };
-        }
-
-        public async Task<IEnumerable<GetInterrationByBoardIdResonse>> GetIterationsByBoardId(Guid boardId)
-        {
-            var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == boardId, null);
-
-            var result = new List<GetInterrationByBoardIdResonse>();
-
-            foreach (var iteration in iterations)
-            {
-                iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
-                var response = new GetInterrationByBoardIdResonse
-                {
-                    InterationId = iteration.InterationId,
-                    InterationName = iteration.InterationName,
-                    Status = iteration.Status.Title,
-                    StartDate = iteration.StartDate,
-                    EndDate = iteration.EndDate,
-                    BoardId = iteration.BoardId,
-                };
-
-                response.workItemResponses = await GetWorkItemsForIterationAsync(iteration);
-                result.Add(response);
-            }
-
-            return result;
-        }
-
-        private async Task<List<WorkItemResponse>> GetWorkItemsForIterationAsync(Interation iteration)
-        {
-            var workItems = new List<WorkItemResponse>();
-            var Tickets = await _ticketRepository.GetAllWithOdata(x => x.InterationId == iteration.InterationId, null);
-
-            if (Tickets == null) return null;
-
-            foreach (var ticket in Tickets)
-            {
-                if (ticket.PrevId == null)
-                {
-                    ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-                    var item = new WorkItemResponse
-                    {
-                        TicketId = ticket.TicketId,
-                        Title = ticket.Title,
-                        TicketType = "Work Item",
-                        TicketStatus = ticket.Status.Title
-                    };
-
-                    item.Tickets = await GetChildTicketsAsync(ticket.TicketId, Tickets);
-
-                    workItems.Add(item);
-                }
-            }
-
-            return workItems;
-        }
-
-        private async Task<List<TicketResponse>> GetChildTicketsAsync(Guid parentId, IEnumerable<Ticket> allTickets)
-        {
-            foreach(var ticket in allTickets)
-            {
-                ticket.TicketType = await _ticketTypeRepository.GetAsync(x => x.TypeId == ticket.TypeId, null);
-                ticket.Status = await _statusRepository.GetAsync(x => x.StatusId == ticket.StatusId, null);
-            }
-            return allTickets
-              .Where(x => x.PrevId == parentId)
-              .Select(x => new TicketResponse
-              {
-                  TicketId = x.TicketId,
-                  Title = x.Title,
-                  TicketType = x.TicketType.Title,
-                  TicketStatus = x.Status.Title
-              })
-              .ToList();
-            return null;
-        }
-
-        public async Task<bool> CreateInteration(CreateIterationRequest createIterationRequest, Guid boarId)
-        {
-            using var transaction = _iterationRepository.DatabaseTransaction();
-
-            try
-            {
-                var newIterationRequest = new Interation
-                {
-                    InterationName = createIterationRequest.InterationName,
-                    StartDate = createIterationRequest.StartDate,
-                    EndDate = createIterationRequest.EndDate,
-                    BoardId = boarId,
-                   StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A")
-                };
+		private readonly CapstoneContext _context;
+		private readonly IProjectRepository _projectRepository;
+		private readonly IMapper _mapper;
+		private readonly IInterationRepository _iterationRepository;
+		private readonly IBoardRepository _boardRepository;
+		private readonly ITaskRepository _TaskRepository;
+		private readonly IStatusRepository _statusRepository;
+		private readonly ITaskTypeRepository _TaskTypeRepository;
 
 
-                var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
-                var board = await _boardRepository.GetAsync(x => x.BoardId == boarId, null);
-                board.Interations.Add(newIteration);
-                await _boardRepository.UpdateAsync(board);
+		public IterationService(CapstoneContext context, IProjectRepository projectRepository, IMapper mapper, IInterationRepository iterationRepository, IBoardRepository boardRepository, ITaskRepository TaskRepository, IStatusRepository statusRepository, ITaskTypeRepository TaskTypeRepository, IUserRepository userRepository)
+		{
+			_context = context;
+			_projectRepository = projectRepository;
+			_mapper = mapper;
+			_iterationRepository = iterationRepository;
+			_boardRepository = boardRepository;
+			_TaskRepository = TaskRepository;
+			_statusRepository = statusRepository;
+			_TaskTypeRepository = TaskTypeRepository;
+		}
+		public async Task<GetInterrationByIdResonse> GetIterationsById(Guid iterationId)
+		{
+			var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, x => x.Board)!;
 
-                _iterationRepository.SaveChanges();
-                _boardRepository.SaveChanges();
+			iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
+			var response = new GetInterrationByIdResonse
+			{
+				InterationId = iteration.InterationId,
+				InterationName = iteration.InterationName,
+				StartDate = iteration.StartDate,
+				EndDate = iteration.EndDate,
+				BoardId = iteration.BoardId,
+				Status = iteration.Status.Title
+			};
+			response.Tasks = await _TaskRepository.GetTaskByInterationId(iteration.InterationId);
 
-                transaction.Commit();
-                return true;
-            }
-            catch (Exception)
-            {
-                transaction.RollBack();
-                return false;
-            }
-        }
-        public async Task<bool> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
-        {
+			return response;
+		}
 
-            using var transaction = _iterationRepository.DatabaseTransaction();
+		public async Task<IEnumerable<GetInterrationByIdResonse>> GetIterationTasksByProjectId(Guid projectId)
+		{
+			var iterations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, null);
 
-            try
-            {
-                var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
+			var result = new List<GetInterrationByIdResonse>();
 
-                iteration.InterationName = updateIterationRequest.InterationName;
-                iteration.StartDate = updateIterationRequest.StartDate;
-                iteration.EndDate = updateIterationRequest.EndDate;
-                iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == updateIterationRequest.StatusId, null);
+			foreach (var iteration in iterations)
+			{
+				iteration.Status = await _statusRepository.GetAsync(x => x.StatusId == iteration.StatusId, null);
+				var response = new GetInterrationByIdResonse
+				{
+					InterationId = iteration.InterationId,
+					InterationName = iteration.InterationName,
+					Status = iteration.Status.Title,
+					StartDate = iteration.StartDate,
+					EndDate = iteration.EndDate,
+					BoardId = iteration.BoardId,
+				};
 
+				response.Tasks = await _TaskRepository.GetTaskByInterationId(iteration.InterationId);
+				result.Add(response);
+			}
 
-                await _iterationRepository.UpdateAsync(iteration);
+			return result;
+		}
 
-                await _iterationRepository.SaveChanges();
-                transaction.Commit();
-                return true;
-            }
-            catch (Exception)
-            {
-                transaction.RollBack();
-                return false;
-            }
-        }
+		public async Task<GetIntergrationResponse> CreateInteration(CreateIterationRequest createIterationRequest)
+		{
+			using var transaction = _iterationRepository.DatabaseTransaction();
 
-        
+			try
+			{
+				var newIterationRequest = new Interation
+				{
+					InterationName = createIterationRequest.InterationName,
+					StartDate = DateTime.Parse(createIterationRequest.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+					EndDate = DateTime.Parse(createIterationRequest.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+					BoardId = createIterationRequest.ProjectId,
+					StatusId = Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DF4A"),
+				};
 
-    }
+				var newIteration = await _iterationRepository.CreateAsync(newIterationRequest);
+				var board = await _boardRepository.GetAsync(x => x.BoardId == createIterationRequest.ProjectId, null);
+				board.Interations.Add(newIteration);
+
+				await _boardRepository.UpdateAsync(board);
+				await _iterationRepository.SaveChanges();
+				await _boardRepository.SaveChanges();
+
+				transaction.Commit();
+				return new GetIntergrationResponse
+				{
+					BoardId = newIteration.BoardId,
+					EndDate = newIteration.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					StartDate = newIteration.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					InterationId = newIteration.InterationId,
+					InterationName = newIteration.InterationName,
+					StatusId = newIteration.StatusId,
+					Response = new Common.DTOs.Base.BaseResponse
+					{
+						IsSucceed = true,
+						Message = "Create scucessfully"
+					},
+				};
+			}
+			catch (Exception)
+			{
+				transaction.RollBack();
+				return new GetIntergrationResponse
+				{
+					Response = new Common.DTOs.Base.BaseResponse
+					{
+						IsSucceed = false,
+						Message = "Create fail"
+					},
+				};
+			}
+		}
+		public async Task<BaseResponse> UpdateIterationRequest(UpdateIterationRequest updateIterationRequest, Guid iterationId)
+		{
+
+			using var transaction = _iterationRepository.DatabaseTransaction();
+			try
+			{
+				var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
+
+				iteration.InterationName = updateIterationRequest.InterationName;
+				iteration.StartDate = updateIterationRequest.StartDate;
+				iteration.EndDate = updateIterationRequest.EndDate;
+
+				await _iterationRepository.UpdateAsync(iteration);
+				await _iterationRepository.SaveChanges();
+				transaction.Commit();
+
+				return new BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Update interation successfully"
+				};
+			}
+			catch (Exception ex)
+			{
+				transaction.RollBack();
+				return new BaseResponse
+				{
+					IsSucceed = false,
+					Message = "Update interation fail because" + ex.Message
+				};
+			}
+		}
+
+		public async Task<GetIntergrationResponse> GetCurrentInterationId(Guid projectId)
+		{
+			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, x=>x.Status);
+			var inter = new GetIntergrationResponse();
+			foreach (var interation in interations)
+			{
+				if (interation.StartDate <= DateTime.Now && DateTime.Now <= interation.EndDate)
+				{
+					var response = new GetIntergrationResponse
+					{
+						InterationId = interation.InterationId,
+						InterationName = interation.InterationName,
+						BoardId = interation.BoardId,
+						StartDate = interation.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+						EndDate = interation.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+						Status = interation.Status.Title
+					};
+					return response;
+				}
+			}
+			return inter;
+		}
+
+		public async Task<bool> CheckExist(Guid interationId)
+		{
+			var interation = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
+			if(interation == null)
+			{
+				return false;
+			}
+			return true;
+		}
+	}
 }

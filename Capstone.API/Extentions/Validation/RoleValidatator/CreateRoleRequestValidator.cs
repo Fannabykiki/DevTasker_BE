@@ -3,17 +3,17 @@ using FluentValidation;
 
 namespace Capstone.API.Extentions.Validation.RoleValidator
 {
-    public class CreateRoleRequestValidator : AbstractValidator<CreateRoleRequest>
+    public class CreateRoleRequestValidator : AbstractValidator<CreateNewRoleRequest>
     {
         public CreateRoleRequestValidator()
         {
             RuleFor(x => x.RoleName)
-              .NotEmpty().WithMessage("RoleName is required")
-              .MaximumLength(100).WithMessage("RoleName must not exceed 100 characters");
+                .MaximumLength(64).WithMessage("Role name must be less than 64 characters")
+                .Matches(@"^[\p{L}\s0-9]+$").WithMessage("Invalid Role Name")
+                .NotEmpty().WithMessage("RoleName is required");
 
             RuleFor(x => x.Description)
-              .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
-              .When(x => !string.IsNullOrWhiteSpace(x.Description));
+                .MaximumLength(500).WithMessage("Description must not exceed 500 characters");
         }
     }
 }

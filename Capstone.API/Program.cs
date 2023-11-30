@@ -19,18 +19,27 @@ using System.Text;
 using Capstone.Service.Mapping;
 using Capstone.Service.ProjectService;
 using Capstone.Service.PermissionSchemaService;
-using static System.Reflection.Metadata.BlobBuilder;
 using Capstone.Service.TicketService;
 using Capstone.Service.IterationService;
 using Capstone.API.Extentions.AuthorizeMiddleware;
-using Microsoft.AspNetCore.Authorization;
 using Capstone.API.Helper;
 using Capstone.Service.StatusService;
 using Capstone.Service.AttachmentServices;
 using Capstone.Service.TicketCommentService;
 using Capstone.Service.RoleService;
+using Capstone.Service.TaskService;
+using Capstone.Service.ProjectMemberService;
+using Capstone.Service.BlobStorage;
+using Capstone.Service.NotificationService;
+using Hangfire;
+using Capstone.API.Jobs;
+using Hangfire.Dashboard;
+using Capstone.Service.Hubs;
+using Capstone.API.Extentions.RolePermissionAuthorize;
+using Microsoft.AspNetCore.Authorization;
+using Capstone.Common.Constants;
 
-static async Task InitializeDatabase(IApplicationBuilder app)
+static async System.Threading.Tasks.Task InitializeDatabase(IApplicationBuilder app)
 {
     using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope();
     if (scope != null)
@@ -38,6 +47,7 @@ static async Task InitializeDatabase(IApplicationBuilder app)
         await scope.ServiceProvider.GetRequiredService<CapstoneContext>().Database.MigrateAsync();
     }
 }
+
 static IEdmModel GetEdmModel()
 {
     ODataConventionModelBuilder builder = new();
@@ -48,11 +58,11 @@ static IEdmModel GetEdmModel()
     builder.EntitySet<Permission>("Permissions");
     builder.EntitySet<Project>("Projects");
     builder.EntitySet<Role>("Roles");
-    builder.EntitySet<Ticket>("Tickets");
-    builder.EntitySet<TicketComment>("TicketComments");
-    builder.EntitySet<TicketHistory>("TicketHistorys");
-    builder.EntitySet<TicketType>("TicketTypes");
-    builder.EntitySet<Status>("TicketStatuss");
+    builder.EntitySet<Capstone.DataAccess.Entities.Task>("SubTasks");
+    builder.EntitySet<TaskComment>("TaskComments");
+    builder.EntitySet<TaskHistory>("TaskHistorys");
+    builder.EntitySet<TaskType>("TaskTypes");
+    builder.EntitySet<Status>("TaskStatus");
     builder.EntitySet<PriorityLevel>("PriorityLevels");
     builder.EntitySet<ProjectMember>("ProjectMembers");
 
@@ -71,6 +81,7 @@ builder.Services.AddDbContext<CapstoneContext>(opt =>
     opt.UseSqlServer(configuration.GetConnectionString("DBConnString"));
 });
 // Add services to the container.
+builder.Services.AddSingleton<PresenceTracker>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -85,10 +96,10 @@ builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
-builder.Services.AddScoped<ITicketService, TicketService>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ITaskRepository, TicketRepository>();
 
-builder.Services.AddScoped<ITicketTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<ITaskTypeRepository, TicketTypeRepository>();
 builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
 builder.Services.AddScoped<ITicketStatusRepository, TicketStatusRepository>();
 
@@ -106,14 +117,28 @@ builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
 
-builder.Services.AddScoped<ITicketCommentRepository, TicketCommentRepository>();
-builder.Services.AddScoped<ITicketCommentService, TicketCommentService>();
+builder.Services.AddScoped<ITaskCommentRepository, TicketCommentRepository>();
+builder.Services.AddScoped<ITaskCommentService, TaskCommentService>();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
-builder.Services.AddScoped<IMailHelper, MailHelper>();
+builder.Services.AddScoped<ITaskTypeRepository, TicketTypeRepository>();
+builder.Services.AddScoped<IPriorityRepository, PriorityRepository>();
 
+builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
+
+builder.Services.AddScoped<IBoardStatusRepository, BoardStatusRepository>();
+builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
+builder.Services.AddScoped<AzureBlobService>();
+
+builder.Services.AddScoped<IMailHelper, MailHelper>();
+builder.Services.AddScoped<IEmailJob, EmailJob>();
+builder.Services.AddScoped<RolePermissionFilter>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddControllers().AddOData(opt => opt.AddRouteComponents("odata", GetEdmModel()).Filter().Select().Expand().Count().OrderBy().SetMaxTop(100));
@@ -125,24 +150,17 @@ builder.Services.AddControllers()
 					options.ImplicitlyValidateRootCollectionElements = true;
 
                     // Automatic registration of validators in assembly
-                    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());                  
                 });
 
-// Add authorization policies if needed
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("GoogleDriveAccess", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-        // Add more requirements as needed
-    });
-});
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+//}));
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
-
 //add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
            options =>
@@ -157,27 +175,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                    ValidAudience = JwtConstant.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key)),
                };
+               options.Events = new JwtBearerEvents
+               {
+                   OnMessageReceived = context =>
+                   {
+                       var accessToken = context.Request.Query["access_token"];
+
+                       var path = context.HttpContext.Request.Path;
+                       if (!string.IsNullOrEmpty(accessToken) &&
+                           path.StartsWithSegments("/notification"))
+                       {
+                           context.Token = accessToken;
+                       }
+
+                       return System.Threading.Tasks.Task.CompletedTask;
+                   }
+               };
+
            }
        );
-//// Add Google OAuth authentication
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.Authority = "https://accounts.google.com";
-//        options.Audience = configuration["Authentication:Google:ClientId"]; 
-//    });
-
-//// Add authorization policies if needed
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("GoogleDriveAccess", policy =>
-//    {
-//        policy.RequireAuthenticatedUser();
-//        policy.RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-//        // Add more requirements as needed
-//    });
-//});
-
+builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
+                                    .UseRecommendedSerializerSettings()
+                                    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DBConnString")));
+builder.Services.AddHangfireServer();
+builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -185,12 +206,21 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization(
     options =>
     {
-        options.AddPolicy("CanView", policy =>
+        options.AddPolicy("CreateTask", policy =>
         {
             policy.Requirements.Add(new PermissionRequirement(null));
+            policy.RequireAuthenticatedUser();
+            policy.RequireRole("993951AD-5457-41B9-8FFF-4D1C1FA557D0");
+        });
+        options.AddPolicy(AuthorizationRequirementNameConstant.RolePermission, policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.Requirements.Add(new PermissionRoleRequirement());
         });
     }
     );
+builder.Services.AddSingleton<IAuthorizationHandler, AppAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationService, RolePermissionAuthorizationService>();
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
@@ -210,4 +240,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseHangfireDashboard("/hangfire");
+RecurringJob.RemoveIfExists("email-for-deadline");
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
+app.MapHub<NotificationHub>("/notification");
 app.Run();

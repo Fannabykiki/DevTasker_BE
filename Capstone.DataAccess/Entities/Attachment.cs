@@ -9,11 +9,11 @@ namespace Capstone.DataAccess.Entities
         public string Title { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
-        public Guid TicketId { get; set; } //2
-        public Guid? CommentId { get; set; }
+        public DateTime? ExprireTime { get; set; }
+        public Guid? TaskId { get; set; }
         public Guid CreateBy { get; set; }
-        public User User { get; set; }
-        public Ticket Ticket { get; set; } //1 Attachment just only in 1 task
-        public TicketComment TaskComment { get; set; } // 1 Attachment has 1 comment
+        public bool? IsDeleted { get; set; }
+        public ProjectMember ProjectMember { get; set; }
+        public Task Task { get; set; } // 1 Attachment has 1 comment
     }
 }

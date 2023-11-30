@@ -2,81 +2,105 @@
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Schema;
-using Capstone.Common.DTOs.User;
-using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.LoggerService;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Capstone.Service.PermissionSchemaService
 {
-    public class PermissionSchemaService : IPermissionSchemaService
+	public class PermissionSchemaService : IPermissionSchemaService
     {
         private readonly IPermissionSchemaRepository _permissionSchemaRepository;
         private readonly ISchemaRepository _schemaRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IPermissionRepository _permissionRepository;
+        private readonly IProjectRepository _projectRepository;
         private readonly ILoggerManager _logger;
-		private readonly IMapper _mapper;
+        private readonly IMapper _mapper;
 
-		public PermissionSchemaService(ILoggerManager logger, IPermissionSchemaRepository permissionSchemaRepository, ISchemaRepository schemaRepository, IRoleRepository roleRepository, IPermissionRepository permissionRepository, IMapper mapper)
-		{
-			_permissionSchemaRepository = permissionSchemaRepository;
-			_schemaRepository = schemaRepository;
-			_roleRepository = roleRepository;
-			_permissionRepository = permissionRepository;
-			_logger = logger;
-			_mapper = mapper;
-		}
-		public async Task<IEnumerable<GetAllPermissionSchemaResponse>> GetAllSchema()
+
+        public PermissionSchemaService(ILoggerManager logger, IPermissionSchemaRepository permissionSchemaRepository, ISchemaRepository schemaRepository, IRoleRepository roleRepository, IPermissionRepository permissionRepository, IMapper mapper,IProjectRepository projectRepository)
         {
-			var schemas = await _schemaRepository.GetAllWithOdata(x => true,null);
-            return _mapper.Map<List<GetAllPermissionSchemaResponse>>(schemas);
+            _permissionSchemaRepository = permissionSchemaRepository;
+            _schemaRepository = schemaRepository;
+            _roleRepository = roleRepository;
+            _permissionRepository = permissionRepository;
+            _logger = logger;
+            _mapper = mapper;
+            _projectRepository = projectRepository;
+        }
+
+        public async Task<List<GetSchemaResponse>> GetAllSchema(bool mode)
+        {
+            IEnumerable<Schema>? schemas;
+            if (mode) {
+                schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete != true, null);
+            }
+            else
+            {
+                schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete == true, null);
+            }
+            var results = _mapper.Map<List<GetSchemaResponse>>(schemas);
+            foreach(var schema in results)
+            {
+                var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schema.SchemaId, x => x.Status);
+                if (projects != null)
+                {
+                    var projectUsed = projects.Select(p => new GetProjectUsedResponse
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName,
+                        Description = p.Description,
+                        ProjectStatus = p.Status.Title
+                    }).ToList();
+                    schema.ProjectsUsed = (List<GetProjectUsedResponse>?)projectUsed;
+                }
+                
+            }
+            return results;
         }
 
         public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
-        {   
-            var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
-            var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId,x => x.Permission);
+        {
+            var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
+            if (schemas == null) return null;
+            
+            var permissionSchemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, x => x.Permission);
+            var permissions = await _permissionRepository.GetAllWithOdata(x => true, null);
             var permissionRoles = new List<PermissionRolesDTO>();
 
-            foreach (var role in permissionSchemas)
+            foreach (var permission in permissions)
             {
-				var roles = await _schemaRepository.GetPermissionRolesBySchemaId(role.PermissionId,schemaId);
-				var permissionInRoles = new List<RoleInPermissionDTO>();
-				foreach (var item in roles)
+                var per = permissionSchemas.Where(x => x.PermissionId == permission.PermissionId);
+                var roles = per.Select(x => x.RoleId);
+                var permissionInRoles = new List<RoleInPermissionDTO>();
+                foreach (var item in roles)
                 {
+                    var role = await _roleRepository.GetAsync(x => x.RoleId == item, null);
                     permissionInRoles.Add(new RoleInPermissionDTO
                     {
-                        Description = item.Description,
-                        RoleId = item.RoleId,
-                        RoleName = item.RoleName,
+                        Description = role.Description,
+                        RoleId = role.RoleId,
+                        RoleName = role.RoleName,
                     });
-				}
-				permissionRoles.Add(new PermissionRolesDTO
-				{
-					PermissionId = role.PermissionId,
-					Name = role.Permission.Name,
-					Description = role.Permission.Description,
+                }
+                permissionRoles.Add(new PermissionRolesDTO
+                {
+                    PermissionId = permission.PermissionId,
+                    Name = permission.Name,
+                    Description = permission.Description,
                     Roles = permissionInRoles
-				});
-			}
-         
+                });
+            }
+
             var result = new GetPermissionSchemaByIdResponse
             {
                 SchemaId = schemaId,
                 SchemaName = schemas.SchemaName,
                 Description = schemas.Description,
                 rolePermissions = permissionRoles
-			};
+            };
 
             return result;
         }
@@ -89,11 +113,12 @@ namespace Capstone.Service.PermissionSchemaService
                 var schema = new Schema
                 {
                     SchemaName = request.SchemaName,
-                    Description = request.Description
+                    Description = request.Description,
+                    IsDelete = false
                 };
                 var newSchema = await _schemaRepository.CreateAsync(schema);
-                var permissions = _permissionRepository.GetAllAsync(x => x.PermissionId != null,null);
-                foreach(var permission in permissions)
+                var permissions = _permissionRepository.GetAllAsync(x => true, null);
+                foreach (var permission in permissions)
                 {
                     await _permissionSchemaRepository.CreateAsync(new SchemaPermission
                     {
@@ -108,8 +133,9 @@ namespace Capstone.Service.PermissionSchemaService
                         RoleId = Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430") //Admin of system
                     });
                 }
-                _schemaRepository.SaveChanges();
-                _permissionSchemaRepository.SaveChanges();
+                await _permissionSchemaRepository.SaveChanges();
+                await _schemaRepository.SaveChanges();
+
 
                 transaction.Commit();
                 return true;
@@ -126,14 +152,14 @@ namespace Capstone.Service.PermissionSchemaService
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
-                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
                 if (schema == null) { return false; }
 
                 schema.SchemaName = request.SchemaName ?? schema.SchemaName;
                 schema.Description = request.Description ?? schema.Description;
 
-                _schemaRepository.UpdateAsync(schema);
-                _schemaRepository.SaveChanges();
+                await _schemaRepository.UpdateAsync(schema);
+                await _schemaRepository.SaveChanges();
 
                 transaction.Commit();
                 return true;
@@ -145,49 +171,29 @@ namespace Capstone.Service.PermissionSchemaService
                 return false;
             }
         }
-        public async Task<bool> UpdateSchemaPermissionRoles(Guid schemaId, UpdatePermissionSchemaRequest request)
+        public async Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest request)
         {
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
-                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
-                if(schema == null) return false;
-
-                foreach (var permission in request.rolePermissions)
+                if (request.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||
+                        request.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) return false;
+                var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
+                foreach (var permission in request.PermissionIds)
                 {
-                    var per = _permissionRepository.GetAllAsync(x => x.PermissionId == permission.PermissionId, null);
-                    if (per == null) return false;
-
-                    var listCurentRole = _permissionSchemaRepository.GetAllAsync(x=>x.PermissionId == permission.PermissionId && x.SchemaId == schemaId, null).Select(x => x.RoleId);
-
-                    foreach (var curentRole in listCurentRole)
+                    var permissionRole = schemaPermission.Where(x => x.PermissionId == permission && x.RoleId == request.RoleId);
+                    if(permissionRole.Any() == false)
                     {
-                        if (!permission.RoleIds.Contains((Guid)curentRole))
+                        var newPermissionRole = new SchemaPermission
                         {
-                            var deletedRole = _permissionSchemaRepository.GetAllAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == curentRole, null);
-                            await _permissionSchemaRepository.DeleteAsync((SchemaPermission)deletedRole);
-                        }
-                    }
-
-                    foreach (var role in permission.RoleIds)
-                    {
-                        var rol = _roleRepository.GetAllAsync(x => x.RoleId == role, null);
-                        if (rol == null) return false;
-
-                        var permissionSchema = await _permissionSchemaRepository.GetAsync(x => x.SchemaId == schemaId && x.PermissionId == permission.PermissionId && x.RoleId == role, null);
-                        if (permissionSchema == null)
-                        {
-                            await _permissionSchemaRepository.CreateAsync(new SchemaPermission
-                            {
-                                SchemaId = schemaId,
-                                PermissionId = permission.PermissionId,
-                                RoleId = role
-                            });
-                        }
+                            SchemaId = schemaId,
+                            PermissionId = permission,
+                            RoleId = request.RoleId
+                        };
+                        await _permissionSchemaRepository.CreateAsync(newPermissionRole);
                     }
                 }
-                _permissionSchemaRepository.SaveChanges();
-
+                await _permissionSchemaRepository.SaveChanges();
                 transaction.Commit();
                 return true;
             }
@@ -198,5 +204,105 @@ namespace Capstone.Service.PermissionSchemaService
                 return false;
             }
         }
-    }
+
+        public async Task<GetSchemaResponse> GetSchemaById(Guid SchemaId)
+        {
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId && x.IsDelete != true, null);
+            return _mapper.Map<GetSchemaResponse>(schema);
+        }
+
+        public async Task<bool> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest request)
+        {
+            using var transaction = _permissionSchemaRepository.DatabaseTransaction();
+            try
+            {
+                var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
+                foreach (var role in request.RoleIds)
+                {
+                    if(role == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") || 
+                        role == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
+
+                    var permissionRole = schemaPermission.First(x => x.RoleId == role && x.PermissionId == request.PermissionId);
+                    if (permissionRole != null)
+                    {
+                        await _permissionSchemaRepository.DeleteAsync(permissionRole);
+                    }
+                }
+                await _permissionSchemaRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return false;
+            }
+        }
+
+        public async Task<GetSchemaResponse> GetSchemaByName(string schemaName)
+        {
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaName.Trim().ToLower().Equals(schemaName.Trim().ToLower()) && x.IsDelete != true, null);
+            return _mapper.Map<GetSchemaResponse>(schema);
+        }
+
+        public async Task<bool> RemoveSchemaAsync(Guid SchemaId)
+        {
+            using var transaction = _projectRepository.DatabaseTransaction();
+            try
+            {
+                var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId, null);
+                schema.SchemaName = schema.SchemaName.Trim() + " (Deleted)";
+                schema.IsDelete = true;
+                schema.DeleteAt= DateTime.Now;
+
+                await _schemaRepository.UpdateAsync(schema);
+                await _schemaRepository.SaveChanges();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.Message);
+                transaction.RollBack();
+                return false;
+            }
+        }
+
+        public async Task<List<GetProjectSchemasResponse>> GetProjectSchemas(Guid projectId)
+        {
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+            var schemas = await _schemaRepository.GetAllWithOdata(x => x.IsDelete != true, null);
+            
+            var results = _mapper.Map<List<GetProjectSchemasResponse>>(schemas);
+            foreach (var schema in results)
+            {
+                schema.isCurrentProjectSchema = project.SchemasId == schema.SchemaId ? true : false;
+                var projects = await _projectRepository.GetAllWithOdata(x => x.SchemasId == schema.SchemaId, x => x.Status);
+                if (projects != null)
+                {
+                    var projectUsed = projects.Select(p => new GetProjectUsedResponse
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName,
+                        Description = p.Description,
+                        ProjectStatus = p.Status.Title
+                    }).ToList();
+                    schema.ProjectsUsed = (List<GetProjectUsedResponse>?)projectUsed;
+                }
+
+            }
+            return results;
+        }
+
+		public async Task<bool> CheckExist(Guid schemaId)
+		{
+            var schema = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId, null);
+            if (schema == null)
+            {
+                return false;
+            }
+            return true;
+		}
+	}
 }

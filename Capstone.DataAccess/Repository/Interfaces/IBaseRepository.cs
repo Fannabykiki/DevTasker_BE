@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Capstone.DataAccess.Entities;
+using System.Linq.Expressions;
 
 namespace Capstone.DataAccess.Repository.Interfaces
 {
@@ -13,5 +14,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
         Task<bool> DeleteAsync(T entity);
         Task<int> SaveChanges();
         IDatabaseTransaction DatabaseTransaction();
+        IQueryable<T> GetQuery();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Capstone.Common.Enums;
+﻿using Capstone.Common.DTOs.Role;
+using Capstone.Common.Enums;
 
 namespace Capstone.Common.DTOs.Project;
 
@@ -14,6 +15,8 @@ public class GetAllProjectViewModel
 	public DateTime CreateAt { get; set; }
 	public DateTime? DeleteAt { get; set; }
 	public DateTime? ExpireAt { get; set; }
+	public bool? IsDelete { get; set; }
 	public bool PrivacyStatus { get; set; } // false: Private , true: Public
+	public RoleDTO MemberRole { get; set; } // false: Private , true: Public
 
 }

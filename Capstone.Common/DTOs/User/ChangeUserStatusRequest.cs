@@ -9,9 +9,8 @@ namespace Capstone.Common.DTOs.User
 {
     public class ChangeUserStatusRequest
     {
-        public Guid ChangeBy { get; set; }
-        public string VerifyToken { get; set; }
-        public string? reason { get; set; }
-        public Guid StatusIdChangeTo { get; set; }
+		public Guid UserId { get; set; }
+		public string? reason { get; set; }
+        public bool StatusIdChangeTo { get; set; }
     }
 }

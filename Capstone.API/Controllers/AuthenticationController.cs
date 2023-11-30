@@ -1,13 +1,10 @@
-﻿using Capstone.API.Extentions;
-using Capstone.Common.DTOs.Email;
+﻿using Capstone.Common.DTOs.Email;
 using Capstone.Common.DTOs.User;
-using Capstone.Common.Token;
 using Capstone.Service.LoggerService;
 using Capstone.Service.UserService;
-using GoogleAuthentication.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Capstone.API.Controllers
@@ -66,35 +63,36 @@ namespace Capstone.API.Controllers
 
 		}
 
-        [HttpGet("external-login")]
-        public IActionResult Login()
+        [HttpPost("external-login/token")]
+		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(ExternalLoginRequest request)
         {
-
-            var clientId = _config["Authentication:Google:ClientId"];
-
-            var redirectUrl = _config["Authentication:Google:CallBackUrl"];
-
-            var authUrl = GoogleAuth.GetAuthUrl(clientId, redirectUrl);
-
-            return Redirect(authUrl);
-
-        }
-
-        [HttpGet("external-login/token")]
-		public async Task<ActionResult<LoginResponse>> LoginExternalCallback(string? code)
-		{
 			GoogleProfile googleUser = new GoogleProfile();
 			try
 			{
-				var ClientSecret = _config["Authentication:Google:ClientSecret"];
-				var ClientID = _config["Authentication:Google:ClientId"];
-				var url = _config["Authentication:Google:CallBackUrl"];
-				var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
-				var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
-				googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
-                
+                //var ClientSecret = _config["Authentication:Google:ClientSecret"];
+                //var ClientID = _config["Authentication:Google:ClientId"];
+                //var url = _config["Authentication:Google:CallBackUrl"];
+                //var ggToken = await GoogleAuth.GetAuthAccessToken(code, ClientID, ClientSecret, url);
+                //var userProfile = await GoogleAuth.GetProfileResponseAsync(ggToken.AccessToken.ToString());
+                //googleUser = JsonConvert.DeserializeObject<GoogleProfile>(userProfile);
+                var handler = new JwtSecurityTokenHandler();
 
-            }
+				// Read and validate the token
+                var tokenGG = handler.ReadJwtToken(request.code);
+
+                var claimsDictionary = new Dictionary<string, string>();
+
+                // Extract claims into a dictionary
+                foreach (var claim in tokenGG.Claims)
+                {
+                    claimsDictionary.Add(claim.Type, claim.Value);
+                }
+                // Serialize the claims dictionary into JSON
+                var jsonClaims = JsonConvert.SerializeObject(claimsDictionary);
+
+                // Deserialize the JSON back into a GoogleProfile object
+                googleUser = JsonConvert.DeserializeObject<GoogleProfile>(jsonClaims);
+			}
 			catch (Exception ex)
 			{
 
@@ -157,14 +155,20 @@ namespace Capstone.API.Controllers
 		[HttpPost("token")]
 		public async Task<ActionResult<LoginResponse>> LoginInternal(LoginRequest request)
 		{
-			var user = await _usersService.LoginUser(request.Email, request.Password);
-			if (user == null )
+			var account = await _usersService.GetUserByEmailAsync(request.Email);
+			if (account == null)
 			{
-				return NotFound("User not exist");
+				return NotFound("Your email not exist");
+			}
+			var user = await _usersService.LoginUser(request.Email, request.Password);
+			if(user == null)
+			{
+				return NotFound("Your password not correct");
+
 			}
 			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
-				return BadRequest("User is inactive");
+				return BadRequest("Your account is inactive.Please verify your account");
 			}
 
 			var token = await _usersService.CreateToken(user);

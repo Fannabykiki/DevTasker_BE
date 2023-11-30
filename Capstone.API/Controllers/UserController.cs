@@ -1,4 +1,4 @@
-﻿using Capstone.Common.DTOs.Email;
+﻿using Capstone.API.Extentions;
 using Capstone.API.Helper;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
@@ -42,11 +42,22 @@ namespace Capstone.API.Controllers
 			_config = config;
 		}
 
-		[HttpGet("users")]
+		[HttpGet("admin/users")]
 		[EnableQuery()]
-		public async Task<ActionResult<GetAllUsersResponse>> GetUsers()
+		public async Task<ActionResult<List<UserResponse>>> GetUsers()
 		{
 			var response = await _usersService.GetUsersAsync();
+			if (response == null)
+			{
+				return BadRequest("Three are no User!");
+			}
+			return Ok(response);
+		}
+		
+		[HttpGet("admin/users/analyzation")]
+		public async Task<ActionResult<GetUsersAnalyzeResponse>> GetUsersAnalyze()
+		{
+			var response = await _usersService.GetUsersAnalyze();
 			if (response == null)
 			{
 				return BadRequest("Three are no User!");
@@ -78,42 +89,45 @@ namespace Capstone.API.Controllers
             };
 		}
 
-
-		[HttpPut("users/{id}")]
-		public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateProfileRequest request)
+		//1
+		[HttpPut("users")]
+		public async Task<IActionResult> UpdateUser([FromBody] UpdateProfileRequest request)
 		{
+			if(request.DoB >= DateTime.Now)
+			{
+				return BadRequest("Can't update date of birth greater than today");
+			}
 			// Validate model
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var result = await _usersService.UpdateProfileAsync(request, id);
+			var result = await _usersService.UpdateProfileAsync(request, request.UserId);
 
 			return Ok(result);
 
 		}
-		
-		[HttpPut("users/change-status/{id}")]
-		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest,Guid id)
+		//2
+		[HttpPut("users/change-status")]
+		public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest changeUserStatusRequest)
 		{
-            var user = await _usersService.GetUserByIdAsync(changeUserStatusRequest.ChangeBy);
+            var userId = this.GetCurrentLoginUserId();
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
+            var user = await _usersService.GetUserByIdAsync(userId);
 			if (user.IsAdmin == null || user.IsAdmin == false)
 			{
 				return Unauthorized();
 			}
-            if (user == null || user.ResetTokenExpires < DateTime.UtcNow || user.AccessToken  != changeUserStatusRequest.VerifyToken)
-            {
-                return NotFound("Invalid token");
-            }
 
-            var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, id);
+            var result = await _usersService.ChangeUserStatus(changeUserStatusRequest, changeUserStatusRequest.UserId);
 			if (result == true)
 			{
-				var status = await _statusService.GetStatusByIdAsync(id);
-                var userBeChange = await _usersService.GetUserByIdAsync(id);
-				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {status.Title}", changeUserStatusRequest.reason);
+                var userBeChange = await _usersService.GetUserByIdAsync(changeUserStatusRequest.UserId);
+				await _mailHelper.Send(userBeChange.Email, $"[DevTasker] Your account status have been change to {userBeChange.Status.Title}", changeUserStatusRequest.reason);
             }
             
-
             return Ok(result);
 
 		}

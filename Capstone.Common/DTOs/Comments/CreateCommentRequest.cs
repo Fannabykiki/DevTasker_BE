@@ -4,6 +4,5 @@
     {
         public string? Content { get; set; }
         public Guid TaskId { get; set; }
-        public Guid ByUser { get; set; }
     }
 }

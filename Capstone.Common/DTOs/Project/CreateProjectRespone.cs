@@ -2,9 +2,10 @@
 
 namespace Capstone.Common.DTOs.Project
 {
-	public class CreateProjectRespone : BaseResponse
+	public class CreateProjectRespone 
 	{
 		public Guid ProjectId { get; set; }
+		public Guid BoardId { get; set; }
 		public string ProjectName { get; set; }
 		public string Description { get; set; }
 		public string StartDate { get; set; }
@@ -13,8 +14,10 @@ namespace Capstone.Common.DTOs.Project
 		public string CreateAt { get; set; }
 		public Guid SchemasId { get; set; }
 		public Guid StatusId { get; set; }
+		public Guid InterationId { get; set; }
 		public DateTime? DeleteAt { get; set; }
 		public DateTime? ExpireAt { get; set; }
 		public bool PrivacyStatus { get; set; } // false: Private , true: Public
-	}
+        public BaseResponse BaseResponse { get; set; }
+    }
 }
