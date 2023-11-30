@@ -157,9 +157,13 @@ builder.Services.AddControllers()
 //{
 //    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 //}));
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+//}));
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    build.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed((host) => true).AllowCredentials();
 }));
 //add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
