@@ -244,7 +244,7 @@ app.MapControllers();
 app.UseCorsMiddleware();
 app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
-RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
+//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
 app.MapHub<NotificationHub>("/notification");
 app.Run();
