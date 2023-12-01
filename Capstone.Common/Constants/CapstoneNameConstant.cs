@@ -58,4 +58,9 @@ namespace Capstone.Common.Constants
     {
         public const string RolePermission = "RolePermission";
     }
+    public static class StatusGuidConstant
+    {
+        public const string StatusInTeamGuid = "BA888147-C90A-4578-8BA6-63BA1756FAC1";
+        public const string StatusUnavailableGuid = "A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274";
+    }
 }
