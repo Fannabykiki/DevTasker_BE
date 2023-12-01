@@ -268,9 +268,8 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
-
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
