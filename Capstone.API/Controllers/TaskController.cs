@@ -7,6 +7,7 @@ using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
+using Capstone.Service.NotificationService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Authorization;
@@ -24,17 +25,20 @@ namespace Capstone.API.Controllers
 		private readonly IProjectService _projectService;
 		private readonly IIterationService _interationService;
 		private readonly IAuthorizationService _authorizationService;
+		private readonly INotificationService _notificationService;
 		public TaskController(ILoggerManager logger, 
 			ITaskService taskService, 
 			IIterationService interationService, 
 			IProjectService projectService,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            INotificationService notificationService)
 		{
 			_logger = logger;
 			_taskService = taskService;
 			_interationService = interationService;
 			_projectService = projectService;
 			_authorizationService = authorizationService;
+			_notificationService = notificationService;
 		}
 
 		[HttpGet("tasks/kanban")]
@@ -138,7 +142,11 @@ namespace Capstone.API.Controllers
 					return BadRequest("You need login first");
 				}
 				var result = await _taskService.CreateTask(request, userId);
-				return Ok(result);
+				if (result.BaseResponse.IsSucceed)
+				{
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                }  
+                return Ok(result);
 			}
 			else
 			{
@@ -158,7 +166,11 @@ namespace Capstone.API.Controllers
 					return BadRequest("You need login first");
 				}
 				var result = await _taskService.CreateTask(request, userId);
-				return Ok(result);
+                if (result.BaseResponse.IsSucceed)
+                {
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                }
+                return Ok(result);
 			}
 		}
 
@@ -251,6 +263,8 @@ namespace Capstone.API.Controllers
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.UpdateTask(updateTicketRequest);
+
+			// Notification
 			return Ok(result);
 		}
 
@@ -278,8 +292,12 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
 			var result = await _taskService.UpdateTaskStatus(updateTaskStatusRequest.TaskId, updateTaskStatusRequest);
-
-			return Ok(result);
+            
+            if (result.BaseResponse.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            return Ok(result);
 		}
 
 		[HttpPut("tasks/status/order")]
@@ -317,8 +335,7 @@ namespace Capstone.API.Controllers
 			//	return NotFound("Task not found");
 			//}
 			var result = await _taskService.DeleteTaskStatus(deleteTaskStatusRequest);
-
-			return Ok(result);
+            return Ok(result);
 		}
 
 		//4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
@@ -344,8 +361,12 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
-
-			return Ok(result);
+			if (result.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            
+            return Ok(result);
 		}
         //1 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPut("tasks/restoration")]
