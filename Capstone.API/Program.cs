@@ -137,7 +137,7 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
-builder.Services.AddScoped<IEmailJob, EmailJob>();
+builder.Services.AddScoped<IEmailJob, DeadlineRemindJob>();
 builder.Services.AddScoped<RolePermissionFilter>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -244,7 +244,7 @@ app.MapControllers();
 app.UseCorsMiddleware();
 app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
-//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
+RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
 app.MapHub<NotificationHub>("/notification");
 app.Run();

@@ -9,6 +9,7 @@ using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
+using Capstone.Service.NotificationService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.UserService;
@@ -29,13 +30,15 @@ namespace Capstone.API.Controllers
 		private readonly IUserService _userService;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IAuthorizationService _authorizationService;
+		private readonly INotificationService _notificationService;
 
 		public ProjectController(ILoggerManager logger, 
 			IProjectService projectService, 
 			IHttpContextAccessor httpContextAccessor, 
 			IProjectMemberService projectMemberService, 
 			IUserService userService,
-			IAuthorizationService authorizationService)
+			IAuthorizationService authorizationService,
+			INotificationService notificationService)
 		{
 			_logger = logger;
 			_projectService = projectService;
@@ -43,6 +46,7 @@ namespace Capstone.API.Controllers
 			_projectMemberService = projectMemberService;
 			_userService = userService;
 			_authorizationService = authorizationService;
+			_notificationService = notificationService;
 		}
 
 		[HttpPost("projects")]
@@ -50,8 +54,12 @@ namespace Capstone.API.Controllers
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _projectService.CreateProject(createProjectRequest, userId);
-
-			return Ok(result);
+			if (result != null)
+			{
+                await _notificationService.SendNotificationChangeProjectStatus(result.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            
+            return Ok(result);
 		}
 
 		// E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
@@ -179,6 +187,10 @@ namespace Capstone.API.Controllers
 				return BadRequest("Task of project hasn't done yet. Please set all task with status done before close project");
 			}
 			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
+			if (project.StatusResponse.IsSucceed)
+			{
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+			}
 			return Ok(project);
 		}
 
@@ -533,8 +545,11 @@ namespace Capstone.API.Controllers
 			}
 
 			var result = await _projectService.DeleteProject(deleteProjectRequest.ProjectId);
-
-			return Ok(result);
+			if(result.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }            
+            return Ok(result);
 		}
 
 		//5  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
@@ -563,6 +578,10 @@ namespace Capstone.API.Controllers
 			if (project.ExpireAt >= DateTime.Now)
 			{
 				var result = await _projectService.RestoreProject(deleteProjectRequest.ProjectId);
+				if(result.IsSucceed)
+				{
+					await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+				}
 				return Ok(result);
 			}
 			else
