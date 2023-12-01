@@ -56,11 +56,13 @@ namespace Capstone.Service.Hubs
                 //var userName = _capstoneContext.Users.FirstOrDefault(u => u.UserId.ToString() == UserId).UserName;
                 await _presenceTracker.UserConnected(UserId, Context.ConnectionId);
             }
+            await Groups.AddToGroupAsync(Context.ConnectionId, UserId);
         }
         public override async System.Threading.Tasks.Task OnDisconnectedAsync(Exception? exception)
         {
             var UserId = Context.User.FindFirstValue("UserId");
             await _presenceTracker.UserDisconnected(UserId, Context.ConnectionId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, UserId);
             await base.OnDisconnectedAsync(exception);
         }
         public async System.Threading.Tasks.Task SendNotificationChangeTaskStatus(string taskId, string userId)
@@ -114,7 +116,7 @@ namespace Capstone.Service.Hubs
             }
             var listNotification = listReceiver.Select(id => new Notification
             {
-                NotificationId = new Guid(),
+                NotificationId = Guid.NewGuid(),
                 Title = title,
                 Description = description,
                 CreateAt = DateTime.Now,
@@ -154,7 +156,7 @@ namespace Capstone.Service.Hubs
             var lstReceived = projectMembers.Where(x => x.UserId.ToString() != userId).Select(x => x.UserId);
             var lstNotification = lstReceived.Select(x => new Notification
             {
-                NotificationId = new Guid(),
+                NotificationId = Guid.NewGuid(),
                 Title = "Status change",
                 Description = $"The status of project {project.ProjectName} has been changed to {project.Status.Title}",
                 CreateAt = DateTime.Now,
@@ -215,7 +217,7 @@ namespace Capstone.Service.Hubs
                 case CommentActionCconstant.Create:
                     lstNotification = lstReceived.Select(x => new Notification
                     {
-                        NotificationId = new Guid(),
+                        NotificationId = Guid.NewGuid(),
                         Title = "Comment created",
                         Description = $"A comment has been created in task {comment.Task.Title} by {comment.ProjectMember.Users.UserName} ",
                         CreateAt = DateTime.Now,
@@ -228,7 +230,7 @@ namespace Capstone.Service.Hubs
                 case CommentActionCconstant.Edit:
                     lstNotification = lstReceived.Select(x => new Notification
                     {
-                        NotificationId = new Guid(),
+                        NotificationId = Guid.NewGuid(),
                         Title = "Comment status change",
                         Description = $"Comment has been edited in task {comment.Task.Title} by {comment.ProjectMember.Users.UserName} ",
                         CreateAt = DateTime.Now,
@@ -241,7 +243,7 @@ namespace Capstone.Service.Hubs
                 case CommentActionCconstant.Delete:
                     lstNotification = lstReceived.Select(x => new Notification
                     {
-                        NotificationId = new Guid(),
+                        NotificationId = Guid.NewGuid(),
                         Title = "Comment status change",
                         Description = $"A comment has been deleted in task {comment.Task.Title} by {comment.ProjectMember.Users.UserName} ",
                         CreateAt = DateTime.Now,
