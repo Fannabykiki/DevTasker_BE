@@ -14,5 +14,6 @@ namespace Capstone.Service.NotificationService
         public System.Threading.Tasks.Task SendNotificationChangeProjectStatus(string projectId, string userId);
         public System.Threading.Tasks.Task SendNotificationChangeTaskStatus(string taskId, string userId);
         public System.Threading.Tasks.Task SendNotificationCommentTask(string commentId, string userId, string action);
+        public System.Threading.Tasks.Task SendNotificationTaskDeadline();
     }
 }

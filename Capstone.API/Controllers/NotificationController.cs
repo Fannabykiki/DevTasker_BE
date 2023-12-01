@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Iteration;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Notification;
 using Capstone.DataAccess.Entities;
 using Capstone.Service.NotificationService;
@@ -20,7 +21,7 @@ namespace Capstone.API.Controllers
         [HttpGet("latest")]
         public async Task<ActionResult<List<NotificationViewModel>>> GetLatest()
         {
-            var userId = new Guid();
+            var userId = this.GetCurrentLoginUserId();
             var result = await _notificationService.GetLatestNotifications(userId);
             if (result == null)
             {

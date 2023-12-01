@@ -43,5 +43,12 @@ namespace Capstone.API.Controllers.Testing
             await _notificationService.SendNotificationCommentTask(commentTaskId, userId.ToString(), action);
             return Ok();
         }
+        [HttpPost("send-notification-email-job")]
+        public async Task<IActionResult> SendNotifcationEmailJob()
+        {
+            var userId = this.GetCurrentLoginUserId();
+            await _notificationService.SendNotificationTaskDeadline();
+            return Ok();
+        }
     }
 }
