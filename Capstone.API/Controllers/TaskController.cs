@@ -119,7 +119,12 @@ namespace Capstone.API.Controllers
         //  993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
         [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
-		{
+		{	
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if(projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
 			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if(!memberStatus)
 			{
@@ -178,8 +183,13 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
-            //Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create subtask in done project");
+			}
+			//Authorize
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
                     ListProjectId = new List<Guid?> { request.ProjectId },
@@ -272,9 +282,8 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
-
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {

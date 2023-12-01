@@ -292,11 +292,18 @@ public class ProjectService : IProjectService
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status)!;
+
+			if(member.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") || member.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
+			{
+				return null;
+			}
+
             if (member.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
             {
                 return new BaseResponse { IsSucceed = false, Message = "You cannot change the role of the user who has the System Admin role" };
             }
+
             if (updateMemberRoleRequest.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
             {
                 if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
@@ -434,7 +441,7 @@ public class ProjectService : IProjectService
 
 	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
 	{
-		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x=>x.Status)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
 	}
 

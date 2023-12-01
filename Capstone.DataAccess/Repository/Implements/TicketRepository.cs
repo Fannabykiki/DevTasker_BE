@@ -21,8 +21,8 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == false && x.PrevId == null).OrderBy(x => x.CreateTime).Include(x => x.PriorityLevel)
 								.Select(x => new TaskViewModel
 								{
-									AssignTo = x.ProjectMember.Users.UserName,
-									CreateBy = x.ProjectMember.Users.UserName,
+									AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a => a.Users).Select(a => a.Users.UserName).FirstOrDefault(),
+									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
 									DeleteAt = x.DeleteAt == null
@@ -81,8 +81,8 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Where(x => x.InterationId == interationId && x.IsDelete == false && x.PrevId == null).OrderBy(x => x.CreateTime).Include(x => x.PriorityLevel)
 								.Select(x => new TaskViewModel
 								{
-									AssignTo = x.ProjectMember.Users.UserName,
-									CreateBy = x.ProjectMember.Users.UserName,
+									AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a => a.Users).Select(a => a.Users.UserName).FirstOrDefault(),
+									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
 									DeleteAt = x.DeleteAt == null
@@ -106,9 +106,9 @@ namespace Capstone.DataAccess.Repository.Implements
 									TypeName = x.TicketType.Title,
 									PriorityLevel = x.PriorityLevel.Level,
 									TotalComment = _context.TaskComments
-									.Where(m => m.TaskId == x.TaskId).Count(),
+									.Where(m => m.TaskId == x.TaskId && m.DeleteAt == null).Count(),
 									TotalAttachment = _context.Attachments
-									.Where(a => a.TaskId == x.TaskId).Count(),
+									.Where(a => a.TaskId == x.TaskId && a.IsDeleted == false).Count(),
 									SubTask = _context.Tasks
 														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
 														.Select(m => new SubTask
@@ -149,8 +149,8 @@ namespace Capstone.DataAccess.Repository.Implements
 							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId && x.IsDelete == false)
 							.Select(x => new TaskViewModel
 							{
-								AssignTo = x.ProjectMember.Users.UserName,
-								CreateBy = x.ProjectMember.Users.UserName,
+								AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a => a.Users).Select(a => a.Users.UserName).FirstOrDefault(),
+								CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 								CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 								Description = x.Description,
 								DeleteAt = x.DeleteAt == null
@@ -176,8 +176,8 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == true)
 								.Select(x => new TaskViewModel
 								{
-									AssignTo = x.ProjectMember.Users.UserName,
-									CreateBy = x.ProjectMember.Users.UserName,
+									AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a => a.Users).Select(a => a.Users.UserName).FirstOrDefault(),
+									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
 									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
@@ -204,9 +204,9 @@ namespace Capstone.DataAccess.Repository.Implements
 								.Select(x => new TaskDetailViewModel
 								{
 									AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a=>a.Users).Select(a=>a.Users.UserName).FirstOrDefault(),
+									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									AssignToStatus = x.ProjectMember.Users.Status.Title,
 									AssignToStatusId = x.ProjectMember.Users.Status.StatusId,
-									CreateBy = _context.Users.Where(u => u.UserId == x.CreateBy).Select(a => a.UserName).FirstOrDefault(),
 									CreateTime = x.CreateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = x.Description,
 									DeleteAt = x.DeleteAt == null ? null : x.DeleteAt.Value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
