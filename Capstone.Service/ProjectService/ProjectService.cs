@@ -294,7 +294,7 @@ public class ProjectService : IProjectService
 
 			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status)!;
 
-			if(member.Status.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
+			if(member.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") || member.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
 			{
 				return null;
 			}
