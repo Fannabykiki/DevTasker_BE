@@ -35,7 +35,7 @@ public interface IProjectService
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
 	Task<BaseResponse> ChangeProjectSchema(Guid projectId);
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
-	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
+	Task<ChangeProjectStatusRespone> ChangeProjectStatus(Guid statusId,ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 	Task<int> GetTaskStatusDone(Guid projectId);

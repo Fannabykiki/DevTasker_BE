@@ -169,8 +169,9 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
+			
 			//Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
                     ListProjectId = new List<Guid?> { changeProjectStatusRequest.ProjectId },
@@ -180,13 +181,40 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
+			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
 			if (pro != 0)
 			{
 				return BadRequest("Task of project hasn't done yet. Please set all task with status done before close project");
 			}
-			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
+			var project = await _projectService.ChangeProjectStatus(Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"),changeProjectStatusRequest);
+			if (project.StatusResponse.IsSucceed)
+			{
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+			}
+			return Ok(project);
+		}
+
+		[HttpPut("projects/reopen-project")]
+		public async Task<ActionResult<ChangeProjectStatusRespone>> ReOpenProject(ChangeProjectStatusRequest changeProjectStatusRequest)
+		{
+			
+			//Authorize
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { changeProjectStatusRequest.ProjectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects, "Browse Projects" }
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+			var pro = await _projectService.GetProjectByProjectId(changeProjectStatusRequest.ProjectId);
+			if (pro.StatusId != Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't reopen project is doing");
+			}
+			var project = await _projectService.ChangeProjectStatus(Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"), changeProjectStatusRequest);
 			if (project.StatusResponse.IsSucceed)
 			{
 				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
