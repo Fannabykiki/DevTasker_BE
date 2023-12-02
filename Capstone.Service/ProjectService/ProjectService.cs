@@ -770,14 +770,14 @@ public class ProjectService : IProjectService
 		}
 	}
 
-	public async Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest)
+	public async Task<ChangeProjectStatusRespone> ChangeProjectStatus(Guid statusId,ChangeProjectStatusRequest changeProjectStatusRequest)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == changeProjectStatusRequest.ProjectId, x => x.Status)!;
 
-			project.StatusId = Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C");
+			project.StatusId = statusId ;
 
 			var update = await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
