@@ -787,11 +787,10 @@ public class ProjectService : IProjectService
 				ProjectId = update.ProjectId,
 				ProjectName = update.ProjectName,
 				StatusId = update.StatusId,
-				StatusName = update.Status.Title,
 				StatusResponse = new BaseResponse
 				{
 					IsSucceed = true,
-					Message = "Change project's status to done successfully"
+					Message = "Change project's status successfully"
 				}
 			};
 		}
