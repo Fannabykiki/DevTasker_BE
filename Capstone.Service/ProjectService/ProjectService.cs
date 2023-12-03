@@ -204,7 +204,7 @@ public class ProjectService : IProjectService
 				BaseResponse = new Common.DTOs.Base.BaseResponse
 				{
 					IsSucceed = false,
-					Message = "Create successfully"
+					Message = "Create fail"
 				}
 			};
 		}
@@ -415,10 +415,12 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
-			project.StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE");
+			project.StatusId = Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5");
+
 			project.DeleteAt = null;
 			project.ExpireAt = null;
 			project.IsDelete = false;
+
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();

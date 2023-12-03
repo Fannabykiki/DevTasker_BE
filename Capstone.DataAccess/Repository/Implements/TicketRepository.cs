@@ -222,6 +222,7 @@ namespace Capstone.DataAccess.Repository.Implements
 									TaskId = x.TaskId,
 									TypeId = x.TypeId,
 									TypeName = x.TicketType.Title,
+									ProjectId = _context.BoardStatus.Where(b => b.BoardStatusId == x.StatusId).Include(a => a.Board).Select(a => a.Board.BoardId).FirstOrDefault(),
 									CommentResponse = _context.TaskComments
 				.AsQueryable()
 				.Include(m => m.ProjectMember).ThenInclude(pm => pm.Users)
@@ -306,7 +307,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<int> GetTaskDone(Guid projectId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == true && x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"))
+								.Where(x => x.Interation.BoardId == projectId && x.IsDelete == true && x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5") && x.IsDelete == false)
 								.Select(x => new TaskViewModel
 								{
 									AssignTo = x.ProjectMember.Users.UserName,
