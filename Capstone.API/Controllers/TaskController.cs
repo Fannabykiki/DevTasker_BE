@@ -232,7 +232,8 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
-            //Authorize
+		
+			//Authorize
 			var projectId = await _taskService.GetProjectIdOfTask(updateTicketRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
@@ -248,16 +249,22 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var memberStatus = await _projectService.CheckMemberStatus(updateTicketRequest.AssignTo);
+			var taskDetail = await _taskService.GetTaskDetail(updateTicketRequest.TaskId);
+			if (taskDetail == null)
+			{
+				return NotFound("Task not found");
+			}
+			var projectStatus = await _projectService.GetProjectByProjectId(taskDetail.ProjectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create subtask in done project");
+			}
+			var memberStatus = await _projectService.CheckMemberStatus(updateTicketRequest.AssignTo);
 			if (!memberStatus)
 			{
 				return BadRequest("Can't assign to unavailable member");
 			}
-			var task = await _taskService.CheckExist(updateTicketRequest.TaskId);
-			if (!task) {
-				return NotFound("Task not found");
-			}
+		
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
 			if (updateTicketRequest.StartDate.Date < interation.StartDate.Date)
 			{
@@ -267,7 +274,7 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 			}
-			var userId = this.GetCurrentLoginUserId();
+			var userId = this.GetCurrentLoginUserId();	
 			if (userId == Guid.Empty)
 			{
 				return BadRequest("You need login first");
