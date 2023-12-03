@@ -135,7 +135,7 @@ namespace Capstone.DataAccess.Repository.Implements
             return tasks;
         }
 
-        private ReportRecord GenerateReportRecord(List<BoardStatus> listStatus, List<Entities.Task> tasks)
+        private ReportRecord GenerateReportRecord(List<BoardStatus> listStatus, List<Entities.Task> tasks)////////////////////
         {
             var reportRecord = new ReportRecord();
             var reports = GenerateReportStatusList(listStatus, tasks);
@@ -160,6 +160,12 @@ namespace Capstone.DataAccess.Repository.Implements
                     Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * numberTask) / tasks.Count)
                 });
             }
+            reports.Add(new ReportStatus
+            {
+                Title = "Deleted",
+                NumberTask = tasks.Count(x => x.IsDelete == true),
+                Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * tasks.Count(x => x.IsDelete == true)) / tasks.Count)
+            });
             return reports;
         }
 

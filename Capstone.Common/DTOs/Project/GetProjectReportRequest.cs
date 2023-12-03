@@ -35,7 +35,7 @@ namespace Capstone.Common.DTOs.Project
     }
     public class ReportStatus
     {
-        public Guid BoardStatusId { get; set; }
+        public Guid? BoardStatusId { get; set; }
         public string Title { get; set; }
         public int? NumberTask { get; set; }
         public int? Percent { get; set; }
