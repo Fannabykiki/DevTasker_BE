@@ -76,7 +76,7 @@ namespace Capstone.Service.ProjectMemberService
 				{
 					foreach (var email in inviteUserRequest.Email)
 					{
-						var user = await _userRepository.GetAsync(x => x.Email == email, null);
+						var user = await _userRepository.GetAsync(x => x.Email.Equals(email), null);
 						var member = await _projectMemberRepository.GetAsync(x => x.UserId == user.UserId && x.ProjectId == inviteUserRequest.ProjectId, null);
 						if (member != null)
 						{
