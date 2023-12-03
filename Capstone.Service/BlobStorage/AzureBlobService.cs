@@ -71,6 +71,19 @@ namespace Capstone.Service.BlobStorage
 				var project = await _interationRepository.GetAsync(i => i.InterationId == interation.InterationId, null);
 				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId, null);
 				BlobClient client = containerClient.GetBlobClient(file.FileName);
+
+				var allowedFileCode = new[] { ".jpg", ".png", ".pdf", ".doc", ".xls", ".xlsx", ".csv", ".txt", ".doc", ".zip", ".rar", ".docx", ".ppt", ".pptx", ".gif", ".jpeg", ".mov", ".mp4", ".xml", ".cs", ".json", ".html", ".sql" };
+
+				var extension = Path.GetExtension(file.FileName);
+				if (!allowedFileCode.Contains(extension))
+				{
+					return new BlobResponse
+					{
+						IsSucceed = false,
+						Message = "File format not allowed"
+					};
+				}
+
 				var fileSize = file.Length;
 				if (fileSize > 10 * 1024 * 1024)
 				{
@@ -80,6 +93,46 @@ namespace Capstone.Service.BlobStorage
 						Message = "Please choose attachment smaller than 10MB !!!"
 					};
 				}
+
+				if (await client.ExistsAsync())
+				{
+					var filenameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+					var fileExtension = Path.GetExtension(file.FileName);
+					var countAttachments = (await _attachmentRepository.GetAllWithOdata(x => x.Title.Contains(file.FileName), null)).Count();
+					var newFileName = $"{filenameWithoutExtension}({countAttachments}){fileExtension}";
+					BlobClient _client = containerClient.GetBlobClient(newFileName);
+
+					await using (Stream? data = file.OpenReadStream())
+					{
+
+						var newAttachment = new Attachment
+						{
+							AttachmentId = Guid.NewGuid(),
+							TaskId = taskId,
+							CreateAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+							CreateBy = member.MemberId,
+							Title = newFileName,
+							IsDeleted = false
+						};
+
+						await _attachmentRepository.CreateAsync(newAttachment);
+						await _attachmentRepository.SaveChanges();
+						transaction.Commit();
+						await _client.UploadAsync(data);
+					}
+
+					return new BlobResponse
+					{
+						Message = $"Attachment {newFileName} Upload successfully",
+						IsSucceed = true,
+						Blob = new BlobViewModel
+						{
+							Uri = client.Uri.AbsoluteUri,
+							Name = client.Name,
+						}
+					};
+				}
+
 				await using (Stream? data = file.OpenReadStream())
 				{
 					var newAttachment = new Attachment

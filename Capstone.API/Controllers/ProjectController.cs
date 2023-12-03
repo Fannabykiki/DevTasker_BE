@@ -144,6 +144,7 @@ namespace Capstone.API.Controllers
 				}
 				else if (isPending == false)
 				{
+					var addNewMember = await _projectMemberService.AddNewProjectMember(inviteUserRequest);
 					await _projectService.SendMailInviteUser(inviteUserRequest, userId);
 					return Ok($"Email {email} is already left project. Please check mail and confirm invitation to join project again");
 				}
