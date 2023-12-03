@@ -52,10 +52,7 @@ namespace Capstone.API.Controllers
             }
 
             var userId = this.GetCurrentLoginUserId();
-			if (userId == Guid.Empty)
-			{
-				return BadRequest("You need to login first");
-			}
+		
 			var files = await _azureBlobService.UploadFile(userId, file, taskId);
 			return Ok(files);
 		}

@@ -887,7 +887,7 @@ public class ProjectService : IProjectService
 	public async Task<int> GetTaskStatusDone(Guid projectId)
 	{
 		int taskDone = await _ticketRepository.GetTaskDone(projectId);
-		int taskTotal = (await _ticketRepository.GetAllTask(projectId)).Count();
+		int taskTotal = await _ticketRepository.GetTotalTask(projectId);
 		return taskTotal - taskDone;
 	}
 

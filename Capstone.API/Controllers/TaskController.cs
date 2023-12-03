@@ -274,7 +274,7 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 			}
-			var userId = this.GetCurrentLoginUserId();
+			var userId = this.GetCurrentLoginUserId();	
 			if (userId == Guid.Empty)
 			{
 				return BadRequest("You need login first");
