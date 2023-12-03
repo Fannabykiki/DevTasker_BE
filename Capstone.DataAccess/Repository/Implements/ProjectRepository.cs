@@ -151,7 +151,7 @@ namespace Capstone.DataAccess.Repository.Implements
             var reports = new List<ReportStatus>();
             foreach (var status in listStatus)
             {
-                var numberTask = tasks.Count(x => x.StatusId == status.BoardStatusId);
+                var numberTask = tasks.Count(x => x.StatusId == status.BoardStatusId && x.IsDelete != true);
                 reports.Add(new ReportStatus
                 {
                     BoardStatusId = status.BoardStatusId,
