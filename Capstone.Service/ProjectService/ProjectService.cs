@@ -77,7 +77,7 @@ public class ProjectService : IProjectService
 				Description = createProjectRequest.Description,
 				SchemasId = Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"),
 				Board = new Board
-				{
+				{	
 					BoardId = Guid.NewGuid(),
 					ProjectId = projectId,
 					DeleteAt = null,
@@ -96,7 +96,8 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "To do",
 				Order = 1,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			var inProgress = new BoardStatus
@@ -104,7 +105,8 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "In Progress",
 				Order = 2,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			var done = new BoardStatus
@@ -112,12 +114,23 @@ public class ProjectService : IProjectService
 				BoardId = newProject.Board.BoardId,
 				Title = "Done",
 				Order = 3,
-				BoardStatusId = new Guid()
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
+			};
+
+			var fail = new BoardStatus
+			{
+				BoardId = newProject.Board.BoardId,
+				Title = "Fail",
+				Order = 4,
+				BoardStatusId = new Guid(),
+				StatusId = Guid.Parse("BB93DD2D-B9E7-401F-83AA-174C588AB9DE")
 			};
 
 			await _boardStatusRepository.CreateAsync(done);
 			await _boardStatusRepository.CreateAsync(todo);
 			await _boardStatusRepository.CreateAsync(inProgress);
+			await _boardStatusRepository.CreateAsync(fail);
 			await _boardStatusRepository.SaveChanges();
 
 			var newInteration = new Interation
@@ -272,18 +285,51 @@ public class ProjectService : IProjectService
 		return _mapper.Map<List<ViewMemberProject>>(projects);
 	}
 
-	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest)
+	public async Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest, Guid updateBy)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null)!;
-			if (member.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || member.IsOwner == true)
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status)!;
+
+			if(member.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") || member.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
 			{
-				return new BaseResponse { IsSucceed = false, Message = "Update Member Role successfully" };
+				return null;
 			}
+
+            if (member.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+            {
+                return new BaseResponse { IsSucceed = false, Message = "You cannot change the role of the user who has the System Admin role" };
+            }
+
+            if (updateMemberRoleRequest.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B"))
+            {
+                if (member.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") && member.IsOwner == true)
+                {
+                    return new BaseResponse { IsSucceed = true, Message = "Update Member Role successfully" };
+                }
+				
+                var updateByUser = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.UserId == updateBy, null)!;
+				if (updateByUser.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
+				{
+					var PO = await _projectMemberRepository.GetAsync(x => x.ProjectId == member.ProjectId && x.IsOwner == true, null)!;
+                    PO.IsOwner = false;
+                    PO.RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56");
+                    await _projectMemberRepository.UpdateAsync(PO);
+                    await _projectMemberRepository.SaveChanges();
+                }
+				else
+				{
+                    updateByUser.IsOwner = false;
+                    updateByUser.RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56");
+                    await _projectMemberRepository.UpdateAsync(updateByUser);
+                    await _projectMemberRepository.SaveChanges();
+                }
+                member.IsOwner = true;
+                
+            }
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
@@ -395,7 +441,7 @@ public class ProjectService : IProjectService
 
 	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
 	{
-		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x=>x.Status)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
 	}
 
@@ -724,14 +770,14 @@ public class ProjectService : IProjectService
 		}
 	}
 
-	public async Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest)
+	public async Task<ChangeProjectStatusRespone> ChangeProjectStatus(Guid statusId,ChangeProjectStatusRequest changeProjectStatusRequest)
 	{
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == changeProjectStatusRequest.ProjectId, x => x.Status)!;
 
-			project.StatusId = Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C");
+			project.StatusId = statusId ;
 
 			var update = await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
@@ -741,11 +787,10 @@ public class ProjectService : IProjectService
 				ProjectId = update.ProjectId,
 				ProjectName = update.ProjectName,
 				StatusId = update.StatusId,
-				StatusName = update.Status.Title,
 				StatusResponse = new BaseResponse
 				{
 					IsSucceed = true,
-					Message = "Change project's status to done successfully"
+					Message = "Change project's status successfully"
 				}
 			};
 		}

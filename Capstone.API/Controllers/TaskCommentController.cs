@@ -4,6 +4,7 @@ using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Comments;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TicketComment;
+using Capstone.Service.NotificationService;
 using Capstone.Service.TicketCommentService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Authorization;
@@ -19,14 +20,17 @@ namespace Capstone.API.Controllers
         private readonly ITaskCommentService _commentService;
         private readonly ITaskService _taskService;
         private readonly IAuthorizationService _authorizationService;
+        private readonly INotificationService _notificationService;
 
         public TaskCommentController(ITaskCommentService commentService, 
             ITaskService taskService,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            INotificationService notificationService)
         {
             _commentService = commentService;
             _taskService = taskService;
             _authorizationService = authorizationService;
+            _notificationService = notificationService;
         }
 
         [HttpPost("comment")]
@@ -42,7 +46,10 @@ namespace Capstone.API.Controllers
             {
                 return BadRequest("Failed to create a new comment.");
             }
-
+            else
+            {
+                await _notificationService.SendNotificationCommentTask(newComment.CommentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Create);
+            }
             return Ok(newComment);
         }
 
@@ -70,7 +77,10 @@ namespace Capstone.API.Controllers
             {
                 return NotFound("Comment not found or Unable to delete.");
             }
-
+            else
+            {
+                await _notificationService.SendNotificationCommentTask(commentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Delete);
+            }
             return Ok("Comment deleted.");
         }
 
@@ -88,7 +98,10 @@ namespace Capstone.API.Controllers
             {
                 return BadRequest("Failed to create a new comment.");
             }
-
+            else
+            {
+                await _notificationService.SendNotificationCommentTask(commentId.ToString(), userId.ToString(), CommentActionCconstant.Create);
+            }
             return Ok(newComment);
         }
 
@@ -128,7 +141,10 @@ namespace Capstone.API.Controllers
             {
                 return NotFound("Comment not found or Unable to update.");
             }
-
+            else
+            {
+                await _notificationService.SendNotificationCommentTask(updated.CommentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Edit);
+            }
             return Ok(updated);
         }
     }

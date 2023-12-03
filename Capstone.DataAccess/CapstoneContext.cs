@@ -155,6 +155,12 @@ namespace Capstone.DataAccess
                 .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<Status>()
+                .HasMany(sc => sc.BoardStatuses)
+                .WithOne(s => s.Status)
+                .HasForeignKey(sc => sc.StatusId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Status>()
                 .HasMany(sc => sc.Project)
                 .WithOne(s => s.Status)
                 .HasForeignKey(sc => sc.StatusId)

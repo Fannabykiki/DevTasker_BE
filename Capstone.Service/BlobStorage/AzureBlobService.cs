@@ -69,27 +69,19 @@ namespace Capstone.Service.BlobStorage
 
 				var interation = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
 				var project = await _interationRepository.GetAsync(i => i.InterationId == interation.InterationId, null);
-				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId,null);
+				var member = await _projectMemberRepository.GetAsync(x => x.UserId == userId && x.ProjectId == project.BoardId, null);
 				BlobClient client = containerClient.GetBlobClient(file.FileName);
 				var fileSize = file.Length;
-				if(fileSize > 20 * 1024 * 1024)
+				if (fileSize > 10 * 1024 * 1024)
 				{
 					return new BlobResponse
 					{
 						IsSucceed = false,
-						Message = "Please choose attachment smaller than 20MB !!!"
-					};
-				}
-				if (await client.ExistsAsync())
-				{
-					return new BlobResponse
-					{
-						IsSucceed = false,
-						Message = "Attachment is exist. Please rename and try again!!!"
+						Message = "Please choose attachment smaller than 10MB !!!"
 					};
 				}
 				await using (Stream? data = file.OpenReadStream())
-				{	
+				{
 					var newAttachment = new Attachment
 					{
 						AttachmentId = Guid.NewGuid(),
@@ -99,11 +91,13 @@ namespace Capstone.Service.BlobStorage
 						Title = file.FileName,
 						IsDeleted = false
 					};
+
 					await _attachmentRepository.CreateAsync(newAttachment);
 					await _attachmentRepository.SaveChanges();
 					transaction.Commit();
-					await client.UploadAsync(data);
+					await client.UploadAsync(data, true);
 				}
+
 
 				return new BlobResponse
 				{
@@ -159,7 +153,7 @@ namespace Capstone.Service.BlobStorage
 			return null;
 		}
 
-		public async Task<BlobResponse> DeleteFile(string blobFile,Guid taskId)
+		public async Task<BlobResponse> DeleteFile(string blobFile, Guid taskId)
 		{
 			using var transaction = _attachmentRepository.DatabaseTransaction();
 			try

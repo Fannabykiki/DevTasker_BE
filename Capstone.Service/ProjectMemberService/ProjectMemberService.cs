@@ -77,6 +77,21 @@ namespace Capstone.Service.ProjectMemberService
 					foreach (var email in inviteUserRequest.Email)
 					{
 						var user = await _userRepository.GetAsync(x => x.Email == email, null);
+						var member = await _projectMemberRepository.GetAsync(x => x.UserId == user.UserId && x.ProjectId == inviteUserRequest.ProjectId, null);
+						if (member != null)
+						{
+							member.StatusId = Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746");
+
+							await _projectMemberRepository.UpdateAsync(member);
+							await _projectMemberRepository.SaveChanges();
+							transaction.Commit();
+
+							return new AddNewProjectMemberResponse
+							{
+								IsSucceed = true,
+								Message = "Invite user to project successfully"
+							};
+						}
 						var projectMember = new ProjectMember
 						{
 							IsOwner = false,
@@ -87,10 +102,9 @@ namespace Capstone.Service.ProjectMemberService
 							RoleId = Guid.Parse("0A0994FC-CBAE-482F-B5E8-160BB8DDCD56")
 						};
 
-						var member = await _projectMemberRepository.CreateAsync(projectMember);
+						await _projectMemberRepository.CreateAsync(projectMember);
 						await _projectMemberRepository.SaveChanges();
 						transaction.Commit();
-
 					}
 					return new AddNewProjectMemberResponse
 					{
@@ -108,13 +122,13 @@ namespace Capstone.Service.ProjectMemberService
 
 		public async Task<bool> CheckExist(Guid memberId)
 		{
-			var member = await _projectMemberRepository.GetAsync(x=>x.MemberId == memberId,null);
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
 			if (member == null)
 				return false;
 			return true;
 		}
 
-		public async Task<bool> CheckMemberStatus(string email, Guid projectId,Guid statusId)
+		public async Task<bool> CheckMemberStatus(string email, Guid projectId, Guid statusId)
 		{
 			var projects = await _projectMemberRepository.CheckStatus(projectId, statusId);
 			var list = _mapper.Map<List<ViewMemberProject>>(projects);
@@ -166,19 +180,19 @@ namespace Capstone.Service.ProjectMemberService
 			}
 		}
 
-        public async Task<Guid?> GetProjectIdFromMember(Guid memberId)
-        {
+		public async Task<Guid?> GetProjectIdFromMember(Guid memberId)
+		{
 			var projectmember = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
-			if(projectmember!= null)
+			if (projectmember != null)
 			{
 				return projectmember.ProjectId;
 			}
 			return null;
-        }
-    
+		}
+
 		public async Task<ViewMemberProject> GetMemberByMemberId(Guid memberId)
 		{
-			var member = await _projectMemberRepository.GetAsync(x=>x.MemberId == memberId,null);
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
 			return _mapper.Map<ViewMemberProject>(member);
 		}
 	}

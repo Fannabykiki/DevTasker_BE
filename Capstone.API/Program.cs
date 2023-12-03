@@ -137,7 +137,7 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
-builder.Services.AddScoped<IEmailJob, EmailJob>();
+builder.Services.AddScoped<IEmailJob, DeadlineRemindJob>();
 builder.Services.AddScoped<RolePermissionFilter>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
@@ -153,11 +153,18 @@ builder.Services.AddControllers()
                     options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());                  
                 });
 
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+//}));
+//builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+//{
+//    build.WithOrigins("http://127.0.0.1:3000", "https://devtasker.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+//}));
 builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
 {
-    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    build.SetIsOriginAllowed(host => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
-
 //add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
            options =>
@@ -172,7 +179,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                    ValidAudience = JwtConstant.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstant.Key)),
                };
-               
+               options.Events = new JwtBearerEvents
+               {
+                   OnMessageReceived = context =>
+                   {
+                       var accessToken = context.Request.Query["access_token"];
+
+                       var path = context.HttpContext.Request.Path;
+                       if (!string.IsNullOrEmpty(accessToken) &&
+                           path.StartsWithSegments("/notification"))
+                       {
+                           context.Token = accessToken;
+                       }
+
+                       return System.Threading.Tasks.Task.CompletedTask;
+                   }
+               };
+
            }
        );
 builder.Services.AddHangfire(x => x.UseSimpleAssemblyNameTypeSerializer()
@@ -201,7 +224,6 @@ builder.Services.AddAuthorization(
     }
     );
 builder.Services.AddSingleton<IAuthorizationHandler, AppAuthorizationHandler>();
-builder.Services.AddScoped<IAuthorizationService, RolePermissionAuthorizationService>();
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
@@ -210,7 +232,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
-
 app.UseCors("corspolicy");
 
 app.UseHttpsRedirection();
@@ -220,10 +241,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCorsMiddleware();
 app.UseHangfireDashboard("/hangfire");
 RecurringJob.RemoveIfExists("email-for-deadline");
-//RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
+RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "0 23 * * *", TimeZoneInfo.Local);
 //RecurringJob.AddOrUpdate<IEmailJob>("email-for-deadline",x => x.RunJob(), "* * * * *");
-app.MapHub<NotificationHub>("/notificattion");
+app.MapHub<NotificationHub>("/notification");
 app.Run();

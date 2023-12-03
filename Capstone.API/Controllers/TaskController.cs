@@ -2,12 +2,12 @@
 using Capstone.API.Extentions.RolePermissionAuthorize;
 using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Base;
-using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.TaskPriority;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.IterationService;
 using Capstone.Service.LoggerService;
+using Capstone.Service.NotificationService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Authorization;
@@ -25,17 +25,20 @@ namespace Capstone.API.Controllers
 		private readonly IProjectService _projectService;
 		private readonly IIterationService _interationService;
 		private readonly IAuthorizationService _authorizationService;
+		private readonly INotificationService _notificationService;
 		public TaskController(ILoggerManager logger, 
 			ITaskService taskService, 
 			IIterationService interationService, 
 			IProjectService projectService,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            INotificationService notificationService)
 		{
 			_logger = logger;
 			_taskService = taskService;
 			_interationService = interationService;
 			_projectService = projectService;
 			_authorizationService = authorizationService;
+			_notificationService = notificationService;
 		}
 
 		[HttpGet("tasks/kanban")]
@@ -69,7 +72,6 @@ namespace Capstone.API.Controllers
 			var response = await _taskService.GetAllTaskByInterationIdAsync(interationId);
 			return Ok(response);
 		}
-
 
 		[HttpGet("tasks/status")]
 		[EnableQuery()]
@@ -117,7 +119,12 @@ namespace Capstone.API.Controllers
         //  993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
         [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
-		{
+		{	
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if(projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
 			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if(!memberStatus)
 			{
@@ -140,7 +147,11 @@ namespace Capstone.API.Controllers
 					return BadRequest("You need login first");
 				}
 				var result = await _taskService.CreateTask(request, userId);
-				return Ok(result);
+				if (result.BaseResponse.IsSucceed)
+				{
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                }  
+                return Ok(result);
 			}
 			else
 			{
@@ -160,7 +171,11 @@ namespace Capstone.API.Controllers
 					return BadRequest("You need login first");
 				}
 				var result = await _taskService.CreateTask(request, userId);
-				return Ok(result);
+                if (result.BaseResponse.IsSucceed)
+                {
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                }
+                return Ok(result);
 			}
 		}
 
@@ -168,8 +183,13 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
-            //Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create subtask in done project");
+			}
+			//Authorize
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
                     ListProjectId = new List<Guid?> { request.ProjectId },
@@ -253,6 +273,8 @@ namespace Capstone.API.Controllers
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.UpdateTask(updateTicketRequest);
+
+			// Notification
 			return Ok(result);
 		}
 
@@ -260,9 +282,8 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
-
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
@@ -280,12 +301,54 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
 			var result = await _taskService.UpdateTaskStatus(updateTaskStatusRequest.TaskId, updateTaskStatusRequest);
+            
+            if (result.BaseResponse.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            return Ok(result);
+		}
+
+		[HttpPut("tasks/status/order")]
+		public async Task<IActionResult> MoveStastus(UpdateTaskOrderRequest updateTaskOrderRequest)
+		{
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
+			var result = await _taskService.UpdateTaskOrder(updateTaskOrderRequest);
 
 			return Ok(result);
 		}
 
-        //4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
-        [HttpPut("tasks/deletion")]
+		[HttpPut("tasks/status/title")]
+		public async Task<IActionResult> UpdateStastusName(UpdateTaskNameRequest updateTaskNameRequest)
+		{
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
+			var result = await _taskService.UpdateTaskTitle(updateTaskNameRequest);
+
+			return Ok(result);
+		}
+
+		[HttpPut("tasks/status/deletion")]
+		public async Task<IActionResult> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest)
+		{
+			//var task = await _taskService.CheckExist(updateTaskOrderRequest.);
+			//if (!task)
+			//{
+			//	return NotFound("Task not found");
+			//}
+			var result = await _taskService.DeleteTaskStatus(deleteTaskStatusRequest);
+            return Ok(result);
+		}
+
+		//4 9D7C3592-0CAF-42D1-A7B6-293CA69F6201 - Delete Tasks
+		[HttpPut("tasks/deletion")]
 		public async Task<IActionResult> DeleteTicket(RestoreTaskRequest restoreTaskRequest)
 		{
             //Authorize
@@ -307,27 +370,19 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
-
-			return Ok(result);
+			if (result.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            
+            return Ok(result);
 		}
         //1 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
         [HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
-            
-            var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
-			if (!task)
-			{
-				return NotFound("Task not found");
-			}
-			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
-			if (taskDetail.DeleteAt == null)
-			{
-				return BadRequest("Task is still active. Cant restore it!!!");
-			}
-
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(restoreTaskRequest.TaskId);
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(restoreTaskRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
@@ -338,9 +393,23 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var taskDetail = await _taskService.GetTaskDetail(restoreTaskRequest.TaskId);
+			if (taskDetail.DeleteAt == null)
+			{
+				return BadRequest("Task is still active. Cant restore it!!!");
+			}
+			var status = await _taskService.CheckTaskStatus(taskDetail.StatusId);
+			if (!status)
+			{
+				return BadRequest($"Can't restore task because {taskDetail.StatusName} column has been removed ");
+			}
 
-
-            if (DateTime.Parse(taskDetail.ExpireTime) >= DateTime.Now)
+			if (DateTime.Parse(taskDetail.ExpireTime).Date > DateTime.Now.Date)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest);
 				return Ok(response);

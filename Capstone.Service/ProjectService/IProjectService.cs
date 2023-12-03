@@ -21,7 +21,7 @@ public interface IProjectService
     Task<BaseResponse> CreateProjectRole(CreateRoleRequest createRoleRequest);
 	Task<IEnumerable<ViewMemberProject>> GetMemberByProjectId(Guid projectId);
 	Task<IEnumerable<GetAllProjectViewModel>> GetProjectByUserId(Guid projectId);
-	Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest);
+	Task<BaseResponse> UpdateMemberRole(Guid memberId, UpdateMemberRoleRequest updateMemberRoleRequest, Guid updateBy);
 	Task<BaseResponse> UpdateProjectInfo(Guid projectId, UpdateProjectNameInfo updateProjectNameInfo);
 	Task<BaseResponse> UpdateProjectSchema(Guid projectId, UpdatePermissionSchemaRequest changePermissionSchemaRequest);
 	Task<BaseResponse> UpdateProjectPrivacy(Guid projectId, UpdateProjectPrivacyRequest updateProjectPrivacyRequest);
@@ -35,7 +35,7 @@ public interface IProjectService
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
 	Task<BaseResponse> ChangeProjectSchema(Guid projectId);
 	Task<BaseResponse> ExitProject(Guid userId, Guid projectId);
-	Task<ChangeProjectStatusRespone> ChangeProjectStatus(ChangeProjectStatusRequest changeProjectStatusRequest);
+	Task<ChangeProjectStatusRespone> ChangeProjectStatus(Guid statusId,ChangeProjectStatusRequest changeProjectStatusRequest);
 	Task<InvitationResponse> CheckInvation(Guid invationId);
 	Task<List<ProjectStatusViewModel>> GetAllProjectStatus(Guid projectId);
 	Task<int> GetTaskStatusDone(Guid projectId);

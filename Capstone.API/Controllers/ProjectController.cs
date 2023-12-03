@@ -9,6 +9,7 @@ using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
+using Capstone.Service.NotificationService;
 using Capstone.Service.ProjectMemberService;
 using Capstone.Service.ProjectService;
 using Capstone.Service.UserService;
@@ -29,13 +30,15 @@ namespace Capstone.API.Controllers
 		private readonly IUserService _userService;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IAuthorizationService _authorizationService;
+		private readonly INotificationService _notificationService;
 
 		public ProjectController(ILoggerManager logger, 
 			IProjectService projectService, 
 			IHttpContextAccessor httpContextAccessor, 
 			IProjectMemberService projectMemberService, 
 			IUserService userService,
-			IAuthorizationService authorizationService)
+			IAuthorizationService authorizationService,
+			INotificationService notificationService)
 		{
 			_logger = logger;
 			_projectService = projectService;
@@ -43,6 +46,7 @@ namespace Capstone.API.Controllers
 			_projectMemberService = projectMemberService;
 			_userService = userService;
 			_authorizationService = authorizationService;
+			_notificationService = notificationService;
 		}
 
 		[HttpPost("projects")]
@@ -50,8 +54,12 @@ namespace Capstone.API.Controllers
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _projectService.CreateProject(createProjectRequest, userId);
-
-			return Ok(result);
+			if (result != null)
+			{
+                await _notificationService.SendNotificationChangeProjectStatus(result.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }
+            
+            return Ok(result);
 		}
 
 		// E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
@@ -85,10 +93,10 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPost("projects/exit-project")]
-		public async Task<ActionResult<BaseResponse>> ExitProject(Guid projectId)
+		public async Task<ActionResult<BaseResponse>> ExitProject(ExitProjectRequest exitProjectRequest)
 		{
 			var userId = this.GetCurrentLoginUserId();
-			var result = await _projectService.ExitProject(userId, projectId);
+			var result = await _projectService.ExitProject(userId, exitProjectRequest.ProjectId);
 
 			return Ok(result);
 		}
@@ -161,8 +169,9 @@ namespace Capstone.API.Controllers
 		[HttpPost("projects/close-project")]
 		public async Task<ActionResult<ChangeProjectStatusRespone>> CloseProject(ChangeProjectStatusRequest changeProjectStatusRequest)
 		{
+			
 			//Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
                 {
                     ListProjectId = new List<Guid?> { changeProjectStatusRequest.ProjectId },
@@ -172,13 +181,44 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
+			var pro = await _projectService.GetTaskStatusDone(changeProjectStatusRequest.ProjectId);
 			if (pro != 0)
 			{
 				return BadRequest("Task of project hasn't done yet. Please set all task with status done before close project");
 			}
-			var project = await _projectService.ChangeProjectStatus(changeProjectStatusRequest);
+			var project = await _projectService.ChangeProjectStatus(Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"),changeProjectStatusRequest);
+			if (project.StatusResponse.IsSucceed)
+			{
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+			}
+			return Ok(project);
+		}
+
+		[HttpPut("projects/reopen-project")]
+		public async Task<ActionResult<ChangeProjectStatusRespone>> ReOpenProject(ChangeProjectStatusRequest changeProjectStatusRequest)
+		{
+			
+			//Authorize
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { changeProjectStatusRequest.ProjectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects, "Browse Projects" }
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+			var pro = await _projectService.GetProjectByProjectId(changeProjectStatusRequest.ProjectId);
+			if (pro.StatusId != Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't reopen project is doing");
+			}
+			var project = await _projectService.ChangeProjectStatus(Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"), changeProjectStatusRequest);
+			if (project.StatusResponse.IsSucceed)
+			{
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+			}
 			return Ok(project);
 		}
 
@@ -219,7 +259,7 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Account dont match with invitation");
 			}
-			var projectMember = await _projectMemberService.AcceptInvitation(user.UserId, acceptInviteRequest);
+			var projectMember = await _projectMemberService.DeclineInvitation(user.UserId, acceptInviteRequest);
 
 			return Ok(projectMember);
 		}
@@ -308,6 +348,7 @@ namespace Capstone.API.Controllers
 
 			return Ok(result);
 		}
+		
 
 		[HttpGet("projects/status")]
 		public async Task<ActionResult<List<ProjectStatusViewModel>>> GetProjectStatus(Guid projectId)
@@ -441,12 +482,19 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Member not exist");
 			}
+
 			if (updateMemberRoleRequest.RoleId.Equals("5B5C81E8-722D-4801-861C-6F10C07C769B") || updateMemberRoleRequest.RoleId.Equals("7ACED6BC-0B25-4184-8062-A29ED7D4E430"))
 				return BadRequest("You can not change to this role !");
-			var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest);
+
+            var userId = this.GetCurrentLoginUserId();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("You need to login first");
+            }
+            var result = await _projectService.UpdateMemberRole(updateMemberRoleRequest.MemberId, updateMemberRoleRequest, userId);
 			if (result == null)
 			{
-				return StatusCode(500);
+				return BadRequest("Can't assign unavailable member");
 			}
 
 			return Ok(result);
@@ -525,8 +573,11 @@ namespace Capstone.API.Controllers
 			}
 
 			var result = await _projectService.DeleteProject(deleteProjectRequest.ProjectId);
-
-			return Ok(result);
+			if(result.IsSucceed)
+			{
+                await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+            }            
+            return Ok(result);
 		}
 
 		//5  E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
@@ -555,6 +606,10 @@ namespace Capstone.API.Controllers
 			if (project.ExpireAt >= DateTime.Now)
 			{
 				var result = await _projectService.RestoreProject(deleteProjectRequest.ProjectId);
+				if(result.IsSucceed)
+				{
+					await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+				}
 				return Ok(result);
 			}
 			else

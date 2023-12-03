@@ -15,8 +15,8 @@ namespace Capstone.API.Extentions.Validation.TicketValidator
 			  .WithMessage("Description must be less than 50 characters");
 
 			RuleFor(x => x.Description)
-			  .MaximumLength(250)
-			  .WithMessage("Description must be less than 250 characters");
+			  .MaximumLength(3000)
+			  .WithMessage("Description must be less than 3000 characters");
 
 			RuleFor(x => x.StartDate)
 			  .NotEmpty()
