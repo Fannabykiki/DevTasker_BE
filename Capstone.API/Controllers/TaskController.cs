@@ -188,7 +188,6 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
-		
 			//Authorize
 			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
@@ -278,11 +277,11 @@ namespace Capstone.API.Controllers
 			}
 		
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
-			if (updateTicketRequest.StartDate.Minute < interation.StartDate.Minute)
+			if (updateTicketRequest.StartDate.Date < interation.StartDate.Date)
 			{
 				return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 			}
-			if (updateTicketRequest.DueDate.Minute > interation.EndDate.Minute)
+			if (updateTicketRequest.DueDate.Date > interation.EndDate.Date)
 			{
 				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 			}
@@ -299,7 +298,7 @@ namespace Capstone.API.Controllers
 
         //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
         [HttpPut("tasks/status")]
-		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
+		public async Task<IActionResult> UpdateTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
 		
 			//Authorize
