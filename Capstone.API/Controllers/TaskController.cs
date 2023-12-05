@@ -125,6 +125,10 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't create task in done project");
 			}
+		 	if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
 			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if(!memberStatus)
 			{
@@ -157,7 +161,7 @@ namespace Capstone.API.Controllers
 			{
 				var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
-				if (request.StartDate.Minute =< DateTime.Parse(interation.StartDate).Minute)
+				if (request.StartDate.Minute <= DateTime.Parse(interation.StartDate).Minute)
 				{
 					return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 				}
@@ -183,11 +187,7 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
-			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
-			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
-			{
-				return BadRequest("Can't create subtask in done project");
-			}
+		
 			//Authorize
 			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
@@ -199,8 +199,16 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
+			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if (!memberStatus)
 			{
 				return BadRequest("Can't assign to unavailable member");
@@ -232,7 +240,6 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
-		
 			//Authorize
 			var projectId = await _taskService.GetProjectIdOfTask(updateTicketRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
@@ -258,6 +265,10 @@ namespace Capstone.API.Controllers
 			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
 			{
 				return BadRequest("Can't create subtask in done project");
+			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
 			}
 			var memberStatus = await _projectService.CheckMemberStatus(updateTicketRequest.AssignTo);
 			if (!memberStatus)
@@ -289,6 +300,7 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks/status")]
 		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
+		
 			//Authorize
 			var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
@@ -301,8 +313,16 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
+			var projectStatus = await _projectService.GetProjectByProjectId(projectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
+			var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
 			if (!task)
 			{
 				return NotFound("Task not found");
