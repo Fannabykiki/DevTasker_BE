@@ -26,6 +26,7 @@ namespace Capstone.DataAccess.Repository.Implements
             var reportRecord = GenerateReportRecord(listStatus,tasks);
             var reportByWeek = GenerateReportByWeek(listStatus,tasks);
             var reportMembers = GenerateMemberReport(listMember, listStatus, tasks);
+            
 
             var result = new GetProjectReportRequest
             {
@@ -156,6 +157,7 @@ namespace Capstone.DataAccess.Repository.Implements
                 {
                     BoardStatusId = status.BoardStatusId,
                     Title = status.Title,
+                    Order = status.Order,
                     NumberTask = numberTask,
                     Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * numberTask) / tasks.Count)
                 });
