@@ -146,7 +146,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetAllTaskCompleted(Guid projectId, Guid statusId)
 		{
 			var taskList = await _context.Tasks
-							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId && x.IsDelete == false)
+							.Where(x => x.Interation.BoardId == projectId && x.StatusId == statusId && x.IsDelete == false && x.PrevId == null)
 							.Select(x => new TaskViewModel
 							{
 								AssignTo = _context.ProjectMembers.Where(a => a.MemberId == x.AssignTo).Include(a => a.Users).Select(a => a.Users.UserName).FirstOrDefault(),

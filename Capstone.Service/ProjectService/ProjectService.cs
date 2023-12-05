@@ -441,7 +441,7 @@ public class ProjectService : IProjectService
 		}
 	}
 
-	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
+	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid? projectId)
 	{
 		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x=>x.Status)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
