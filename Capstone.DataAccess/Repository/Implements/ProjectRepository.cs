@@ -22,7 +22,7 @@ namespace Capstone.DataAccess.Repository.Implements
             var project = await LoadProjectWithTasks(projectId);
             var tasks = GetTasksFromProject(project);
             var listStatus = _context.BoardStatus.Where(x => x.BoardId == projectId).ToList();
-            var listMember = _context.ProjectMembers.Include(u => u.Users).ThenInclude(s => s.Status).Where(x => x.ProjectId == projectId).ToList();
+            var listMember = _context.ProjectMembers.Include(u => u.Users).ThenInclude(s => s.Status).Where(x => x.ProjectId == projectId && x.StatusId == Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1")).ToList();
             var reportRecord = GenerateReportRecord(listStatus,tasks);
             var reportByWeek = GenerateReportByWeek(listStatus,tasks);
             var reportMembers = GenerateMemberReport(listMember, listStatus, tasks);
