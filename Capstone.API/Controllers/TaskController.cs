@@ -133,11 +133,11 @@ namespace Capstone.API.Controllers
 			if (request.InterationId != Guid.Empty)
 			{
 				var interation = await _interationService.GetIterationsById(request.InterationId);
-				if (request.StartDate.Date < interation.StartDate.Date)
+				if (request.StartDate.Minute <= interation.StartDate.Minute)
 				{
 					return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 				}
-				if (request.DueDate.Date > interation.EndDate.Date)
+				if (request.DueDate.Minute >= interation.EndDate.Minute)
 				{
 					return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 				}
@@ -157,11 +157,11 @@ namespace Capstone.API.Controllers
 			{
 				var interation = await _interationService.GetCurrentInterationId(request.ProjectId);
 
-				if (request.StartDate.Date < DateTime.Parse(interation.StartDate).Date)
+				if (request.StartDate.Minute =< DateTime.Parse(interation.StartDate).Minute)
 				{
 					return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 				}
-				if (request.DueDate.Date > DateTime.Parse(interation.EndDate).Date)
+				if (request.DueDate.Minute >= DateTime.Parse(interation.EndDate).Minute)
 				{
 					return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 				}
@@ -206,11 +206,11 @@ namespace Capstone.API.Controllers
 				return BadRequest("Can't assign to unavailable member");
 			}
 			var task = await _taskService.GetTaskDetail(request.TaskId);
-			if (request.StartDate.Date < DateTime.Parse(task.StartDate).Date)
+			if (request.StartDate.Minute <= DateTime.Parse(task.StartDate).Minute)
 			{
 				return BadRequest("Can't create new task with start date before task's start date. Please update and try again");
 			}
-			if (request.DueDate.Date > DateTime.Parse(task.DueDate).Date)
+			if (request.DueDate.Minute >= DateTime.Parse(task.DueDate).Minute)
 			{
 				return BadRequest("Cant create new task with end date after task's end date. Please update and try again");
 			}
@@ -266,11 +266,11 @@ namespace Capstone.API.Controllers
 			}
 		
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
-			if (updateTicketRequest.StartDate.Date < interation.StartDate.Date)
+			if (updateTicketRequest.StartDate.Minute <= interation.StartDate.Minute)
 			{
 				return BadRequest("Can't create new task with start date before sprint's start date. Please update and try again");
 			}
-			if (updateTicketRequest.DueDate.Date > interation.EndDate.Date)
+			if (updateTicketRequest.DueDate.Minute >= interation.EndDate.Minute)
 			{
 				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
 			}

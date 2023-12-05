@@ -148,7 +148,7 @@ namespace Capstone.Service.BlobStorage
 					await _attachmentRepository.CreateAsync(newAttachment);
 					await _attachmentRepository.SaveChanges();
 					transaction.Commit();
-					await client.UploadAsync(data, true);
+					await client.UploadAsync(data);
 				}
 
 
