@@ -98,7 +98,7 @@ namespace Capstone.Service.BlobStorage
 				{
 					var filenameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
 					var fileExtension = Path.GetExtension(file.FileName);
-					var countAttachments = (await _attachmentRepository.GetAllWithOdata(x => x.Title.Contains(file.FileName), null)).Count();
+					var countAttachments = (await _attachmentRepository.GetAllWithOdata(x => x.Title.StartsWith(filenameWithoutExtension) && x.TaskId == taskId && x.Title.EndsWith(fileExtension), null)).Count();
 					var newFileName = $"{filenameWithoutExtension}({countAttachments}){fileExtension}";
 					BlobClient _client = containerClient.GetBlobClient(newFileName);
 
@@ -148,7 +148,7 @@ namespace Capstone.Service.BlobStorage
 					await _attachmentRepository.CreateAsync(newAttachment);
 					await _attachmentRepository.SaveChanges();
 					transaction.Commit();
-					await client.UploadAsync(data, true);
+					await client.UploadAsync(data);
 				}
 
 
@@ -171,6 +171,10 @@ namespace Capstone.Service.BlobStorage
 					IsSucceed = false,
 					Message = "Upload Attachment fail"
 				};
+			}
+			finally
+			{
+				transaction.Dispose();
 			}
 
 		}

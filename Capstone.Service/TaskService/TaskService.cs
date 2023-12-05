@@ -572,7 +572,7 @@ namespace Capstone.Service.TaskService
 				{
 					TaskId = Guid.NewGuid(),
 					Title = request.Title,
-					Description = request.Decription,
+					Description = request.Description,
 					StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
