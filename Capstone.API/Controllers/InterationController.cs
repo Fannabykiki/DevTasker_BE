@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Capstone.API.Controllers
 {
 	[Route("api/Interation-management")]
-    [ApiController]
-    public class InterationController : ControllerBase
-    {
-        private readonly ILoggerManager _logger;
-        private readonly IIterationService _iterationService;
-        private readonly IProjectService _projectService;
+	[ApiController]
+	public class InterationController : ControllerBase
+	{
+		private readonly ILoggerManager _logger;
+		private readonly IIterationService _iterationService;
+		private readonly IProjectService _projectService;
 
 		public InterationController(ILoggerManager logger, IIterationService iterationService, IProjectService projectService)
 		{
@@ -23,33 +23,36 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpPost("Interation")]
-        public async Task<ActionResult<GetIntergrationResponse>> CreateIteration(CreateIterationRequest createIterationRequest)
-        {   
-            var interationList = await _projectService.GetInterationByProjectId(createIterationRequest.ProjectId);
-            foreach (var interation in interationList)
-            {
-                if (createIterationRequest.InterationName.ToLower().Equals(interation.InterationName.ToLower()))
-                {
+		public async Task<ActionResult<GetIntergrationResponse>> CreateIteration(CreateIterationRequest createIterationRequest)
+		{
+			var interationList = await _projectService.GetInterationByProjectId(createIterationRequest.ProjectId);
+			foreach (var interation in interationList)
+			{
+				if (createIterationRequest.InterationName.ToLower().Equals(interation.InterationName.ToLower()))
+				{
 					return BadRequest("Sprint's name is exist. Please try another Sprint's name");
 				}
 			}
-            var project = await _projectService.GetProjectByProjectId(createIterationRequest.ProjectId);
-            if(createIterationRequest.StartDate <= project.StartDate)
-            {
-                return BadRequest("Cant create new sprint with start date before project's start date. Please update and try again");
-            }
+			var project = await _projectService.GetProjectByProjectId(createIterationRequest.ProjectId);
+			if (createIterationRequest.StartDate <= project.StartDate)
+			{
+				return BadRequest("Cant create new sprint with start date before project's start date. Please update and try again");
+			}
 			if (createIterationRequest.EndDate >= project.EndDate)
 			{
 				return BadRequest("Can't create new sprint with end date after project's end date. Please update and try again");
 			}
 			var result = await _iterationService.CreateInteration(createIterationRequest);
-
-            return Ok(result);
-        }
-        //1
-        [HttpPut("Interation")]
-        public async Task<ActionResult<BaseResponse>> UpdateIteration(UpdateIterationRequest updateIterationRequest)
-        {
+			if (result.Response.StatusCode == 400)
+			{
+				return BadRequest(result.Response.Message);
+			}
+			return Ok(result);
+		}
+		//1
+		[HttpPut("Interation")]
+		public async Task<ActionResult<BaseResponse>> UpdateIteration(UpdateIterationRequest updateIterationRequest)
+		{
 			var isExist = await _iterationService.CheckExist(updateIterationRequest.InterationId);
 			if (!isExist)
 			{
@@ -66,38 +69,42 @@ namespace Capstone.API.Controllers
 				return BadRequest("Can't update sprint with end date after project's end date. Please update and try again");
 			}
 			var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, updateIterationRequest.InterationId);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
+			if (result == null)
+			{
+				return StatusCode(500);
+			}
+			else if (result.StatusCode == 400)
+			{
+				return BadRequest(result.Message);
+			}
 
-            return Ok(result);
-        }
+			return Ok(result);
+		}
 
 
-        [HttpGet("Interation/{projectId}")]
-        public async Task<ActionResult<IQueryable<GetInterrationByIdResonse>>> GetAllIteration(Guid projectId)
-        {
-            var result = await _iterationService.GetIterationTasksByProjectId(projectId);
-            if(result == null)
-            {
-                return BadRequest("Project not have any task!");
-            }
-            return Ok(result);
-        }
+		[HttpGet("Interation/{projectId}")]
+		public async Task<ActionResult<IQueryable<GetInterrationByIdResonse>>> GetAllIteration(Guid projectId)
+		{
+			var result = await _iterationService.GetIterationTasksByProjectId(projectId);
+			if (result == null)
+			{
+				return BadRequest("Project not have any task!");
+			}
+			return Ok(result);
+		}
 
-        [HttpGet("Interation/tasks/{iterationId}")]
-        public async Task<ActionResult<GetInterrationByIdResonse>> GetIterationById(Guid iterationId)
-        {
-            var result = await _iterationService.GetIterationsById(iterationId);
+		[HttpGet("Interation/tasks/{iterationId}")]
+		public async Task<ActionResult<GetInterrationByIdResonse>> GetIterationById(Guid iterationId)
+		{
+			var result = await _iterationService.GetIterationsById(iterationId);
 
-            if (result == null)
-            {
-                return NotFound();
-            }
+			if (result == null)
+			{
+				return NotFound();
+			}
 
-            return Ok(result);
-        }
+			return Ok(result);
+		}
 
-    }
+	}
 }
