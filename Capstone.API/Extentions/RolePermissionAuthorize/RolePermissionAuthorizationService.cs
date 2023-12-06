@@ -25,7 +25,7 @@ namespace Capstone.API.Extentions.RolePermissionAuthorize
                 foreach (var projectId in tmp.ListProjectId)
                 {
                     if (!projectId.HasValue) continue;
-                    var lstPermission = await _projectService.GetPermissionByUserId(projectId.Value, userId);
+                    var lstPermission = await _projectService.GetPermissionAuthorizeByUserId(projectId.Value, userId);
                     if (lstPermission.ToList().Any(x => tmp.ListPermissionAuthorized.Contains(x.Name)))
                     {
                         return AuthorizationResult.Success();

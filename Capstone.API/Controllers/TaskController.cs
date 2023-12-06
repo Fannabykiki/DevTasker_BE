@@ -120,8 +120,18 @@ namespace Capstone.API.Controllers
         //  993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
         [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
-		{	
-			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+		{
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { request.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.CreateTasks }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+            var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
 			if(projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
 			{
 				return BadRequest("Can't create task in done project");
@@ -154,7 +164,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
 				if (result.BaseResponse.IsSucceed)
 				{
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
                 }  
                 return Ok(result);
 			}
@@ -178,7 +188,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
                 if (result.BaseResponse.IsSucceed)
                 {
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
                 }
                 return Ok(result);
 			}
@@ -331,7 +341,7 @@ namespace Capstone.API.Controllers
             
             if (result.BaseResponse.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId, this.GetCurrentLoginUserId());
             }
             return Ok(result);
 		}
@@ -399,7 +409,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
             }
             
             return Ok(result);
