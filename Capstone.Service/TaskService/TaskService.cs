@@ -565,9 +565,34 @@ namespace Capstone.Service.TaskService
 		public async Task<CreateTaskResponse> CreateSubTask(CreateSubTaskRequest request, Guid userId)
 		{
 			using var transaction = _ticketRepository.DatabaseTransaction();
-			var task = await _ticketRepository.GetAsync(x => x.TaskId == request.TaskId, null);
+
 			try
 			{
+				var task = await _ticketRepository.GetAsync(x => x.TaskId == request.TaskId, null);
+				if (request.StartDate.Date < task.StartDate.Date)
+				{
+					return new CreateTaskResponse
+					{
+						BaseResponse = new BaseResponse
+						{
+							StatusCode = 400,
+							Message = "Can't create subtask's start date before task's start date",
+							IsSucceed = false,
+						}
+					};
+				}
+				else if (request.DueDate.Date > task.DueDate.Date)
+				{
+					return new CreateTaskResponse
+					{
+						BaseResponse = new BaseResponse
+						{
+							StatusCode = 400,
+							Message = "Can't create subtask's end date after task's end date",
+							IsSucceed = false,
+						}
+					};
+				}
 				var ticketEntity = new Task()
 				{
 					TaskId = Guid.NewGuid(),
@@ -795,9 +820,9 @@ namespace Capstone.Service.TaskService
 				};
 			}
 		}
-		
-        public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
-        {
+
+		public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
+		{
 			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x => x.Interation);
 			var projectId = task.Interation.BoardId;
 			return projectId;
@@ -848,7 +873,7 @@ namespace Capstone.Service.TaskService
 				await _boardStatusRepository.UpdateAsync(status);
 				await _boardStatusRepository.SaveChanges();
 
-				var taskList = await _ticketRepository.GetAllWithOdata(x => x.StatusId == deleteTaskStatusRequest.TaskStatusId,null);
+				var taskList = await _ticketRepository.GetAllWithOdata(x => x.StatusId == deleteTaskStatusRequest.TaskStatusId, null);
 				foreach (var task in taskList)
 				{
 					var taskDetail = await _ticketRepository.GetAsync(x => x.TaskId == task.TaskId, null);
@@ -896,7 +921,7 @@ namespace Capstone.Service.TaskService
 
 		public async Task<bool> CheckTaskStatus(Guid statusId)
 		{
-			var status = await _boardStatusRepository.GetAsync(x=>x.BoardStatusId == statusId,null);
+			var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == statusId, null);
 			if (status.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31")) return false;
 			return true;
 		}
