@@ -238,6 +238,10 @@ namespace Capstone.API.Controllers
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
+			if (result.BaseResponse.StatusCode == 400)
+			{
+				return BadRequest(result.BaseResponse.Message);
+			}
 			return Ok(result);
         }
 
