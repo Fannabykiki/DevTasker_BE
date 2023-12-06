@@ -164,10 +164,11 @@ namespace Capstone.DataAccess.Repository.Implements
             }
             reports.Add(new ReportStatus
             {
+                BoardStatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"),
                 Title = "Deleted",
                 NumberTask = tasks.Count(x => x.IsDelete == true),
                 Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * tasks.Count(x => x.IsDelete == true)) / tasks.Count)
-            });
+            }) ;
             return reports;
         }
 
