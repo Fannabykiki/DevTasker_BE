@@ -8,8 +8,8 @@ namespace Capstone.API.Extentions.Validation.TaskValidator
         public UpdateTaskValidator()
         {
 			RuleFor(x => x.Description)
-			  .MaximumLength(3000)
-			  .WithMessage("Description must be less than 3000 characters");
+			  .MaximumLength(50000)
+			  .WithMessage("Description must be less than 50.000 characters");
 
 			RuleFor(x => x.DueDate)
 			  .GreaterThanOrEqualTo(x => x.StartDate)

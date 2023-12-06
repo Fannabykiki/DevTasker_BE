@@ -12,7 +12,7 @@ namespace Capstone.API.Extentions.Validation.ProjectValidator
 			.NotNull().WithMessage("Project's name is require")
 			  .When(x => !string.IsNullOrWhiteSpace(x.ProjectName));
 			RuleFor(x => x.Description)
-			  .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
+			  .MaximumLength(50000).WithMessage("Description must less than 50.000 characters")
 			  .When(x => !string.IsNullOrWhiteSpace(x.Description));
 		}
 	}

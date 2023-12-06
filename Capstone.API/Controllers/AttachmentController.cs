@@ -36,7 +36,7 @@ namespace Capstone.API.Controllers
 
 		// E291ABC0-C869-4FF0-9E3C-48B74022577D - Create Attachments
 		[HttpPost("attachments")]
-		public async Task<IActionResult> UploadFile(IFormFile file, Guid taskId)
+		public async Task<IActionResult> UploadFile(IFormFileCollection file, Guid taskId)
 		{
             //Authorize
             var projectId = await _taskService.GetProjectIdOfTask(taskId);
@@ -52,9 +52,11 @@ namespace Capstone.API.Controllers
             }
 
             var userId = this.GetCurrentLoginUserId();
-		
-			var files = await _azureBlobService.UploadFile(userId, file, taskId);
-			return Ok(files);
+			foreach (var fileItem in file)
+			{
+				await _azureBlobService.UploadFile(userId, fileItem, taskId);
+			}
+			return Ok(file);
 		}
 
 		[HttpGet("attachments/download/{fileName}/{taskId}")]
