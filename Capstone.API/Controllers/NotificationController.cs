@@ -30,6 +30,17 @@ namespace Capstone.API.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("allNotification")]
+        public async Task<ActionResult<List<NotificationViewModel>>> GetAllNotificationLatest()
+        {
+            var userId = this.GetCurrentLoginUserId();
+            var result = await _notificationService.GetAllNotificationsByUser(userId);
+            if (result == null)
+            {
+                return BadRequest("Project not have any task!");
+            }
+            return Ok(result);
+        }
         [HttpPost("read")]
         public async Task<ActionResult<bool>> ReadNotification(ReadNotificationRequest request)
         {

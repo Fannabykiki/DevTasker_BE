@@ -63,6 +63,11 @@ namespace Capstone.Service.NotificationService
             var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).Take(page).ToListAsync();
             return _mapper.Map<List<NotificationViewModel>>(results);
         }
+        public async Task<List<NotificationViewModel>> GetAllNotificationsByUser(Guid userId)
+        {
+            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).ToListAsync();
+            return _mapper.Map<List<NotificationViewModel>>(results);
+        }
         public async Task<bool> MarkReadNotification(Guid userId, ReadNotificationRequest request)
         {
             try
