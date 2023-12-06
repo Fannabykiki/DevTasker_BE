@@ -78,7 +78,7 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
 		{
 			var response = await _taskService.GetAllTaskStatus(projectId);
-            response.Add(new StatusTaskViewModel { Title = "Deleted", BoardId = projectId });
+            response.Add(new StatusTaskViewModel { BoardStatusId = new Guid(), Title = "Deleted", BoardId = projectId , Order = 0});
             return Ok(response);
 		}
 		
