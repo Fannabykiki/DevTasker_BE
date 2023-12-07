@@ -224,6 +224,7 @@ builder.Services.AddAuthorization(
     }
     );
 builder.Services.AddSingleton<IAuthorizationHandler, AppAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationService, RolePermissionAuthorizationService>();
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILoggerManager>();
 app.ConfigureExceptionHandler(logger);
