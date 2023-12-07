@@ -11,5 +11,6 @@ namespace Capstone.Common.DTOs.PermissionSchema
 		public Guid SchemaId { get; set; }
 		public Guid PermissionId { get; set; }
         public List<Guid> RoleIds { get; set; }
+        public Guid? ProjectId { get; set; }
     }
 }

@@ -169,13 +169,13 @@ namespace Capstone.Service.RoleService
         {
             var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
             if (project == null) return null;
-            var schemas = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId,x => x.Role);
+            var schemas = await _roleRepository.GetAllWithOdata(x => x.IsDelete != true,null);
             var roles = new List<GetRoleResponse>();
             HashSet<Role> Role = new HashSet<Role>();
             foreach (var schema in schemas)
             {
                 if (schema.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||schema.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) continue;
-                Role.Add(schema.Role);
+                Role.Add(schema);
             }
             foreach (var role in Role)
             {
