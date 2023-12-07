@@ -30,6 +30,7 @@ namespace Capstone.Service.NotificationService
         private readonly IProjectMemberRepository _projectMemberRepository;
         private readonly ITaskRepository _taskRepository;
         private readonly ITaskCommentRepository _taskCommentRepository;
+        private readonly IBoardStatusRepository _boardStatusRepository;
         private readonly PresenceTracker _presenceTracker;
 
         private readonly IHubContext<NotificationHub> _hubContext;
@@ -41,6 +42,7 @@ namespace Capstone.Service.NotificationService
             IProjectMemberRepository projectMemberRepository,
             ITaskRepository taskRepository,
             ITaskCommentRepository taskCommentRepository,
+            IBoardStatusRepository boardStatusRepository,
             PresenceTracker presenceTracker,
             IHubContext<NotificationHub> hubContext,
             IMapper mapper)
@@ -51,6 +53,7 @@ namespace Capstone.Service.NotificationService
             _projectMemberRepository = projectMemberRepository;
             _taskRepository = taskRepository;
             _taskCommentRepository = taskCommentRepository;
+            _boardStatusRepository = boardStatusRepository;
             _presenceTracker = presenceTracker;
             _hubContext = hubContext;
             _mapper = mapper;
@@ -60,18 +63,45 @@ namespace Capstone.Service.NotificationService
             var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).Take(page).ToListAsync();
             return _mapper.Map<List<NotificationViewModel>>(results);
         }
-
-        public async System.Threading.Tasks.Task SendNotificationChangeProjectStatus(string projectId, string userId)
+        public async Task<List<NotificationViewModel>> GetAllNotificationsByUser(Guid userId)
         {
-            var project = await _projectRepository.GetQuery().Include("Status").FirstOrDefaultAsync(x => x.ProjectId.ToString() == projectId);
-            var projectMembers = await _projectMemberRepository.GetQuery().Include("Role").Where(x => x.ProjectId.ToString() == projectId).ToListAsync();
+            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).ToListAsync();
+            return _mapper.Map<List<NotificationViewModel>>(results);
+        }
+        public async Task<bool> MarkReadNotification(Guid userId, ReadNotificationRequest request)
+        {
+            try
+            {
+                var listReadNotification = _notificationRepository.GetQuery().Where(x => x.RecerverId == userId && !x.IsRead);
+                if (request.ListNotificationIds != null && request.ListNotificationIds.Count > 0)
+                {
+                    listReadNotification = listReadNotification.Where(x => request.ListNotificationIds.Contains(x.NotificationId));
+                }
+                foreach (var notification in listReadNotification)
+                {
+                    notification.IsRead = true;
+                    await _notificationRepository.UpdateAsync(notification);
+                }
+                return await _notificationRepository.SaveChanges() > 0;
+            }catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+        public async System.Threading.Tasks.Task SendNotificationChangeProjectStatus( Guid projectId, Guid userId)
+        {
+            var project = await _projectRepository.GetQuery().Include("Status").FirstOrDefaultAsync(x => x.ProjectId == projectId);
+            var projectMembers = await _projectMemberRepository.GetQuery().Include("Role").Where(x => x.ProjectId == projectId).ToListAsync();
             if (project == null) return;
-            var lstReceived = projectMembers.Where(x => x.UserId.ToString() != userId).Select(x => x.UserId);
+            var currentUser = await _userRepository.GetAsync(x => x.UserId == userId, null);
+            if (currentUser == null) return;
+            var lstReceived = projectMembers.Where(x => x.UserId != userId).Select(x => x.UserId);
             var lstNotification = lstReceived.Select(x => new Notification
             {
                 NotificationId = Guid.NewGuid(),
-                Title = "Status change",
-                Description = $"The status of project {project.ProjectName} has been changed to {project.Status.Title}",
+                Title = "Project status has been changed",
+                Description = $"User <strong>{currentUser.UserName}</strong> has change the status of project <strong>{project.ProjectName}</strong> to <strong>{project.Status.Title}</strong>",
                 CreateAt = DateTime.Now,
                 IsRead = false,
                 RecerverId = x,
@@ -96,7 +126,7 @@ namespace Capstone.Service.NotificationService
                 .Where(x => x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor).Select(y => y.UserId);
             await SendMailForNotification(lstProjectAdmin.ToList(), lstNotification.ToList());
         }
-        public async System.Threading.Tasks.Task SendNotificationChangeTaskStatus(string taskId, string userId)
+        public async System.Threading.Tasks.Task SendNotificationChangeTaskStatus(Guid taskId, Guid userId)
         {
             var task = await _taskRepository.GetQuery()
                 .Include(t=>t.ProjectMember)
@@ -105,46 +135,88 @@ namespace Capstone.Service.NotificationService
                 .ThenInclude(it => it.Board)
                 .ThenInclude(b => b.Project)
                 .ThenInclude(prj=>prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
-                .FirstOrDefaultAsync(x => x.TaskId.ToString() == taskId);
+                .Include(tc=>tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
             if (task == null) return;
-            if (task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.ToDo
-                && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done
-                && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Deleted) return;
+            //if (task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.ToDo
+            //    && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done
+            //    && task.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Deleted) return;
 
             var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
-                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId.ToString() != userId ).Select(y => y.UserId);
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId!= userId ).Select(y => y.UserId);
             var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
             var listReceiver = lstProjectAdmin;
+
             var title = "";
             var description = "";
-            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}";
-
-            switch (task.Status.Title)
+            var latestTaskhistory = task.TaskHistories.OrderByDescending(x=>x.ChangeAt).FirstOrDefault();
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
+            
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            if(task.ProjectMember.UserId != userId)
             {
-                case CapstoneNameConstant.TaskStatusNameConstant.ToDo:
-
-                    title = "[Task Is Ready]";
-                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.ToDo}";
-                    listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
-                    break;
-
-                case CapstoneNameConstant.TaskStatusNameConstant.Done:
-
-                    title = "[Task Is Done]";
-                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Done}";
-                    listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
-                    listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
-                    break;
-
-                case CapstoneNameConstant.TaskStatusNameConstant.Deleted:
-
-                    title = "[Task Is Deleted]";
-                    description = $"The task {task.Title} has been set to {CapstoneNameConstant.TaskStatusNameConstant.Deleted}";
-                    listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
-                    listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
-                    break;
-
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
             }
+            if (createdBy.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
+            }
+
+            if(latestTaskhistory== null)
+            {
+                title = "Task Is Ready";
+                description = $"User <strong>{userAccount?.UserName}</strong> has created task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> at <strong>{task.CreateTime}</strong>";
+            }
+            else
+            {
+                title = "Task Updated!";
+                var previousStatus = await _boardStatusRepository.GetQuery().FirstOrDefaultAsync(x => x.BoardStatusId == latestTaskhistory.PreviousStatusId);
+                if(previousStatus != null)
+                {
+                    description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> from {previousStatus.Title} to {task.Title} at <strong>{task.CreateTime}</strong>";
+                }
+                else
+                {
+                    description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> to {task.Title} at <strong>{task.CreateTime}</strong>";
+                }
+            }
+            
+            //switch (task.Status.Title)
+            //{
+            //    case CapstoneNameConstant.TaskStatusNameConstant.ToDo:
+
+
+            //        if(latestTaskhistory == null)
+            //        {
+            //            title = "Task Is Ready";
+            //            description = $"User <strong>{userAccount?.UserName}</strong> has created task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> at <strong>{task.CreateTime}</strong>";
+            //        }
+            //        else
+            //        {
+            //            title = "Task status changed"
+            //            description = $"The task <strong>{task.Title}</strong> has been set to <strong>{CapstoneNameConstant.TaskStatusNameConstant.ToDo}</strong> by <strong>{userAccount?.UserName}</strong> ";
+            //        }
+            //        listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            //        break;
+
+            //    case CapstoneNameConstant.TaskStatusNameConstant.Done:
+
+            //        title = "[Task Is Done]";
+            //        description = $"The task <strong>{task.Title}</strong> has been set to <strong>{CapstoneNameConstant.TaskStatusNameConstant.Done}</strong> by <strong>{userAccount?.UserName}</strong> ";
+            //        listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            //        listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
+            //        break;
+
+            //    case CapstoneNameConstant.TaskStatusNameConstant.Deleted:
+
+            //        title = "[Task Is Deleted]";
+            //        description = $"The task <strong>{task.Title}</strong> has been set to <strong>{CapstoneNameConstant.TaskStatusNameConstant.Deleted}</strong> by <strong>{userAccount?.UserName}</strong> ";
+            //        listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            //        listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
+            //        break;
+
+            //}
             var listNotification = listReceiver.Select(id => new Notification
             {
                 NotificationId = Guid.NewGuid(),
@@ -177,9 +249,9 @@ namespace Capstone.Service.NotificationService
             
             
         }
-        public async System.Threading.Tasks.Task SendNotificationCommentTask(string commentId, string userId, string action)
+        public async System.Threading.Tasks.Task SendNotificationCommentTask(Guid commentId, Guid userId, string action)
         {
-            var comment = await _taskCommentRepository.GetQuery().FirstOrDefaultAsync(x => x.CommentId.ToString() == commentId);
+            var comment = await _taskCommentRepository.GetQuery().FirstOrDefaultAsync(x => x.CommentId == commentId);
             if (comment == null) return;
             var task = await _taskRepository.GetQuery()
                 .Include(t => t.ProjectMember)
@@ -194,7 +266,7 @@ namespace Capstone.Service.NotificationService
                 .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Users)
                 .FirstOrDefaultAsync(x => x.TaskId == comment.TaskId);
             if (task == null) return;
-            var cmtUser = await _userRepository.GetAsync(x => x.UserId.ToString() == userId, null);
+            var cmtUser = await _userRepository.GetAsync(x => x.UserId == userId, null);
             if (cmtUser == null) return;
             
             
@@ -204,9 +276,10 @@ namespace Capstone.Service.NotificationService
                 .Select(y => new
                 {
                     UserId = y.UserId,
+                    MemberId = y.MemberId,
                     Name = y.Users.UserName,
                     Role = y.Role.RoleName
-                }).Where(dt=>dt.UserId.ToString() != userId).ToList();
+                }).Where(dt=>dt.UserId!= userId).ToList();
 
             var lstNotification = new List<Notification>();
             switch (action)
@@ -215,25 +288,25 @@ namespace Capstone.Service.NotificationService
                     lstNotification = lstReceived.Select(x => new Notification
                     {
                         NotificationId = Guid.NewGuid(),
-                        Title = "Comment created",
-                        Description = $"A comment has been created in task {comment.Task.Title} by {cmtUser.UserName} ",
+                        Title = "New comment in task",
+                        Description = $"<strong>{cmtUser.UserName}</strong> commented on task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
                         CreateAt = DateTime.Now,
                         IsRead = false,
                         RecerverId = x.UserId,
-                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}"
+                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
                     }).ToList();
                     break;
-
+                    
                 case CommentActionCconstant.Edit:
                     lstNotification = lstReceived.Select(x => new Notification
                     {
                         NotificationId = Guid.NewGuid(),
-                        Title = "Comment status change",
-                        Description = $"Comment has been edited in task {comment.Task.Title} by {cmtUser.UserName} ",
+                        Title = "Comment edited in task",
+                        Description = $"<strong>{cmtUser.UserName}</strong> has edited his/her comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
                         CreateAt = DateTime.Now,
                         IsRead = false,
                         RecerverId = x.UserId,
-                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}"
+                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
                     }).ToList();
                     break;
 
@@ -242,11 +315,11 @@ namespace Capstone.Service.NotificationService
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Comment status change",
-                        Description = $"A comment has been deleted in task {comment.Task.Title} by {cmtUser.UserName} ",
+                        Description = x.MemberId == comment.CreateBy? $"Your commentin task <strong>{comment.Task.Title}</strong> has been deleted by <strong>{cmtUser.UserName}</strong>" : $"Comment of <strong>{x.Name}</strong> been deleted in task <strong>{comment.Task.Title}</strong> by <strong>{cmtUser.UserName}</strong>",
                         CreateAt = DateTime.Now,
                         IsRead = false,
                         RecerverId = x.UserId,
-                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}"
+                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
                     }).ToList();
                     break;
 
@@ -320,7 +393,7 @@ namespace Capstone.Service.NotificationService
                             CreateAt = DateTime.Now,
                             IsRead = false,
                             RecerverId = dt.Users.UserId,
-                            TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}"
+                            TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}"
                         }
                     }).ToList();
                 notificationEmailList.AddRange(listNotifs);  
@@ -398,6 +471,8 @@ namespace Capstone.Service.NotificationService
                 client.Disconnect(true);
             }
         }
+
+        
     }
     public class NotificationEmailRequest
     {

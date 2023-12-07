@@ -10,6 +10,7 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using MailKit.Security;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using MimeKit.Text;
 
@@ -571,8 +572,32 @@ public class ProjectService : IProjectService
 		}
 		return newPermisisonViewModel;
 	}
-
-	public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
+    public async Task<IEnumerable<PermissionViewModel>> GetPermissionAuthorizeByUserId(Guid projectId, Guid userId)
+	{
+        var newPermisisonViewModel = new List<PermissionViewModel>();
+		var projectMember = await _projectMemberRepository.GetQuery().Include(x => x.Project)
+			.FirstOrDefaultAsync(pr => pr.ProjectId == projectId && pr.UserId == userId);
+		if(projectMember == null) return null;
+		var permissions = await _permissionSchemaRepository.GetPermissionBySchewmaAndRoleId(projectMember.Project.SchemasId, projectMember.RoleId);
+        HashSet<Guid> result = new HashSet<Guid>();
+        foreach (var permission in permissions)
+        {
+            result.Add(permission.PermissionId);
+        }
+        foreach (var permisison in result)
+        {
+            var per = await _permissionRepository.GetAsync(x => x.PermissionId == permisison, null);
+            var permissionViewModel = new PermissionViewModel
+            {
+                Description = per.Description,
+                Name = per.Name,
+                PermissionId = per.PermissionId,
+            };
+            newPermisisonViewModel.Add(permissionViewModel);
+        }
+        return newPermisisonViewModel;
+    }
+    public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
 	{
 		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
 		var projectsList = new List<GetAllProjectResponse>();
