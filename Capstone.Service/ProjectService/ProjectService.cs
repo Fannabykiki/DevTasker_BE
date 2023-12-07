@@ -860,7 +860,7 @@ public class ProjectService : IProjectService
 
 			Guid shemaID = Guid.Empty;
 
-            if (project.SchemasId != Guid.Parse(""))
+            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
 				shemaID = project.SchemasId;
 			}
