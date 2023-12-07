@@ -840,13 +840,42 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
+            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
             var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
+            var Schema = new Schema
+            {
+                SchemaName = "Schema " + project.ProjectName,
+                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                IsDelete = false
+            };
+            var newSchema = await _schemaRepository.CreateAsync(Schema);
 
+            foreach (var item in schemaPermission)
+            {
+                item.SchemaId = newSchema.SchemaId;
+                await _permissionSchemaRepository.CreateAsync(item);
+            }
+            await _permissionSchemaRepository.SaveChanges();
+            await _schemaRepository.SaveChanges();
 
-            project.SchemasId = changePermissionSchemaRequest.SchemaId;
+			Guid shemaID = Guid.Empty;
 
-            var update = await _projectRepository.UpdateAsync(project);
+            if (project.SchemasId != Guid.Parse(""))
+			{
+				shemaID = project.SchemasId;
+			}
+
+            project.SchemasId = newSchema.SchemaId;
+            await _projectRepository.UpdateAsync(project);
             await _projectRepository.SaveChanges();
+
+			if(shemaID != Guid.Empty)
+			{
+                await _schemaRepository.DeleteSchemaById(shemaID);
+                await _schemaRepository.SaveChanges();
+            }
+            
+
             transaction.Commit();
 			return new BaseResponse
 			{
