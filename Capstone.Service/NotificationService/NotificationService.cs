@@ -75,7 +75,7 @@ namespace Capstone.Service.NotificationService
                 var listReadNotification = _notificationRepository.GetQuery().Where(x => x.RecerverId == userId && !x.IsRead);
                 if (request.ListNotificationIds != null && request.ListNotificationIds.Count > 0)
                 {
-                    listReadNotification = listReadNotification.Where(x => request.ListNotificationIds.Contains(x.RecerverId));
+                    listReadNotification = listReadNotification.Where(x => request.ListNotificationIds.Contains(x.NotificationId));
                 }
                 foreach (var notification in listReadNotification)
                 {
