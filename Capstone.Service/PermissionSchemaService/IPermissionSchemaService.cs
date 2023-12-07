@@ -20,8 +20,8 @@ namespace Capstone.Service.PermissionSchemaService
         Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId);
         Task<bool> CreateNewPermissionSchema(CreateNewSchemaRequest createNewSchemaRequest);
         Task<bool> UpdateSchema(Guid schemaId, UpdateSchemaRequest updateSchemaRequest);
-        Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest grantPermissionSchemaRequest);
-        Task<bool> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest revokePermissionSchemaRequest);
+        Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest grantPermissionSchemaRequest, Guid userId);
+        Task<bool> RevokeSchemaPermissionRoles(Guid schemaId, RevokePermissionSchemaRequest revokePermissionSchemaRequest, Guid userId);
 		Task<bool> CheckExist(Guid schemaId);
 	}
 }

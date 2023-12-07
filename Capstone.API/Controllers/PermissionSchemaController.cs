@@ -1,4 +1,5 @@
-﻿using Capstone.Common.DTOs.Iteration;
+﻿using Capstone.API.Extentions;
+using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.PermissionSchema;
 using Capstone.Common.DTOs.Role;
 using Capstone.Common.DTOs.Schema;
@@ -102,12 +103,17 @@ namespace Capstone.API.Controllers
         [HttpPut("schemas/grant-permission")]
         public async Task<IActionResult> GrantSchemaPermissionRoles(GrantPermissionSchemaRequest request)
         {
-			var isExist = await _permissionSchemaService.CheckExist(request.SchemaId);
+            var uId = this.GetCurrentLoginUserId();
+            if (uId == Guid.Empty)
+            {
+                return BadRequest("You need to login first");
+            }
+            var isExist = await _permissionSchemaService.CheckExist(request.SchemaId);
 			if (!isExist)
 			{
-				return NotFound("Interation not exist!!!");
+				return NotFound("Schema not exist!!!");
 			}
-			var result = await _permissionSchemaService.GrantSchemaPermissionRoles(request.SchemaId, request);
+			var result = await _permissionSchemaService.GrantSchemaPermissionRoles(request.SchemaId, request, uId);
             if(result == true)
             {
                 var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
@@ -123,11 +129,16 @@ namespace Capstone.API.Controllers
         public async Task<IActionResult> RevokeSchemaPermissionRoles(RevokePermissionSchemaRequest request)
         {
 			var isExist = await _permissionSchemaService.CheckExist(request.SchemaId);
-			if (!isExist)
+            var uId = this.GetCurrentLoginUserId();
+            if (uId == Guid.Empty)
+            {
+                return BadRequest("You need to login first");
+            }
+            if (!isExist)
 			{
 				return NotFound("Interation not exist!!!");
 			}
-			var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(request.SchemaId, request);
+			var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(request.SchemaId, request, uId);
             if(result == true)
             {
                 var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
