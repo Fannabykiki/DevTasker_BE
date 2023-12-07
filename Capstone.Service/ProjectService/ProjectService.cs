@@ -503,7 +503,7 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, x=>x.ProjectMembers);
 			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
 			foreach (var user in inviteUserRequest.Email)
 			{
@@ -528,8 +528,8 @@ public class ProjectService : IProjectService
 				email.Subject = "DevTakser verification step";
 				email.Body = new TextPart(TextFormat.Html)
 				{
-					Text = $"<h1>You've been invited to DevTasker</h1>" +
-					$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
+					Text = $"<h1>You've been invited to DevTasker</h1>" 
+					+ $"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
 				};
 
 				using (var client = new MailKit.Net.Smtp.SmtpClient())
