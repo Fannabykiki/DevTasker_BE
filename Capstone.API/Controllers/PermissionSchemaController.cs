@@ -136,7 +136,7 @@ namespace Capstone.API.Controllers
             }
             if (!isExist)
 			{
-				return NotFound("Interation not exist!!!");
+				return NotFound("Schema not exist!!!");
 			}
 			var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(request.SchemaId, request, uId);
             if(result == true)
