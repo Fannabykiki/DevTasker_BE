@@ -3,6 +3,7 @@ using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Notification;
 using Capstone.DataAccess.Entities;
 using Capstone.Service.NotificationService;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -29,5 +30,28 @@ namespace Capstone.API.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("allNotification")]
+        public async Task<ActionResult<List<NotificationViewModel>>> GetAllNotificationLatest()
+        {
+            var userId = this.GetCurrentLoginUserId();
+            var result = await _notificationService.GetAllNotificationsByUser(userId);
+            if (result == null)
+            {
+                return BadRequest("Project not have any task!");
+            }
+            return Ok(result);
+        }
+        [HttpPost("read")]
+        public async Task<ActionResult<bool>> ReadNotification(ReadNotificationRequest request)
+        {
+            var userId = this.GetCurrentLoginUserId();
+            var result = await _notificationService.MarkReadNotification(userId,request);
+            if (result == null)
+            {
+                return BadRequest("Project not have any task!");
+            }
+            return Ok(result);
+        }
+
     }
 }

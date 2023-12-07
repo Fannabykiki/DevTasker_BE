@@ -29,7 +29,8 @@ public interface IProjectService
 	Task<BaseResponse> RestoreProject(Guid projectId);
 	Task<GetAllProjectViewModel> GetProjectByProjectId(Guid? projectId );
 	Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId,Guid userId);
-	Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
+    Task<IEnumerable<PermissionViewModel>> GetPermissionAuthorizeByUserId(Guid projectId, Guid userId);
+    Task<ViewProjectInfoRequest> GetInfoProjectByProjectId(Guid projectId);
 	Task<bool?> SendMailInviteUser(InviteUserRequest inviteUserRequest,Guid userId);
 	Task<List<InterationViewModel>> GetInterationByProjectId(Guid projectId);
 	Task<BaseResponse> RemoveProjectMember(Guid memberId);
