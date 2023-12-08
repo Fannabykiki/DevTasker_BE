@@ -37,7 +37,11 @@ namespace Capstone.Common.DTOs.Task
 	public class SubTask
 	{
         public Guid TaskId { get; set; }
-        public string Title { get; set; }
+		public string UserStatus { get; set; }
+		public string MemberStatus { get; set; }
+		public Guid MemberStatusId { get; set; }
+		public Guid UserStatusId { get; set; }
+		public string Title { get; set; }
         public string? Description { get; set; }
         public string StartDate { get; set; }
         public string DueDate { get; set; }
