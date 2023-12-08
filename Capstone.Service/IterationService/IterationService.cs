@@ -156,25 +156,30 @@ namespace Capstone.Service.IterationService
 				var intertaionList = await GetIterationTasksByProjectId(iteration.BoardId);
 				foreach (var interItem in intertaionList)
 				{
-					if (updateIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+					if (updateIterationRequest.InterationId == intertaionList.ElementAt(0).InterationId)
 					{
+						continue;
+					}
+					if (updateIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+					{	
+						
 						return new BaseResponse
 						{	
 							StatusCode = 400,
-							Message = "Can't update interation's start date before the previous interation's end date",
+							Message = "Can't update sprint's start date before the previous sprint's end date",
 							IsSucceed = true,
 						};
 					}
 				}
 				var taskInInteration = await _TaskRepository.GetTaskByInterationId(iterationId);
 				foreach (var task in taskInInteration)
-				{
+				{	
 					if (updateIterationRequest.StartDate.Date > DateTime.Parse(task.StartDate).Date)
 					{
 						return new BaseResponse
 						{
 							StatusCode = 400,
-							Message = $"Can't update interation start date after task's start date in this interation ",
+							Message = $"Can't update sprint's start date after task's start date in this sprint ",
 							IsSucceed = false,
 						};
 					}
@@ -183,7 +188,7 @@ namespace Capstone.Service.IterationService
 						return new BaseResponse
 						{
 							StatusCode = 400,
-							Message = "Can't update interation end date before task's end date in this interation ",
+							Message = "Can't update sprint's end date before task's end date in this sprint ",
 							IsSucceed = false,
 						};
 					}
