@@ -263,6 +263,9 @@ namespace Capstone.Service.PermissionSchemaService
                     }
                     await _permissionSchemaRepository.SaveChanges();
                     await _schemaRepository.SaveChanges();
+                    project.SchemasId = newSchema.SchemaId;
+                    await _projectRepository.UpdateAsync(project);
+                    await _projectRepository.SaveChanges();
                     schemaId = newSchema.SchemaId;
                 }
 
