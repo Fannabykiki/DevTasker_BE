@@ -53,6 +53,10 @@ namespace Capstone.DataAccess.Repository.Implements
 														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
 														.Select(m => new SubTask
 														{
+															UserStatus = m.ProjectMember.Users.Status.Title,
+															MemberStatus = m.ProjectMember.Status.Title,
+															UserStatusId = m.ProjectMember.Users.Status.StatusId,
+															MemberStatusId = m.ProjectMember.Status.StatusId,
 															TaskId = m.TaskId,
 															StatusName = m.Status.Title,
 															StatusId = m.StatusId,
@@ -121,6 +125,10 @@ namespace Capstone.DataAccess.Repository.Implements
 														.Where(m => m.PrevId == x.TaskId && m.IsDelete == false).OrderBy(x => x.CreateTime)
 														.Select(m => new SubTask
 														{
+															UserStatus = m.ProjectMember.Users.Status.Title,
+															MemberStatus = m.ProjectMember.Status.Title,
+															UserStatusId = m.ProjectMember.Users.Status.StatusId,
+															MemberStatusId = m.ProjectMember.Status.StatusId,
 															TaskId = m.TaskId,
 															StatusName = m.Status.Title,
 															StatusId = m.StatusId,
