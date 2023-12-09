@@ -2,6 +2,7 @@
 using AutoMapper.Execution;
 using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Notification;
+using Capstone.Common.DTOs.Project;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.Hubs;
@@ -150,6 +151,7 @@ namespace Capstone.Service.NotificationService
 
             var title = "";
             var description = "";
+            var testLatest = task.TaskHistories.OrderByDescending(x => x.ChangeAt).ToList();
             var latestTaskhistory = task.TaskHistories.OrderByDescending(x=>x.ChangeAt).FirstOrDefault();
             var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
             
@@ -162,24 +164,41 @@ namespace Capstone.Service.NotificationService
             {
                 listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
             }
-
+            
             if(latestTaskhistory== null)
             {
                 title = "Task Is Ready";
-                description = $"User <strong>{userAccount?.UserName}</strong> has created task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> at <strong>{task.CreateTime}</strong>";
+                description = $"User <strong>{userAccount?.UserName}</strong> has created task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{task.CreateTime}</strong>";
             }
             else
             {
-                title = "Task Updated!";
-                var previousStatus = await _boardStatusRepository.GetQuery().FirstOrDefaultAsync(x => x.BoardStatusId == latestTaskhistory.PreviousStatusId);
-                if(previousStatus != null)
+                if (task.IsDelete.HasValue && task.IsDelete.Value)
                 {
-                    description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> from {previousStatus.Title} to {task.Title} at <strong>{task.CreateTime}</strong>";
+                    title = "Task Deleted";
+                    description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{latestTaskhistory.ChangeAt}</strong>";
                 }
                 else
                 {
-                    description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project}</strong> to {task.Title} at <strong>{task.CreateTime}</strong>";
+                    title = "Task Updated!";
+                    var previousStatus = await _boardStatusRepository.GetQuery().FirstOrDefaultAsync(x => x.BoardStatusId == latestTaskhistory.PreviousStatusId);
+                    if (previousStatus != null)
+                    {
+                        if (task.StatusId == previousStatus.BoardStatusId)
+                        {
+                            description = $"User <strong>{userAccount?.UserName}</strong> has updated task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{task.CreateTime}</strong>";
+                        }
+                        else
+                        {
+                            description = $"User <strong>{userAccount?.UserName}</strong> has changed status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> from <strong>{previousStatus.Title}</strong> to <strong>{task.Status.Title}</strong> at <strong>{task.CreateTime}</strong>";
+                        }
+
+                    }
+                    else
+                    {
+                        description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> to <strong>{task.Title}</strong> at <strong>{task.CreateTime}</strong>";
+                    }
                 }
+                
             }
             
             //switch (task.Status.Title)

@@ -235,16 +235,16 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> InviteMemberDeclination(AcceptInviteRequest acceptInviteRequest)
 		{
             //Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
-                new RolePermissionResource
-                {
-                    ListProjectId = new List<Guid?> { acceptInviteRequest.ProjectId },
-                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
-                }, AuthorizationRequirementNameConstant.RolePermission);
-            if (!authorizationResult.Succeeded)
-            {
-                return Unauthorized(ErrorMessage.InvalidPermission);
-            }
+            //var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+            //    new RolePermissionResource
+            //    {
+            //        ListProjectId = new List<Guid?> { acceptInviteRequest.ProjectId },
+            //        ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
+            //    }, AuthorizationRequirementNameConstant.RolePermission);
+            //if (!authorizationResult.Succeeded)
+            //{
+            //    return Unauthorized(ErrorMessage.InvalidPermission);
+            //}
 
             var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
 			var uId = this.GetCurrentLoginUserId();
