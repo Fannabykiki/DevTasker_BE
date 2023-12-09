@@ -306,8 +306,12 @@ namespace Capstone.API.Controllers
 			}
 			var result = await _taskService.UpdateTask(updateTicketRequest);
 
-			// Notification
-			return Ok(result);
+            // Notification
+            if (result.BaseResponse.IsSucceed)
+            {
+                await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
+            }
+            return Ok(result);
 		}
 
         //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
