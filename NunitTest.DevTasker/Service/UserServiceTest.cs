@@ -22,6 +22,7 @@ namespace NUnitTest.DevTasker.Service
     {
         private readonly CapstoneContext _context;
         private Mock<IUserRepository> _userRepositoryMock;
+        private Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
         private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private UserService _userService;
@@ -32,6 +33,7 @@ namespace NUnitTest.DevTasker.Service
         public void SetUp()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
+            _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
             _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -52,7 +54,7 @@ namespace NUnitTest.DevTasker.Service
             var context = new CapstoneContext(contextOptions);
           
 
-            _userService = new UserService(context, _userRepositoryMock.Object, _mapper, _serviceScopeFactoryMock.Object, _httpContextAccessorMock.Object);
+            _userService = new UserService(context, _userRepositoryMock.Object, _mapper, _serviceScopeFactoryMock.Object, _httpContextAccessorMock.Object, _projectMemberRepositoryMock.Object);
         }
 
         [Test]

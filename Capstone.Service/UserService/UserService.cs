@@ -28,15 +28,17 @@ namespace Capstone.Service.UserService
 	{
 		private readonly CapstoneContext _context;
 		private readonly IUserRepository _userRepository;
+		private readonly IProjectMemberRepository _projectMemberRepository;
 		private readonly IMapper _mapper;
 		private readonly IServiceScopeFactory _serviceScopeFactory;
 		private readonly ClaimsIdentity? _identity;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory, IHttpContextAccessor httpContextAccessor)
+		public UserService(CapstoneContext context, IUserRepository userRepository, IMapper mapper, IServiceScopeFactory serviceScopeFactory, IHttpContextAccessor httpContextAccessor, IProjectMemberRepository projectMemberRepository)
 		{
 			_context = context;
 			_userRepository = userRepository;
+			_projectMemberRepository = projectMemberRepository;
 			_mapper = mapper;
 			_serviceScopeFactory = serviceScopeFactory;
 			var identity = httpContextAccessor.HttpContext?.User?.Identity;
@@ -437,11 +439,18 @@ namespace Capstone.Service.UserService
 				try
 				{
 					var updateRequest = await _userRepository.GetAsync(s => s.UserId == userId, null)!;
+					var memberRecords = await _projectMemberRepository.GetAllWithOdata(x => x.UserId == userId,null);
 					var status = changeUserStatusRequest.StatusIdChangeTo == true ? "BB93DD2D-B9E7-401F-83AA-174C588AB9DE" : "093416CB-1A26-43A4-9E11-DBDF5166DFFB";
-
+                    var memberStatus = changeUserStatusRequest.StatusIdChangeTo == true ? "ba888147-c90a-4578-8ba6-63ba1756fac1" : "a29bf1e9-2de2-4e5f-a6da-32d88fccd274";
+					
                     updateRequest.StatusId = Guid.Parse(status);
-
-					await _userRepository.UpdateAsync(updateRequest);
+					foreach (var item in memberRecords)
+					{
+						item.StatusId = Guid.Parse(memberStatus);
+						await _projectMemberRepository.UpdateAsync(item);
+                    }
+					await _projectMemberRepository.SaveChanges();
+                    await _userRepository.UpdateAsync(updateRequest);
 					await _userRepository.SaveChanges();
 
 					transaction.Commit();
