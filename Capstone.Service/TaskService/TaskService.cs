@@ -6,9 +6,6 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
-using Org.BouncyCastle.Math.EC.Rfc7748;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Metrics;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
@@ -93,9 +90,9 @@ namespace Capstone.Service.TaskService
 						{
 							AssignTo = newTask.AssignTo,
 							CreateBy = userId,
-							CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							CreateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							Description = newTask.Description,
-							DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							DeleteAt = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							TaskId = newTask.TaskId,
 							InterationId = newTask.InterationId,
@@ -126,7 +123,7 @@ namespace Capstone.Service.TaskService
 									Description = request.Description,
 									StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 									DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-									CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+									CreateTime = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 									CreateBy = userId,
 									TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
 									PriorityId = request.PriorityId,
@@ -146,9 +143,9 @@ namespace Capstone.Service.TaskService
 								{
 									AssignTo = newTask.AssignTo,
 									CreateBy = userId,
-									CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									CreateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									Description = newTask.Description,
-									DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+									DeleteAt = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 									TaskId = newTask.TaskId,
 									InterationId = newTask.InterationId,
@@ -180,7 +177,7 @@ namespace Capstone.Service.TaskService
 							Description = request.Description,
 							StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 							DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-							CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+							CreateTime = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 							CreateBy = userId,
 							TypeId = request.TypeId,
 							PriorityId = request.PriorityId,
@@ -201,9 +198,9 @@ namespace Capstone.Service.TaskService
 						{
 							AssignTo = newTask.AssignTo,
 							CreateBy = userId,
-							CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							CreateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							Description = newTask.Description,
-							DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+							DeleteAt = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							DueDate = newTask.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 							TaskId = newTask.TaskId,
 							InterationId = newTask.InterationId,
@@ -234,7 +231,7 @@ namespace Capstone.Service.TaskService
 									Description = request.Description,
 									StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 									DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
-									CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+									CreateTime = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 									CreateBy = userId,
 									TypeId = Guid.Parse("00BD0387-BFA1-403F-AB03-4839985CB29A"),
 									PriorityId = request.PriorityId,
@@ -311,7 +308,7 @@ namespace Capstone.Service.TaskService
 				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == updateTicketRequest.MemberId, x => x.Users);
 				var newHistory = new TaskHistory
 				{
-					ChangeAt = DateTime.Now,
+					ChangeAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					ChangeBy = updateTicketRequest.MemberId,
 					CurrentStatusId = updateTicketRequest.StatusId,
 					PreviousStatusId = task.StatusId,
@@ -332,8 +329,6 @@ namespace Capstone.Service.TaskService
 				task.PriorityId = updateTicketRequest.PriorityId;
 				task.StatusId = updateTicketRequest.StatusId;
 
-
-
 				var updateTask = await _ticketRepository.UpdateAsync(task);
 				await _ticketRepository.SaveChanges();
 				transaction.Commit();
@@ -342,9 +337,9 @@ namespace Capstone.Service.TaskService
 				{
 					AssignTo = task.AssignTo,
 					CreateBy = task.CreateBy,
-					CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					CreateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 					Description = task.Description,
-					DeleteAt = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+					DeleteAt = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 					DueDate = task.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
 					TaskId = task.TaskId,
 					InterationId = task.InterationId,
@@ -952,6 +947,53 @@ namespace Capstone.Service.TaskService
 			var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == statusId, null);
 			if (status.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31")) return false;
 			return true;
+		}
+
+		public async Task<BaseResponse> DeleteEachTask(RestoreTaskRequest restoreTaskRequest)
+		{
+			using var transaction = _iterationRepository.DatabaseTransaction();
+			try
+			{
+				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == restoreTaskRequest.TaskId, x => x.Status)!;
+				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == restoreTaskRequest.MemberId, x => x.Users);
+
+				selectedTicket.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+				selectedTicket.IsDelete = true;
+				selectedTicket.ExprireTime = DateTime.Parse(DateTime.Now.AddDays(30).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+			
+				var newHistory = new TaskHistory
+				{
+					ChangeAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+					ChangeBy = restoreTaskRequest.MemberId,
+					CurrentStatusId = selectedTicket.StatusId,
+					PreviousStatusId = selectedTicket.StatusId,
+					HistoryId = Guid.NewGuid(),
+					TaskId = restoreTaskRequest.TaskId,
+					Title = $"Task {selectedTicket.Title} has been deleted by {member.Users.UserName}"
+				};
+
+				await _taskHistoryRepository.CreateAsync(newHistory);
+				await _taskHistoryRepository.SaveChanges();
+
+				await _ticketRepository.UpdateAsync(selectedTicket);
+				await _context.SaveChangesAsync();
+				transaction.Commit();
+
+				return new BaseResponse
+				{
+					IsSucceed = true,
+					Message = "Delete Successfully"
+				};
+			}
+			catch (Exception e)
+			{
+				transaction.RollBack();
+				return new BaseResponse
+				{
+					IsSucceed = false,
+					Message = "Delete fail"
+				};
+			}
 		}
 	}
 }
