@@ -465,10 +465,38 @@ namespace Capstone.Service.TaskService
 			{
 				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == restoreTaskRequest.TaskId, x => x.Status)!;
 				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == restoreTaskRequest.MemberId, x => x.Users);
+				var subTaskList = await _ticketRepository.GetAllWithOdata(x => x.TaskId == restoreTaskRequest.TaskId, null);
 
 				selectedTicket.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 				selectedTicket.IsDelete = true;
 				selectedTicket.ExprireTime = DateTime.Parse(DateTime.Now.AddDays(30).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+
+				foreach (var subTask in subTaskList)
+				{
+					if (subTask.PrevId == restoreTaskRequest.TaskId)
+					{
+						subTask.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+						subTask.IsDelete = true;
+						subTask.ExprireTime = DateTime.Parse(DateTime.Now.AddDays(30).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+					}
+
+					var newHistorySubTask = new TaskHistory
+					{
+						ChangeAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+						ChangeBy = restoreTaskRequest.MemberId,
+						CurrentStatusId = subTask.StatusId,
+						PreviousStatusId = subTask.StatusId,
+						HistoryId = Guid.NewGuid(),
+						TaskId = restoreTaskRequest.TaskId,
+						Title = $"Task {subTask.Title} has been deleted by {member.Users.UserName}"
+					};
+
+					await _taskHistoryRepository.CreateAsync(newHistorySubTask);
+					await _taskHistoryRepository.SaveChanges();
+
+					await _ticketRepository.UpdateAsync(subTask);
+					await _ticketRepository.SaveChanges();
+				}
 
 				var newHistory = new TaskHistory
 				{
@@ -565,14 +593,39 @@ namespace Capstone.Service.TaskService
 		public async Task<CreateTaskResponse> CreateSubTask(CreateSubTaskRequest request, Guid userId)
 		{
 			using var transaction = _ticketRepository.DatabaseTransaction();
-			var task = await _ticketRepository.GetAsync(x => x.TaskId == request.TaskId, null);
+
 			try
 			{
+				var task = await _ticketRepository.GetAsync(x => x.TaskId == request.TaskId, null);
+				if (request.StartDate.Date < task.StartDate.Date)
+				{
+					return new CreateTaskResponse
+					{
+						BaseResponse = new BaseResponse
+						{
+							StatusCode = 400,
+							Message = "Can't create subtask's start date before task's start date",
+							IsSucceed = false,
+						}
+					};
+				}
+				else if (request.DueDate.Date > task.DueDate.Date)
+				{
+					return new CreateTaskResponse
+					{
+						BaseResponse = new BaseResponse
+						{
+							StatusCode = 400,
+							Message = "Can't create subtask's end date after task's end date",
+							IsSucceed = false,
+						}
+					};
+				}
 				var ticketEntity = new Task()
 				{
 					TaskId = Guid.NewGuid(),
 					Title = request.Title,
-					Description = request.Decription,
+					Description = request.Description,
 					StartDate = DateTime.Parse(request.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					DueDate = DateTime.Parse(request.DueDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 					CreateTime = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
@@ -795,9 +848,9 @@ namespace Capstone.Service.TaskService
 				};
 			}
 		}
-		
-        public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
-        {
+
+		public async Task<Guid?> GetProjectIdOfTask(Guid taskId)
+		{
 			var task = await _ticketRepository.GetAsync(x => x.TaskId == taskId, x => x.Interation);
 			var projectId = task.Interation.BoardId;
 			return projectId;
@@ -848,7 +901,7 @@ namespace Capstone.Service.TaskService
 				await _boardStatusRepository.UpdateAsync(status);
 				await _boardStatusRepository.SaveChanges();
 
-				var taskList = await _ticketRepository.GetAllWithOdata(x => x.StatusId == deleteTaskStatusRequest.TaskStatusId,null);
+				var taskList = await _ticketRepository.GetAllWithOdata(x => x.StatusId == deleteTaskStatusRequest.TaskStatusId, null);
 				foreach (var task in taskList)
 				{
 					var taskDetail = await _ticketRepository.GetAsync(x => x.TaskId == task.TaskId, null);
@@ -896,7 +949,7 @@ namespace Capstone.Service.TaskService
 
 		public async Task<bool> CheckTaskStatus(Guid statusId)
 		{
-			var status = await _boardStatusRepository.GetAsync(x=>x.BoardStatusId == statusId,null);
+			var status = await _boardStatusRepository.GetAsync(x => x.BoardStatusId == statusId, null);
 			if (status.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31")) return false;
 			return true;
 		}

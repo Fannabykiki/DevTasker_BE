@@ -12,5 +12,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
 	public interface ISchemaRepository : IBaseRepository<Schema>
 	{
 		Task<List<RoleDTO>> GetPermissionRolesBySchemaId(Guid permissionId, Guid schemaId);
+		Task<bool> DeleteSchemaById(Guid schemaId);
 	}
 }

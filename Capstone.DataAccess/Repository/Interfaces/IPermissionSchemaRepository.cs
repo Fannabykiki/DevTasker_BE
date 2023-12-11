@@ -7,5 +7,6 @@ namespace Capstone.DataAccess.Repository.Interfaces
     public interface IPermissionSchemaRepository : IBaseRepository<SchemaPermission>
     {
 		Task<List<PermissionViewModel>> GetPermissionByUserId(Guid? roleId);
-	}
+        Task<List<PermissionViewModel>> GetPermissionBySchewmaAndRoleId(Guid? schemaId, Guid? roleId);
+    }
 }

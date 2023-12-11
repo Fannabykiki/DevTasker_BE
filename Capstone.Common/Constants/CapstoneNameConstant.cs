@@ -50,7 +50,7 @@ namespace Capstone.Common.Constants
         public const string DeleteAllComments = "Delete All Comments";
         public const string EditOwnComments = "Edit Own Comments";
         public const string EditAllComments = "Edit All Comments";
-        public const string CreateAttachments = "]Create Attachments";
+        public const string CreateAttachments = "Create Attachments";
         public const string DeleteAllAttachments = "Delete All Attachments";
 
     }

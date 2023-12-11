@@ -23,24 +23,24 @@ namespace Capstone.API.Controllers.Testing
             return Ok();
         }
         [HttpPost("send-notification-project")]
-        public async Task<IActionResult> SendNotifcationProject(string projectId)
+        public async Task<IActionResult> SendNotifcationProject(Guid projectId)
         {
             var userId = this.GetCurrentLoginUserId();
-            await _notificationService.SendNotificationChangeProjectStatus(projectId, userId.ToString());
+            await _notificationService.SendNotificationChangeProjectStatus(projectId, userId);
             return Ok();
         }
         [HttpPost("send-notification-task")]
-        public async Task<IActionResult> SendNotifcationTask(string taskId)
+        public async Task<IActionResult> SendNotifcationTask(Guid taskId)
         {
             var userId = this.GetCurrentLoginUserId();
-            await _notificationService.SendNotificationChangeTaskStatus(taskId, userId.ToString());
+            await _notificationService.SendNotificationChangeTaskStatus(taskId, userId);
             return Ok();
         }
         [HttpPost("send-notification-comment")]
-        public async Task<IActionResult> SendNotifcationCommentTask(string commentTaskId, string action)
+        public async Task<IActionResult> SendNotifcationCommentTask(Guid commentTaskId, string action)
         {
             var userId = this.GetCurrentLoginUserId();
-            await _notificationService.SendNotificationCommentTask(commentTaskId, userId.ToString(), action);
+            await _notificationService.SendNotificationCommentTask(commentTaskId, userId, action);
             return Ok();
         }
         [HttpPost("send-notification-email-job")]

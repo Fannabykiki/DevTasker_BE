@@ -22,10 +22,11 @@ namespace Capstone.DataAccess.Repository.Implements
             var project = await LoadProjectWithTasks(projectId);
             var tasks = GetTasksFromProject(project);
             var listStatus = _context.BoardStatus.Where(x => x.BoardId == projectId).ToList();
-            var listMember = _context.ProjectMembers.Include(u => u.Users).ThenInclude(s => s.Status).Where(x => x.ProjectId == projectId).ToList();
+            var listMember = _context.ProjectMembers.Include(u => u.Users).ThenInclude(s => s.Status).Where(x => x.ProjectId == projectId && x.StatusId == Guid.Parse("BA888147-C90A-4578-8BA6-63BA1756FAC1")).ToList();
             var reportRecord = GenerateReportRecord(listStatus,tasks);
             var reportByWeek = GenerateReportByWeek(listStatus,tasks);
             var reportMembers = GenerateMemberReport(listMember, listStatus, tasks);
+            
 
             var result = new GetProjectReportRequest
             {
@@ -156,16 +157,18 @@ namespace Capstone.DataAccess.Repository.Implements
                 {
                     BoardStatusId = status.BoardStatusId,
                     Title = status.Title,
+                    Order = status.Order,
                     NumberTask = numberTask,
                     Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * numberTask) / tasks.Count)
                 });
             }
             reports.Add(new ReportStatus
             {
+                BoardStatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"),
                 Title = "Deleted",
                 NumberTask = tasks.Count(x => x.IsDelete == true),
                 Percent = tasks.Count() == 0 ? 0 : (int)Math.Round((double)(100 * tasks.Count(x => x.IsDelete == true)) / tasks.Count)
-            });
+            }) ;
             return reports;
         }
 

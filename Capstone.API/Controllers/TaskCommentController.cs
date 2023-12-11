@@ -48,7 +48,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                await _notificationService.SendNotificationCommentTask(newComment.CommentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Create);
+                await _notificationService.SendNotificationCommentTask(newComment.CommentId, this.GetCurrentLoginUserId(), CommentActionCconstant.Create);
             }
             return Ok(newComment);
         }
@@ -79,7 +79,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                await _notificationService.SendNotificationCommentTask(commentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Delete);
+                await _notificationService.SendNotificationCommentTask(commentId, this.GetCurrentLoginUserId(), CommentActionCconstant.Delete);
             }
             return Ok("Comment deleted.");
         }
@@ -100,7 +100,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                await _notificationService.SendNotificationCommentTask(commentId.ToString(), userId.ToString(), CommentActionCconstant.Create);
+                await _notificationService.SendNotificationCommentTask(commentId, userId, CommentActionCconstant.Create);
             }
             return Ok(newComment);
         }
@@ -143,7 +143,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                await _notificationService.SendNotificationCommentTask(updated.CommentId.ToString(), this.GetCurrentLoginUserId().ToString(), CommentActionCconstant.Edit);
+                await _notificationService.SendNotificationCommentTask(updated.CommentId, this.GetCurrentLoginUserId(), CommentActionCconstant.Edit);
             }
             return Ok(updated);
         }

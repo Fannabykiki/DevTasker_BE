@@ -8,11 +8,11 @@ namespace Capstone.API.Extentions.Validation.ProjectValidator
 		public UpdateProjectValidate()
 		{
 			RuleFor(x => x.ProjectName)
+				.MaximumLength(50).WithMessage("Project name must less than 50 characters")
 			.NotNull().WithMessage("Project's name is require")
-			  .MaximumLength(500).WithMessage("ProjectName must not exceed 500 characters")
 			  .When(x => !string.IsNullOrWhiteSpace(x.ProjectName));
 			RuleFor(x => x.Description)
-			  .MaximumLength(500).WithMessage("Description must not exceed 500 characters")
+			  .MaximumLength(50000).WithMessage("Description must less than 50.000 characters")
 			  .When(x => !string.IsNullOrWhiteSpace(x.Description));
 		}
 	}

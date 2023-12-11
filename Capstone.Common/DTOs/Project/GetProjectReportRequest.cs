@@ -39,6 +39,7 @@ namespace Capstone.Common.DTOs.Project
         public string Title { get; set; }
         public int? NumberTask { get; set; }
         public int? Percent { get; set; }
+        public int? Order { get; set; }
 
     }
 }

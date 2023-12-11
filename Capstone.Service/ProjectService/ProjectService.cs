@@ -10,6 +10,7 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using MailKit.Security;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using MimeKit.Text;
 
@@ -135,10 +136,10 @@ public class ProjectService : IProjectService
 
 			var newInteration = new Interation
 			{
-				StartDate = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+				StartDate = DateTime.Parse(newProject.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProject.Board.BoardId,
-				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+				EndDate = DateTime.Parse(newProject.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				InterationName = "Sprint 1",
 				InterationId = Guid.NewGuid(),
 			};
@@ -354,6 +355,7 @@ public class ProjectService : IProjectService
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
 			project.ProjectName = updateProjectNameInfo.ProjectName;
 			project.Description = updateProjectNameInfo.Description;
+			project.EndDate = updateProjectNameInfo.EndDate;
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
@@ -441,7 +443,7 @@ public class ProjectService : IProjectService
 		}
 	}
 
-	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid projectId)
+	public async Task<GetAllProjectViewModel> GetProjectByProjectId(Guid? projectId)
 	{
 		var projects = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x=>x.Status)!;
 		return _mapper.Map<GetAllProjectViewModel>(projects);
@@ -502,7 +504,7 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, null);
+			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, x=>x.ProjectMembers);
 			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
 			foreach (var user in inviteUserRequest.Email)
 			{
@@ -527,8 +529,8 @@ public class ProjectService : IProjectService
 				email.Subject = "DevTakser verification step";
 				email.Body = new TextPart(TextFormat.Html)
 				{
-					Text = $"<h1>You've been invited to DevTasker</h1>" +
-					$"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
+					Text = $"<h1>You've been invited to DevTasker</h1>" 
+					+ $"<h2>Project Name: {project.ProjectName} </h2><p>Click the link below to accept invitation</p><a href=\"{verificationLink}\">Join now</a>"
 				};
 
 				using (var client = new MailKit.Net.Smtp.SmtpClient())
@@ -571,8 +573,32 @@ public class ProjectService : IProjectService
 		}
 		return newPermisisonViewModel;
 	}
-
-	public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
+    public async Task<IEnumerable<PermissionViewModel>> GetPermissionAuthorizeByUserId(Guid projectId, Guid userId)
+	{
+        var newPermisisonViewModel = new List<PermissionViewModel>();
+		var projectMember = await _projectMemberRepository.GetQuery().Include(x => x.Project)
+			.FirstOrDefaultAsync(pr => pr.ProjectId == projectId && pr.UserId == userId);
+		if(projectMember == null) return null;
+		var permissions = await _permissionSchemaRepository.GetPermissionBySchewmaAndRoleId(projectMember.Project.SchemasId, projectMember.RoleId);
+        HashSet<Guid> result = new HashSet<Guid>();
+        foreach (var permission in permissions)
+        {
+            result.Add(permission.PermissionId);
+        }
+        foreach (var permisison in result)
+        {
+            var per = await _permissionRepository.GetAsync(x => x.PermissionId == permisison, null);
+            var permissionViewModel = new PermissionViewModel
+            {
+                Description = per.Description,
+                Name = per.Name,
+                PermissionId = per.PermissionId,
+            };
+            newPermisisonViewModel.Add(permissionViewModel);
+        }
+        return newPermisisonViewModel;
+    }
+    public async Task<IQueryable<GetAllProjectResponse>> GetProjectsAdmin()
 	{
 		var projects = await _projectRepository.GetAllWithOdata(x => true, x => x.Status);
 		var projectsList = new List<GetAllProjectResponse>();
@@ -637,9 +663,11 @@ public class ProjectService : IProjectService
 		var totalProject = projects.Count();
 		var activeProject = projects.Where(x => x.StatusId == Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5")).Count();
 		var inactiveProject = projects.Where(x => x.StatusId == Guid.Parse("DB6CBA9F-6B55-4E18-BBC1-624AFDCD92C7")).Count();
-		var deleteProject = totalProject - activeProject - inactiveProject;
+		var doneProject = projects.Where(x => x.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C")).Count();
+		var deleteProject = totalProject - activeProject - inactiveProject- doneProject;
 		var activeProjectPercent = (int)Math.Round((double)(100 * activeProject) / totalProject);
 		var inactiveProjectPercent = (int)Math.Round((double)(100 * inactiveProject) / totalProject);
+		var doneProjectPercent = (int)Math.Round((double)(100 * doneProject) / totalProject);
 		var deleteProjectPercent = 100 - activeProjectPercent - inactiveProjectPercent;
 
 		return new ProjectAnalyzeRespone
@@ -651,6 +679,8 @@ public class ProjectService : IProjectService
 			ProjectDeletePercent = deleteProjectPercent,
 			ProjectInActive = inactiveProject,
 			ProjectInActivePercent = inactiveProjectPercent,
+			ProjectDone= doneProject,
+			ProjectDonePercent= doneProjectPercent,
 		};
 	}
 
@@ -815,13 +845,42 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
+            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
             var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
+            var Schema = new Schema
+            {
+                SchemaName = "Schema " + project.ProjectName,
+                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                IsDelete = false
+            };
+            var newSchema = await _schemaRepository.CreateAsync(Schema);
 
+            foreach (var item in schemaPermission)
+            {
+                item.SchemaId = newSchema.SchemaId;
+                await _permissionSchemaRepository.CreateAsync(item);
+            }
+            await _permissionSchemaRepository.SaveChanges();
+            await _schemaRepository.SaveChanges();
 
-            project.SchemasId = changePermissionSchemaRequest.SchemaId;
+			Guid shemaID = Guid.Empty;
 
-            var update = await _projectRepository.UpdateAsync(project);
+            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+			{
+				shemaID = project.SchemasId;
+			}
+
+            project.SchemasId = newSchema.SchemaId;
+            await _projectRepository.UpdateAsync(project);
             await _projectRepository.SaveChanges();
+
+			if(shemaID != Guid.Empty)
+			{
+                await _schemaRepository.DeleteSchemaById(shemaID);
+                await _schemaRepository.SaveChanges();
+            }
+            
+
             transaction.Commit();
 			return new BaseResponse
 			{

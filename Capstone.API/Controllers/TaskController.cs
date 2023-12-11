@@ -78,7 +78,7 @@ namespace Capstone.API.Controllers
 		public async Task<ActionResult<List<StatusTaskViewModel>>> GetAllStatusTaskByProjectId(Guid projectId)
 		{
 			var response = await _taskService.GetAllTaskStatus(projectId);
-            response.Add(new StatusTaskViewModel { Title = "Deleted", BoardId = projectId });
+            response.Add(new StatusTaskViewModel { BoardStatusId = Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"), Title = "Deleted", BoardId = projectId , Order = 0});
             return Ok(response);
 		}
 		
@@ -120,11 +120,25 @@ namespace Capstone.API.Controllers
         //  993951AD-5457-41B9-8FFF-4D1C1FA557D0 - Create Tasks
         [HttpPost("tasks")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateTask(CreateTaskRequest request)
-		{	
-			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+		{
+            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+                new RolePermissionResource
+                {
+                    ListProjectId = new List<Guid?> { request.ProjectId },
+                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.CreateTasks }
+                }, AuthorizationRequirementNameConstant.RolePermission);
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized(ErrorMessage.InvalidPermission);
+            }
+            var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
 			if(projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
 			{
 				return BadRequest("Can't create task in done project");
+			}
+		 	if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
 			}
 			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if(!memberStatus)
@@ -150,7 +164,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
 				if (result.BaseResponse.IsSucceed)
 				{
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
                 }  
                 return Ok(result);
 			}
@@ -174,7 +188,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
                 if (result.BaseResponse.IsSucceed)
                 {
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
                 }
                 return Ok(result);
 			}
@@ -184,11 +198,6 @@ namespace Capstone.API.Controllers
         [HttpPost("tasks/subtask")]
 		public async Task<ActionResult<CreateTaskResponse>> CreateSubTask(CreateSubTaskRequest request)
 		{
-			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
-			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
-			{
-				return BadRequest("Can't create subtask in done project");
-			}
 			//Authorize
 			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
                 new RolePermissionResource
@@ -200,8 +209,16 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
+			var projectStatus = await _projectService.GetProjectByProjectId(request.ProjectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
+			var memberStatus = await _projectService.CheckMemberStatus(request.AssignTo);
 			if (!memberStatus)
 			{
 				return BadRequest("Can't assign to unavailable member");
@@ -221,6 +238,10 @@ namespace Capstone.API.Controllers
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
+			if (result.BaseResponse.StatusCode == 400)
+			{
+				return BadRequest(result.BaseResponse.Message);
+			}
 			return Ok(result);
         }
 
@@ -233,7 +254,6 @@ namespace Capstone.API.Controllers
         [HttpPut("tasks")]
 		public async Task<IActionResult> Update(UpdateTaskRequest updateTicketRequest)
 		{
-		
 			//Authorize
 			var projectId = await _taskService.GetProjectIdOfTask(updateTicketRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
@@ -260,6 +280,10 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't create subtask in done project");
 			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
 			var memberStatus = await _projectService.CheckMemberStatus(updateTicketRequest.AssignTo);
 			if (!memberStatus)
 			{
@@ -282,14 +306,19 @@ namespace Capstone.API.Controllers
 			}
 			var result = await _taskService.UpdateTask(updateTicketRequest);
 
-			// Notification
-			return Ok(result);
+            // Notification
+            if (result.BaseResponse.IsSucceed)
+            {
+                await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
+            }
+            return Ok(result);
 		}
 
         //3 A6067E1B-6F37-429C-865C-AA4CC4D829DE - Close Tasks
         [HttpPut("tasks/status")]
-		public async Task<IActionResult> UpdateaTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
+		public async Task<IActionResult> UpdateTaskStastus(UpdateTaskStatusRequest updateTaskStatusRequest)
 		{
+		
 			//Authorize
 			var projectId = await _taskService.GetProjectIdOfTask(updateTaskStatusRequest.TaskId);
             var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
@@ -302,8 +331,16 @@ namespace Capstone.API.Controllers
             {
                 return Unauthorized(ErrorMessage.InvalidPermission);
             }
-
-            var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
+			var projectStatus = await _projectService.GetProjectByProjectId(projectId);
+			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+			{
+				return BadRequest("Can't create task in done project");
+			}
+			if (projectStatus.StatusId == Guid.Parse("C59F200A-C557-4492-8D0A-5556A3BA7D31"))
+			{
+				return BadRequest("Can't create task in deleted project");
+			}
+			var task = await _taskService.CheckExist(updateTaskStatusRequest.TaskId);
 			if (!task)
 			{
 				return NotFound("Task not found");
@@ -312,7 +349,7 @@ namespace Capstone.API.Controllers
             
             if (result.BaseResponse.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeTaskStatus(updateTaskStatusRequest.TaskId, this.GetCurrentLoginUserId());
             }
             return Ok(result);
 		}
@@ -380,7 +417,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
             }
             
             return Ok(result);

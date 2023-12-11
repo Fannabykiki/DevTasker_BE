@@ -83,6 +83,22 @@ namespace Capstone.Service.IterationService
 
 			try
 			{
+				//var intertaionList = await GetIterationTasksByProjectId(createIterationRequest.ProjectId);
+				//foreach (var interItem in intertaionList)
+				//{
+				//	if (createIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+				//	{
+				//		return new GetIntergrationResponse
+				//		{
+				//			Response = new BaseResponse
+				//			{
+				//				StatusCode = 400,
+				//				Message = "Can't create new interation's start date before the previous interation's end date",
+				//				IsSucceed = true,
+				//			}
+				//		};
+				//	}
+				//}
 				var newIterationRequest = new Interation
 				{
 					InterationName = createIterationRequest.InterationName,
@@ -137,6 +153,47 @@ namespace Capstone.Service.IterationService
 			{
 				var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
 
+				//var intertaionList = await GetIterationTasksByProjectId(iteration.BoardId);
+				//foreach (var interItem in intertaionList)
+				//{
+				//	if (updateIterationRequest.InterationId == intertaionList.ElementAt(0).InterationId)
+				//	{
+				//		continue;
+				//	}
+				//	if (updateIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+				//	{	
+						
+				//		return new BaseResponse
+				//		{	
+				//			StatusCode = 400,
+				//			Message = "Can't update sprint's start date before the previous sprint's end date",
+				//			IsSucceed = true,
+				//		};
+				//	}
+				//}
+				var taskInInteration = await _TaskRepository.GetTaskByInterationId(iterationId);
+				foreach (var task in taskInInteration)
+				{	
+					if (updateIterationRequest.StartDate.Date > DateTime.Parse(task.StartDate).Date)
+					{
+						return new BaseResponse
+						{
+							StatusCode = 400,
+							Message = $"Can't update sprint's start date after task's start date in this sprint ",
+							IsSucceed = false,
+						};
+					}
+					if (updateIterationRequest.EndDate.Date < DateTime.Parse(task.DueDate).Date)
+					{
+						return new BaseResponse
+						{
+							StatusCode = 400,
+							Message = "Can't update sprint's end date before task's end date in this sprint ",
+							IsSucceed = false,
+						};
+					}
+				}
+
 				iteration.InterationName = updateIterationRequest.InterationName;
 				iteration.StartDate = updateIterationRequest.StartDate;
 				iteration.EndDate = updateIterationRequest.EndDate;
@@ -164,7 +221,7 @@ namespace Capstone.Service.IterationService
 
 		public async Task<GetIntergrationResponse> GetCurrentInterationId(Guid projectId)
 		{
-			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, x=>x.Status);
+			var interations = await _iterationRepository.GetAllWithOdata(x => x.BoardId == projectId, x => x.Status);
 			var inter = new GetIntergrationResponse();
 			foreach (var interation in interations)
 			{
@@ -188,7 +245,7 @@ namespace Capstone.Service.IterationService
 		public async Task<bool> CheckExist(Guid interationId)
 		{
 			var interation = await _iterationRepository.GetAsync(x => x.InterationId == interationId, null);
-			if(interation == null)
+			if (interation == null)
 			{
 				return false;
 			}

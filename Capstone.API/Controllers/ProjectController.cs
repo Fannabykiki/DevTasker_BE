@@ -56,7 +56,7 @@ namespace Capstone.API.Controllers
 			var result = await _projectService.CreateProject(createProjectRequest, userId);
 			if (result != null)
 			{
-                await _notificationService.SendNotificationChangeProjectStatus(result.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeProjectStatus(result.ProjectId, this.GetCurrentLoginUserId());
             }
             
             return Ok(result);
@@ -190,7 +190,7 @@ namespace Capstone.API.Controllers
 			var project = await _projectService.ChangeProjectStatus(Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"),changeProjectStatusRequest);
 			if (project.StatusResponse.IsSucceed)
 			{
-				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId, this.GetCurrentLoginUserId());
 			}
 			return Ok(project);
 		}
@@ -218,7 +218,7 @@ namespace Capstone.API.Controllers
 			var project = await _projectService.ChangeProjectStatus(Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"), changeProjectStatusRequest);
 			if (project.StatusResponse.IsSucceed)
 			{
-				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+				await _notificationService.SendNotificationChangeProjectStatus(project.ProjectId, this.GetCurrentLoginUserId());
 			}
 			return Ok(project);
 		}
@@ -235,16 +235,16 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> InviteMemberDeclination(AcceptInviteRequest acceptInviteRequest)
 		{
             //Authorize
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
-                new RolePermissionResource
-                {
-                    ListProjectId = new List<Guid?> { acceptInviteRequest.ProjectId },
-                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
-                }, AuthorizationRequirementNameConstant.RolePermission);
-            if (!authorizationResult.Succeeded)
-            {
-                return Unauthorized(ErrorMessage.InvalidPermission);
-            }
+            //var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+            //    new RolePermissionResource
+            //    {
+            //        ListProjectId = new List<Guid?> { acceptInviteRequest.ProjectId },
+            //        ListPermissionAuthorized = new List<string> { PermissionNameConstant.AdministerProjects}
+            //    }, AuthorizationRequirementNameConstant.RolePermission);
+            //if (!authorizationResult.Succeeded)
+            //{
+            //    return Unauthorized(ErrorMessage.InvalidPermission);
+            //}
 
             var user = await _userService.GetUserByEmailAsync(acceptInviteRequest.Email);
 			var uId = this.GetCurrentLoginUserId();
@@ -576,7 +576,7 @@ namespace Capstone.API.Controllers
 			var result = await _projectService.DeleteProject(deleteProjectRequest.ProjectId);
 			if(result.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+                await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId, this.GetCurrentLoginUserId());
             }            
             return Ok(result);
 		}
@@ -609,7 +609,7 @@ namespace Capstone.API.Controllers
 				var result = await _projectService.RestoreProject(deleteProjectRequest.ProjectId);
 				if(result.IsSucceed)
 				{
-					await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId.ToString(), this.GetCurrentLoginUserId().ToString());
+					await _notificationService.SendNotificationChangeProjectStatus(deleteProjectRequest.ProjectId, this.GetCurrentLoginUserId());
 				}
 				return Ok(result);
 			}

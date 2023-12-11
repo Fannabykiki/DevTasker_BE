@@ -3,6 +3,7 @@ using Capstone.Common.DTOs.Role;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Capstone.DataAccess.Repository.Implements
 {
@@ -13,7 +14,27 @@ namespace Capstone.DataAccess.Repository.Implements
 		{
 			_context = context;
 		}
-		public async Task<List<RoleDTO>> GetPermissionRolesBySchemaId(Guid permissionId, Guid schemaId)
+
+        public async Task<bool> DeleteSchemaById(Guid schemaId)
+        {
+			try
+			{
+				var permissionSchema = _context.PermissionSchemas.Where(x => x.SchemaId == schemaId);
+				foreach (var item in permissionSchema)
+				{
+                    _context.PermissionSchemas.Remove(item);
+                }
+				var schema = _context.Schemas.FirstOrDefault(x => x.SchemaId == schemaId);
+				_context.Schemas.Remove(schema);
+
+				return true;
+			}catch(Exception ex)
+			{
+				return false;
+			}
+        }
+
+        public async Task<List<RoleDTO>> GetPermissionRolesBySchemaId(Guid permissionId, Guid schemaId)
 		{
 			var role = await _context.SchemaPermissions
 				.Where(sp => sp.SchemaId == schemaId && sp.PermissionId == permissionId)
