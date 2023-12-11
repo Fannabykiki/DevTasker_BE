@@ -61,6 +61,7 @@ namespace Capstone.Common.DTOs.Task
         public Guid InterationId { get; set; }
         public string InterationName { get; set; }
         public int? TotalComment { get; set; }
-        public int? TotalAttachment { get; set; }
+		public bool? IsParentDeleted { get; set; }
+		public int? TotalAttachment { get; set; }
     }
 }

@@ -422,8 +422,39 @@ namespace Capstone.API.Controllers
             
             return Ok(result);
 		}
-        //1 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
-        [HttpPut("tasks/restoration")]
+
+		[HttpPut("tasks/deleti-each-task")]
+		public async Task<IActionResult> DeleteEachTask(RestoreTaskRequest restoreTaskRequest)
+		{
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(restoreTaskRequest.TaskId);
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { projectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.DeleteTasks }
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+
+			var task = await _taskService.CheckExist(restoreTaskRequest.TaskId);
+			if (!task)
+			{
+				return NotFound("Task not found");
+			}
+			var result = await _taskService.DeleteEachTask(restoreTaskRequest);
+			if (result.IsSucceed)
+			{
+				await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+			}
+
+			return Ok(result);
+		}
+
+		//1 E83C8597-8181-424A-B48F-CA3A8AA021B1 - Administer Projects
+		[HttpPut("tasks/restoration")]
 		public async Task<ActionResult<BaseResponse>> RestoreTask(RestoreTaskRequest restoreTaskRequest)
 		{
 			//Authorize
