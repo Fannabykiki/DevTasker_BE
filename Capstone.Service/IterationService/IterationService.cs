@@ -83,22 +83,22 @@ namespace Capstone.Service.IterationService
 
 			try
 			{
-				var intertaionList = await GetIterationTasksByProjectId(createIterationRequest.ProjectId);
-				foreach (var interItem in intertaionList)
-				{
-					if (createIterationRequest.StartDate.Date <= interItem.EndDate.Date)
-					{
-						return new GetIntergrationResponse
-						{
-							Response = new BaseResponse
-							{
-								StatusCode = 400,
-								Message = "Can't create new interation's start date before the previous interation's end date",
-								IsSucceed = true,
-							}
-						};
-					}
-				}
+				//var intertaionList = await GetIterationTasksByProjectId(createIterationRequest.ProjectId);
+				//foreach (var interItem in intertaionList)
+				//{
+				//	if (createIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+				//	{
+				//		return new GetIntergrationResponse
+				//		{
+				//			Response = new BaseResponse
+				//			{
+				//				StatusCode = 400,
+				//				Message = "Can't create new interation's start date before the previous interation's end date",
+				//				IsSucceed = true,
+				//			}
+				//		};
+				//	}
+				//}
 				var newIterationRequest = new Interation
 				{
 					InterationName = createIterationRequest.InterationName,
@@ -153,24 +153,24 @@ namespace Capstone.Service.IterationService
 			{
 				var iteration = await _iterationRepository.GetAsync(x => x.InterationId == iterationId, null)!;
 
-				var intertaionList = await GetIterationTasksByProjectId(iteration.BoardId);
-				foreach (var interItem in intertaionList)
-				{
-					if (updateIterationRequest.InterationId == intertaionList.ElementAt(0).InterationId)
-					{
-						continue;
-					}
-					if (updateIterationRequest.StartDate.Date <= interItem.EndDate.Date)
-					{	
+				//var intertaionList = await GetIterationTasksByProjectId(iteration.BoardId);
+				//foreach (var interItem in intertaionList)
+				//{
+				//	if (updateIterationRequest.InterationId == intertaionList.ElementAt(0).InterationId)
+				//	{
+				//		continue;
+				//	}
+				//	if (updateIterationRequest.StartDate.Date <= interItem.EndDate.Date)
+				//	{	
 						
-						return new BaseResponse
-						{	
-							StatusCode = 400,
-							Message = "Can't update sprint's start date before the previous sprint's end date",
-							IsSucceed = true,
-						};
-					}
-				}
+				//		return new BaseResponse
+				//		{	
+				//			StatusCode = 400,
+				//			Message = "Can't update sprint's start date before the previous sprint's end date",
+				//			IsSucceed = true,
+				//		};
+				//	}
+				//}
 				var taskInInteration = await _TaskRepository.GetTaskByInterationId(iterationId);
 				foreach (var task in taskInInteration)
 				{	
