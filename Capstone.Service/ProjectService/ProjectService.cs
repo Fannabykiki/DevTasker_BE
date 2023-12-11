@@ -139,7 +139,7 @@ public class ProjectService : IProjectService
 				StartDate = DateTime.Parse(newProject.StartDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				StatusId = Guid.Parse("3FC7B979-BC37-4E06-B38A-B01245541867"),
 				BoardId = newProject.Board.BoardId,
-				EndDate = DateTime.Parse(DateTime.UtcNow.AddDays(14).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+				EndDate = DateTime.Parse(newProject.EndDate.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
 				InterationName = "Sprint 1",
 				InterationId = Guid.NewGuid(),
 			};
