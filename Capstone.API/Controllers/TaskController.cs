@@ -423,7 +423,7 @@ namespace Capstone.API.Controllers
             return Ok(result);
 		}
 
-		[HttpPut("tasks/deleti-each-task")]
+		[HttpPut("tasks/deletion-each-task")]
 		public async Task<IActionResult> DeleteEachTask(RestoreTaskRequest restoreTaskRequest)
 		{
 			//Authorize
