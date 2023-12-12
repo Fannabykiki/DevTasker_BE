@@ -739,8 +739,16 @@ public class ProjectService : IProjectService
 		using var transaction = _projectRepository.DatabaseTransaction();
 		try
 		{
-			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, null);
+			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Users);
+			if(project.StatusId == Guid.Parse("2707D89B-6040-474C-ABD0-1F2CBC8DAEAB"))
+			{
+				var invitation = await _invitationRepository.GetAsync(x => x.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") && x.InviteTo.Equals(project.Users.Email), null);
 
+				invitation.StatusId = Guid.Parse("2707D89B-6040-474C-ABD0-1F2CBC8DAEAB");
+
+				await _invitationRepository.UpdateAsync(invitation);
+				await _invitationRepository.SaveChanges();
+			}
 			project.StatusId = Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274");
 
 			await _projectMemberRepository.UpdateAsync(project);
