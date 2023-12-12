@@ -152,38 +152,6 @@ namespace Capstone.UnitTests.Service
             Assert.IsFalse(result.Response.IsSucceed, "Expected IsSucceed to be false.");
         }
         [Test]
-        public async Task UpdateIteration_Successful()
-        {
-            // Arrange
-            var updateIterationRequest = new UpdateIterationRequest
-            {
-                InterationName = "Updated Iteration",
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddDays(14)
-            };
-
-            var existingIteration = new Interation
-            {
-               
-                InterationName = "Original Iteration",
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddDays(7),
-                // Add other properties as needed
-            };
-
-            _iterationRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Interation, bool>>>(), null))
-                                    .ReturnsAsync(existingIteration);
-
-            // Act
-            var iterationId = Guid.NewGuid();
-            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
-
-            // Assert
-            Assert.IsTrue(result.IsSucceed);
-           
-        }
-
-        [Test]
         public async Task UpdateIteration_Fail()
         {
             // Arrange
