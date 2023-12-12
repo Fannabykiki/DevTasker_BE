@@ -73,6 +73,7 @@ namespace Capstone.DataAccess.Repository.Implements
 															InterationId = m.InterationId,
 															InterationName = m.Interation.InterationName,
 															IsDelete = m.IsDelete,
+															IsParentDeleted = x.IsDelete,
 															PriorityLevel = m.PriorityLevel.Level,
 															DeleteAt = m.DeleteAt == null
   ? null
@@ -145,6 +146,7 @@ namespace Capstone.DataAccess.Repository.Implements
 															InterationId = m.InterationId,
 															InterationName = m.Interation.InterationName,
 															IsDelete = m.IsDelete,
+															IsParentDeleted = x.IsDelete,
 															PriorityLevel = m.PriorityLevel.Level,
 															DeleteAt = m.DeleteAt == null
   ? null
