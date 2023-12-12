@@ -9,7 +9,10 @@ using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using Capstone.Service.Hubs;
+using Google.Apis.Drive.v3.Data;
 using MailKit.Security;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using MimeKit.Text;
@@ -36,7 +39,30 @@ public class ProjectService : IProjectService
 	private readonly ITaskRepository _ticketRepository;
 	private readonly IInvitationRepository _invitationRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository, IInvitationRepository invitationRepository)
+    private readonly PresenceTracker _presenceTracker;
+    private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly INotificationRepository _notificationRepository;
+    public ProjectService(CapstoneContext context, 
+		IProjectRepository projectRepository, 
+		IRoleRepository roleRepository, 
+		IMapper mapper, 
+		ISchemaRepository permissionSchemaRepository, 
+		IProjectMemberRepository projectMemberRepository, 
+		IBoardRepository boardRepository, 
+		IPermissionRepository permissionRepository, 
+		IInterationRepository interationRepository, 
+		IPermissionSchemaRepository permissionScemaRepo,
+		IStatusRepository statusRepository,
+		IBoardStatusRepository boardStatusRepository,
+		IUserRepository userRepository,
+		ITaskTypeRepository ticketTypeRepository,
+		IPriorityRepository priorityRepository, 
+		ITaskRepository ticketRepository, 
+		IInvitationRepository invitationRepository,
+        PresenceTracker presenceTracker,
+        IHubContext<NotificationHub> hubContext,
+        INotificationRepository notificationRepository
+        )
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -55,6 +81,9 @@ public class ProjectService : IProjectService
 		_priorityRepository = priorityRepository;
 		_ticketRepository = ticketRepository;
 		_invitationRepository = invitationRepository;
+		_presenceTracker = presenceTracker;
+		_hubContext = hubContext;
+		_notificationRepository = notificationRepository;
 	}
 
 	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -506,6 +535,7 @@ public class ProjectService : IProjectService
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, x=>x.ProjectMembers);
 			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
+			var actionUser = await _userRepository.GetAsync(x => x.UserId == userId, null);
 			foreach (var user in inviteUserRequest.Email)
 			{
 				var newInvite = new Invitation
@@ -540,6 +570,9 @@ public class ProjectService : IProjectService
 					client.Send(email);
 					client.Disconnect(true);
 				}
+				var receiver = await _userRepository.GetAsync(x => x.Email == user, null);
+				if (receiver == null) continue;
+                await SendNotificationForInvitation(project.ProjectName, actionUser.UserName, receiver.UserId, verificationLink);
 			}
 		}
 		catch
@@ -549,8 +582,29 @@ public class ProjectService : IProjectService
 		}
 		return true;
 	}
+	public async System.Threading.Tasks.Task SendNotificationForInvitation(string projectName, string userName, Guid receiverId, string verificationLink)
+	{
+		var notification = new Notification
+		{
+			NotificationId = Guid.NewGuid(),
+			Title = "Invite to project",
+			Description = $"User <strong>{userName}</strong> invited you to project <strong>{projectName}</strong>",
+			CreateAt = DateTime.Now,
+			IsRead = false,
+			RecerverId = receiverId,
+			TargetUrl = verificationLink,
+		};
+		await _notificationRepository.CreateAsync(notification);
+		await _notificationRepository.SaveChanges();
 
-	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
+        if (await _presenceTracker.IsOnlineUser(receiverId.ToString()))
+        {
+            await _hubContext.Clients.Group(receiverId.ToString()).SendAsync("EmitNotification");
+        }
+    }
+
+
+    public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
 	{
 		var newPermisisonViewModel = new List<PermissionViewModel>();
 		var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;
