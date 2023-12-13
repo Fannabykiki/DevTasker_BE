@@ -44,7 +44,7 @@ namespace Capstone.API.Controllers
 		[HttpGet("tasks/kanban")]
 		[EnableQuery()]
 		public async Task<ActionResult<List<TaskViewModel>>> GetAllTask(Guid projetcId)
-		{
+		{ 
 			var response = await _taskService.GetAllTaskAsync(projetcId);
 			return Ok(response);
 		}
