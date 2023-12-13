@@ -346,21 +346,36 @@ namespace Capstone.Service.UserService
 			return true;
 		}
 
-		public async Task<bool> ForgotPassword(string email)
+		public async Task<bool> ForgotPassword(string emails)
 		{
 			using (var transaction = _userRepository.DatabaseTransaction())
 			{
 				try
 				{
-					var updateRequest = await _userRepository.GetAsync(s => s.Email == email, null)!;
+					var updateRequest = await _userRepository.GetAsync(s => s.Email == emails, null)!;
 
 					updateRequest.PassResetToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
-					updateRequest.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
+					updateRequest.ResetTokenExpires = DateTime.Now.AddDays(1);
 
 					await _userRepository.UpdateAsync(updateRequest);
 					await _userRepository.SaveChanges();
 
 					transaction.Commit();
+
+					string verificationLink = "https://devtasker.azurewebsites.net/forgot-password?" + "token=" + updateRequest.PassResetToken + "&email=" + emails;
+					var email = new MimeMessage();
+					email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
+					email.To.Add(MailboxAddress.Parse("" + emails));
+					email.Subject = "DevTakser forgot password";
+					email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Final step to reset your password</h1><p>Click the link below to reset your password:</p><a href=\"{verificationLink}\">Reset password of {updateRequest.UserName} now</a>" };
+
+					using (var client = new MailKit.Net.Smtp.SmtpClient())
+					{
+						client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+						client.Authenticate("devtaskercapstone@gmail.com", "fbacmmlfxlmchkmc");
+						client.Send(email);
+						client.Disconnect(true);
+					}
 
 					return true;
 				}

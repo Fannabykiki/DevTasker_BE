@@ -242,9 +242,9 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Invalid Token");
 			}
-			if (user.ResetTokenExpires < DateTime.UtcNow )
+			if (user.ResetTokenExpires < DateTime.Now )
 			{
-				return BadRequest("Token has expired");
+				return BadRequest("Your reset password link has expired");
 			}
 			if (user.StatusId.Equals(Guid.Parse("093416CB-1A26-43A4-9E11-DBDF5166DFFB")))
 			{
@@ -256,7 +256,7 @@ namespace Capstone.API.Controllers
 			}
 			await _usersService.ResetPassWord(resetPasswordRequest);
 
-			return Ok("A verification email send to user");
+			return Ok("Your password is reset successfully");
 		}
 
 
