@@ -87,7 +87,7 @@ namespace Capstone.DataAccess.Repository.Implements
 		public async Task<List<TaskViewModel>> GetTaskByInterationId(Guid interationId)
 		{
 			var taskList = await _context.Tasks
-								.Where(x => x.InterationId == interationId && x.IsDelete == false && x.PrevId == null).OrderBy(x => x.CreateTime).Include(x => x.PriorityLevel)
+								.Where(x => x.InterationId == interationId && x.PrevId == null).OrderBy(x => x.CreateTime).Include(x => x.PriorityLevel)
 								.Select(x => new TaskViewModel
 								{
 									UserStatus = x.ProjectMember.Users.Status.Title,
