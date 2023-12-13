@@ -367,7 +367,7 @@ namespace Capstone.Service.UserService
 					email.From.Add(MailboxAddress.Parse("devtaskercapstone@gmail.com"));
 					email.To.Add(MailboxAddress.Parse("" + emails));
 					email.Subject = "DevTakser forgot password";
-					email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Final step to reset your password</h1><p>Click the link below to reset your password:</p><a href=\"{verificationLink}\">Reset password now</a>" };
+					email.Body = new TextPart(TextFormat.Html) { Text = $"<h1>Final step to reset your password</h1><p>Click the link below to reset your password:</p><a href=\"{verificationLink}\">Reset password of {updateRequest.UserName} now</a>" };
 
 					using (var client = new MailKit.Net.Smtp.SmtpClient())
 					{
