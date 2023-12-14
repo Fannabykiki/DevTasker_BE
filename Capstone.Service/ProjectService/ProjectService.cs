@@ -909,45 +909,29 @@ public class ProjectService : IProjectService
         {
             var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
             var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
-            var Schema = new Schema
+            var Schema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+            Schema.SchemaName = "Schema " + project.ProjectName;
+            Schema.Description = "Permission Schema cloned from schema \"" + schemaPermission.First().Schema.SchemaName + "\"";
+            Schema.IsDelete = false;
+            foreach (var item in Schema.SchemaPermissions)
             {
-                SchemaName = "Schema " + project.ProjectName,
-                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                IsDelete = false
-            };
-            var newSchema = await _schemaRepository.CreateAsync(Schema);
+                await _permissionSchemaRepository.DeleteAsync(item);
+            }
+            await _permissionSchemaRepository.SaveChanges();
 
             foreach (var item in schemaPermission)
             {
-                item.SchemaId = newSchema.SchemaId;
+                item.SchemaId = project.SchemasId;
                 await _permissionSchemaRepository.CreateAsync(item);
             }
             await _permissionSchemaRepository.SaveChanges();
-            await _schemaRepository.SaveChanges();
-
-			Guid shemaID = Guid.Empty;
-
-            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
-			{
-				shemaID = project.SchemasId;
-			}
-
-            project.SchemasId = newSchema.SchemaId;
-            await _projectRepository.UpdateAsync(project);
-            await _projectRepository.SaveChanges();
-
-			if(shemaID != Guid.Empty)
-			{
-                await _schemaRepository.DeleteSchemaById(shemaID);
-                await _schemaRepository.SaveChanges();
-            }
-            
 
             transaction.Commit();
 			return new BaseResponse
 			{
 				IsSucceed = true,
-				Message = "Change project's schema successfully"
+				Message = "Clone project's schema successfully"
 			};
         }
         catch (Exception)
