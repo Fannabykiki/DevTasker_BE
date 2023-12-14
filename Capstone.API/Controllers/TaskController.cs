@@ -275,8 +275,24 @@ namespace Capstone.API.Controllers
 			{
 				return NotFound("Task not found");
 			}
-			var projectStatus = await _projectService.GetProjectByProjectId(taskDetail.ProjectId);
-			if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
+                var projectStatus = await _projectService.GetProjectByProjectId(taskDetail.ProjectId);
+            if (updateTicketRequest.StartDate < projectStatus.StartDate)
+            {
+                return BadRequest("New StartDate just can greater than or equal curent Project StartDate");
+            }
+			if (updateTicketRequest.DueDate > projectStatus.EndDate)
+            {
+                return BadRequest("New DueDate just can smaller than or equal curent Project EndDate");
+            }
+			if (updateTicketRequest.StartDate > DateTime.Parse(taskDetail.StartDate))
+            {
+                return BadRequest("New StartDate just can smaller than or equal curent StartDate");
+            }
+			if (updateTicketRequest.DueDate < DateTime.Parse(taskDetail.DueDate))
+            {
+                return BadRequest("New DueDate just can greater than or equal curent DueDate");
+            }
+            if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
 			{
 				return BadRequest("Can't create subtask in done project");
 			}
