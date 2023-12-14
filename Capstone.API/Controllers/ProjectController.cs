@@ -518,10 +518,11 @@ namespace Capstone.API.Controllers
 				return NotFound("Project not exist");
 			}
 
-
-
 			var result = await _projectService.UpdateProjectInfo(updateProjectNameInfo.ProjectId, updateProjectNameInfo);
-
+			if(result.StatusCode == 400)
+			{
+				return BadRequest(result.Message);
+			}
 			return Ok(result);
 		}
 

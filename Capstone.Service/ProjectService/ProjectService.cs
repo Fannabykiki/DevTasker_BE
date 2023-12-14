@@ -382,12 +382,28 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			var sprints = await _interationRepository.GetAllWithOdata(x=>x.BoardId == updateProjectNameInfo.ProjectId, null);
+			foreach (var sprint in sprints)
+			{
+				if(sprint.EndDate.Date > updateProjectNameInfo.EndDate.Date)
+				{
+					return new BaseResponse
+					{	
+						StatusCode = 400,
+						IsSucceed = false,
+						Message = "Can't update project's end date before sprint's end date"
+					};
+				}
+			}
+
 			project.ProjectName = updateProjectNameInfo.ProjectName;
 			project.Description = updateProjectNameInfo.Description;
 			project.EndDate = updateProjectNameInfo.EndDate;
+
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
+
 			return new BaseResponse { IsSucceed = true, Message = "Update Project Info successfully" };
 		}
 		catch (Exception)
