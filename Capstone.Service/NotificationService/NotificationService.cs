@@ -307,7 +307,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = title,
                 Description = id == task.ProjectMember.UserId? descriptionForAssign : description,
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 TargetUrl = TargetUrl,
                 IsRead = false,
                 RecerverId = id
@@ -394,7 +394,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = title,
                 Description = description,
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 TargetUrl = TargetUrl,
                 IsRead = false,
                 RecerverId = id
@@ -460,7 +460,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = title,
                 Description = description,
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 TargetUrl = TargetUrl,
                 IsRead = false,
                 RecerverId = id
