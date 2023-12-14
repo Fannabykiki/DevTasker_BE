@@ -100,7 +100,7 @@ namespace Capstone.API.Controllers
             }
             else
             {
-                await _notificationService.SendNotificationCommentTask(commentId, userId, CommentActionCconstant.Create);
+                await _notificationService.SendNotificationCommentTask(newComment.CommentId, userId, CommentActionCconstant.Reply);
             }
             return Ok(newComment);
         }
