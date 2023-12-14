@@ -53,7 +53,7 @@ namespace Capstone.API.Controllers
         [HttpGet("schemas/{schemaId:Guid}")]
         public async Task<IActionResult> GetSchemaById(Guid schemaId)
         {
-            var result = await _permissionSchemaService.GetPermissionSchemaById(schemaId);
+            var result = await _permissionSchemaService.GetPermissionSchemaById(schemaId, null);
             if(result == null)
             {
                 return BadRequest("Schema not existed!");
@@ -116,7 +116,7 @@ namespace Capstone.API.Controllers
 			var result = await _permissionSchemaService.GrantSchemaPermissionRoles(request.SchemaId, request, uId);
             if(result == true)
             {
-                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId, request.ProjectId);
                 return Ok(schemaDetails);
             }
             else
@@ -141,7 +141,7 @@ namespace Capstone.API.Controllers
 			var result = await _permissionSchemaService.RevokeSchemaPermissionRoles(request.SchemaId, request, uId);
             if(result == true)
             {
-                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId);
+                var schemaDetails = await _permissionSchemaService.GetPermissionSchemaById(request.SchemaId, request.ProjectId);
                 return Ok(schemaDetails);
             }
             else
