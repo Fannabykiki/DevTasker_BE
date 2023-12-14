@@ -188,20 +188,23 @@ namespace Capstone.Service.PermissionSchemaService
                     Schema.SchemaName = "Schema " + project.ProjectName;
                     Schema.Description = "Permission Schema cloned from schema \"" + schemaPermission.First().Schema.SchemaName + "\"";
                     Schema.IsDelete = false;
-                    foreach(var item in Schema.SchemaPermissions)
+
+                    _schemaRepository.UpdateAsync(Schema);
+                    _schemaRepository.SaveChanges();
+
+                    foreach (var item in Schema.SchemaPermissions)
                     {
                         await _permissionSchemaRepository.DeleteAsync(item);
+                        await _permissionSchemaRepository.SaveChanges();
                     }
-                    await _permissionSchemaRepository.SaveChanges();
 
                     foreach (var item in schemaPermission)
                     {
                         item.SchemaId = project.SchemasId;
                         await _permissionSchemaRepository.CreateAsync(item);
+                        await _permissionSchemaRepository.SaveChanges();
                     }
-                    await _permissionSchemaRepository.SaveChanges();
-                    await _projectRepository.UpdateAsync(project);
-                    await _projectRepository.SaveChanges();
+                    
                     schemaId = project.SchemasId;
                 }
                 
@@ -254,20 +257,24 @@ namespace Capstone.Service.PermissionSchemaService
                     Schema.SchemaName = "Schema " + project.ProjectName;
                     Schema.Description = "Permission Schema cloned from schema \"" + SchemaPermission.First().Schema.SchemaName + "\"";
                     Schema.IsDelete = false;
+                    _schemaRepository.UpdateAsync(Schema);
+                    _schemaRepository.SaveChanges();
+
                     foreach(var item in Schema.SchemaPermissions)
                     {
                         await _permissionSchemaRepository.DeleteAsync(item);
+                        await _permissionSchemaRepository.SaveChanges();
                     }
-                    await _permissionSchemaRepository.SaveChanges();
+                    
 
                     foreach (var item in SchemaPermission)
                     {
                         item.SchemaId = project.SchemasId;
                         await _permissionSchemaRepository.CreateAsync(item);
+                        await _permissionSchemaRepository.SaveChanges();
                     }
-                    await _permissionSchemaRepository.SaveChanges();
-                    await _projectRepository.UpdateAsync(project);
-                    await _projectRepository.SaveChanges();
+                    
+
                     schemaId = project.SchemasId;
                 }
 
@@ -307,6 +314,10 @@ namespace Capstone.Service.PermissionSchemaService
             using var transaction = _projectRepository.DatabaseTransaction();
             try
             {
+                if(SchemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                {
+                    return false;
+                }
                 var schema = await _schemaRepository.GetAsync(x => x.SchemaId == SchemaId, null);
                 schema.SchemaName = schema.SchemaName.Trim() + " (Deleted)";
                 schema.IsDelete = true;
