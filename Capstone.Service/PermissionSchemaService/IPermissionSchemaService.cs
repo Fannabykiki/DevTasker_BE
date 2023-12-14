@@ -17,7 +17,7 @@ namespace Capstone.Service.PermissionSchemaService
         Task<GetSchemaResponse> GetSchemaById(Guid SchemaId);
         Task<GetSchemaResponse> GetSchemaByName(string schemaName);
         Task<bool> RemoveSchemaAsync(Guid SchemaId);
-        Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId);
+        Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid SchemaId, Guid? projectId);
         Task<bool> CreateNewPermissionSchema(CreateNewSchemaRequest createNewSchemaRequest);
         Task<bool> UpdateSchema(Guid schemaId, UpdateSchemaRequest updateSchemaRequest);
         Task<bool> GrantSchemaPermissionRoles(Guid schemaId, GrantPermissionSchemaRequest grantPermissionSchemaRequest, Guid userId);
