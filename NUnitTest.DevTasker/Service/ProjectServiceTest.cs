@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
 using Capstone.Common.DTOs.Project;
-using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
+using Capstone.Service.Hubs;
 using Capstone.Service.ProjectService;
-using Capstone.Service.RoleService;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
@@ -36,7 +34,12 @@ namespace NUnitTest.DevTasker.Service
         private Mock<IUserRepository> _userRepository;
         private Mock<ITaskTypeRepository> _ticketTypeRepository;
         private Mock<IPriorityRepository> _priorityRepository;
-        private Mock <IInvitationRepository> _invitationRepository;
+        private Mock<IInvitationRepository> _invitationRepository;
+        private readonly PresenceTracker _presenceTracker;
+        private Mock <INotificationRepository> _notificationRepository;
+        private Mock<Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub>> _hubContext;
+
+
 
         [SetUp]
         public void Setup()
@@ -57,6 +60,8 @@ namespace NUnitTest.DevTasker.Service
             _ticketTypeRepository = new Mock<ITaskTypeRepository>();
             _priorityRepository = new Mock<IPriorityRepository>();
             _invitationRepository = new Mock<IInvitationRepository>();
+            _hubContext = new Mock<Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub>>();
+            _notificationRepository = new Mock<INotificationRepository>();
 
 
             _projectRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(_databaseTransactionMock.Object);
@@ -79,7 +84,10 @@ namespace NUnitTest.DevTasker.Service
                 _ticketTypeRepository.Object,
                  _priorityRepository.Object,
                 _ticketRepository.Object,
-                _invitationRepository.Object
+                _invitationRepository.Object,
+                _presenceTracker,
+                _hubContext.Object,
+                _notificationRepository.Object
             );
         }
 
@@ -204,7 +212,7 @@ namespace NUnitTest.DevTasker.Service
             var projectId = Guid.NewGuid();
             var updateProjectNameInfo = new UpdateProjectNameInfo
             {
-                ProjectName = "", 
+                ProjectName = "",
                 Description = "Updated Description"
             };
             // Act

@@ -9,7 +9,10 @@ using Capstone.Common.DTOs.User;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
+using Capstone.Service.Hubs;
+using Google.Apis.Drive.v3.Data;
 using MailKit.Security;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using MimeKit.Text;
@@ -36,7 +39,30 @@ public class ProjectService : IProjectService
 	private readonly ITaskRepository _ticketRepository;
 	private readonly IInvitationRepository _invitationRepository;
 
-	public ProjectService(CapstoneContext context, IProjectRepository projectRepository, IRoleRepository roleRepository, IMapper mapper, ISchemaRepository permissionSchemaRepository, IProjectMemberRepository projectMemberRepository, IBoardRepository boardRepository, IPermissionRepository permissionRepository, IInterationRepository interationRepository, IPermissionSchemaRepository permissionScemaRepo, IStatusRepository statusRepository, IBoardStatusRepository boardStatusRepository, IUserRepository userRepository, ITaskTypeRepository ticketTypeRepository, IPriorityRepository priorityRepository, ITaskRepository ticketRepository, IInvitationRepository invitationRepository)
+    private readonly PresenceTracker _presenceTracker;
+    private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly INotificationRepository _notificationRepository;
+    public ProjectService(CapstoneContext context, 
+		IProjectRepository projectRepository, 
+		IRoleRepository roleRepository, 
+		IMapper mapper, 
+		ISchemaRepository permissionSchemaRepository, 
+		IProjectMemberRepository projectMemberRepository, 
+		IBoardRepository boardRepository, 
+		IPermissionRepository permissionRepository, 
+		IInterationRepository interationRepository, 
+		IPermissionSchemaRepository permissionScemaRepo,
+		IStatusRepository statusRepository,
+		IBoardStatusRepository boardStatusRepository,
+		IUserRepository userRepository,
+		ITaskTypeRepository ticketTypeRepository,
+		IPriorityRepository priorityRepository, 
+		ITaskRepository ticketRepository, 
+		IInvitationRepository invitationRepository,
+        PresenceTracker presenceTracker,
+        IHubContext<NotificationHub> hubContext,
+        INotificationRepository notificationRepository
+        )
 	{
 		_context = context;
 		_projectRepository = projectRepository;
@@ -55,6 +81,9 @@ public class ProjectService : IProjectService
 		_priorityRepository = priorityRepository;
 		_ticketRepository = ticketRepository;
 		_invitationRepository = invitationRepository;
+		_presenceTracker = presenceTracker;
+		_hubContext = hubContext;
+		_notificationRepository = notificationRepository;
 	}
 
 	public async Task<CreateProjectRespone> CreateProject(CreateProjectRequest createProjectRequest, Guid userId)
@@ -506,6 +535,7 @@ public class ProjectService : IProjectService
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId, x=>x.ProjectMembers);
 			var member = await _projectMemberRepository.GetAsync(x => x.ProjectId == inviteUserRequest.ProjectId && x.UserId == userId, null);
+			var actionUser = await _userRepository.GetAsync(x => x.UserId == userId, null);
 			foreach (var user in inviteUserRequest.Email)
 			{
 				var newInvite = new Invitation
@@ -540,6 +570,9 @@ public class ProjectService : IProjectService
 					client.Send(email);
 					client.Disconnect(true);
 				}
+				var receiver = await _userRepository.GetAsync(x => x.Email == user, null);
+				if (receiver == null) continue;
+                await SendNotificationForInvitation(project.ProjectName, actionUser.UserName, receiver.UserId, verificationLink);
 			}
 		}
 		catch
@@ -549,8 +582,29 @@ public class ProjectService : IProjectService
 		}
 		return true;
 	}
+	public async System.Threading.Tasks.Task SendNotificationForInvitation(string projectName, string userName, Guid receiverId, string verificationLink)
+	{
+		var notification = new Notification
+		{
+			NotificationId = Guid.NewGuid(),
+			Title = "Invite to project",
+			Description = $"User <strong>{userName}</strong> invited you to project <strong>{projectName}</strong>",
+			CreateAt = DateTime.Now,
+			IsRead = false,
+			RecerverId = receiverId,
+			TargetUrl = verificationLink,
+		};
+		await _notificationRepository.CreateAsync(notification);
+		await _notificationRepository.SaveChanges();
 
-	public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
+        if (await _presenceTracker.IsOnlineUser(receiverId.ToString()))
+        {
+            await _hubContext.Clients.Group(receiverId.ToString()).SendAsync("EmitNotification");
+        }
+    }
+
+
+    public async Task<IEnumerable<PermissionViewModel>> GetPermissionByUserId(Guid projectId, Guid userId)
 	{
 		var newPermisisonViewModel = new List<PermissionViewModel>();
 		var role = await _projectMemberRepository.GetAsync(x => x.ProjectId == projectId && x.UserId == userId, x => x.Role)!;
@@ -853,47 +907,73 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
-            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
-            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
-            var Schema = new Schema
-            {
-                SchemaName = "Schema " + project.ProjectName,
-                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                IsDelete = false
-            };
-            var newSchema = await _schemaRepository.CreateAsync(Schema);
+            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, x => x.Schema);
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Schemas)!;
 
-            foreach (var item in schemaPermission)
-            {
-                item.SchemaId = newSchema.SchemaId;
-                await _permissionSchemaRepository.CreateAsync(item);
-            }
-            await _permissionSchemaRepository.SaveChanges();
-            await _schemaRepository.SaveChanges();
-
-			Guid shemaID = Guid.Empty;
-
-            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+            if (project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
-				shemaID = project.SchemasId;
-			}
-
-            project.SchemasId = newSchema.SchemaId;
-            await _projectRepository.UpdateAsync(project);
-            await _projectRepository.SaveChanges();
-
-			if(shemaID != Guid.Empty)
-			{
-                await _schemaRepository.DeleteSchemaById(shemaID);
+                var Schema = new Schema
+                {
+                    SchemaName = "Schema " + project.ProjectName,
+                    Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                    IsDelete = false
+                };
+                var newSchema = await _schemaRepository.CreateAsync(Schema);
+                foreach (var item in schemaPermission)
+                {
+                    item.SchemaId = newSchema.SchemaId;
+                    await _permissionSchemaRepository.CreateAsync(item);
+                }
+                await _permissionSchemaRepository.SaveChanges();
                 await _schemaRepository.SaveChanges();
+
+                project.SchemasId = newSchema.SchemaId;
+
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
+			}
+			else if(changePermissionSchemaRequest.SchemaId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+			{
+				project.Schemas.SchemaName = "Schema " + project.ProjectName;
+				project.Schemas.Description = "Permission Schema cloned from \"" + schemaPermission.First().Schema.SchemaName + "\"";
+                project.Schemas.IsDelete = false;
+				await _schemaRepository.UpdateAsync(project.Schemas);
+                await _schemaRepository.SaveChanges();
+
+
+                var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
+				foreach(var item in currentSchemaPermission)
+				{
+                    await _permissionSchemaRepository.DeleteAsync(item);
+				}
+				foreach(var item in schemaPermission)
+				{
+					item.SchemaId = project.SchemasId;
+					await _permissionSchemaRepository.CreateAsync(item);
+				}
+				await _permissionSchemaRepository.SaveChanges();
+			}
+			else
+			{
+                project.SchemasId = changePermissionSchemaRequest.SchemaId;
+
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
             }
             
+            
+
+            
+            
+
+            
+
 
             transaction.Commit();
 			return new BaseResponse
 			{
 				IsSucceed = true,
-				Message = "Change project's schema successfully"
+				Message = "Clone project's schema successfully"
 			};
         }
         catch (Exception)
