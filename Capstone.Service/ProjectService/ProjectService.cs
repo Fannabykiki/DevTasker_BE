@@ -742,7 +742,7 @@ public class ProjectService : IProjectService
 			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Users);
 			if(project.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"))
 			{
-				var invitation = await _invitationRepository.GetAsync(x => x.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") && x.InviteTo.Equals(project.Users.Email), null);
+				var invitation = await _invitationRepository.GetAsync(x => x.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") && x.InviteTo.Equals(project.Users.Email) && x.ProjectId == project.ProjectId, null);
 
 				invitation.StatusId = Guid.Parse("2707D89B-6040-474C-ABD0-1F2CBC8DAEAB");
 

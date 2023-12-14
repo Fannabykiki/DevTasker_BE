@@ -460,7 +460,7 @@ namespace Capstone.Service.TaskService
 			{
 				var selectedTicket = await _ticketRepository.GetAsync(x => x.TaskId == restoreTaskRequest.TaskId, x => x.Status)!;
 				var member = await _projectMemberRepository.GetAsync(x => x.MemberId == restoreTaskRequest.MemberId, x => x.Users);
-				var subTaskList = await _ticketRepository.GetAllWithOdata(x => x.TaskId == restoreTaskRequest.TaskId, null);
+				var subTaskList = await _ticketRepository.GetAllWithOdata(x => x.PrevId == restoreTaskRequest.TaskId, null);
 
 				selectedTicket.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 				selectedTicket.IsDelete = true;
@@ -473,6 +473,9 @@ namespace Capstone.Service.TaskService
 						subTask.DeleteAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
 						subTask.IsDelete = true;
 						subTask.ExprireTime = DateTime.Parse(DateTime.Now.AddDays(30).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"));
+
+						await _ticketRepository.UpdateAsync(subTask);
+						await _ticketRepository.SaveChanges();
 					}
 
 					var newHistorySubTask = new TaskHistory
@@ -488,9 +491,6 @@ namespace Capstone.Service.TaskService
 
 					await _taskHistoryRepository.CreateAsync(newHistorySubTask);
 					await _taskHistoryRepository.SaveChanges();
-
-					await _ticketRepository.UpdateAsync(subTask);
-					await _ticketRepository.SaveChanges();
 				}
 
 				var newHistory = new TaskHistory
