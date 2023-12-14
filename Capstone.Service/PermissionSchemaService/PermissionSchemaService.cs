@@ -62,8 +62,13 @@ namespace Capstone.Service.PermissionSchemaService
             return results;
         }
 
-        public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
+        public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId, Guid? projectId)
         {
+            if (projectId.HasValue)
+            {
+                var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+                schemaId = project.SchemasId;
+            }
             var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
             if (schemas == null) return null;
             
