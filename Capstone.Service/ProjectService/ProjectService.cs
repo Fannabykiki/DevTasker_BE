@@ -907,40 +907,67 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
-            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
-            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
-            var Schema = new Schema
-            {
-                SchemaName = "Schema " + project.ProjectName,
-                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                IsDelete = false
-            };
-            var newSchema = await _schemaRepository.CreateAsync(Schema);
+            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, x => x.Schema);
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Schemas)!;
+			var Schema = new Schema();
 
-            foreach (var item in schemaPermission)
-            {
-                item.SchemaId = newSchema.SchemaId;
-                await _permissionSchemaRepository.CreateAsync(item);
-            }
-            await _permissionSchemaRepository.SaveChanges();
-            await _schemaRepository.SaveChanges();
-
-            Guid shemaID = Guid.Empty;
-
-            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
-            {
-                shemaID = project.SchemasId;
-            }
-
-            project.SchemasId = newSchema.SchemaId;
-            await _projectRepository.UpdateAsync(project);
-            await _projectRepository.SaveChanges();
-
-            if (shemaID != Guid.Empty)
-            {
-                await _schemaRepository.DeleteSchemaById(shemaID);
+            if (project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+			{
+                Schema = new Schema
+                {
+                    SchemaName = "Schema " + project.ProjectName,
+                    Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                    IsDelete = false
+                };
+                var newSchema = await _schemaRepository.CreateAsync(Schema);
+                foreach (var item in schemaPermission)
+                {
+                    item.SchemaId = newSchema.SchemaId;
+                    await _permissionSchemaRepository.CreateAsync(item);
+                }
+                await _permissionSchemaRepository.SaveChanges();
                 await _schemaRepository.SaveChanges();
+
+                project.SchemasId = newSchema.SchemaId;
+
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
+			}
+			else if(changePermissionSchemaRequest.SchemaId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+			{
+				project.Schemas.SchemaName = "Schema " + project.ProjectName;
+				project.Schemas.Description = "Permission Schema cloned from project\" " + schemaPermission.First().Schema.SchemaName + "\"";
+                project.Schemas.IsDelete = false;
+				await _schemaRepository.UpdateAsync(project.Schemas);
+                await _schemaRepository.SaveChanges();
+
+
+                var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
+				foreach(var item in currentSchemaPermission)
+				{
+                    await _permissionSchemaRepository.DeleteAsync(item);
+				}
+				foreach(var item in schemaPermission)
+				{
+					item.SchemaId = project.SchemasId;
+					await _permissionSchemaRepository.CreateAsync(item);
+				}
+				await _permissionSchemaRepository.SaveChanges();
+			}
+			else
+			{
+                project.SchemasId = changePermissionSchemaRequest.SchemaId;
+
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
             }
+            
+            
+
+            
+            
+
+            
 
 
             transaction.Commit();
