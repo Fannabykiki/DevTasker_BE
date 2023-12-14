@@ -62,13 +62,35 @@ namespace Capstone.Service.NotificationService
         }
         public async Task<List<NotificationViewModel>> GetLatestNotifications(Guid userId, int page = 10)
         {
-            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).Take(page).ToListAsync();
-            return _mapper.Map<List<NotificationViewModel>>(results);
+            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).Take(page)
+                .Select(x=>new NotificationViewModel
+                {
+                    NotificationId = x.NotificationId,
+                    Title = x.Title,
+                    Description = x.Description,
+                    CreateAt = x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    IsRead = false,
+                    RecerverId = x.RecerverId,
+                    TargetUrl = x.TargetUrl
+                })
+                .ToListAsync();
+            return results;
         }
         public async Task<List<NotificationViewModel>> GetAllNotificationsByUser(Guid userId)
         {
-            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt).ToListAsync();
-            return _mapper.Map<List<NotificationViewModel>>(results);
+            var results = await _notificationRepository.GetQuery().Where(x => x.RecerverId == userId).OrderByDescending(y => y.CreateAt)
+                .Select(x => new NotificationViewModel
+                {
+                    NotificationId = x.NotificationId,
+                    Title = x.Title,
+                    Description = x.Description,
+                    CreateAt = x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
+                    IsRead = false,
+                    RecerverId = x.RecerverId,
+                    TargetUrl = x.TargetUrl
+                })
+                .ToListAsync();
+            return results;
         }
         public async Task<bool> MarkReadNotification(Guid userId, ReadNotificationRequest request)
         {
@@ -104,7 +126,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = "Project status has been changed",
                 Description = $"User <strong>{currentUser.UserName}</strong> has change the status of project <strong>{project.ProjectName}</strong> to <strong>{project.Status.Title}</strong>",
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 IsRead = false,
                 RecerverId = x,
                 TargetUrl = $"https://devtasker.azurewebsites.net/project/{projectId}"
@@ -176,7 +198,7 @@ namespace Capstone.Service.NotificationService
                 if (task.IsDelete.HasValue && task.IsDelete.Value)
                 {
                     title = "Task Deleted";
-                    description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Now}</strong>";
+                    description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"))}</strong>";
                 }
                 else
                 {
@@ -242,7 +264,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = title,
                 Description = description,
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 TargetUrl = TargetUrl,
                 IsRead = false,
                 RecerverId = id
@@ -441,7 +463,7 @@ namespace Capstone.Service.NotificationService
 
             var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
             var title = "Task Deleted";
-            var description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Now}</strong>"; 
+            var description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"))}</strong>"; 
             var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/trash?id={task.TaskId}";
 
             
@@ -524,7 +546,7 @@ namespace Capstone.Service.NotificationService
                         NotificationId = Guid.NewGuid(),
                         Title = "New comment in task",
                         Description = $"<strong>{cmtUser.UserName}</strong> commented on task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
-                        CreateAt = DateTime.Now,
+                        CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                         IsRead = false,
                         RecerverId = x.UserId,
                         TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
@@ -537,7 +559,7 @@ namespace Capstone.Service.NotificationService
                         NotificationId = Guid.NewGuid(),
                         Title = "Comment edited in task",
                         Description = $"<strong>{cmtUser.UserName}</strong> has edited his/her comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
-                        CreateAt = DateTime.Now,
+                        CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                         IsRead = false,
                         RecerverId = x.UserId,
                         TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
@@ -550,7 +572,7 @@ namespace Capstone.Service.NotificationService
                         NotificationId = Guid.NewGuid(),
                         Title = "Comment status change",
                         Description = x.MemberId == comment.CreateBy? $"Your comment in task <strong>{comment.Task.Title}</strong> has been deleted by <strong>{cmtUser.UserName}</strong>" : $"Comment of <strong>{x.Name}</strong> been deleted in task <strong>{comment.Task.Title}</strong> by <strong>{cmtUser.UserName}</strong>",
-                        CreateAt = DateTime.Now,
+                        CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                         IsRead = false,
                         RecerverId = x.UserId,
                         TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
@@ -563,7 +585,7 @@ namespace Capstone.Service.NotificationService
                         NotificationId = Guid.NewGuid(),
                         Title = "New comment in task",
                         Description = $"<strong>{cmtUser.UserName}</strong> replied to a comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
-                        CreateAt = DateTime.Now,
+                        CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                         IsRead = false,
                         RecerverId = x.UserId,
                         TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
@@ -580,7 +602,7 @@ namespace Capstone.Service.NotificationService
                                 NotificationId = Guid.NewGuid(),
                                 Title = "New comment in task",
                                 Description = $"<strong>{cmtUser.UserName}</strong> replied to your comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
-                                CreateAt = DateTime.Now,
+                                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                                 IsRead = false,
                                 RecerverId =replyComment.ProjectMember.UserId,
                                 TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
@@ -626,7 +648,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = "Removed from project",
                 Description = $"You have been removed from project <strong>{project.ProjectName}</strong> by user <strong>{currentUser.UserName}</strong>",
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 TargetUrl = "",
                 IsRead = false,
                 RecerverId = removedMemberUserId
@@ -654,7 +676,7 @@ namespace Capstone.Service.NotificationService
                 NotificationId = Guid.NewGuid(),
                 Title = "Member exit project",
                 Description = $"User <strong>{currentUser.UserName}</strong> exited project <strong>{project.ProjectName}</strong>",
-                CreateAt = DateTime.Now,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                 IsRead = false,
                 RecerverId = x,
                 TargetUrl = ""
@@ -689,8 +711,8 @@ namespace Capstone.Service.NotificationService
                 .ThenInclude(it => it.Board)
                 .ThenInclude(b => b.Project)
                 .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
-                .Where(x => (x.DueDate <= DateTime.Now.AddDays(3) && x.DueDate >= DateTime.Now.AddDays(2)
-                || x.DueDate <= DateTime.Now.AddDays(1)) && 
+                .Where(x => (x.DueDate <= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(3) && x.DueDate >= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(2)
+                || x.DueDate <= DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(1)) && 
                 !x.IsDelete.Value && x.Status.Title != CapstoneNameConstant.TaskStatusNameConstant.Done)
                 .ToListAsync();
 
@@ -698,10 +720,10 @@ namespace Capstone.Service.NotificationService
                 .Select(x => new
                 {
                     DueDate = x.DueDate,
-                    Now = DateTime.Now,
-                    NowAdd3Day = DateTime.Now.AddDays(3),
-                    NowAdd2Day = DateTime.Now.AddDays(2),
-                    NowAdd1Day = DateTime.Now.AddDays(1)
+                    Now = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                    NowAdd3Day = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(3),
+                    NowAdd2Day = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(2),
+                    NowAdd1Day = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")).AddDays(1)
                 }).ToListAsync();
             if (taskList.Count ==0) return;
             var notificationEmailList = new List<NotificationEmailRequest>();
@@ -722,7 +744,7 @@ namespace Capstone.Service.NotificationService
                             NotificationId = Guid.NewGuid(),
                             Title = subject,
                             Description = message,
-                            CreateAt = DateTime.Now,
+                            CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
                             IsRead = false,
                             RecerverId = dt.Users.UserId,
                             TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}"
