@@ -955,10 +955,22 @@ public class ProjectService : IProjectService
 			}
 			else
 			{
+				var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                foreach (var item in currentSchema.SchemaPermissions)
+                {
+                    await _permissionSchemaRepository.DeleteAsync(item);
+                }
+
+                await _permissionSchemaRepository.SaveChanges();
+                
                 project.SchemasId = changePermissionSchemaRequest.SchemaId;
 
                 await _projectRepository.UpdateAsync(project);
                 await _projectRepository.SaveChanges();
+
+                await _schemaRepository.DeleteAsync(currentSchema);
+                await _schemaRepository.SaveChanges();
             }
             
             
