@@ -175,7 +175,7 @@ namespace Capstone.Service.NotificationService
                 if (task.IsDelete.HasValue && task.IsDelete.Value)
                 {
                     title = "Task Deleted";
-                    description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{latestTaskhistory.ChangeAt}</strong>";
+                    description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Now}</strong>";
                 }
                 else
                 {
@@ -253,8 +253,6 @@ namespace Capstone.Service.NotificationService
 
             await _notificationRepository.SaveChanges();
 
-            await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
-
             foreach (var user in listReceiver)
             {
                 if (!await _presenceTracker.IsOnlineUser(user.ToString()))
@@ -267,6 +265,68 @@ namespace Capstone.Service.NotificationService
             await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
             
             
+        }
+        public async System.Threading.Tasks.Task SendNotificationDeleteTaskNotification(Guid taskId, Guid userId)
+        {
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(tc => tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
+            if (task == null) return;
+            var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId != userId).Select(y => y.UserId);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
+            var listReceiver = lstProjectAdmin;
+
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            var title = "Task Deleted";
+            var description = $"User <strong>{userAccount?.UserName}</strong> has deleted task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{DateTime.Now}</strong>"; 
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/trash?id={task.TaskId}";
+
+            
+            if (task.ProjectMember.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            }
+            if (createdBy.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
+            }
+            
+            
+            var listNotification = listReceiver.Select(id => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = title,
+                Description = description,
+                CreateAt = DateTime.Now,
+                TargetUrl = TargetUrl,
+                IsRead = false,
+                RecerverId = id
+            });
+            foreach (var notif in listNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+
+            await _notificationRepository.SaveChanges();
+
+            foreach (var user in listReceiver)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //send mail for admins
+            await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
         }
         public async System.Threading.Tasks.Task SendNotificationCommentTask(Guid commentId, Guid userId, string action)
         {
@@ -362,6 +422,67 @@ namespace Capstone.Service.NotificationService
             var lstProjectAdmin = lstReceived.Where(x => x.Role == RoleNameConstant.ProductOwner || x.Role == RoleNameConstant.Supervisor).Select(d => d.UserId);
             await SendMailForNotification(lstProjectAdmin.ToList(), lstNotification.ToList());
 
+        }
+        public async System.Threading.Tasks.Task RemoveMemberNotification(Guid userId, Guid projectId, Guid removedMemberUserId)
+        {
+            var currentUser = await _userRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == userId);
+            var project = await _projectRepository.GetQuery().FirstOrDefaultAsync(x => x.ProjectId == projectId);
+            if (project == null) return;
+
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Removed from project",
+                Description = $"You have been removed from project <strong>{project.ProjectName}</strong> by user <strong>{currentUser.UserName}</strong>",
+                CreateAt = DateTime.Now,
+                TargetUrl = "",
+                IsRead = false,
+                RecerverId = removedMemberUserId
+            };
+            await _notificationRepository.CreateAsync(notification);
+            await _notificationRepository.SaveChanges();
+            if (await _presenceTracker.IsOnlineUser(removedMemberUserId.ToString()))
+            {
+                await _hubContext.Clients.Group(removedMemberUserId.ToString()).SendAsync("EmitNotification");
+            }
+            await SendMailForNotification(new List<Guid>() { removedMemberUserId}, new List<Notification>() { notification });
+
+        }
+        public async System.Threading.Tasks.Task ExitProjectNotification(Guid userId, Guid projectId)
+        {
+            var project = await _projectRepository.GetQuery().Include("Status").FirstOrDefaultAsync(x => x.ProjectId == projectId);
+            var projectMembers = await _projectMemberRepository.GetQuery().Include("Role").Where(x => x.ProjectId == projectId).ToListAsync();
+            if (project == null) return;
+            var currentUser = await _userRepository.GetAsync(x => x.UserId == userId, null);
+            if (currentUser == null) return;
+
+            var lstReceived = projectMembers.Where(x => x.UserId != userId && x.Role.RoleName == RoleNameConstant.ProductOwner).Select(x => x.UserId);
+            var lstNotification = lstReceived.Select(x => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Member exit project",
+                Description = $"User <strong>{currentUser.UserName}</strong> exited project <strong>{project.ProjectName}</strong>",
+                CreateAt = DateTime.Now,
+                IsRead = false,
+                RecerverId = x,
+                TargetUrl = ""
+            }).ToList();
+            foreach (var notif in lstNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+            await _notificationRepository.SaveChanges();
+            //Send Notif
+            foreach (var user in lstReceived)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //Send Mail
+            await SendMailForNotification(lstReceived.ToList(), lstNotification.ToList());
         }
         public async System.Threading.Tasks.Task SendNotificationTaskDeadline()
         {

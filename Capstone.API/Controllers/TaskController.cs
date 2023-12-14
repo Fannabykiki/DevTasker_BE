@@ -433,7 +433,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+                await _notificationService.SendNotificationDeleteTaskNotification(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
             }
             
             return Ok(result);
@@ -463,7 +463,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteEachTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-				await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+				await _notificationService.SendNotificationDeleteTaskNotification(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
 			}
 
 			return Ok(result);

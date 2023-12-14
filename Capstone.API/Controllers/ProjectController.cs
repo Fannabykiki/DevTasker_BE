@@ -88,7 +88,11 @@ namespace Capstone.API.Controllers
 				return BadRequest("Can't remove System Admin");
 			}
 			var result = await _projectService.RemoveProjectMember(memberId);
+			if (result.IsSucceed)
+			{
 
+				await _notificationService.RemoveMemberNotification(this.GetCurrentLoginUserId(), projectId.Value, member.UserId);
+			}
 			return Ok(result);
 		}
 
@@ -97,7 +101,11 @@ namespace Capstone.API.Controllers
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _projectService.ExitProject(userId, exitProjectRequest.ProjectId);
+			if (result.IsSucceed)
+			{
 
+				await _notificationService.ExitProjectNotification(userId, exitProjectRequest.ProjectId);
+			}
 			return Ok(result);
 		}
 
