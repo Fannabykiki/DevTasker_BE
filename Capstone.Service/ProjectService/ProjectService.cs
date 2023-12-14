@@ -914,18 +914,24 @@ public class ProjectService : IProjectService
             Schema.SchemaName = "Schema " + project.ProjectName;
             Schema.Description = "Permission Schema cloned from schema \"" + schemaPermission.First().Schema.SchemaName + "\"";
             Schema.IsDelete = false;
+
+            _schemaRepository.UpdateAsync(Schema);
+            _schemaRepository.SaveChanges();
+
             foreach (var item in Schema.SchemaPermissions)
             {
                 await _permissionSchemaRepository.DeleteAsync(item);
+                await _permissionSchemaRepository.SaveChanges();
             }
-            await _permissionSchemaRepository.SaveChanges();
+            
 
             foreach (var item in schemaPermission)
             {
                 item.SchemaId = project.SchemasId;
                 await _permissionSchemaRepository.CreateAsync(item);
+                await _permissionSchemaRepository.SaveChanges();
             }
-            await _permissionSchemaRepository.SaveChanges();
+            
 
             transaction.Commit();
 			return new BaseResponse
