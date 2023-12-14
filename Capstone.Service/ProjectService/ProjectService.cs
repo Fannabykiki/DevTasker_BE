@@ -935,7 +935,7 @@ public class ProjectService : IProjectService
 			else if(changePermissionSchemaRequest.SchemaId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
 				project.Schemas.SchemaName = "Schema " + project.ProjectName;
-				project.Schemas.Description = "Permission Schema cloned from project\" " + schemaPermission.First().Schema.SchemaName + "\"";
+				project.Schemas.Description = "Permission Schema cloned from \"" + schemaPermission.First().Schema.SchemaName + "\"";
                 project.Schemas.IsDelete = false;
 				await _schemaRepository.UpdateAsync(project.Schemas);
                 await _schemaRepository.SaveChanges();
