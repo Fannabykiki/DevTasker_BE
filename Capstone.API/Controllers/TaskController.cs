@@ -276,22 +276,6 @@ namespace Capstone.API.Controllers
 				return NotFound("Task not found");
 			}
                 var projectStatus = await _projectService.GetProjectByProjectId(taskDetail.ProjectId);
-   //         if (updateTicketRequest.StartDate < projectStatus.StartDate)
-   //         {
-   //             return BadRequest("New StartDate just can greater than or equal curent Project StartDate");
-   //         }
-			//if (updateTicketRequest.DueDate > projectStatus.EndDate)
-   //         {
-   //             return BadRequest("New DueDate just can smaller than or equal curent Project EndDate");
-   //         }
-			//if (updateTicketRequest.StartDate > DateTime.Parse(taskDetail.StartDate))
-   //         {
-   //             return BadRequest("New StartDate just can smaller than or equal curent StartDate");
-   //         }
-			//if (updateTicketRequest.DueDate < DateTime.Parse(taskDetail.DueDate))
-   //         {
-   //             return BadRequest("New DueDate just can greater than or equal curent DueDate");
-   //         }
             if (projectStatus.StatusId == Guid.Parse("855C5F2C-8337-4B97-ACAE-41D12F31805C"))
 			{
 				return BadRequest("Can't create subtask in done project");
@@ -305,7 +289,15 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't assign to unavailable member");
 			}
-		
+			var task = await _taskService.GetTaskDetail(updateTicketRequest.TaskId);
+			if (updateTicketRequest.StartDate.Date < DateTime.Parse(task.StartDate).Date)
+			{
+				return BadRequest("Can't update new task with start date before task's start date. Please update and try again");
+			}
+			if (updateTicketRequest.DueDate.Date > DateTime.Parse(task.DueDate).Date)
+			{
+				return BadRequest("Can't update new task with end date after task's end date. Please update and try again");
+			}
 			var interation = await _interationService.GetIterationsById(updateTicketRequest.InterationId);
 			if (updateTicketRequest.StartDate.Date < interation.StartDate.Date)
 			{
@@ -313,7 +305,7 @@ namespace Capstone.API.Controllers
 			}
 			if (updateTicketRequest.DueDate.Date > interation.EndDate.Date)
 			{
-				return BadRequest("Cant create new task with end date after sprint's end date. Please update and try again");
+				return BadRequest("Can't create new task with end date after sprint's end date. Please update and try again");
 			}
 			var userId = this.GetCurrentLoginUserId();	
 			if (userId == Guid.Empty)
