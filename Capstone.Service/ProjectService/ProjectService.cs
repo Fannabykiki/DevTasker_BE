@@ -909,11 +909,10 @@ public class ProjectService : IProjectService
         {
             var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, x => x.Schema);
             var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Schemas)!;
-			var Schema = new Schema();
 
             if (project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
-                Schema = new Schema
+                var Schema = new Schema
                 {
                     SchemaName = "Schema " + project.ProjectName,
                     Description = "Permission Schema for project\" " + project.ProjectName + "\"",
