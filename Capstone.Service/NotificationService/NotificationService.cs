@@ -3,6 +3,7 @@ using AutoMapper.Execution;
 using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Notification;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Task;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.Hubs;
@@ -266,7 +267,161 @@ namespace Capstone.Service.NotificationService
             
             
         }
-        public async System.Threading.Tasks.Task SendNotificationDeleteTaskNotification(Guid taskId, Guid userId)
+        public async System.Threading.Tasks.Task SendNotificationCreateTask(Guid taskId, Guid userId)
+        {
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(tc => tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
+            if (task == null) return;
+            var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId != userId).Select(y => y.UserId);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
+            var listReceiver = lstProjectAdmin;
+
+            var title = "";
+            var description = "";
+            var testLatest = task.TaskHistories.OrderByDescending(x => x.ChangeAt).ToList();
+            var latestTaskhistory = task.TaskHistories.OrderByDescending(x => x.ChangeAt).FirstOrDefault();
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
+
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            if (task.ProjectMember.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            }
+            title = "New Task Created";
+            description = $"User <strong>{userAccount?.UserName}</strong> created task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong>";
+            var descriptionForAssign = $"User <strong>{userAccount?.UserName}</strong> assigned task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> to you</strong>";
+            
+
+
+            var listNotification = listReceiver.Select(id => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = title,
+                Description = id == task.ProjectMember.UserId? descriptionForAssign : description,
+                CreateAt = DateTime.Now,
+                TargetUrl = TargetUrl,
+                IsRead = false,
+                RecerverId = id
+            });
+            foreach (var notif in listNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+
+            await _notificationRepository.SaveChanges();
+
+            foreach (var user in listReceiver)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //send mail for admins
+            await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
+        }
+        public async System.Threading.Tasks.Task SendNotificationUpdateTask(Guid taskId, Guid userId, TaskDetailViewModel oldTask)
+        {
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(tc => tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
+            if (task == null) return;
+            var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId != userId).Select(y => y.UserId);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
+            var listReceiver = lstProjectAdmin;
+
+            var title = "";
+            var description = "";
+            var testLatest = task.TaskHistories.OrderByDescending(x => x.ChangeAt).ToList();
+            var latestTaskhistory = task.TaskHistories.OrderByDescending(x => x.ChangeAt).FirstOrDefault();
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
+
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            if (task.ProjectMember.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            }
+            if (createdBy.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(createdBy.UserId).Distinct();
+            }
+            title = "Task Updated";
+            var previousStatus = await _boardStatusRepository.GetQuery().FirstOrDefaultAsync(x => x.BoardStatusId == latestTaskhistory.PreviousStatusId);
+            if (previousStatus != null)
+            {
+                if (task.StatusId == previousStatus.BoardStatusId)
+                {
+                    description = $"User <strong>{userAccount?.UserName}</strong> has updated task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> at <strong>{task.CreateTime}</strong>";
+                }
+                else
+                {
+                    description = $"User <strong>{userAccount?.UserName}</strong> has changed status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> from <strong>{previousStatus.Title}</strong> to <strong>{task.Status.Title}</strong>";
+                }
+
+            }
+            else
+            {
+                description = $"User <strong>{userAccount?.UserName}</strong> has change status of task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> to <strong>{task.Title}</strong> ";
+            }
+            
+
+            bool isSendEmail = false;
+            if((task.Status.Title == CapstoneNameConstant.TaskStatusNameConstant.ToDo||task.Status.Title == CapstoneNameConstant.TaskStatusNameConstant.Done) 
+                && task.StatusId == previousStatus.BoardStatusId)
+            {
+                isSendEmail = true ;
+            } 
+            var listNotification = listReceiver.Select(id => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = title,
+                Description = description,
+                CreateAt = DateTime.Now,
+                TargetUrl = TargetUrl,
+                IsRead = false,
+                RecerverId = id
+            });
+            foreach (var notif in listNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+
+            await _notificationRepository.SaveChanges();
+
+            foreach (var user in listReceiver)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //send mail for admins
+            if (isSendEmail)
+            {
+                await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
+            }
+            
+        }
+        public async System.Threading.Tasks.Task SendNotificationDeleteTask(Guid taskId, Guid userId)
         {
             var task = await _taskRepository.GetQuery()
                 .Include(t => t.ProjectMember)
@@ -394,12 +549,49 @@ namespace Capstone.Service.NotificationService
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Comment status change",
-                        Description = x.MemberId == comment.CreateBy? $"Your commentin task <strong>{comment.Task.Title}</strong> has been deleted by <strong>{cmtUser.UserName}</strong>" : $"Comment of <strong>{x.Name}</strong> been deleted in task <strong>{comment.Task.Title}</strong> by <strong>{cmtUser.UserName}</strong>",
+                        Description = x.MemberId == comment.CreateBy? $"Your comment in task <strong>{comment.Task.Title}</strong> has been deleted by <strong>{cmtUser.UserName}</strong>" : $"Comment of <strong>{x.Name}</strong> been deleted in task <strong>{comment.Task.Title}</strong> by <strong>{cmtUser.UserName}</strong>",
                         CreateAt = DateTime.Now,
                         IsRead = false,
                         RecerverId = x.UserId,
                         TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
                     }).ToList();
+                    break;
+                case CommentActionCconstant.Reply:
+                    
+                    lstNotification = lstReceived.Select(x => new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "New comment in task",
+                        Description = $"<strong>{cmtUser.UserName}</strong> replied to a comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
+                        CreateAt = DateTime.Now,
+                        IsRead = false,
+                        RecerverId = x.UserId,
+                        TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
+                    }).ToList();
+                    if (comment.ReplyTo.HasValue)
+                    {
+                        var replyComment = await _taskCommentRepository.GetQuery().Include(x => x.ProjectMember).FirstOrDefaultAsync(cm => cm.CommentId == comment.ReplyTo);
+                        var replyNotification = lstNotification.FirstOrDefault(x => x.RecerverId == replyComment.ProjectMember.UserId);
+
+                        if(replyNotification == null)
+                        {
+                            lstNotification.Add(new Notification
+                            {
+                                NotificationId = Guid.NewGuid(),
+                                Title = "New comment in task",
+                                Description = $"<strong>{cmtUser.UserName}</strong> replied to your comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>",
+                                CreateAt = DateTime.Now,
+                                IsRead = false,
+                                RecerverId =replyComment.ProjectMember.UserId,
+                                TargetUrl = $"https://devtasker.azurewebsites.net/project/{comment.Task.Interation.BoardId}/tasks?id={comment.TaskId}"
+                            });
+                        }
+                        else
+                        {
+                            replyNotification.Description = $"<strong>{cmtUser.UserName}</strong> replied to your comment in task <strong>{comment.Task.Title}</strong> of project <strong>{comment.Task.Interation.Board.Project.ProjectName}</strong>";
+                        }
+
+                    }
                     break;
 
             }
