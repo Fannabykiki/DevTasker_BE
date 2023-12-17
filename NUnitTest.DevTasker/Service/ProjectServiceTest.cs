@@ -185,7 +185,44 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.IsSucceed);
             Console.WriteLine("Update Succes");
         }
-
+        [Test]
+        public async Task TestUpdateProjectInfo_SuccessNoDes()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var updateProjectNameInfo = new UpdateProjectNameInfo
+            {
+                ProjectName = "Updated Project Name",
+                Description = ""
+            };
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ReturnsAsync(new Project { ProjectId = projectId });
+            _databaseTransactionMock.Setup(transaction => transaction.Commit());
+            // Act
+            var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
+            // Assert
+            Assert.IsTrue(result.IsSucceed);
+            Console.WriteLine("Update Succes");
+        }
+        [Test]
+        public async Task TestUpdateProjectInfo_SuccessWithEnddateinthefuture()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var updateProjectNameInfo = new UpdateProjectNameInfo
+            {
+                ProjectName = "Updated Project Name",
+                Description = "Updated Description"
+            };
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ReturnsAsync(new Project { ProjectId = projectId });
+            _databaseTransactionMock.Setup(transaction => transaction.Commit());
+            // Act
+            var result = await _projectService.UpdateProjectInfo(projectId, updateProjectNameInfo);
+            // Assert
+            Assert.IsTrue(result.IsSucceed);
+            Console.WriteLine("Update Succes");
+        }
         [Test]
         public async Task TestUpdateProjectInfo_Failure()
         {
@@ -204,7 +241,6 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsFalse(result.IsSucceed);
             Console.WriteLine("Update Fail");
         }
-
         [Test]
         public async Task UpdateProjectInfo_Fail_WithEmptyProjectName()
         {
@@ -222,7 +258,6 @@ namespace NUnitTest.DevTasker.Service
         }
 
         // Delete Project 
-
         [Test]
         public async Task TestDeleteProject_Success()
         {

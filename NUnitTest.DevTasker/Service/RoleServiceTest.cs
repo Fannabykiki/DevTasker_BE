@@ -82,7 +82,51 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsNotNull(result);
         }
+        [Test]
+        public async Task CreateProjectRole_SuccessEmptyDes()
+        {
+            // Arrange
+            var createRoleRequest = new CreateNewRoleRequest
+            {
+                RoleName = "Test Role",
+                Description = ""
+            };
 
+            var newRole = new Role
+            {
+                RoleId = Guid.NewGuid(),
+                RoleName = createRoleRequest.RoleName,
+                Description = createRoleRequest.Description
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            _mapper.Setup(m => m.Map<GetRoleResponse>(It.IsAny<Role>()))
+                .Returns((Role role) => new GetRoleResponse
+                {
+                    RoleId = role.RoleId,
+                    RoleName = role.RoleName,
+                    Description = role.Description
+                });
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            //Act
+            var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
+            // Assert
+            Assert.IsNotNull(result);
+        }
         [Test]
         public async Task CreateProjectRole_Failure()
         {
@@ -115,7 +159,102 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsNull(result);
 
         }
+        [Test]
+        public async Task CreateProjectRole_FailurewithTitleNameExist()
+        {
+            // Arrange
+            var createRoleRequest = new CreateNewRoleRequest
+            {
+                RoleName = "Test Role",
+                Description = "Test Role Description"
+            };
 
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            // Act
+            var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
+
+            // Assert
+            Assert.IsNull(result);
+
+        }
+        [Test]
+        public async Task CreateProjectRole_FailureEmtyRoleName()
+        {
+            // Arrange
+            var createRoleRequest = new CreateNewRoleRequest
+            {
+                RoleName = "",
+                Description = "Test Role Description"
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            // Act
+            var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
+
+            // Assert
+            Assert.IsNull(result);
+
+        }
+        [Test]
+        public async Task CreateProjectRole_FailureDuplicateRole()
+        {
+            // Arrange
+            var createRoleRequest = new CreateNewRoleRequest
+            {
+                RoleName = "uplicate",
+                Description = "Test Role Description"
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            // Act
+            var result = await roleService.CreateProjectRole(createRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("CreateProjectRole Success");
+            }
+            else
+            {
+                Console.WriteLine("CreateProjectRole Fail");
+            }
+
+            // Assert
+            Assert.IsNull(result);
+
+        }
         [Test]
         public async Task UpdateSystemRole_Success()
         {
@@ -153,7 +292,43 @@ namespace NUnitTest.DevTasker.Service
            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
             Assert.IsNull(result, "UpdateSystemRole should succeed and return a non-null result");
         }
+        [Test]
+        public async Task UpdateSystemRole_SuccessEmtyDes()
+        {
+            // Arrange
+            var roleId = Guid.NewGuid();
+            var updateRoleRequest = new UpdateRoleRequest
+            {
+                RoleName = "Updated Role Name",
+                Description = ""
+            };
 
+            var existingRole = new Role
+            {
+                RoleId = roleId,
+                RoleName = "Original Role Name",
+                Description = "Original Role Description"
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            _mapper.Setup(m => m.Map<GetRoleResponse>(It.IsAny<Role>()))
+               .Returns((Role role) => new GetRoleResponse
+               {
+                   RoleId = role.RoleId,
+                   RoleName = role.RoleName,
+                   Description = role.Description
+               });
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            //Act
+            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
+            Assert.IsNull(result, "UpdateSystemRole should succeed and return a non-null result");
+        }
 
         [Test]
         public async Task UpdateSystemRole_Failure()
@@ -163,6 +338,68 @@ namespace NUnitTest.DevTasker.Service
             var updateRoleRequest = new UpdateRoleRequest
             {
                 RoleName = "Updated Role Name",
+                Description = "Updated Role Description"
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            // Act
+            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("UpdateSystemRole Success");
+            }
+            else
+            {
+                Console.WriteLine("UpdateSystemRole Fail");
+            }
+            // Assert
+            Assert.IsNull(result);
+            databaseTransaction.Verify(t => t.RollBack(), Times.Once);
+        }
+        [Test]
+        public async Task UpdateSystemRole_Fail()
+        {
+            // Arrange
+            var roleId = Guid.NewGuid();
+            var updateRoleRequest = new UpdateRoleRequest
+            {
+                RoleName = "",
+                Description = "Updated Role Description"
+            };
+
+            var databaseTransaction = new Mock<IDatabaseTransaction>();
+            _roleRepository.Setup(repo => repo.DatabaseTransaction())
+                .Returns(databaseTransaction.Object);
+
+            var roleService = new RoleService(_roleRepository.Object, _mapper.Object, _projectRepository.Object, _permissionSchemaRepository.Object);
+
+            // Act
+            var result = await roleService.UpdateSystemRole(roleId, updateRoleRequest);
+            if (result != null)
+            {
+                Console.WriteLine("UpdateSystemRole Success");
+            }
+            else
+            {
+                Console.WriteLine("UpdateSystemRole Fail");
+            }
+            // Assert
+            Assert.IsNull(result);
+            databaseTransaction.Verify(t => t.RollBack(), Times.Once);
+        }
+        [Test]
+        public async Task UpdateSystemRole_FailWithTitleExíst()
+        {
+            // Arrange
+            var roleId = Guid.NewGuid();
+            var updateRoleRequest = new UpdateRoleRequest
+            {
+                RoleName = "",
                 Description = "Updated Role Description"
             };
 

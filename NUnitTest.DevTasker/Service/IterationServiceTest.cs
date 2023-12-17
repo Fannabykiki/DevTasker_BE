@@ -172,7 +172,7 @@ namespace Capstone.UnitTests.Service
 
             // Assert
             Assert.IsFalse(result.IsSucceed);
-           
+
         }
         [Test]
         public async Task UpdateIteration_Fail_InvalidIterationName()
@@ -180,8 +180,29 @@ namespace Capstone.UnitTests.Service
             // Arrange
             var updateIterationRequest = new UpdateIterationRequest
             {
-                
+
                 InterationName = "",  // IterationName is empty
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14)
+            };
+
+            // Act
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+
+            // Assert
+            Assert.IsFalse(result.IsSucceed);
+            Console.WriteLine("Update iteration Fail");
+
+        }
+        [Test]
+        public async Task UpdateIteration_Fail_InvalidIterationNameduplicate()
+        {
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+
+                InterationName = "duplicate",  // IterationName is duplicate
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(14)
             };
@@ -217,6 +238,5 @@ namespace Capstone.UnitTests.Service
             Console.WriteLine("Update iteration Fail");
 
         }
-
     }
 }

@@ -76,6 +76,64 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result);
           
         }
+
+        [Test]
+        public async Task CreateNewPermissionSchema_Successwithemtydes()
+        {
+            // Arrange
+            var request = new CreateNewSchemaRequest
+            {
+                SchemaName = "TestSchema",
+                Description = ""
+            };
+
+            var newSchema = new Schema
+            {
+                SchemaId = Guid.NewGuid(),
+                SchemaName = request.SchemaName,
+                Description = request.Description
+            };
+
+            _schemaRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<Schema>())).ReturnsAsync(newSchema);
+            _permissionRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<Expression<Func<Permission, bool>>>(), null))
+                .Returns(new List<Permission> { new Permission { PermissionId = Guid.NewGuid() } }.AsQueryable());
+
+            // Act
+            var result = await _permissionSchemaService.CreateNewPermissionSchema(request);
+
+            // Assert
+            Assert.IsTrue(result);
+
+        }
+
+        [Test]
+        public async Task CreateNewPermissionSchema_fail()
+        {
+            // Arrange
+            var request = new CreateNewSchemaRequest
+            {
+                SchemaName = "",
+                Description = "Test Description"
+            };
+
+            var newSchema = new Schema
+            {
+                SchemaId = Guid.NewGuid(),
+                SchemaName = request.SchemaName,
+                Description = request.Description
+            };
+
+            _schemaRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<Schema>())).ReturnsAsync(newSchema);
+            _permissionRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<Expression<Func<Permission, bool>>>(), null))
+                .Returns(new List<Permission> { new Permission { PermissionId = Guid.NewGuid() } }.AsQueryable());
+
+            // Act
+            var result = await _permissionSchemaService.CreateNewPermissionSchema(request);
+
+            // Assert
+            Assert.IsTrue(result);
+
+        }
         [Test]
         public async Task UpdateSchema_Success()
         {
@@ -103,7 +161,60 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result);
             
         }
+        [Test]
+        public async Task UpdateSchema_Fail()
+        {
+            // Arrange
+            var schemaId = Guid.NewGuid();
+            var request = new UpdateSchemaRequest
+            {
+                SchemaName = "",
+                Description = "UpdatedDescription"
+            };
 
+            var schema = new Schema
+            {
+                SchemaId = schemaId,
+                SchemaName = "InitialSchemaName",
+                Description = "InitialDescription"
+            };
+
+            _schemaRepositoryMock.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Schema, bool>>>(), null)).ReturnsAsync(schema);
+
+            // Act
+            var result = await _permissionSchemaService.UpdateSchema(schemaId, request);
+
+            // Assert
+            Assert.True(result);
+
+        }
+        [Test]
+        public async Task UpdateSchema_successwwithemptydes()
+        {
+            // Arrange
+            var schemaId = Guid.NewGuid();
+            var request = new UpdateSchemaRequest
+            {
+                SchemaName = "",
+                Description = "UpdatedDescription"
+            };
+
+            var schema = new Schema
+            {
+                SchemaId = schemaId,
+                SchemaName = "InitialSchemaName",
+                Description = ""
+            };
+
+            _schemaRepositoryMock.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Schema, bool>>>(), null)).ReturnsAsync(schema);
+
+            // Act
+            var result = await _permissionSchemaService.UpdateSchema(schemaId, request);
+
+            // Assert
+            Assert.True(result);
+
+        }
 
 
     }
