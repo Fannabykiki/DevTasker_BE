@@ -190,7 +190,7 @@ namespace Capstone.Service.PermissionSchemaService
                 {
 
                     var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, x => x.Schemas);
-                    if (schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
                     {
                         var Schema = new Schema
                         {
@@ -212,7 +212,7 @@ namespace Capstone.Service.PermissionSchemaService
                         await _projectRepository.SaveChanges();
                         schemaId = newSchema.SchemaId;
                     }
-                    else if (project.SchemasId != schemaId)
+                    else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
                     {
                         var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
 
@@ -291,7 +291,7 @@ namespace Capstone.Service.PermissionSchemaService
                 {
                     var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, null);
                     var SchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
-                    if (schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
                     {
 
 
@@ -314,7 +314,7 @@ namespace Capstone.Service.PermissionSchemaService
                         await _projectRepository.SaveChanges();
                         schemaId = newSchema.SchemaId;
                     }
-                    else if (project.SchemasId != schemaId)
+                    else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
                     {
                         var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
 
