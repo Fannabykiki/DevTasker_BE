@@ -977,11 +977,9 @@ public class ProjectService : IProjectService
                 {
                     await _permissionSchemaRepository.DeleteAsync(item);
                 }
-
                 await _permissionSchemaRepository.SaveChanges();
                 
                 project.SchemasId = changePermissionSchemaRequest.SchemaId;
-
                 await _projectRepository.UpdateAsync(project);
                 await _projectRepository.SaveChanges();
 
