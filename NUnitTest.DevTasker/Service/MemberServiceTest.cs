@@ -45,7 +45,7 @@ namespace NUnitTest.DevTasker.Service
             _httpContextAccessor = new Mock<IHttpContextAccessor>();
             _invitationRepository = new Mock<IInvitationRepository>();
 
-            // Set up the behavior for the mock
+           
             _projectMemberRepository.Setup(repo => repo.DatabaseTransaction()).Returns(_transactionMock.Object);
 
             _projectMemberService = new ProjectMemberService(
@@ -149,7 +149,7 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsFalse(result.IsSucceed);
             Assert.AreEqual("Accept invitation fail", result.Message);
-            // Additional assertions for the specific failure scenario
+           
         }
 
         [Test]
@@ -176,7 +176,7 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsFalse(result.IsSucceed);
             Assert.AreEqual("Accept invitation fail", result.Message);
-            // Additional assertions for the specific failure scenario
+           
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsFalse(result.IsSucceed);
             Assert.AreEqual("Accept invitation fail", result.Message);
-            // Additional assertions for the specific failure scenario
+           
         }
 
         [Test]

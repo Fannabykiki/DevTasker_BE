@@ -5,6 +5,7 @@ using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.RoleService;
 using Moq;
 using NUnit.Framework;
+using System.Linq.Expressions;
 using Task = System.Threading.Tasks.Task;
 
 namespace NUnitTest.DevTasker.Service
@@ -423,7 +424,68 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsNull(result);
             databaseTransaction.Verify(t => t.RollBack(), Times.Once);
         }
+        [Test]
+        public async Task GetSystemRoleByName_Success()
+        {
+            // Arrange
+            var roleName = "TestRole";
+            var role = new Role { RoleId = Guid.NewGuid(), RoleName = roleName, Description = "Test Description" };
+            _roleRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Role, bool>>>(), null))
+                           .ReturnsAsync(role);
+            _mapper.Setup(m => m.Map<GetRoleResponse>(It.IsAny<Role>()))
+                   .Returns((Role r) => new GetRoleResponse { RoleId = r.RoleId, RoleName = r.RoleName, Description = r.Description });
 
+            // Act
+            var result = await _roleService.GetSystemRoleByName(roleName);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(roleName, result.RoleName);
+        }
+        [Test]
+        public async Task GetSystemRoleById_Success()
+        {
+            // Arrange
+            var roleId = Guid.NewGuid();
+            var role = new Role { RoleId = roleId, RoleName = "TestRole", Description = "Test Description" };
+            _roleRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Role, bool>>>(), null))
+                           .ReturnsAsync(role);
+            _mapper.Setup(m => m.Map<GetRoleResponse>(It.IsAny<Role>()))
+                   .Returns((Role r) => new GetRoleResponse { RoleId = r.RoleId, RoleName = r.RoleName, Description = r.Description });
+
+            // Act
+            var result = await _roleService.GetSystemRoleById(roleId);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(roleId, result.RoleId);
+        }
+       
+        [Test]
+        public async Task GetRolesByProjectId_Success()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var project = new Project { ProjectId = projectId, ProjectName = "TestProject" };
+            var roles = new List<Role>
+        {
+            new Role { RoleId = Guid.NewGuid(), RoleName = "Role1", Description = "Description1" },
+            new Role { RoleId = Guid.NewGuid(), RoleName = "Role2", Description = "Description2" }
+        };
+            _projectRepository.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                              .ReturnsAsync(project);
+            _roleRepository.Setup(repo => repo.GetAllWithOdata(It.IsAny<Expression<Func<Role, bool>>>(), null))
+                           .ReturnsAsync(roles);
+            _mapper.Setup(m => m.Map<GetRoleResponse>(It.IsAny<Role>()))
+                   .Returns((Role r) => new GetRoleResponse { RoleId = r.RoleId, RoleName = r.RoleName, Description = r.Description });
+
+            // Act
+            var result = await _roleService.GetRolesByProjectId(projectId);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+        }
 
     }
 }

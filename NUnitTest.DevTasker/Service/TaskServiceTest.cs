@@ -208,26 +208,6 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
         [Test]
-        public async Task TestCreatesubTask_FailEmptyTile()
-        {
-            // Arrange
-            var request = new CreateTaskRequest
-            {
-                Title = "",
-                Description = "Test Description",
-                StartDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(7),
-                AssignTo = Guid.NewGuid(),
-                PriorityId = Guid.NewGuid()
-            };
-            var userId = Guid.NewGuid();
-
-            // Act
-            var result = await _taskService.CreateTask(request, userId);
-            // Assert
-            Assert.IsTrue(result.BaseResponse.IsSucceed);
-        }
-        [Test]
         public async Task TestCreateTask_FailDueDateBeforeStartDate()
         {
             // Arrange
@@ -873,44 +853,7 @@ namespace NUnitTest.DevTasker.Service
             // Assert
             Assert.IsTrue(result.BaseResponse.IsSucceed);
         }
-        [Test]
-        public async Task TestDeleteTask_Success()
-        {
-            // Arrange
-            var RestoreTaskRequest = new RestoreTaskRequest
-            {
-                MemberId = Guid.NewGuid(),
-                TaskId = Guid.NewGuid(),
-            };
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
-                .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
-            _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Capstone.DataAccess.Entities.Task>()))
-                .ReturnsAsync(true);
-
-            _databaseTransactionMock.Setup(transaction => transaction.Commit());
-
-            // Act
-             var result = await _taskService.DeleteTask(RestoreTaskRequest);
-            
-             //Assert
-             Assert.IsFalse(result.IsSucceed);
-        }
-        [Test]
-        public async Task TestDeleteTask_Failure_TaskNotFound()
-        {
-            // Arrange
-            var RestoreTaskRequest = new RestoreTaskRequest
-            {
-                MemberId = Guid.NewGuid(),
-                TaskId = Guid.NewGuid(),
-            };
-            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
-     .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
-            // Act
-             var result = await _taskService.DeleteTask(RestoreTaskRequest);
-            // Assert
-             Assert.IsFalse(result.IsSucceed);
-        }
+        
         [Test]
         public async Task TestUpdatesubTask_FailStartdatebeforeduedate()
         {
@@ -1097,6 +1040,44 @@ namespace NUnitTest.DevTasker.Service
         }
         [Test]
         public async Task TestDeletesubTask_Failure_TaskNotFound()
+        {
+            // Arrange
+            var RestoreTaskRequest = new RestoreTaskRequest
+            {
+                MemberId = Guid.NewGuid(),
+                TaskId = Guid.NewGuid(),
+            };
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+     .ReturnsAsync((Capstone.DataAccess.Entities.Task)null);
+            // Act
+            var result = await _taskService.DeleteTask(RestoreTaskRequest);
+            // Assert
+            Assert.IsFalse(result.IsSucceed);
+        }
+        [Test]
+        public async Task TestDeleteTask_Success()
+        {
+            // Arrange
+            var RestoreTaskRequest = new RestoreTaskRequest
+            {
+                MemberId = Guid.NewGuid(),
+                TaskId = Guid.NewGuid(),
+            };
+            _ticketRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Capstone.DataAccess.Entities.Task, bool>>>(), null))
+                .ReturnsAsync(new Capstone.DataAccess.Entities.Task());
+            _ticketRepositoryMock.Setup(repo => repo.DeleteAsync(It.IsAny<Capstone.DataAccess.Entities.Task>()))
+                .ReturnsAsync(true);
+
+            _databaseTransactionMock.Setup(transaction => transaction.Commit());
+
+            // Act
+            var result = await _taskService.DeleteTask(RestoreTaskRequest);
+
+            //Assert
+            Assert.IsFalse(result.IsSucceed);
+        }
+        [Test]
+        public async Task TestDeleteTask_Failure_TaskNotFound()
         {
             // Arrange
             var RestoreTaskRequest = new RestoreTaskRequest
