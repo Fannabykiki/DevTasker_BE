@@ -18,6 +18,7 @@ namespace Capstone.Service.NotificationService
         public System.Threading.Tasks.Task SendNotificationCreateTask(Guid taskId, Guid userId);
         public System.Threading.Tasks.Task SendNotificationUpdateTask(Guid taskId, Guid userId, TaskDetailViewModel oldTask);
         public System.Threading.Tasks.Task SendNotificationDeleteTask(Guid taskId, Guid userId);
+        public System.Threading.Tasks.Task SendNotificationChangeRole(Guid memberid, Guid userId);
         public System.Threading.Tasks.Task SendNotificationCommentTask(Guid commentId, Guid userId, string action);
         public System.Threading.Tasks.Task SendNotificationTaskDeadline();
         public System.Threading.Tasks.Task<bool> MarkReadNotification(Guid userId, ReadNotificationRequest request);

@@ -7,6 +7,7 @@ using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.NotificationService;
@@ -505,8 +506,11 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't assign unavailable member");
 			}
-
-			return Ok(result);
+            if (result.IsSucceed)
+			{
+                await _notificationService.SendNotificationDeleteTask(updateMemberRoleRequest.MemberId, this.GetCurrentLoginUserId());
+            }
+            return Ok(result);
 		}
 
 		[HttpPut("projects/info")]
