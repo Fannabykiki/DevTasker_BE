@@ -191,7 +191,7 @@ namespace Capstone.Service.PermissionSchemaService
 
                     var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, x => x.Schemas);
 
-                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") && project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
                     {
                         var Schema = new Schema
                         {
