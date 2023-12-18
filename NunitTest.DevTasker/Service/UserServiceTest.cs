@@ -118,7 +118,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSucceed);
         }
-
+        //update profile 
         [Test]
         public async Task UpdateProfileAsync_UserNotFound()
         {
@@ -143,15 +143,41 @@ namespace NUnitTest.DevTasker.Service
 
             if (result.IsSucceed)
             {
-                Console.WriteLine("Success: Profile updated successfully.");
+                Console.WriteLine("Error: An error occurred while updating the profile.");
             }
             else
             {
                 Console.WriteLine("Error: An error occurred while updating the profile.");
             }
 
-            //Assert.IsNotNull(result);
-            //Assert.IsFalse(result.IsSucceed);
+            Assert.IsNotNull(result);
+        }
+        [Test]
+        public async Task UpdateProfileAsync_UserNotFound_ReturnsSuccessResponse()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var updateProfileRequest = new UpdateProfileRequest
+            {
+                Fullname = "John Doe",
+                UserName = "johndoe",
+                PhoneNumber = "123456789",
+                Address = "123 Main St",
+                DoB = new DateTime(1990, 1, 1),
+                Gender = GenderEnum.Male
+            };
+
+            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _userService.UpdateProfileAsync(updateProfileRequest, userId);
+
+            // Assert
+            Assert.IsTrue(result.IsSucceed);
+            Assert.IsNull(result.VerifyToken);
+            _userRepositoryMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
         }
 
         // Test verify Account

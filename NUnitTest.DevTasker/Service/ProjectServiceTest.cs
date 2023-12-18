@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Capstone.Common.DTOs.Base;
 using Capstone.Common.DTOs.Project;
 using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
@@ -285,6 +286,82 @@ namespace NUnitTest.DevTasker.Service
             var result = await _projectService.DeleteProject(projectIdToDelete);
             // Assert
             Assert.IsFalse(result.IsSucceed);
+        }
+        [Test]
+        public async Task RestoreProject_Success()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var project = new Project
+            {
+                ProjectId = projectId,
+                StatusId = Guid.Parse("53F76F08-FF3C-43EB-9FF4-C9E028E513D5"),
+                DeleteAt = DateTime.UtcNow,
+                ExpireAt = DateTime.UtcNow.AddMonths(1),
+                IsDelete = true
+            };
+
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ReturnsAsync(project);
+            _databaseTransactionMock.Setup(transaction => transaction.Commit());
+
+            // Act
+            var result = await _projectService.RestoreProject(projectId);
+
+            // Assert
+            Assert.IsTrue(result.IsSucceed, "Expected project restoration to succeed.");
+            Console.WriteLine(result.Message);
+        }
+
+        [Test]
+        public async Task RestoreProject_Failure()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<Project, bool>>>(), null))
+                .ThrowsAsync(new Exception("Restore Project failed"));
+            _databaseTransactionMock.Setup(transaction => transaction.RollBack());
+
+            // Act
+            var result = await _projectService.RestoreProject(projectId);
+
+            // Assert
+            Assert.IsFalse(result.IsSucceed, "Expected project restoration to fail.");
+            Console.WriteLine(result.Message);
+        }
+        [Test]
+        public async Task ChangeProjectStatus_Success()
+        {
+            // Arrange
+            var projectId = Guid.NewGuid();
+            var statusId = Guid.NewGuid();
+            var changeProjectStatusRequest = new ChangeProjectStatusRequest
+            {
+                ProjectId = projectId,
+                // other properties...
+            };
+
+            var project = new Project
+            {
+                ProjectId = projectId,
+                // other properties...
+            };
+
+            _projectRepositoryMock.Setup(repo => repo.GetAsync(
+                It.IsAny<Expression<Func<Project, bool>>>(),
+                It.IsAny<Expression<Func<Project, object>>>())) 
+                .ReturnsAsync(project);
+            _projectRepositoryMock.Setup(repo => repo.UpdateAsync(project))
+                .ReturnsAsync(project);
+
+            // Act
+            var result = await _projectService.ChangeProjectStatus(statusId, changeProjectStatusRequest);
+
+            // Assert
+            Assert.IsNotNull(result, "Expected a non-null result for ChangeProjectStatus.");
+            Assert.IsTrue(result.StatusResponse.IsSucceed, "Expected a successful status response.");
+            Console.WriteLine("ChangeProjectStatus Success");
         }
     }
 }
