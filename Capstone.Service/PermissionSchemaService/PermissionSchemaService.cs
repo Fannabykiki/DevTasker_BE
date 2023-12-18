@@ -190,6 +190,7 @@ namespace Capstone.Service.PermissionSchemaService
                 {
 
                     var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, x => x.Schemas);
+
                     if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
                     {
                         var Schema = new Schema
@@ -199,7 +200,7 @@ namespace Capstone.Service.PermissionSchemaService
                             IsDelete = false
                         };
                         var newSchema = await _schemaRepository.CreateAsync(Schema);
-
+                        
                         foreach (var item in schemaPermission)
                         {
                             item.SchemaId = newSchema.SchemaId;
@@ -210,6 +211,20 @@ namespace Capstone.Service.PermissionSchemaService
                         project.SchemasId = newSchema.SchemaId;
                         await _projectRepository.UpdateAsync(project);
                         await _projectRepository.SaveChanges();
+                        if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                        {
+                            var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                            foreach (var item in currentSchema.SchemaPermissions)
+                            {
+                                await _permissionSchemaRepository.DeleteAsync(item);
+                            }
+                            await _permissionSchemaRepository.SaveChanges();
+                            await _schemaRepository.DeleteAsync(currentSchema);
+                            await _schemaRepository.SaveChanges();
+                        }
+
+
                         schemaId = newSchema.SchemaId;
                     }
                     else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
@@ -312,6 +327,18 @@ namespace Capstone.Service.PermissionSchemaService
                         project.SchemasId = newSchema.SchemaId;
                         await _projectRepository.UpdateAsync(project);
                         await _projectRepository.SaveChanges();
+                        if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                        {
+                            var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                            foreach (var item in currentSchema.SchemaPermissions)
+                            {
+                                await _permissionSchemaRepository.DeleteAsync(item);
+                            }
+                            await _permissionSchemaRepository.SaveChanges();
+                            await _schemaRepository.DeleteAsync(currentSchema);
+                            await _schemaRepository.SaveChanges();
+                        }
                         schemaId = newSchema.SchemaId;
                     }
                     else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
