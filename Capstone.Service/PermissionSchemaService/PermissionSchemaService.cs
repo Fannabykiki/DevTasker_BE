@@ -208,7 +208,7 @@ namespace Capstone.Service.PermissionSchemaService
                     await _projectRepository.SaveChanges();
                     schemaId = newSchema.SchemaId;
                 }
-                else
+                else if(project.SchemasId != schemaId)
                 {
                     var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
 
@@ -298,7 +298,7 @@ namespace Capstone.Service.PermissionSchemaService
                     await _projectRepository.SaveChanges();
                     schemaId = newSchema.SchemaId;
                 }
-                else
+                else if (project.SchemasId != schemaId)
                 {
                     var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
 
