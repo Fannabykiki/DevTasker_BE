@@ -69,7 +69,7 @@ namespace Capstone.Service.NotificationService
                     Title = x.Title,
                     Description = x.Description,
                     CreateAt = x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    IsRead = false,
+                    IsRead = x.IsRead,
                     RecerverId = x.RecerverId,
                     TargetUrl = x.TargetUrl
                 })
@@ -85,7 +85,7 @@ namespace Capstone.Service.NotificationService
                     Title = x.Title,
                     Description = x.Description,
                     CreateAt = x.CreateAt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
-                    IsRead = false,
+                    IsRead = x.IsRead,
                     RecerverId = x.RecerverId,
                     TargetUrl = x.TargetUrl
                 })
