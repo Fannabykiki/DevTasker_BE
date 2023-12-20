@@ -62,8 +62,13 @@ namespace Capstone.Service.PermissionSchemaService
             return results;
         }
 
-        public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId)
+        public async Task<GetPermissionSchemaByIdResponse> GetPermissionSchemaById(Guid schemaId, Guid? projectId)
         {
+            if (projectId != null)
+            {
+                var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null);
+                schemaId = project.SchemasId;
+            }
             var schemas = await _schemaRepository.GetAsync(x => x.SchemaId == schemaId && x.IsDelete != true, null);
             if (schemas == null) return null;
             
@@ -179,51 +184,94 @@ namespace Capstone.Service.PermissionSchemaService
             {
                 if (request.RoleId == Guid.Parse("5B5C81E8-722D-4801-861C-6F10C07C769B") ||
                         request.RoleId == Guid.Parse("7ACED6BC-0B25-4184-8062-A29ED7D4E430")) return false;
-                var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, x => x.Schemas);
                 var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
-                if (schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+
+                if (request.ProjectId != null)
                 {
-                    var Schema = new Schema
-                    {
-                        SchemaName = "Schema " + project.ProjectName,
-                        Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                        IsDelete = false
-                    };
-                    var newSchema = await _schemaRepository.CreateAsync(Schema);
 
-                    foreach (var item in schemaPermission)
+                    var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, x => x.Schemas);
+
+                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
                     {
-                        item.SchemaId = newSchema.SchemaId;
-                        await _permissionSchemaRepository.CreateAsync(item);
-                    }
-                    await _permissionSchemaRepository.SaveChanges();
-                    await _schemaRepository.SaveChanges();
-                    project.SchemasId = newSchema.SchemaId;
-                    await _projectRepository.UpdateAsync(project);
-                    await _projectRepository.SaveChanges();
-                    schemaId = newSchema.SchemaId;
-                }
-                else if(project.SchemasId != schemaId)
-                {
-                    project.Schemas.SchemaName = "Schema " + project.ProjectName;
-                    project.Schemas.Description = "Permission Schema cloned from \"" + schemaPermission.First().Schema.SchemaName + "\"";
-                    project.Schemas.IsDelete = false;
-                    await _schemaRepository.UpdateAsync(project.Schemas);
-                    await _schemaRepository.SaveChanges();
+                        var Schema = new Schema
+                        {
+                            SchemaName = "Schema " + project.ProjectName,
+                            Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                            IsDelete = false
+                        };
+                        var newSchema = await _schemaRepository.CreateAsync(Schema);
+                        
+                        foreach (var item in schemaPermission)
+                        {
+                            item.SchemaId = newSchema.SchemaId;
+                            await _permissionSchemaRepository.CreateAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        await _schemaRepository.SaveChanges();
+
+                        if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                        {
+                            var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                            foreach (var item in currentSchema.SchemaPermissions)
+                            {
+                                await _permissionSchemaRepository.DeleteAsync(item);
+                            }
+                            await _permissionSchemaRepository.SaveChanges();
+
+                            project.SchemasId = newSchema.SchemaId;
+                            await _projectRepository.UpdateAsync(project);
+                            await _projectRepository.SaveChanges();
+
+                            await _schemaRepository.DeleteAsync(currentSchema);
+                            await _schemaRepository.SaveChanges();
+                        }
+                        else
+                        {
+                            project.SchemasId = newSchema.SchemaId;
+                            await _projectRepository.UpdateAsync(project);
+                            await _projectRepository.SaveChanges();
+                        }
+                        
+                        
 
 
-                    var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
-                    foreach (var item in currentSchemaPermission)
-                    {
-                        await _permissionSchemaRepository.DeleteAsync(item);
+                        schemaId = newSchema.SchemaId;
                     }
-                    foreach (var item in schemaPermission)
+                    else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
                     {
-                        item.SchemaId = project.SchemasId;
-                        await _permissionSchemaRepository.CreateAsync(item);
+                        var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                        currentSchema.SchemaName = "Schema " + project.ProjectName;
+                        currentSchema.Description = "Permission Schema cloned from \"" + schemaPermission.First().Schema.SchemaName + "\"";
+                        currentSchema.IsDelete = false;
+                        await _schemaRepository.UpdateAsync(currentSchema);
+                        await _schemaRepository.SaveChanges();
+
+
+                        var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
+                        foreach (var item in currentSchemaPermission)
+                        {
+                            await _permissionSchemaRepository.DeleteAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        foreach (var item in schemaPermission)
+                        {
+                            item.SchemaId = project.SchemasId;
+                            await _permissionSchemaRepository.CreateAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        schemaId = project.SchemasId;
                     }
-                    await _permissionSchemaRepository.SaveChanges();
-                    schemaId = project.SchemasId;
+                    else
+                    {
+                        var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                        currentSchema.Description = "Permission Schema for project\" " + project.ProjectName + "\"";
+
+                        await _schemaRepository.UpdateAsync(currentSchema);
+                        await _schemaRepository.SaveChanges();
+                    }
                 }
 
 
@@ -265,53 +313,91 @@ namespace Capstone.Service.PermissionSchemaService
             using var transaction = _permissionSchemaRepository.DatabaseTransaction();
             try
             {
-                var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, null);
-                var SchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
-                if (schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+                if(request.ProjectId != null)
                 {
+                    var project = await _projectRepository.GetAsync(x => x.ProjectId == request.ProjectId, null);
+                    var SchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);
+                    if ((schemaId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990") || project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990")) && userId != Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"))
+                    {
 
-                    
-                    var Schema = new Schema
-                    {
-                        SchemaName = "Schema " + project.ProjectName,
-                        Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                        IsDelete = false
-                    };
-                    var newSchema = await _schemaRepository.CreateAsync(Schema);
-                    foreach (var item in SchemaPermission)
-                    {
-                        item.SchemaId = newSchema.SchemaId;
-                        await _permissionSchemaRepository.CreateAsync(item);
+
+                        var Schema = new Schema
+                        {
+                            SchemaName = "Schema " + project.ProjectName,
+                            Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                            IsDelete = false
+                        };
+                        var newSchema = await _schemaRepository.CreateAsync(Schema);
+                        foreach (var item in SchemaPermission)
+                        {
+                            item.SchemaId = newSchema.SchemaId;
+                            await _permissionSchemaRepository.CreateAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        await _schemaRepository.SaveChanges();
+
+                        if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                        {
+                            var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                            foreach (var item in currentSchema.SchemaPermissions)
+                            {
+                                await _permissionSchemaRepository.DeleteAsync(item);
+                            }
+                            await _permissionSchemaRepository.SaveChanges();
+
+                            project.SchemasId = newSchema.SchemaId;
+                            await _projectRepository.UpdateAsync(project);
+                            await _projectRepository.SaveChanges();
+
+                            await _schemaRepository.DeleteAsync(currentSchema);
+                            await _schemaRepository.SaveChanges();
+                        }
+                        else
+                        {
+                            project.SchemasId = newSchema.SchemaId;
+                            await _projectRepository.UpdateAsync(project);
+                            await _projectRepository.SaveChanges();
+                        }
+
+                        schemaId = newSchema.SchemaId;
                     }
-                    await _permissionSchemaRepository.SaveChanges();
-                    await _schemaRepository.SaveChanges();
-                    project.SchemasId = newSchema.SchemaId;
-                    await _projectRepository.UpdateAsync(project);
-                    await _projectRepository.SaveChanges();
-                    schemaId = newSchema.SchemaId;
+                    else if (project.SchemasId != schemaId && project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+                    {
+                        var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                        currentSchema.SchemaName = "Schema " + project.ProjectName;
+                        currentSchema.Description = "Permission Schema cloned from \"" + SchemaPermission.First().Schema.SchemaName + "\"";
+                        currentSchema.IsDelete = false;
+                        await _schemaRepository.UpdateAsync(currentSchema);
+                        await _schemaRepository.SaveChanges();
+
+
+                        var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
+                        foreach (var item in currentSchemaPermission)
+                        {
+                            await _permissionSchemaRepository.DeleteAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        foreach (var item in SchemaPermission)
+                        {
+                            item.SchemaId = project.SchemasId;
+                            await _permissionSchemaRepository.CreateAsync(item);
+                        }
+                        await _permissionSchemaRepository.SaveChanges();
+                        schemaId = project.SchemasId;
+                    }
+                    else
+                    {
+                        var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                        currentSchema.Description = "Permission Schema for project\" " + project.ProjectName + "\"";
+
+                        await _schemaRepository.UpdateAsync(currentSchema);
+                        await _schemaRepository.SaveChanges();
+                    }
                 }
-                else if(schemaId != project.SchemasId)
-                {
-                    project.Schemas.SchemaName = "Schema " + project.ProjectName;
-                    project.Schemas.Description = "Permission Schema cloned from \"" + SchemaPermission.First().Schema.SchemaName + "\"";
-                    project.Schemas.IsDelete = false;
-                    await _schemaRepository.UpdateAsync(project.Schemas);
-                    await _schemaRepository.SaveChanges();
-
-
-                    var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
-                    foreach (var item in currentSchemaPermission)
-                    {
-                        await _permissionSchemaRepository.DeleteAsync(item);
-                    }
-                    foreach (var item in SchemaPermission)
-                    {
-                        item.SchemaId = project.SchemasId;
-                        await _permissionSchemaRepository.CreateAsync(item);
-                    }
-                    await _permissionSchemaRepository.SaveChanges();
-                    schemaId = project.SchemasId;
-                }
+                
 
 
                 var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == schemaId, null);

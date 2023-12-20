@@ -152,7 +152,7 @@ namespace Capstone.UnitTests.Service
             Assert.IsFalse(result.Response.IsSucceed, "Expected IsSucceed to be false.");
         }
         [Test]
-        public async Task UpdateIteration_Fail()
+        public async Task UpdateSprint_Fail()
         {
             // Arrange
             var updateIterationRequest = new UpdateIterationRequest
@@ -172,16 +172,37 @@ namespace Capstone.UnitTests.Service
 
             // Assert
             Assert.IsFalse(result.IsSucceed);
-           
+
         }
         [Test]
-        public async Task UpdateIteration_Fail_InvalidIterationName()
+        public async Task UpdateSprit_Fail_InvalidIterationName()
         {
             // Arrange
             var updateIterationRequest = new UpdateIterationRequest
             {
-                
+
                 InterationName = "",  // IterationName is empty
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14)
+            };
+
+            // Act
+            var iterationId = Guid.NewGuid();
+            var result = await _iterationService.UpdateIterationRequest(updateIterationRequest, iterationId);
+
+            // Assert
+            Assert.IsFalse(result.IsSucceed);
+            Console.WriteLine("Update iteration Fail");
+
+        }
+        [Test]
+        public async Task UpdateSprinnt_Fail_SprintNameduplicate()
+        {
+            // Arrange
+            var updateIterationRequest = new UpdateIterationRequest
+            {
+
+                InterationName = "duplicate",  // IterationName is duplicate
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(14)
             };
@@ -197,7 +218,7 @@ namespace Capstone.UnitTests.Service
         }
 
         [Test]
-        public async Task UpdateIteration_Fail_InvalidDateRange()
+        public async Task UpdateSprint_Fail_InvalidDateRange()
         {
             // Arrange
             var updateIterationRequest = new UpdateIterationRequest
@@ -217,6 +238,5 @@ namespace Capstone.UnitTests.Service
             Console.WriteLine("Update iteration Fail");
 
         }
-
     }
 }

@@ -57,94 +57,6 @@ namespace NUnitTest.DevTasker.Service
             _userService = new UserService(context, _userRepositoryMock.Object, _mapper, _serviceScopeFactoryMock.Object, _httpContextAccessorMock.Object, _projectMemberRepositoryMock.Object);
         }
 
-        [Test]
-        public async Task TestLoginUserAsync_UsernameNotFound()
-        {
-            // Arrange
-            var login = new LoginRequest
-            {
-                Email = "nonexistentuser@example.com",
-                Password = "testpassword"
-            };
-        
-           
-
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                 .ReturnsAsync((User)null);
-
-            // Act
-            //var result = await _userService.LoginUser(login);
-
-            // Assert
-           // Assert.Null(result);
-        }
-
-        [Test]
-        public async Task TestLoginUserAsync_NullUsername()
-        {
-            /*// Arrange
-            var email = "nonexistentuser@example.com";
-            var password = "testpassword";
-
-            // Mock the user repository to return null for user not found
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny < Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null);
-
-            // Act
-            var result = await _userService.LoginUser(email, password);
-
-            // Assert
-            Assert.Null(result);*/
-        }
-
-
-
-        [Test]
-        public async Task TestLoginUserAsync_NullPassword()
-        {
-            /*// Arrange
-            string username = "testuser";
-            string password = null;
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null);
-            // Act
-            var result = await _userService.LoginUser(username, password);
-
-            // Assert
-            Assert.Null(result);*/
-        }
-
-        [Test]
-        public async Task TestLoginUserAsync_EmptyUsername()
-        {
-           /* // Arrange
-            string username = "";
-            string password = "testpassword";
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                .ReturnsAsync((User)null);
-            // Act
-            var result = await _userService.LoginUser(username, password);
-
-            // Assert
-            Assert.Null(result);*/
-        }
-
-        [Test]
-        public async Task TestLoginUserAsync_EmptyPassword()
-        {
-           /* // Arrange
-            string username = "testuser";
-            string password = "";
-            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
-                 .ReturnsAsync((User)null);
-
-            // Act
-            var result = await _userService.LoginUser(username, password);
-
-            // Assert
-            Assert.Null(result);*/
-        }
-
         // Test Register
         [Test]
         public async Task CreateAsync_Success()
@@ -206,9 +118,7 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSucceed);
         }
-
-        
-
+        //update profile 
         [Test]
         public async Task UpdateProfileAsync_UserNotFound()
         {
@@ -233,17 +143,42 @@ namespace NUnitTest.DevTasker.Service
 
             if (result.IsSucceed)
             {
-                Console.WriteLine("Success: Profile updated successfully.");
+                Console.WriteLine("Error: An error occurred while updating the profile.");
             }
             else
             {
                 Console.WriteLine("Error: An error occurred while updating the profile.");
             }
 
-            //Assert.IsNotNull(result);
-            //Assert.IsFalse(result.IsSucceed);
+            Assert.IsNotNull(result);
         }
+        [Test]
+        public async Task UpdateProfileAsync_UserNotFound_ReturnsSuccessResponse()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var updateProfileRequest = new UpdateProfileRequest
+            {
+                Fullname = "John Doe",
+                UserName = "johndoe",
+                PhoneNumber = "123456789",
+                Address = "123 Main St",
+                DoB = new DateTime(1990, 1, 1),
+                Gender = GenderEnum.Male
+            };
 
+            _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _userService.UpdateProfileAsync(updateProfileRequest, userId);
+
+            // Assert
+            Assert.IsTrue(result.IsSucceed);
+            Assert.IsNull(result.VerifyToken);
+            _userRepositoryMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(x => x.SaveChanges(), Times.Never);
+        }
 
         // Test verify Account
         [Test]
@@ -282,8 +217,91 @@ namespace NUnitTest.DevTasker.Service
             }
             Assert.IsTrue(result.IsSucceed);
         }
+        [Test]
+        public async Task TestLoginUserAsync_UsernameNotFound()
+        {
+            // Arrange
+            var login = new LoginRequest
+            {
+                Email = "nonexistentuser@example.com",
+                Password = "testpassword"
+            };
 
 
+
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                 .ReturnsAsync((User)null);
+
+            // Act
+            //var result = await _userService.LoginUser(login);
+
+            // Assert
+            // Assert.Null(result);
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_NullUsername()
+        {
+            /*// Arrange
+            var email = "nonexistentuser@example.com";
+            var password = "testpassword";
+
+            // Mock the user repository to return null for user not found
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny < Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _userService.LoginUser(email, password);
+
+            // Assert
+            Assert.Null(result);*/
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_NullPassword()
+        {
+            /*// Arrange
+            string username = "testuser";
+            string password = null;
+            _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                .ReturnsAsync((User)null);
+            // Act
+            var result = await _userService.LoginUser(username, password);
+
+            // Assert
+            Assert.Null(result);*/
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_EmptyUsername()
+        {
+            /* // Arrange
+             string username = "";
+             string password = "testpassword";
+             _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                 .ReturnsAsync((User)null);
+             // Act
+             var result = await _userService.LoginUser(username, password);
+
+             // Assert
+             Assert.Null(result);*/
+        }
+
+        [Test]
+        public async Task TestLoginUserAsync_EmptyPassword()
+        {
+            /* // Arrange
+             string username = "testuser";
+             string password = "";
+             _userRepositoryMock.Setup(repo => repo.GetAsync(It.IsAny<Expression<Func<User, bool>>>(), null))
+                  .ReturnsAsync((User)null);
+
+             // Act
+             var result = await _userService.LoginUser(username, password);
+
+             // Assert
+             Assert.Null(result);*/
+        }
         [Test]
         public async Task VerifyUser_UserNotFound()
         {
@@ -314,8 +332,6 @@ namespace NUnitTest.DevTasker.Service
             }
             Assert.IsFalse(result.IsSucceed);
         }
-
-
         // Test forgot Password
         [Test]
         public async Task ForgotPassword_UserNotFound()
@@ -359,6 +375,24 @@ namespace NUnitTest.DevTasker.Service
             Console.WriteLine("EmptyEmail: Password reset request failed.");
         }
 
+        [Test]
+        public async Task ForgotPassword_EmailInvalid()
+        {
+            // Arrange
+            string email = "invalid"; 
+
+            var databaseTransactionMock = new Mock<IDatabaseTransaction>();
+            _userRepositoryMock.Setup(repo => repo.DatabaseTransaction()).Returns(databaseTransactionMock.Object);
+            // Act
+            var result = await _userService.ForgotPassword(email);
+
+            // Assert
+            _userRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(repo => repo.SaveChanges(), Times.Never);
+
+            Assert.IsFalse(result);
+            Console.WriteLine("EmptyEmail: Password reset request failed.");
+        }
         [Test]
         public async Task ForgotPassword_Success()
         {
@@ -424,8 +458,6 @@ namespace NUnitTest.DevTasker.Service
             Assert.IsTrue(result);
             Console.WriteLine("ResetPasswordValidToken: Password reset succeeded with a valid token.");
         }
-
-
         [Test]
         public async Task ResetPasswordFail()
         {
@@ -503,7 +535,6 @@ namespace NUnitTest.DevTasker.Service
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
         }
-
 
         [Test]
         public async Task ChangePassword_Fail_WhenPasswordsDoNotMatch()

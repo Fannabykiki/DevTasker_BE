@@ -322,7 +322,7 @@ public class ProjectService : IProjectService
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status)!;
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x => x.Status)!;
 
 			if(member.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") || member.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
 			{
@@ -360,6 +360,22 @@ public class ProjectService : IProjectService
                 member.IsOwner = true;
                 
             }
+
+			var tasks = await _ticketRepository.GetAllWithOdata(x => x.AssignTo == member.MemberId, x => x.Status);
+			if(tasks.Count() != 0)
+			{
+                var newAssigned = await _projectMemberRepository.GetAsync(x => x.UserId == updateBy && x.ProjectId == member.ProjectId, null);
+				foreach(var item in tasks)
+				{
+					if(item.Status.Title.Contains("To do")|| item.Status.Title.Contains("In Progress"))
+					{
+                        item.AssignTo = newAssigned.MemberId;
+                        await _ticketRepository.UpdateAsync(item);
+                    }
+				}
+				await _ticketRepository.SaveChanges();
+            }
+			
 
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
@@ -971,10 +987,20 @@ public class ProjectService : IProjectService
 			}
 			else
 			{
-                project.SchemasId = changePermissionSchemaRequest.SchemaId;
+				var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
 
+                foreach (var item in currentSchema.SchemaPermissions)
+                {
+                    await _permissionSchemaRepository.DeleteAsync(item);
+                }
+                await _permissionSchemaRepository.SaveChanges();
+                
+                project.SchemasId = changePermissionSchemaRequest.SchemaId;
                 await _projectRepository.UpdateAsync(project);
                 await _projectRepository.SaveChanges();
+
+                await _schemaRepository.DeleteAsync(currentSchema);
+                await _schemaRepository.SaveChanges();
             }
             
             

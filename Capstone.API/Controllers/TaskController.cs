@@ -164,7 +164,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
 				if (result.BaseResponse.IsSucceed)
 				{
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
+                    await _notificationService.SendNotificationCreateTask(result.TaskId, this.GetCurrentLoginUserId());
                 }  
                 return Ok(result);
 			}
@@ -188,7 +188,7 @@ namespace Capstone.API.Controllers
 				var result = await _taskService.CreateTask(request, userId);
                 if (result.BaseResponse.IsSucceed)
                 {
-                    await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
+                    await _notificationService.SendNotificationCreateTask(result.TaskId, this.GetCurrentLoginUserId());
                 }
                 return Ok(result);
 			}
@@ -317,7 +317,7 @@ namespace Capstone.API.Controllers
             // Notification
             if (result.BaseResponse.IsSucceed)
             {
-                await _notificationService.SendNotificationChangeTaskStatus(result.TaskId, this.GetCurrentLoginUserId());
+                await _notificationService.SendNotificationUpdateTask(result.TaskId,this.GetCurrentLoginUserId(), taskDetail);
             }
             return Ok(result);
 		}
@@ -425,7 +425,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-                await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+                await _notificationService.SendNotificationDeleteTask(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
             }
             
             return Ok(result);
@@ -455,7 +455,7 @@ namespace Capstone.API.Controllers
 			var result = await _taskService.DeleteEachTask(restoreTaskRequest);
 			if (result.IsSucceed)
 			{
-				await _notificationService.SendNotificationChangeTaskStatus(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+				await _notificationService.SendNotificationDeleteTask(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
 			}
 
 			return Ok(result);
