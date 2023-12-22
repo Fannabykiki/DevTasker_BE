@@ -6,6 +6,7 @@ using Capstone.DataAccess;
 using Capstone.DataAccess.Entities;
 using Capstone.DataAccess.Repository.Interfaces;
 using Capstone.Service.TicketService;
+using System.Threading.Tasks;
 using Task = Capstone.DataAccess.Entities.Task;
 
 namespace Capstone.Service.TaskService
@@ -994,6 +995,18 @@ namespace Capstone.Service.TaskService
 					Message = "Delete fail"
 				};
 			}
+		}
+
+		public async Task<TaskDetail> GetTask(Guid taskId)
+		{
+			var result = await _ticketRepository.GetAsync(x=>x.TaskId == taskId, null);
+			return _mapper.Map<TaskDetail>(result);
+		}
+
+		public async Task<TaskDetail> GetTaskParentDetail(Guid? prevId)
+		{
+			var result = await _ticketRepository.GetAsync(x => x.TaskId == prevId, null);
+			return _mapper.Map<TaskDetail>(result);
 		}
 	}
 }

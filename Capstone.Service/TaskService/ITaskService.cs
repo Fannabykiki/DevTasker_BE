@@ -23,11 +23,13 @@ namespace Capstone.Service.TicketService
 		Task<BaseResponse> RestoreTask(RestoreTaskRequest restoreTaskRequest);
 		Task<List<TaskViewModel>> GetAllTaskDeleteAsync(Guid projetcId);
 		Task<TaskDetailViewModel> GetTaskDetail(Guid taskId);
+		Task<TaskDetail> GetTask(Guid taskId);
         Task<Guid?> GetProjectIdOfTask(Guid taskId);
 		Task<bool> CheckExist(Guid taskId);
 		Task<UpdateTaskOrderResponse> UpdateTaskOrder(UpdateTaskOrderRequest updateTaskOrderRequest);
 		Task<UpdateTaskOrderResponse> UpdateTaskTitle(UpdateTaskNameRequest updateTaskNameRequest);
 		Task<BaseResponse> DeleteTaskStatus(DeleteTaskStatusRequest deleteTaskStatusRequest);
 		Task<bool> CheckTaskStatus(Guid taskId);
+		Task<TaskDetail> GetTaskParentDetail(Guid? prevId);
 	}
 }
