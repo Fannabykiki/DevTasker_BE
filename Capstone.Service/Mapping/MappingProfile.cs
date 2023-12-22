@@ -33,6 +33,7 @@ public class MappingProfile : Profile
         CreateMap<Schema, GetSchemaResponse>();
         CreateMap<Schema, GetProjectSchemasResponse>();
         CreateMap<Role, GetRoleResponse>();
+        CreateMap<DataAccess.Entities.Task, TaskDetail>();
 		CreateMap<TaskComment, GetCommentResponse>()
 			.ForPath(dest => dest.User.UserId, opt => opt.MapFrom(src => src.ProjectMember.Users.UserId))
 			.ForPath(dest => dest.User.Fullname, opt => opt.MapFrom(src => src.ProjectMember.Users.Fullname))
