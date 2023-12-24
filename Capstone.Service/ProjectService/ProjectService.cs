@@ -322,7 +322,7 @@ public class ProjectService : IProjectService
 		{
 			await _roleRepository.GetAsync(x => x.RoleId == updateMemberRoleRequest.RoleId, null)!;
 
-			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Status)!;
+			var member = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x => x.Status)!;
 
 			if(member.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") || member.StatusId == Guid.Parse("A29BF1E9-2DE2-4E5F-A6DA-32D88FCCD274"))
 			{
@@ -361,6 +361,22 @@ public class ProjectService : IProjectService
                 
             }
 
+			var tasks = await _ticketRepository.GetAllWithOdata(x => x.AssignTo == member.MemberId, x => x.Status);
+			if(tasks.Count() != 0)
+			{
+                var newAssigned = await _projectMemberRepository.GetAsync(x => x.UserId == updateBy && x.ProjectId == member.ProjectId, null);
+				foreach(var item in tasks)
+				{
+					if(item.Status.Title.Contains("To do")|| item.Status.Title.Contains("In Progress"))
+					{
+                        item.AssignTo = newAssigned.MemberId;
+                        await _ticketRepository.UpdateAsync(item);
+                    }
+				}
+				await _ticketRepository.SaveChanges();
+            }
+			
+
 			member.RoleId = updateMemberRoleRequest.RoleId;
 			await _projectMemberRepository.UpdateAsync(member);
 			await _projectMemberRepository.SaveChanges();
@@ -382,12 +398,28 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, null)!;
+			var sprints = await _interationRepository.GetAllWithOdata(x=>x.BoardId == updateProjectNameInfo.ProjectId, null);
+			foreach (var sprint in sprints)
+			{
+				if(sprint.EndDate.Date > updateProjectNameInfo.EndDate.Date)
+				{
+					return new BaseResponse
+					{	
+						StatusCode = 400,
+						IsSucceed = false,
+						Message = "Can't update project's end date before sprint's end date"
+					};
+				}
+			}
+
 			project.ProjectName = updateProjectNameInfo.ProjectName;
 			project.Description = updateProjectNameInfo.Description;
 			project.EndDate = updateProjectNameInfo.EndDate;
+
 			await _projectRepository.UpdateAsync(project);
 			await _projectRepository.SaveChanges();
 			transaction.Commit();
+
 			return new BaseResponse { IsSucceed = true, Message = "Update Project Info successfully" };
 		}
 		catch (Exception)
@@ -794,9 +826,9 @@ public class ProjectService : IProjectService
 		try
 		{
 			var project = await _projectMemberRepository.GetAsync(x => x.MemberId == memberId, x=>x.Users);
-			if(project.StatusId == Guid.Parse("2707D89B-6040-474C-ABD0-1F2CBC8DAEAB"))
+			if(project.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746"))
 			{
-				var invitation = await _invitationRepository.GetAsync(x => x.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") && x.InviteTo.Equals(project.Users.Email), null);
+				var invitation = await _invitationRepository.GetAsync(x => x.StatusId == Guid.Parse("2D79988F-49C8-4BF4-B5AB-623559B30746") && x.InviteTo.Equals(project.Users.Email) && x.ProjectId == project.ProjectId, null);
 
 				invitation.StatusId = Guid.Parse("2707D89B-6040-474C-ABD0-1F2CBC8DAEAB");
 
@@ -907,47 +939,83 @@ public class ProjectService : IProjectService
         using var transaction = _projectRepository.DatabaseTransaction();
         try
         {
-            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, null);
-            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.ProjectMembers)!;
-            var Schema = new Schema
-            {
-                SchemaName = "Schema " + project.ProjectName,
-                Description = "Permission Schema for project\" " + project.ProjectName + "\"",
-                IsDelete = false
-            };
-            var newSchema = await _schemaRepository.CreateAsync(Schema);
+            var schemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == changePermissionSchemaRequest.SchemaId, x => x.Schema);
+            var project = await _projectRepository.GetAsync(x => x.ProjectId == projectId, x => x.Schemas)!;
 
-            foreach (var item in schemaPermission)
-            {
-                item.SchemaId = newSchema.SchemaId;
-                await _permissionSchemaRepository.CreateAsync(item);
-            }
-            await _permissionSchemaRepository.SaveChanges();
-            await _schemaRepository.SaveChanges();
-
-			Guid shemaID = Guid.Empty;
-
-            if (project.SchemasId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
+            if (project.SchemasId == Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
-				shemaID = project.SchemasId;
+                var Schema = new Schema
+                {
+                    SchemaName = "Schema " + project.ProjectName,
+                    Description = "Permission Schema for project\" " + project.ProjectName + "\"",
+                    IsDelete = false
+                };
+                var newSchema = await _schemaRepository.CreateAsync(Schema);
+                foreach (var item in schemaPermission)
+                {
+                    item.SchemaId = newSchema.SchemaId;
+                    await _permissionSchemaRepository.CreateAsync(item);
+                }
+                await _permissionSchemaRepository.SaveChanges();
+                await _schemaRepository.SaveChanges();
+
+                project.SchemasId = newSchema.SchemaId;
+
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
 			}
-
-            project.SchemasId = newSchema.SchemaId;
-            await _projectRepository.UpdateAsync(project);
-            await _projectRepository.SaveChanges();
-
-			if(shemaID != Guid.Empty)
+			else if(changePermissionSchemaRequest.SchemaId != Guid.Parse("267F7D1D-0292-4F47-88A0-BD2E4F3B0990"))
 			{
-                await _schemaRepository.DeleteSchemaById(shemaID);
+				project.Schemas.SchemaName = "Schema " + project.ProjectName;
+				project.Schemas.Description = "Permission Schema cloned from \"" + schemaPermission.First().Schema.SchemaName + "\"";
+                project.Schemas.IsDelete = false;
+				await _schemaRepository.UpdateAsync(project.Schemas);
+                await _schemaRepository.SaveChanges();
+
+
+                var currentSchemaPermission = await _permissionSchemaRepository.GetAllWithOdata(x => x.SchemaId == project.SchemasId, null);
+				foreach(var item in currentSchemaPermission)
+				{
+                    await _permissionSchemaRepository.DeleteAsync(item);
+				}
+				foreach(var item in schemaPermission)
+				{
+					item.SchemaId = project.SchemasId;
+					await _permissionSchemaRepository.CreateAsync(item);
+				}
+				await _permissionSchemaRepository.SaveChanges();
+			}
+			else
+			{
+				var currentSchema = await _schemaRepository.GetAsync(x => x.SchemaId == project.SchemasId, x => x.SchemaPermissions);
+
+                foreach (var item in currentSchema.SchemaPermissions)
+                {
+                    await _permissionSchemaRepository.DeleteAsync(item);
+                }
+                await _permissionSchemaRepository.SaveChanges();
+                
+                project.SchemasId = changePermissionSchemaRequest.SchemaId;
+                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.SaveChanges();
+
+                await _schemaRepository.DeleteAsync(currentSchema);
                 await _schemaRepository.SaveChanges();
             }
             
+            
+
+            
+            
+
+            
+
 
             transaction.Commit();
 			return new BaseResponse
 			{
 				IsSucceed = true,
-				Message = "Change project's schema successfully"
+				Message = "Clone project's schema successfully"
 			};
         }
         catch (Exception)

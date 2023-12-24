@@ -206,9 +206,9 @@ namespace Capstone.Service.RoleService
                 var roles = new List<GetRoleResponse>();
                 foreach (var role in Roles)
                 {
-                    if (role.IsDelete != true)
+                    
                         roles.Add(_mapper.Map<GetRoleResponse>(role));
-                    else continue;
+                    
                 }
                 return roles;
             }

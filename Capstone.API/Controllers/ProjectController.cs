@@ -7,6 +7,7 @@ using Capstone.Common.DTOs.Invitaion;
 using Capstone.Common.DTOs.Iteration;
 using Capstone.Common.DTOs.Permission;
 using Capstone.Common.DTOs.Project;
+using Capstone.Common.DTOs.Task;
 using Capstone.Common.DTOs.User;
 using Capstone.Service.LoggerService;
 using Capstone.Service.NotificationService;
@@ -88,7 +89,11 @@ namespace Capstone.API.Controllers
 				return BadRequest("Can't remove System Admin");
 			}
 			var result = await _projectService.RemoveProjectMember(memberId);
+			if (result.IsSucceed)
+			{
 
+				await _notificationService.RemoveMemberNotification(this.GetCurrentLoginUserId(), projectId.Value, member.UserId);
+			}
 			return Ok(result);
 		}
 
@@ -97,7 +102,11 @@ namespace Capstone.API.Controllers
 		{
 			var userId = this.GetCurrentLoginUserId();
 			var result = await _projectService.ExitProject(userId, exitProjectRequest.ProjectId);
+			if (result.IsSucceed)
+			{
 
+				await _notificationService.ExitProjectNotification(userId, exitProjectRequest.ProjectId);
+			}
 			return Ok(result);
 		}
 
@@ -497,8 +506,11 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest("Can't assign unavailable member");
 			}
-
-			return Ok(result);
+            if (result.IsSucceed)
+			{
+                await _notificationService.SendNotificationDeleteTask(updateMemberRoleRequest.MemberId, this.GetCurrentLoginUserId());
+            }
+            return Ok(result);
 		}
 
 		[HttpPut("projects/info")]
@@ -510,10 +522,11 @@ namespace Capstone.API.Controllers
 				return NotFound("Project not exist");
 			}
 
-
-
 			var result = await _projectService.UpdateProjectInfo(updateProjectNameInfo.ProjectId, updateProjectNameInfo);
-
+			if(result.StatusCode == 400)
+			{
+				return BadRequest(result.Message);
+			}
 			return Ok(result);
 		}
 
