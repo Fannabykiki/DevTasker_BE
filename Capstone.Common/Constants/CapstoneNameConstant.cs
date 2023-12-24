@@ -15,6 +15,7 @@ namespace Capstone.Common.Constants
             public const string InProgress = "In Progress";
             public const string Done = "Done";
             public const string Deleted = "Deleted";
+            public const string Fail = "Fail";
 
         }
     }
