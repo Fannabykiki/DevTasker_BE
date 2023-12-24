@@ -11,15 +11,23 @@ namespace Capstone.API.Controllers.Testing
     {
         private readonly INotificationService _notificationService;
         private readonly IEmailJob _emailJob;
-        public TestingJobController(IEmailJob emailJob, INotificationService notificationService)
+        private readonly IFailedJob _failedJob;
+        public TestingJobController(IEmailJob emailJob, INotificationService notificationService, IFailedJob failedJob)
         {
             _emailJob = emailJob;
             _notificationService = notificationService;
+            _failedJob = failedJob;
         }
         [HttpGet("job-run")]
         public async Task<IActionResult> GetJobRun()
         {
             await _emailJob.RunJob();
+            return Ok();
+        }
+        [HttpGet("job-overdue-run")]
+        public async Task<IActionResult> GetJobOverdueRun()
+        {
+            await _failedJob.RunJob();
             return Ok();
         }
         [HttpPost("send-notification-project")]
@@ -48,6 +56,13 @@ namespace Capstone.API.Controllers.Testing
         {
             var userId = this.GetCurrentLoginUserId();
             await _notificationService.SendNotificationTaskDeadline();
+            return Ok();
+        }
+        [HttpPost("test-notification-failed-task")]
+        public async Task<IActionResult> SendNotifcationEmailJobForFailedJob(Guid taskId)
+        {
+            var userId = this.GetCurrentLoginUserId();
+            await _notificationService.SendNotificationTaskFailedDeadline(taskId,  Guid.Parse("AFA06CDD-7713-4B81-9163-C45556E4FA4C"));
             return Ok();
         }
     }
