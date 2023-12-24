@@ -60,7 +60,7 @@ namespace Capstone.Service.BlobStorage
 					continue;
 				}
 
-				await System.Threading.Tasks.Task.Delay(500);
+				await System.Threading.Tasks.Task.Delay(520);
 			}
 			return tagValue;
 		}
@@ -159,9 +159,6 @@ namespace Capstone.Service.BlobStorage
 					await _attachmentRepository.CreateAsync(newAttachment);
 					await _attachmentRepository.SaveChanges();
 					await client.UploadAsync(data);
-
-					var tags = client.GetTags().Value.Tags;
-					var tagValue = tags["Malware Scanning scan result"];
 					transaction.Commit();
 
 				}
