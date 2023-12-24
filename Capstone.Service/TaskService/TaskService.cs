@@ -302,7 +302,7 @@ namespace Capstone.Service.TaskService
 
 		public async Task<CreateTaskResponse> UpdateTask(UpdateTaskRequest updateTicketRequest)
 		{
-			using var transaction = _iterationRepository.DatabaseTransaction();
+			using var transaction = _ticketRepository.DatabaseTransaction();
 			try
 			{
 				var task = await _ticketRepository.GetAsync(x => x.TaskId == updateTicketRequest.TaskId, null);
@@ -317,6 +317,32 @@ namespace Capstone.Service.TaskService
 					TaskId = updateTicketRequest.TaskId,
 					Title = $"Task {task.Title} has been updated by {member.Users.UserName}"
 				};
+
+				if(task.InterationId != updateTicketRequest.InterationId)
+				{
+					var subTasks = await _ticketRepository.GetAllWithOdata(x => x.PrevId == updateTicketRequest.TaskId, null);
+					foreach (var subTask in subTasks)
+					{
+						subTask.InterationId = updateTicketRequest.InterationId;
+
+						await _ticketRepository.UpdateAsync(subTask);
+						await _ticketRepository.SaveChanges();
+
+						var newSubTaskHistory = new TaskHistory
+						{
+							ChangeAt = DateTime.Parse(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+							ChangeBy = updateTicketRequest.MemberId,
+							CurrentStatusId = updateTicketRequest.StatusId,
+							PreviousStatusId = task.StatusId,
+							HistoryId = Guid.NewGuid(),
+							TaskId = subTask.TaskId,
+							Title = $"Task {subTask.Title} has been updated sprint because task {task.Title} has been updated by {member.Users.UserName}"
+						};
+
+						await _taskHistoryRepository.CreateAsync(newSubTaskHistory);
+						await _taskHistoryRepository.SaveChanges();
+					}
+				}
 
 				await _taskHistoryRepository.CreateAsync(newHistory);
 				await _taskHistoryRepository.SaveChanges();

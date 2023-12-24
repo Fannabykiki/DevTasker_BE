@@ -293,11 +293,11 @@ namespace Capstone.API.Controllers
 			if(task.PrevId != null)
 			{
 				var taskParent = await _taskService.GetTaskParentDetail(task.PrevId);
-				if (updateTicketRequest.StartDate.Date < taskParent.StartDate)
+				if (updateTicketRequest.StartDate.Date < taskParent.StartDate.Date)
 				{
 					return BadRequest("Can't update new task with start date before task's start date. Please update and try again");
 				}
-				if (updateTicketRequest.DueDate.Date > taskParent.DueDate)
+				if (updateTicketRequest.DueDate.Date > taskParent.DueDate.Date)
 				{
 					return BadRequest("Can't update new task with end date after task's end date. Please update and try again");
 				}
