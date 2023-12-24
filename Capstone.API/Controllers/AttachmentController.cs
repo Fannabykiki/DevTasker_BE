@@ -18,7 +18,7 @@ namespace Capstone.API.Controllers
 		private readonly ITaskService _taskService;
 		private readonly IAuthorizationService _authorizationService;
 
-		public AttachmentController(AzureBlobService azureBlobService, 
+		public AttachmentController(AzureBlobService azureBlobService,
 			ITaskService taskService,
 			IAuthorizationService authorizationService)
 		{
@@ -26,35 +26,40 @@ namespace Capstone.API.Controllers
 			_taskService = taskService;
 			_authorizationService = authorizationService;
 		}
-
-		[HttpGet("attachments")]
-		public async Task<IActionResult> ListAllBlobs()
-		{
-			var result = await _azureBlobService.ListAllBlob();
-			return Ok();
-		}
-
 		// E291ABC0-C869-4FF0-9E3C-48B74022577D - Create Attachments
 		[HttpPost("attachments")]
 		public async Task<IActionResult> UploadFile(IFormFileCollection file, Guid taskId)
 		{
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(taskId);
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
-                new RolePermissionResource
-                {
-                    ListProjectId = new List<Guid?> { projectId },
-                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.CreateAttachments}
-                }, AuthorizationRequirementNameConstant.RolePermission);
-            if (!authorizationResult.Succeeded)
-            {
-                return Unauthorized(ErrorMessage.InvalidPermission);
-            }
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(taskId);
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { projectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.CreateAttachments }
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
+			List<string> errorFiles = new List<string>();
 
-            var userId = this.GetCurrentLoginUserId();
+			var userId = this.GetCurrentLoginUserId();
 			foreach (var fileItem in file)
 			{
 				await _azureBlobService.UploadFile(userId, fileItem, taskId);
+			}
+			foreach (var fileItem in file)
+			{
+				var result = await _azureBlobService.ScanMalware(taskId, fileItem.FileName);
+				if (result != null)
+				{
+					errorFiles.Add(fileItem.FileName);
+				}
+			}
+			if (errorFiles.Count > 0)
+			{
+				return BadRequest(string.Join(",", errorFiles) + " is malware.Can't upload this attachment");
 			}
 			return Ok(file);
 		}
@@ -62,7 +67,7 @@ namespace Capstone.API.Controllers
 		[HttpGet("attachments/download/{fileName}/{taskId}")]
 		public async Task<IActionResult> DownloadFile(string fileName, Guid taskId)
 		{
-			var file = await _azureBlobService.DownLoadFile(fileName,taskId);
+			var file = await _azureBlobService.DownLoadFile(fileName, taskId);
 			if (file == null)
 			{
 				return NotFound("File not exist");
@@ -75,20 +80,20 @@ namespace Capstone.API.Controllers
 		public async Task<IActionResult> Delete(string fileName, Guid taskId)
 		{
 
-            //Authorize
-            var projectId = await _taskService.GetProjectIdOfTask(taskId);
-            var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
-                new RolePermissionResource
-                {
-                    ListProjectId = new List<Guid?> { projectId },
-                    ListPermissionAuthorized = new List<string> { PermissionNameConstant.DeleteAllAttachments }
-                }, AuthorizationRequirementNameConstant.RolePermission);
-            if (!authorizationResult.Succeeded)
-            {
-                return Unauthorized(ErrorMessage.InvalidPermission);
-            }
+			//Authorize
+			var projectId = await _taskService.GetProjectIdOfTask(taskId);
+			var authorizationResult = await _authorizationService.AuthorizeAsync(this.HttpContext.User,
+				new RolePermissionResource
+				{
+					ListProjectId = new List<Guid?> { projectId },
+					ListPermissionAuthorized = new List<string> { PermissionNameConstant.DeleteAllAttachments }
+				}, AuthorizationRequirementNameConstant.RolePermission);
+			if (!authorizationResult.Succeeded)
+			{
+				return Unauthorized(ErrorMessage.InvalidPermission);
+			}
 
-            var file = await _azureBlobService.DeleteFile(fileName, taskId);
+			var file = await _azureBlobService.DeleteFile(fileName, taskId);
 			return Ok(file);
 		}
 	}
