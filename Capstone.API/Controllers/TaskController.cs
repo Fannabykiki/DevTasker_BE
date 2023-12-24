@@ -500,6 +500,10 @@ namespace Capstone.API.Controllers
 			if (DateTime.Parse(taskDetail.ExpireTime).Date > DateTime.Now.Date)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest);
+				if (response.IsSucceed)
+				{
+					await _notificationService.SendNotificationRestoreTask(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+				}
 				return Ok(response);
 			}
 			else
