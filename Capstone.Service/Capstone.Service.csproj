@@ -9,6 +9,9 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="Azure.Identity" Version="1.10.4" />
+    <PackageReference Include="Azure.ResourceManager.SecurityInsights" Version="1.1.0" />
+    <PackageReference Include="Azure.Security.Attestation" Version="1.0.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.63.0.3155" />
     <PackageReference Include="MailKit" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNet.OData" Version="7.7.2" />

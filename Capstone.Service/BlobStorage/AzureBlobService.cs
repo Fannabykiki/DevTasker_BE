@@ -1,12 +1,10 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
-using Capstone.Common.DTOs.Attachment;
 using Capstone.Common.DTOs.BlobAzure;
 using Capstone.DataAccess.Entities;
-using Capstone.DataAccess.Repository.Implements;
 using Capstone.DataAccess.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System.Reflection.Metadata;
+
 
 namespace Capstone.Service.BlobStorage
 {
@@ -35,24 +33,36 @@ namespace Capstone.Service.BlobStorage
 			_taskRepository = taskRepository;
 		}
 
-		public async Task<List<BlobViewModel>> ListAllBlob()
+		public async Task<string> ScanMalware(Guid taskId, string fileName)
 		{
-			List<BlobViewModel> files = new List<BlobViewModel>();
-
-			await foreach (var file in _blobServiceClient.GetBlobsAsync())
+			var containerClient = _blobService.GetBlobContainerClient(taskId.ToString().Trim().ToLower());
+			BlobClient client = containerClient.GetBlobClient(fileName);
+			string tagValue;
+			while (true)
 			{
-				string uri = _blobServiceClient.Uri.ToString();
-				var name = file.Name;
-				var fullUri = $"{uri}/{name}";
 
-				files.Add(new BlobViewModel
+				var tags =  client.GetTags().Value.Tags;
+
+				if (tags.TryGetValue("Malware Scanning scan result", out tagValue))
 				{
-					Uri = fullUri,
-					Name = name,
-					ContentType = file.Properties.ContentType,
-				});
+					if (tagValue.Equals("Malicious"))
+					{
+						await DeleteFile(fileName, taskId);
+						break;
+					}
+					else if(!string.IsNullOrEmpty(tagValue))
+					{
+						return null;
+					}
+				}
+				else
+				{
+					continue;
+				}
+
+				await System.Threading.Tasks.Task.Delay(500);
 			}
-			return files;
+			return tagValue;
 		}
 
 		public async Task<BlobResponse> UploadFile(Guid userId, IFormFile file, Guid taskId)
@@ -85,12 +95,12 @@ namespace Capstone.Service.BlobStorage
 				}
 
 				var fileSize = file.Length;
-				if (fileSize > 10 * 1024 * 1024)
+				if (fileSize > 20 * 1024 * 1024)
 				{
 					return new BlobResponse
 					{
 						IsSucceed = false,
-						Message = "Please choose attachment smaller than 10MB !!!"
+						Message = "Please choose attachment smaller than 20MB !!!"
 					};
 				}
 
@@ -117,8 +127,9 @@ namespace Capstone.Service.BlobStorage
 
 						await _attachmentRepository.CreateAsync(newAttachment);
 						await _attachmentRepository.SaveChanges();
-						transaction.Commit();
 						await _client.UploadAsync(data);
+						transaction.Commit();
+
 					}
 
 					return new BlobResponse
@@ -147,8 +158,12 @@ namespace Capstone.Service.BlobStorage
 
 					await _attachmentRepository.CreateAsync(newAttachment);
 					await _attachmentRepository.SaveChanges();
-					transaction.Commit();
 					await client.UploadAsync(data);
+
+					var tags = client.GetTags().Value.Tags;
+					var tagValue = tags["Malware Scanning scan result"];
+					transaction.Commit();
+
 				}
 
 
