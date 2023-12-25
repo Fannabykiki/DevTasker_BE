@@ -826,6 +826,125 @@ namespace Capstone.Service.NotificationService
             //Send Mail
             await SendMailForNotification(lstReceived.ToList(), lstNotification.ToList());
         }
+        public async System.Threading.Tasks.Task SendNotificationUploadAttachment(Guid taskId, Guid userId)
+        {
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(tc => tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
+            if (task == null) return;
+            var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId != userId).Select(y => y.UserId);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
+            var listReceiver = lstProjectAdmin;
+
+            var title = "";
+            var description = "";
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
+
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            if (task.ProjectMember.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            }
+            title = "New Attachmentt Uploaded";
+            description = $"User <strong>{userAccount?.UserName}</strong> uploaded an atttachment in  task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong>";
+            //var descriptionForAssign = $"User <strong>{userAccount?.UserName}</strong> assigned task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong> to you</strong>";
+
+
+
+            var listNotification = listReceiver.Select(id => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = title,
+                Description = description,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                TargetUrl = TargetUrl,
+                IsRead = false,
+                RecerverId = id
+            });
+            foreach (var notif in listNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+
+            await _notificationRepository.SaveChanges();
+
+            foreach (var user in listReceiver)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //send mail for admins
+            await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
+        }
+        public async System.Threading.Tasks.Task SendNotificationDeleteAttachment(Guid taskId, Guid userId)
+        {
+            var task = await _taskRepository.GetQuery()
+                .Include(t => t.ProjectMember)
+                .Include(x => x.Status)
+                .Include(t => t.Interation)
+                .ThenInclude(it => it.Board)
+                .ThenInclude(b => b.Project)
+                .ThenInclude(prj => prj.ProjectMembers).ThenInclude(prjMem => prjMem.Role)
+                .Include(tc => tc.TaskHistories)
+                .FirstOrDefaultAsync(x => x.TaskId == taskId);
+
+            if (task == null) return;
+            var lstProjectAdmin = task.Interation.Board.Project.ProjectMembers
+                .Where(x => (x.Role.RoleName == RoleNameConstant.ProductOwner || x.Role.RoleName == RoleNameConstant.Supervisor) && x.UserId != userId).Select(y => y.UserId);
+            var createdBy = await _projectMemberRepository.GetQuery().FirstOrDefaultAsync(x => x.UserId == task.CreateBy);
+            var listReceiver = lstProjectAdmin;
+
+            var title = "";
+            var description = "";
+            var TargetUrl = $"https://devtasker.azurewebsites.net/project/{task.Interation.BoardId}/tasks?id={task.TaskId}";
+
+            var userAccount = _userRepository.GetQuery().FirstOrDefault(x => x.UserId == userId);
+            if (task.ProjectMember.UserId != userId)
+            {
+                listReceiver = listReceiver.Append(task.ProjectMember.UserId).Distinct();
+            }
+            title = "Attachmentt Deleted";
+            description = $"User <strong>{userAccount?.UserName}</strong> deleted an atttachment in  task <strong>{task.Title}</strong> in project <strong>{task.Interation.Board.Project.ProjectName}</strong>";
+
+            var listNotification = listReceiver.Select(id => new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = title,
+                Description = description,
+                CreateAt = DateTime.Parse(DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")),
+                TargetUrl = TargetUrl,
+                IsRead = false,
+                RecerverId = id
+            });
+            foreach (var notif in listNotification)
+            {
+                await _notificationRepository.CreateAsync(notif);
+            }
+
+            await _notificationRepository.SaveChanges();
+
+            foreach (var user in listReceiver)
+            {
+                if (!await _presenceTracker.IsOnlineUser(user.ToString()))
+                {
+                    continue;
+                }
+                await _hubContext.Clients.Group(user.ToString()).SendAsync("EmitNotification");
+            }
+            //send mail for admins
+            await SendMailForNotification(lstProjectAdmin.ToList(), listNotification.ToList());
+        }
         public async System.Threading.Tasks.Task SendNotificationTaskDeadline()
         {
             var taskList = await _taskRepository.GetQuery()

@@ -669,7 +669,7 @@ namespace Capstone.Service.TaskService
 
 				return new CreateTaskResponse
 				{
-					TaskId = Guid.NewGuid(),
+					TaskId = newTask.TaskId,
 					AssignTo = newTask.AssignTo,
 					CreateBy = userId,
 					CreateTime = DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'"),
