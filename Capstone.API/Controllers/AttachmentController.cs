@@ -4,6 +4,7 @@ using Capstone.Common.Constants;
 using Capstone.Common.DTOs.Attachment;
 using Capstone.Common.DTOs.Task;
 using Capstone.Service.BlobStorage;
+using Capstone.Service.NotificationService;
 using Capstone.Service.TicketService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +18,16 @@ namespace Capstone.API.Controllers
 		private readonly AzureBlobService _azureBlobService;
 		private readonly ITaskService _taskService;
 		private readonly IAuthorizationService _authorizationService;
-
+		private readonly INotificationService _notificationService;
 		public AttachmentController(AzureBlobService azureBlobService,
 			ITaskService taskService,
-			IAuthorizationService authorizationService)
+			IAuthorizationService authorizationService,
+            INotificationService notificationService)
 		{
 			_azureBlobService = azureBlobService;
 			_taskService = taskService;
 			_authorizationService = authorizationService;
+			_notificationService = notificationService;
 		}
 		// E291ABC0-C869-4FF0-9E3C-48B74022577D - Create Attachments
 		[HttpPost("attachments")]
@@ -61,6 +64,10 @@ namespace Capstone.API.Controllers
 			{
 				return BadRequest(string.Join(",", errorFiles) + " is malware.Can't upload this attachment");
 			}
+			else
+			{
+				await _notificationService.SendNotificationUploadAttachment(taskId, this.GetCurrentLoginUserId());
+			}
 			return Ok(file);
 		}
 
@@ -94,6 +101,10 @@ namespace Capstone.API.Controllers
 			}
 
 			var file = await _azureBlobService.DeleteFile(fileName, taskId);
+			if (file != null && file.IsSucceed.Value)
+			{
+				await _notificationService.SendNotificationDeleteAttachment(taskId, this.GetCurrentLoginUserId());
+			}
 			return Ok(file);
 		}
 	}

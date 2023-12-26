@@ -238,11 +238,16 @@ namespace Capstone.API.Controllers
 				return BadRequest("You need login first");
 			}
 			var result = await _taskService.CreateSubTask(request, userId);
+
 			if (result.BaseResponse.StatusCode == 400)
 			{
 				return BadRequest(result.BaseResponse.Message);
 			}
-			return Ok(result);
+            if (result.BaseResponse.IsSucceed)
+            {
+                await _notificationService.SendNotificationCreateTask(result.TaskId, this.GetCurrentLoginUserId());
+            }
+            return Ok(result);
         }
 
         //2  3C815EC0-267E-4054-A9F4-052BE036F3E0 - Resolve Tasks
@@ -500,6 +505,10 @@ namespace Capstone.API.Controllers
 			if (DateTime.Parse(taskDetail.ExpireTime).Date > DateTime.Now.Date)
 			{
 				var response = await _taskService.RestoreTask(restoreTaskRequest);
+				if (response.IsSucceed)
+				{
+					await _notificationService.SendNotificationRestoreTask(restoreTaskRequest.TaskId, this.GetCurrentLoginUserId());
+				}
 				return Ok(response);
 			}
 			else
