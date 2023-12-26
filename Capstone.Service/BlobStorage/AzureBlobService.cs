@@ -229,15 +229,11 @@ namespace Capstone.Service.BlobStorage
 			{
 				var task = await _taskRepository.GetAsync(x => x.TaskId == taskId, null);
 				var containerClient = _blobService.GetBlobContainerClient(task.TaskId.ToString().Trim().ToLower());
-				if (!await containerClient.ExistsAsync())
-				{
-					await containerClient.CreateAsync();
-				}
 				BlobClient file = containerClient.GetBlobClient(blobFile);
 				if (await file.ExistsAsync())
 				{
 					await file.DeleteIfExistsAsync();
-					var attachment = await _attachmentRepository.GetAsync(x => x.Title.Equals(blobFile), null);
+					var attachment = await _attachmentRepository.GetAsync(x => x.Title.Equals(blobFile) && x.TaskId == taskId , null);
 					await _attachmentRepository.DeleteAsync(attachment);
 					await _attachmentRepository.SaveChanges();
 					transaction.Commit();
